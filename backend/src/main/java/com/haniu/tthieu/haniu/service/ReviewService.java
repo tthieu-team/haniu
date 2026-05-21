@@ -1,0 +1,14 @@
+package com.haniu.tthieu.haniu.service;
+
+import com.haniu.tthieu.haniu.entity.feedback.Review;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface ReviewService {
+    Review createReview(String email, UUID productId, int rating, String comment);
+    List<Review> getApprovedReviewsByProduct(UUID productId);
+    List<Review> getAllReviewsByProduct(UUID productId);
+    Review approveReview(UUID reviewId);
+    void deleteReview(UUID reviewId);
+}

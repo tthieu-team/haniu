@@ -1,0 +1,533 @@
+package com.haniu.tthieu.haniu.service.impl;
+
+import com.haniu.tthieu.haniu.dto.CursorPageResponse;
+import com.haniu.tthieu.haniu.dto.ProductRequestDto;
+import com.haniu.tthieu.haniu.dto.ProductResponseDto;
+import com.haniu.tthieu.haniu.document.ProductDocument;
+import com.haniu.tthieu.haniu.entity.enums.MediaType;
+import com.haniu.tthieu.haniu.entity.product.*;
+import com.haniu.tthieu.haniu.repository.*;
+import com.haniu.tthieu.haniu.repository.elasticsearch.ProductElasticsearchRepository;
+import com.haniu.tthieu.haniu.service.ProductService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+@Slf4j
+public class ProductServiceImpl implements ProductService {
+
+    private final ProductRepository productRepository;
+    private final ProductVariantRepository productVariantRepository;
+    private final ProductMediaRepository productMediaRepository;
+    private final CategoryRepository categoryRepository;
+    private final BrandRepository brandRepository;
+    private final CollectionRepository collectionRepository;
+    private final OccasionRepository occasionRepository;
+    private final RecipientRepository recipientRepository;
+    private final ProductElasticsearchRepository productElasticsearchRepository;
+
+    @Override
+    public ProductResponseDto createProduct(ProductRequestDto request) {
+        log.info("Creating product with name: {}", request.getName());
+
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        Brand brand = request.getBrandId() != null ?
+                brandRepository.findById(request.getBrandId()).orElse(null) : null;
+
+        com.haniu.tthieu.haniu.entity.product.Collection collection = request.getCollectionId() != null ?
+                collectionRepository.findById(request.getCollectionId()).orElse(null) : null;
+
+        Product product = Product.builder()
+                .name(request.getName())
+                .slug(request.getSlug())
+                .sku(request.getSku())
+                .description(request.getDescription())
+                .category(category)
+                .brand(brand)
+                .collection(collection)
+                .price(request.getBasePrice())
+                .salePrice(request.getSalePrice())
+                .stock(request.getStock())
+                .isFeatured(request.isFeatured())
+                .isNew(request.isNew())
+                .isCustomizable(request.isCustomizable())
+                .status(request.getStatus())
+                .layoutTemplate(request.getLayoutTemplate())
+                .layoutConfig(request.getLayoutConfig())
+                .specifications(request.getSpecifications())
+                .seoTitle(request.getSeoTitle())
+                .seoDescription(request.getSeoDescription())
+                .seoKeywords(request.getSeoKeywords())
+                .build();
+
+        // Map Occasions and Recipients
+        if (request.getOccasions() != null && !request.getOccasions().isEmpty()) {
+            Set<Occasion> occasions = new HashSet<>(occasionRepository.findAllById(request.getOccasions()));
+            product.setOccasions(occasions);
+        }
+
+        if (request.getRecipients() != null && !request.getRecipients().isEmpty()) {
+            Set<Recipient> recipients = new HashSet<>(recipientRepository.findAllById(request.getRecipients()));
+            product.setRecipients(recipients);
+        }
+
+        Product savedProduct = productRepository.save(product);
+
+        // Save Variants
+        List<ProductVariant> savedVariants = new ArrayList<>();
+        if (request.getVariants() != null) {
+            for (ProductRequestDto.VariantRequestDto vDto : request.getVariants()) {
+                ProductVariant variant = ProductVariant.builder()
+                        .product(savedProduct)
+                        .sku(vDto.getSku())
+                        .name(vDto.getName())
+                        .color(vDto.getColor())
+                        .size(vDto.getSize())
+                        .material(vDto.getMaterial())
+                        .price(vDto.getPrice())
+                        .salePrice(vDto.getSalePrice())
+                        .stock(vDto.getStock())
+                        .weight(vDto.getWeight())
+                        .imageUrl(vDto.getImageUrl())
+                        .specifications(vDto.getSpecifications())
+                        .build();
+                savedVariants.add(productVariantRepository.save(variant));
+            }
+        }
+
+        // Save Media
+        List<ProductMedia> savedMedia = new ArrayList<>();
+        if (request.getMedia() != null) {
+            for (ProductRequestDto.MediaRequestDto mDto : request.getMedia()) {
+                ProductMedia media = ProductMedia.builder()
+                        .product(savedProduct)
+                        .url(mDto.getUrl())
+                        .type(MediaType.valueOf(mDto.getType()))
+                        .altText(mDto.getAltText())
+                        .isThumbnail(mDto.isThumbnail())
+                        .sortOrder(mDto.getSortOrder())
+                        .build();
+                savedMedia.add(productMediaRepository.save(media));
+            }
+        }
+
+        // Sync to Elasticsearch
+        syncToElasticsearch(savedProduct, savedVariants, savedMedia);
+
+        return mapToResponseDto(savedProduct, savedVariants, savedMedia);
+    }
+
+    @Override
+    public ProductResponseDto updateProduct(UUID id, ProductRequestDto request) {
+        log.info("Updating product with ID: {}", id);
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        Brand brand = request.getBrandId() != null ?
+                brandRepository.findById(request.getBrandId()).orElse(null) : null;
+
+        com.haniu.tthieu.haniu.entity.product.Collection collection = request.getCollectionId() != null ?
+                collectionRepository.findById(request.getCollectionId()).orElse(null) : null;
+
+        product.setName(request.getName());
+        product.setSlug(request.getSlug());
+        product.setSku(request.getSku());
+        product.setDescription(request.getDescription());
+        product.setCategory(category);
+        product.setBrand(brand);
+        product.setCollection(collection);
+        product.setPrice(request.getBasePrice());
+        product.setSalePrice(request.getSalePrice());
+        product.setStock(request.getStock());
+        product.setFeatured(request.isFeatured());
+        product.setNew(request.isNew());
+        product.setCustomizable(request.isCustomizable());
+        product.setStatus(request.getStatus());
+        product.setLayoutTemplate(request.getLayoutTemplate());
+        product.setLayoutConfig(request.getLayoutConfig());
+        product.setSpecifications(request.getSpecifications());
+        product.setSeoTitle(request.getSeoTitle());
+        product.setSeoDescription(request.getSeoDescription());
+        product.setSeoKeywords(request.getSeoKeywords());
+
+        // Update Occasions & Recipients
+        product.getOccasions().clear();
+        if (request.getOccasions() != null && !request.getOccasions().isEmpty()) {
+            product.getOccasions().addAll(occasionRepository.findAllById(request.getOccasions()));
+        }
+
+        product.getRecipients().clear();
+        if (request.getRecipients() != null && !request.getRecipients().isEmpty()) {
+            product.getRecipients().addAll(recipientRepository.findAllById(request.getRecipients()));
+        }
+
+        Product savedProduct = productRepository.save(product);
+
+        // Delete old variants and save new ones
+        List<ProductVariant> oldVariants = productVariantRepository.findByProductId(id);
+        productVariantRepository.deleteAll(oldVariants);
+
+        List<ProductVariant> savedVariants = new ArrayList<>();
+        if (request.getVariants() != null) {
+            for (ProductRequestDto.VariantRequestDto vDto : request.getVariants()) {
+                ProductVariant variant = ProductVariant.builder()
+                        .product(savedProduct)
+                        .sku(vDto.getSku())
+                        .name(vDto.getName())
+                        .color(vDto.getColor())
+                        .size(vDto.getSize())
+                        .material(vDto.getMaterial())
+                        .price(vDto.getPrice())
+                        .salePrice(vDto.getSalePrice())
+                        .stock(vDto.getStock())
+                        .weight(vDto.getWeight())
+                        .imageUrl(vDto.getImageUrl())
+                        .specifications(vDto.getSpecifications())
+                        .build();
+                savedVariants.add(productVariantRepository.save(variant));
+            }
+        }
+
+        // Delete old media and save new ones
+        productMediaRepository.deleteByProductId(id);
+        List<ProductMedia> savedMedia = new ArrayList<>();
+        if (request.getMedia() != null) {
+            for (ProductRequestDto.MediaRequestDto mDto : request.getMedia()) {
+                ProductMedia media = ProductMedia.builder()
+                        .product(savedProduct)
+                        .url(mDto.getUrl())
+                        .type(MediaType.valueOf(mDto.getType()))
+                        .altText(mDto.getAltText())
+                        .isThumbnail(mDto.isThumbnail())
+                        .sortOrder(mDto.getSortOrder())
+                        .build();
+                savedMedia.add(productMediaRepository.save(media));
+            }
+        }
+
+        // Sync to Elasticsearch
+        syncToElasticsearch(savedProduct, savedVariants, savedMedia);
+
+        return mapToResponseDto(savedProduct, savedVariants, savedMedia);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductResponseDto getProductById(UUID id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        List<ProductVariant> variants = productVariantRepository.findByProductId(id);
+        List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(id);
+        return mapToResponseDto(product, variants, media);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductResponseDto getProductBySlug(String slug) {
+        Product product = productRepository.findBySlugFetchAll(slug)
+                .orElseThrow(() -> new RuntimeException("Product not found with slug: " + slug));
+        List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
+        List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
+        return mapToResponseDto(product, variants, media);
+    }
+
+    @Override
+    public void deleteProduct(UUID id) {
+        log.info("Soft deleting product with ID: {}", id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setDeletedAt(LocalDateTime.now());
+        productRepository.save(product);
+
+        // Remove from Elasticsearch
+        productElasticsearchRepository.deleteById(id.toString());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductResponseDto> getProducts(Specification<Product> spec, Pageable pageable) {
+        return productRepository.findAll(spec, pageable).map(product -> {
+            List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
+            List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
+            return mapToResponseDto(product, variants, media);
+        });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductDocument> searchProducts(String keyword, Pageable pageable) {
+        return productElasticsearchRepository.searchPublishedProducts(keyword, pageable);
+    }
+
+    private void syncToElasticsearch(Product product, List<ProductVariant> variants, List<ProductMedia> media) {
+        try {
+            String thumbnail = media.stream()
+                    .filter(ProductMedia::isThumbnail)
+                    .map(ProductMedia::getUrl)
+                    .findFirst()
+                    .orElse(media.isEmpty() ? null : media.getFirst().getUrl());
+
+            List<ProductDocument.VariantDocument> variantDocs = variants.stream()
+                    .map(v -> ProductDocument.VariantDocument.builder()
+                            .id(v.getId().toString())
+                            .sku(v.getSku())
+                            .name(v.getName())
+                            .color(v.getColor())
+                            .size(v.getSize())
+                            .material(v.getMaterial())
+                            .price(v.getPrice())
+                            .salePrice(v.getSalePrice())
+                            .stock(v.getStock())
+                            .build())
+                    .toList();
+
+            List<ProductDocument.MediaDocument> mediaDocs = media.stream()
+                    .map(m -> ProductDocument.MediaDocument.builder()
+                            .url(m.getUrl())
+                            .type(m.getType().name())
+                            .altText(m.getAltText())
+                            .isThumbnail(m.isThumbnail())
+                            .sortOrder(m.getSortOrder())
+                            .build())
+                    .toList();
+
+            List<String> occasionSlugs = product.getOccasions() != null ?
+                    product.getOccasions().stream().map(Occasion::getSlug).toList() : Collections.emptyList();
+
+            List<String> recipientSlugs = product.getRecipients() != null ?
+                    product.getRecipients().stream().map(Recipient::getSlug).toList() : Collections.emptyList();
+
+            ProductDocument doc = ProductDocument.builder()
+                    .id(product.getId().toString())
+                    .categoryId(product.getCategory().getId().toString())
+                    .categoryName(product.getCategory().getName())
+                    .brandId(product.getBrand() != null ? product.getBrand().getId().toString() : null)
+                    .brandName(product.getBrand() != null ? product.getBrand().getName() : null)
+                    .collectionId(product.getCollection() != null ? product.getCollection().getId().toString() : null)
+                    .collectionName(product.getCollection() != null ? product.getCollection().getName() : null)
+                    .occasions(occasionSlugs)
+                    .recipients(recipientSlugs)
+                    .name(product.getName())
+                    .slug(product.getSlug())
+                    .sku(product.getSku())
+                    .description(product.getDescription())
+                    .thumbnailUrl(thumbnail)
+                    .price(product.getPrice())
+                    .salePrice(product.getSalePrice())
+                    .stock(product.getStock())
+                    .status(product.getStatus().name())
+                    .layoutTemplate(product.getLayoutTemplate())
+                    .layoutConfig(product.getLayoutConfig())
+                    .specifications(product.getSpecifications())
+                    .isFeatured(product.isFeatured())
+                    .isNew(product.isNew())
+                    .variants(variantDocs)
+                    .medias(mediaDocs)
+                    .build();
+
+            productElasticsearchRepository.save(doc);
+            log.info("Successfully synced product {} to Elasticsearch", product.getId());
+        } catch (Exception e) {
+            log.error("Failed to sync product {} to Elasticsearch", product.getId(), e);
+        }
+    }
+
+    private ProductResponseDto mapToResponseDto(Product product, List<ProductVariant> variants, List<ProductMedia> media) {
+        ProductResponseDto.CategoryInfo catInfo = ProductResponseDto.CategoryInfo.builder()
+                .id(product.getCategory().getId())
+                .name(product.getCategory().getName())
+                .slug(product.getCategory().getSlug())
+                .build();
+
+        ProductResponseDto.BrandInfo brandInfo = product.getBrand() != null ?
+                ProductResponseDto.BrandInfo.builder()
+                        .id(product.getBrand().getId())
+                        .name(product.getBrand().getName())
+                        .slug(product.getBrand().getSlug())
+                        .build() : null;
+
+        ProductResponseDto.CollectionInfo collInfo = product.getCollection() != null ?
+                ProductResponseDto.CollectionInfo.builder()
+                        .id(product.getCollection().getId())
+                        .name(product.getCollection().getName())
+                        .slug(product.getCollection().getSlug())
+                        .build() : null;
+
+        List<ProductResponseDto.OccasionInfo> occInfos = product.getOccasions() != null ?
+                product.getOccasions().stream()
+                        .map(o -> ProductResponseDto.OccasionInfo.builder()
+                                .id(o.getId())
+                                .name(o.getName())
+                                .slug(o.getSlug())
+                                .build())
+                        .collect(Collectors.toList()) : Collections.emptyList();
+
+        List<ProductResponseDto.RecipientInfo> recInfos = product.getRecipients() != null ?
+                product.getRecipients().stream()
+                        .map(r -> ProductResponseDto.RecipientInfo.builder()
+                                .id(r.getId())
+                                .name(r.getName())
+                                .slug(r.getSlug())
+                                .build())
+                        .collect(Collectors.toList()) : Collections.emptyList();
+
+        List<ProductResponseDto.VariantResponseDto> varList = variants.stream()
+                .map(v -> ProductResponseDto.VariantResponseDto.builder()
+                        .id(v.getId())
+                        .sku(v.getSku())
+                        .name(v.getName())
+                        .color(v.getColor())
+                        .size(v.getSize())
+                        .material(v.getMaterial())
+                        .price(v.getPrice())
+                        .salePrice(v.getSalePrice())
+                        .stock(v.getStock())
+                        .weight(v.getWeight())
+                        .imageUrl(v.getImageUrl())
+                        .specifications(v.getSpecifications())
+                        .build())
+                .toList();
+
+        List<ProductResponseDto.MediaResponseDto> mediaList = media.stream()
+                .map(m -> ProductResponseDto.MediaResponseDto.builder()
+                        .id(m.getId())
+                        .url(m.getUrl())
+                        .type(m.getType().name())
+                        .altText(m.getAltText())
+                        .isThumbnail(m.isThumbnail())
+                        .sortOrder(m.getSortOrder())
+                        .build())
+                .toList();
+
+        return ProductResponseDto.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .slug(product.getSlug())
+                .sku(product.getSku())
+                .description(product.getDescription())
+                .category(catInfo)
+                .brand(brandInfo)
+                .collection(collInfo)
+                .basePrice(product.getPrice())
+                .salePrice(product.getSalePrice())
+                .stock(product.getStock())
+                .isFeatured(product.isFeatured())
+                .isNew(product.isNew())
+                .isCustomizable(product.isCustomizable())
+                .status(product.getStatus())
+                .layoutTemplate(product.getLayoutTemplate())
+                .layoutConfig(product.getLayoutConfig())
+                .specifications(product.getSpecifications())
+                .seoTitle(product.getSeoTitle())
+                .seoDescription(product.getSeoDescription())
+                .seoKeywords(product.getSeoKeywords())
+                .occasions(occInfos)
+                .recipients(recInfos)
+                .variants(varList)
+                .media(mediaList)
+                .createdAt(product.getCreatedAt())
+                .updatedAt(product.getUpdatedAt())
+                .build();
+    }
+
+    @Override
+    public CursorPageResponse<ProductResponseDto> getProductsCursor(
+            UUID categoryId,
+            UUID brandId,
+            UUID collectionId,
+            Boolean isFeatured,
+            Boolean isNew,
+            String cursor,
+            int size) {
+
+        Specification<Product> spec = Specification.where((root, query, cb) -> cb.isNull(root.get("deletedAt")));
+
+        if (categoryId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("category").get("id"), categoryId));
+        }
+        if (brandId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("brand").get("id"), brandId));
+        }
+        if (collectionId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("collection").get("id"), collectionId));
+        }
+        if (isFeatured != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("isFeatured"), isFeatured));
+        }
+        if (isNew != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("isNew"), isNew));
+        }
+
+        if (cursor != null && !cursor.trim().isEmpty()) {
+            try {
+                String decoded = new String(java.util.Base64.getDecoder().decode(cursor));
+                String[] parts = decoded.split("_");
+                if (parts.length == 2) {
+                    java.time.LocalDateTime cursorCreatedAt = java.time.LocalDateTime.parse(parts[0]);
+                    UUID cursorId = UUID.fromString(parts[1]);
+
+                    spec = spec.and((root, query, cb) -> cb.or(
+                        cb.lessThan(root.get("createdAt"), cursorCreatedAt),
+                        cb.and(
+                            cb.equal(root.get("createdAt"), cursorCreatedAt),
+                            cb.lessThan(root.get("id"), cursorId)
+                        )
+                    ));
+                }
+            } catch (Exception e) {
+                // Ignore invalid cursor
+            }
+        }
+
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            0, size + 1,
+            org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Order.desc("createdAt"),
+                org.springframework.data.domain.Sort.Order.desc("id")
+            )
+        );
+
+        List<Product> products = productRepository.findAll(spec, pageable).getContent();
+
+        boolean hasNext = products.size() > size;
+        List<Product> contentProducts = hasNext ? products.subList(0, size) : products;
+
+        String nextCursor = null;
+        if (hasNext && !contentProducts.isEmpty()) {
+            Product lastProduct = contentProducts.get(contentProducts.size() - 1);
+            String rawCursor = lastProduct.getCreatedAt().toString() + "_" + lastProduct.getId().toString();
+            nextCursor = java.util.Base64.getEncoder().encodeToString(rawCursor.getBytes());
+        }
+
+        List<ProductResponseDto> dtos = contentProducts.stream()
+                .map(product -> {
+                    List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
+                    List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
+                    return mapToResponseDto(product, variants, media);
+                })
+                .collect(Collectors.toList());
+
+        return CursorPageResponse.<ProductResponseDto>builder()
+                .content(dtos)
+                .nextCursor(nextCursor)
+                .hasNext(hasNext)
+                .build();
+    }
+}

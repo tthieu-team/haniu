@@ -121,6 +121,11 @@ public class Product {
     @Builder.Default
     private boolean isNew = true;
 
+    @Column(name = "is_customizable", nullable = false)
+    @Builder.Default
+    private boolean isCustomizable = false;
+
+
     @Column(name = "average_rating", precision = 3, scale = 2)
     @Builder.Default
     private BigDecimal averageRating = BigDecimal.ZERO;

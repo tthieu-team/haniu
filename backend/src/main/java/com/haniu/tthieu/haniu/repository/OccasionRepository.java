@@ -1,0 +1,15 @@
+package com.haniu.tthieu.haniu.repository;
+
+import com.haniu.tthieu.haniu.entity.product.Occasion;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+public interface OccasionRepository extends JpaRepository<Occasion, UUID> {
+    List<Occasion> findByIsActiveTrue();
+    Optional<Occasion> findBySlug(String slug);
+}

@@ -1,0 +1,166 @@
+'use client';
+
+interface VariantInput {
+  sku: string;
+  name: string;
+  color: string;
+  size: string;
+  material: string;
+  price: number;
+  salePrice?: number;
+  stock: number;
+  weight?: number;
+  imageUrl?: string;
+}
+
+interface VariantManagerProps {
+  variantsList: VariantInput[];
+  setVariantsList: (list: VariantInput[]) => void;
+  basePrice: number;
+}
+
+export default function VariantManager({ variantsList, setVariantsList, basePrice }: VariantManagerProps) {
+  const addVariant = () => setVariantsList([...variantsList, {
+    sku: '', name: '', color: '', size: '', material: '', price: basePrice, stock: 10
+  }]);
+  const removeVariant = (idx: number) => setVariantsList(variantsList.filter((_, i) => i !== idx));
+
+  return (
+    <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6 text-xs font-semibold">
+      <div className="flex justify-between items-center border-b border-slate-50 dark:border-zinc-800 pb-2">
+        <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400">Các biến thể sản phẩm</h3>
+        <button
+          type="button"
+          onClick={addVariant}
+          className="text-xs text-rose-500 font-bold hover:underline"
+        >
+          ➕ Thêm biến thể mới
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        {variantsList.map((item, idx) => (
+          <div key={idx} className="p-4 border border-slate-200 dark:border-zinc-800 rounded-2xl bg-slate-50/50 dark:bg-zinc-950/10 space-y-4 relative">
+            <button
+              type="button"
+              onClick={() => removeVariant(idx)}
+              className="absolute top-3 right-3 text-slate-400 hover:text-rose-500 font-bold"
+            >
+              ✕ Xóa biến thể
+            </button>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 uppercase">Tên biến thể *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="VD: Hộp đỏ Size S"
+                  value={item.name}
+                  onChange={(e) => {
+                    const list = [...variantsList];
+                    list[idx].name = e.target.value;
+                    setVariantsList(list);
+                  }}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 uppercase">Mã SKU biến thể *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="VD: SKU-MUG-RED-S"
+                  value={item.sku}
+                  onChange={(e) => {
+                    const list = [...variantsList];
+                    list[idx].sku = e.target.value;
+                    setVariantsList(list);
+                  }}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 uppercase">Kích thước (Size)</label>
+                <input
+                  type="text"
+                  placeholder="Size S, M, L"
+                  value={item.size}
+                  onChange={(e) => {
+                    const list = [...variantsList];
+                    list[idx].size = e.target.value;
+                    setVariantsList(list);
+                  }}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 uppercase">Màu sắc</label>
+                <input
+                  type="text"
+                  placeholder="Đỏ, Xanh"
+                  value={item.color}
+                  onChange={(e) => {
+                    const list = [...variantsList];
+                    list[idx].color = e.target.value;
+                    setVariantsList(list);
+                  }}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 pt-2 border-t border-slate-100 dark:border-zinc-800/40">
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 uppercase font-semibold">Giá bán lẻ (đ) *</label>
+                <input
+                  type="number"
+                  required
+                  value={item.price}
+                  onChange={(e) => {
+                    const list = [...variantsList];
+                    list[idx].price = parseFloat(e.target.value);
+                    setVariantsList(list);
+                  }}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800 font-semibold text-rose-500"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 uppercase">Giá KM (đ)</label>
+                <input
+                  type="number"
+                  value={item.salePrice || ''}
+                  onChange={(e) => {
+                    const list = [...variantsList];
+                    list[idx].salePrice = e.target.value ? parseFloat(e.target.value) : undefined;
+                    setVariantsList(list);
+                  }}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 uppercase font-semibold">Tồn kho *</label>
+                <input
+                  type="number"
+                  required
+                  value={item.stock}
+                  onChange={(e) => {
+                    const list = [...variantsList];
+                    list[idx].stock = parseInt(e.target.value);
+                    setVariantsList(list);
+                  }}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
