@@ -1,4 +1,4 @@
-import { fetchApi } from './api';
+import { fetchApi } from '@/lib/api';
 
 export interface CartItemRequest {
   productId: string;

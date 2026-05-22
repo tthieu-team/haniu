@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { orderService } from '@/utils/orderService';
+import { useOrderStore } from '@/store/order';
 
 function CheckoutForm() {
   const router = useRouter();
@@ -23,7 +23,7 @@ function CheckoutForm() {
     couponCode: initialCoupon
   });
 
-  const [loading, setLoading] = useState(false);
+  const { createOrder, createPaymentLink, loading } = useOrderStore();
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,9 +34,8 @@ function CheckoutForm() {
     }
 
     try {
-      setLoading(true);
       setError('');
-      const order = await orderService.createOrder({
+      const order = await createOrder({
         cartId,
         ...formData
       });
@@ -45,7 +44,7 @@ function CheckoutForm() {
         router.push(`/orders/success?orderCode=${order.orderCode}`);
       } else {
         // Online payment: MOMO or VNPAY
-        const paymentRes = await orderService.createPaymentLink(order.id, formData.paymentMethod);
+        const paymentRes = await createPaymentLink(order.id, formData.paymentMethod);
         if (paymentRes?.paymentUrl) {
           window.location.href = paymentRes.paymentUrl;
         } else {
@@ -61,8 +60,6 @@ function CheckoutForm() {
       } else {
         router.push(`/orders/callback?orderCode=${mockOrderCode}&gateway=${formData.paymentMethod}&status=00`);
       }
-    } finally {
-      setLoading(false);
     }
   };
 

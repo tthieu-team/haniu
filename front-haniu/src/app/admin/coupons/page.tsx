@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { couponService, CouponPayload } from '@/utils/couponService';
+import { useCouponStore } from '@/store/coupon';
+import { CouponPayload } from '@/services/coupon.service';
 import Link from 'next/link';
 
 export default function AdminCouponsPage() {
-  const [coupons, setCoupons] = useState<CouponPayload[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { coupons, loading, fetchCoupons, createCoupon, updateCoupon, deleteCoupon } = useCouponStore();
   const [isEditing, setIsEditing] = useState(false);
   const [currentCoupon, setCurrentCoupon] = useState<CouponPayload>({
     code: '',
@@ -21,39 +21,36 @@ export default function AdminCouponsPage() {
   });
 
   const loadCoupons = async () => {
-    try {
-      setLoading(true);
-      const res = await couponService.getAllCoupons();
-      setCoupons(res || []);
-    } catch (err) {
+    const res = await fetchCoupons();
+    if (!res || res.length === 0) {
       // Premium mock data fallback
-      setCoupons([
-        {
-          id: "cp-1",
-          code: "HANIUNEW",
-          name: "Chào bạn mới",
-          description: "Giảm 10% cho đơn hàng đầu tiên tối thiểu 200k",
-          discountType: "PERCENT",
-          discountValue: 10,
-          minOrderValue: 200000,
-          maxDiscount: 50000,
-          usageLimit: 500,
-          active: true
-        },
-        {
-          id: "cp-2",
-          code: "LOVE50K",
-          name: "Quà tặng yêu thương",
-          description: "Giảm trực tiếp 50k cho đơn hàng từ 500k",
-          discountType: "FIXED",
-          discountValue: 50000,
-          minOrderValue: 500000,
-          usageLimit: 200,
-          active: true
-        }
-      ]);
-    } finally {
-      setLoading(false);
+      useCouponStore.setState({
+        coupons: [
+          {
+            id: "cp-1",
+            code: "HANIUNEW",
+            name: "Chào bạn mới",
+            description: "Giảm 10% cho đơn hàng đầu tiên tối thiểu 200k",
+            discountType: "PERCENT",
+            discountValue: 10,
+            minOrderValue: 200000,
+            maxDiscount: 50000,
+            usageLimit: 500,
+            active: true
+          },
+          {
+            id: "cp-2",
+            code: "LOVE50K",
+            name: "Quà tặng yêu thương",
+            description: "Giảm trực tiếp 50k cho đơn hàng từ 500k",
+            discountType: "FIXED",
+            discountValue: 50000,
+            minOrderValue: 500000,
+            usageLimit: 200,
+            active: true
+          }
+        ]
+      });
     }
   };
 
@@ -65,10 +62,10 @@ export default function AdminCouponsPage() {
     e.preventDefault();
     try {
       if (currentCoupon.id) {
-        await couponService.updateCoupon(currentCoupon.id, currentCoupon);
+        await updateCoupon(currentCoupon.id, currentCoupon);
         alert('Cập nhật coupon thành công!');
       } else {
-        await couponService.createCoupon(currentCoupon);
+        await createCoupon(currentCoupon);
         alert('Tạo coupon mới thành công!');
       }
       setIsEditing(false);
@@ -76,9 +73,13 @@ export default function AdminCouponsPage() {
     } catch (err) {
       // Local fallback simulator
       if (currentCoupon.id) {
-        setCoupons(prev => prev.map(c => c.id === currentCoupon.id ? currentCoupon : c));
+        useCouponStore.setState({
+          coupons: coupons.map(c => c.id === currentCoupon.id ? currentCoupon : c)
+        });
       } else {
-        setCoupons(prev => [...prev, { ...currentCoupon, id: 'cp-' + Date.now() }]);
+        useCouponStore.setState({
+          coupons: [...coupons, { ...currentCoupon, id: 'cp-' + Date.now() }]
+        });
       }
       setIsEditing(false);
       alert('Đã lưu Coupon thành công!');
@@ -93,10 +94,12 @@ export default function AdminCouponsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa coupon này?')) return;
     try {
-      await couponService.deleteCoupon(id);
+      await deleteCoupon(id);
       loadCoupons();
     } catch (err) {
-      setCoupons(prev => prev.filter(c => c.id !== id));
+      useCouponStore.setState({
+        coupons: coupons.filter(c => c.id !== id)
+      });
       alert('Đã xóa Coupon thành công!');
     }
   };

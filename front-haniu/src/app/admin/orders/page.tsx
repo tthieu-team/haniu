@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { orderService } from '@/utils/orderService';
+import { useOrderStore } from '@/store/order';
 import Link from 'next/link';
 
 interface OrderItem {
@@ -34,77 +34,72 @@ interface Order {
 }
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { orders, loading, fetchMyOrders, updateOrderStatus, updatePaymentStatus } = useOrderStore();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [filterStatus, setFilterStatus] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   const loadOrders = async () => {
-    try {
-      setLoading(true);
-      // Retrieve orders. Since this is admin view, we call getMyOrders or mock if empty
-      const res = await orderService.getMyOrders();
-      setOrders(res || []);
-    } catch (err) {
+    const res = await fetchMyOrders();
+    if (!res || res.length === 0) {
       // Mock data for premium fallback
-      setOrders([
-        {
-          id: "ord-1",
-          orderCode: "HN-1716301234567",
-          customerName: "Nguyễn Văn A",
-          customerPhone: "0901234567",
-          customerEmail: "vana@gmail.com",
-          totalPrice: 520000,
-          paymentMethod: "MOMO",
-          paymentStatus: "PENDING",
-          orderStatus: "PENDING",
-          orderedAt: "2026-05-21T10:00:00",
-          shippingProvince: "Hà Nội",
-          shippingDistrict: "Cầu Giấy",
-          shippingWard: "Dịch Vọng",
-          shippingAddressLine: "Số 15 Ngõ 20 Trần Thái Tông",
-          note: "Gói quà cẩn thận giúp mình nhé",
-          items: [
-            {
-              id: "item-1",
-              productName: "Hộp Quà Lãng Mạn - Eternal Love",
-              variantName: "Standard",
-              quantity: 1,
-              unitPrice: 490000,
-              totalPrice: 490000,
-              customizationInfo: '{"text":"Chúc mừng sinh nhật Trang","card":"Merry Christmas"}'
-            }
-          ]
-        },
-        {
-          id: "ord-2",
-          orderCode: "HN-1716309876543",
-          customerName: "Trần Thị B",
-          customerPhone: "0987654321",
-          customerEmail: "thib@gmail.com",
-          totalPrice: 180000,
-          paymentMethod: "COD",
-          paymentStatus: "PAID",
-          orderStatus: "DELIVERED",
-          orderedAt: "2026-05-20T14:30:00",
-          shippingProvince: "Hồ Chí Minh",
-          shippingDistrict: "Quận 1",
-          shippingWard: "Bến Nghé",
-          shippingAddressLine: "120 Lê Lợi",
-          items: [
-            {
-              id: "item-2",
-              productName: "Ly Sứ Cao Cấp Men Hỏa Biến",
-              quantity: 1,
-              unitPrice: 180000,
-              totalPrice: 180000
-            }
-          ]
-        }
-      ]);
-    } finally {
-      setLoading(false);
+      useOrderStore.setState({
+        orders: [
+          {
+            id: "ord-1",
+            orderCode: "HN-1716301234567",
+            customerName: "Nguyễn Văn A",
+            customerPhone: "0901234567",
+            customerEmail: "vana@gmail.com",
+            totalPrice: 520000,
+            paymentMethod: "MOMO",
+            paymentStatus: "PENDING",
+            orderStatus: "PENDING",
+            orderedAt: "2026-05-21T10:00:00",
+            shippingProvince: "Hà Nội",
+            shippingDistrict: "Cầu Giấy",
+            shippingWard: "Dịch Vọng",
+            shippingAddressLine: "Số 15 Ngõ 20 Trần Thái Tông",
+            note: "Gói quà cẩn thận giúp mình nhé",
+            items: [
+              {
+                id: "item-1",
+                productName: "Hộp Quà Lãng Mạn - Eternal Love",
+                variantName: "Standard",
+                quantity: 1,
+                unitPrice: 490000,
+                totalPrice: 490000,
+                customizationInfo: '{"text":"Chúc mừng sinh nhật Trang","card":"Merry Christmas"}'
+              }
+            ]
+          },
+          {
+            id: "ord-2",
+            orderCode: "HN-1716309876543",
+            customerName: "Trần Thị B",
+            customerPhone: "0987654321",
+            customerEmail: "thib@gmail.com",
+            totalPrice: 180000,
+            paymentMethod: "COD",
+            paymentStatus: "PAID",
+            orderStatus: "DELIVERED",
+            orderedAt: "2026-05-20T14:30:00",
+            shippingProvince: "Hồ Chí Minh",
+            shippingDistrict: "Quận 1",
+            shippingWard: "Bến Nghé",
+            shippingAddressLine: "120 Lê Lợi",
+            items: [
+              {
+                id: "item-2",
+                productName: "Ly Sứ Cao Cấp Men Hỏa Biến",
+                quantity: 1,
+                unitPrice: 180000,
+                totalPrice: 180000
+              }
+            ]
+          }
+        ]
+      });
     }
   };
 
@@ -114,15 +109,16 @@ export default function AdminOrdersPage() {
 
   const handleUpdateStatus = async (orderId: string, newStatus: string) => {
     try {
-      const updated = await orderService.updateOrderStatus(orderId, newStatus);
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, orderStatus: newStatus } : o));
+      await updateOrderStatus(orderId, newStatus);
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder(prev => prev ? { ...prev, orderStatus: newStatus } : null);
       }
       alert("Cập nhật trạng thái đơn hàng thành công!");
     } catch (err) {
       // Direct mock update if backend fails for any local reason
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, orderStatus: newStatus } : o));
+      useOrderStore.setState({
+        orders: orders.map(o => o.id === orderId ? { ...o, orderStatus: newStatus } : o)
+      });
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder(prev => prev ? { ...prev, orderStatus: newStatus } : null);
       }
@@ -131,14 +127,15 @@ export default function AdminOrdersPage() {
 
   const handleUpdatePayment = async (orderId: string, newPaymentStatus: string) => {
     try {
-      const updated = await orderService.updatePaymentStatus(orderId, newPaymentStatus);
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, paymentStatus: newPaymentStatus } : o));
+      await updatePaymentStatus(orderId, newPaymentStatus);
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder(prev => prev ? { ...prev, paymentStatus: newPaymentStatus } : null);
       }
       alert("Cập nhật trạng thái thanh toán thành công!");
     } catch (err) {
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, paymentStatus: newPaymentStatus } : o));
+      useOrderStore.setState({
+        orders: orders.map(o => o.id === orderId ? { ...o, paymentStatus: newPaymentStatus } : o)
+      });
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder(prev => prev ? { ...prev, paymentStatus: newPaymentStatus } : null);
       }

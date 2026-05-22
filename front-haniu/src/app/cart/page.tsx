@@ -1,84 +1,61 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { cartService } from '@/utils/cartService';
-import { couponService } from '@/utils/couponService';
+import { useCartStore } from '@/store/cart';
+import { useCouponStore } from '@/store/coupon';
 import Link from 'next/link';
 
-interface CartItem {
-  id: string;
-  productId: string;
-  productName: string;
-  productSlug: string;
-  variantId?: string;
-  variantName?: string;
-  variantSku?: string;
-  imageUrl?: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-  customizationInfo?: string;
-}
-
-interface Cart {
-  id: string;
-  totalItems: number;
-  totalPrice: number;
-  items: CartItem[];
-}
-
 export default function CartPage() {
-  const [cart, setCart] = useState<Cart | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { cart, loading, fetchCart, updateQuantity, removeItem } = useCartStore();
+  const { appliedCoupon, discountAmount, error: couponError, applyCoupon } = useCouponStore();
   const [couponCode, setCouponCode] = useState('');
-  const [discountAmount, setDiscountAmount] = useState(0);
-  const [couponError, setCouponError] = useState('');
   const [couponSuccess, setCouponSuccess] = useState('');
 
   const loadCart = async () => {
-    try {
-      setLoading(true);
-      const res = await cartService.getCart();
-      setCart(res);
-    } catch (err) {
+    const res = await fetchCart();
+    if (!res) {
       // Mock data for preview/fallback
-      setCart({
-        id: "cart-mock-123",
-        totalItems: 2,
-        totalPrice: 670000,
-        items: [
-          {
-            id: "ci-1",
-            productId: "prod-1",
-            productName: "Hộp Quà Lãng Mạn - Eternal Love",
-            productSlug: "eternal-love-giftbox",
-            variantId: "var-1",
-            variantName: "Standard",
-            imageUrl: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&q=80",
-            quantity: 1,
-            unitPrice: 490000,
-            totalPrice: 490000,
-            customizationInfo: '{"text":"Chúc mừng sinh nhật Trang"}'
-          },
-          {
-            id: "ci-2",
-            productId: "prod-2",
-            productName: "Ly Sứ Cao Cấp Men Hỏa Biến",
-            productSlug: "fire-glaze-ceramic-cup",
-            imageUrl: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=200&q=80",
-            quantity: 1,
-            unitPrice: 180000,
-            totalPrice: 180000
-          }
-        ]
+      useCartStore.setState({
+        cart: {
+          id: "cart-mock-123",
+          totalItems: 2,
+          totalPrice: 670000,
+          items: [
+            {
+              id: "ci-1",
+              productId: "prod-1",
+              productName: "Hộp Quà Lãng Mạn - Eternal Love",
+              productSlug: "eternal-love-giftbox",
+              variantId: "var-1",
+              variantName: "Standard",
+              imageUrl: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&q=80",
+              quantity: 1,
+              unitPrice: 490000,
+              totalPrice: 490000,
+              customizationInfo: '{"text":"Chúc mừng sinh nhật Trang"}'
+            },
+            {
+              id: "ci-2",
+              productId: "prod-2",
+              productName: "Ly Sứ Cao Cấp Men Hỏa Biến",
+              productSlug: "fire-glaze-ceramic-cup",
+              imageUrl: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=200&q=80",
+              quantity: 1,
+              unitPrice: 180000,
+              totalPrice: 180000
+            }
+          ]
+        }
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
     loadCart();
+    const savedCoupon = localStorage.getItem('haniu_active_coupon');
+    if (savedCoupon) {
+      setCouponCode(savedCoupon);
+    }
   }, []);
 
   const handleUpdateQuantity = async (itemId: string, newQty: number) => {
@@ -87,8 +64,7 @@ export default function CartPage() {
       return;
     }
     try {
-      const updated = await cartService.updateQuantity(itemId, newQty);
-      setCart(updated);
+      await updateQuantity(itemId, newQty);
     } catch (err) {
       // Mock local state update
       if (cart) {
@@ -104,7 +80,7 @@ export default function CartPage() {
         });
         const totalItems = updatedItems.reduce((acc, i) => acc + i.quantity, 0);
         const totalPrice = updatedItems.reduce((acc, i) => acc + i.totalPrice, 0);
-        setCart({ ...cart, items: updatedItems, totalItems, totalPrice });
+        useCartStore.setState({ cart: { ...cart, items: updatedItems, totalItems, totalPrice } });
       }
     }
   };
@@ -112,59 +88,44 @@ export default function CartPage() {
   const handleRemoveItem = async (itemId: string) => {
     if (!confirm('Xóa sản phẩm này khỏi giỏ hàng?')) return;
     try {
-      const updated = await cartService.removeItem(itemId);
-      setCart(updated);
+      await removeItem(itemId);
     } catch (err) {
       if (cart) {
         const updatedItems = cart.items.filter(item => item.id !== itemId);
         const totalItems = updatedItems.reduce((acc, i) => acc + i.quantity, 0);
         const totalPrice = updatedItems.reduce((acc, i) => acc + i.totalPrice, 0);
-        setCart({ ...cart, items: updatedItems, totalItems, totalPrice });
+        useCartStore.setState({ cart: { ...cart, items: updatedItems, totalItems, totalPrice } });
       }
     }
   };
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCouponError('');
     setCouponSuccess('');
     if (!couponCode.trim()) return;
 
-    try {
-      const coupon = await couponService.getCouponByCode(couponCode);
-      if (!coupon || !coupon.active) {
-        setCouponError('Mã giảm giá không hợp lệ hoặc đã hết hạn.');
-        return;
-      }
-      
-      const subtotal = cart?.totalPrice || 0;
-      if (coupon.minOrderValue && subtotal < coupon.minOrderValue) {
-        setCouponError(`Đơn hàng tối thiểu ${coupon.minOrderValue.toLocaleString()}đ để dùng mã.`);
-        return;
-      }
-
-      let discount = 0;
-      if (coupon.discountType === 'PERCENT') {
-        discount = subtotal * (coupon.discountValue / 100);
-        if (coupon.maxDiscount && discount > coupon.maxDiscount) {
-          discount = coupon.maxDiscount;
-        }
-      } else {
-        discount = coupon.discountValue;
-      }
-
-      setDiscountAmount(discount);
-      setCouponSuccess(`Áp dụng mã giảm giá thành công: Giảm ${discount.toLocaleString()}đ!`);
-      localStorage.setItem('haniu_active_coupon', couponCode);
-    } catch (err) {
+    const subtotal = cart?.totalPrice || 0;
+    const res = await applyCoupon(couponCode, subtotal);
+    if (res) {
+      const activeDiscount = useCouponStore.getState().discountAmount;
+      setCouponSuccess(`Áp dụng mã giảm giá thành công: Giảm ${activeDiscount.toLocaleString()}đ!`);
+    } else {
       // Local check fallback simulation
       if (couponCode.toUpperCase() === 'HANIUNEW') {
-        const discount = (cart?.totalPrice || 0) * 0.1;
-        setDiscountAmount(discount);
+        const discount = subtotal * 0.1;
+        useCouponStore.setState({
+          appliedCoupon: {
+            code: 'HANIUNEW',
+            name: 'Chào bạn mới',
+            discountType: 'PERCENT',
+            discountValue: 10,
+            active: true
+          },
+          discountAmount: discount,
+          error: null
+        });
         setCouponSuccess(`Áp dụng mã HANIUNEW thành công: Giảm ${discount.toLocaleString()}đ!`);
         localStorage.setItem('haniu_active_coupon', 'HANIUNEW');
-      } else {
-        setCouponError('Mã giảm giá không chính xác.');
       }
     }
   };

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { productService } from '@/utils/productService';
+import { useProductStore } from '@/store/product';
 
 interface Product {
   id: string;
@@ -50,27 +50,23 @@ const MOCK_PRODUCTS: Product[] = [
 ];
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { products, loading, fetchProducts, deleteProduct } = useProductStore();
   const [successMsg, setSuccessMsg] = useState('');
 
   const loadProducts = async () => {
     try {
-      setLoading(true);
-      const data = await productService.getProducts({ size: 50 });
+      const data = await fetchProducts({ size: 50 });
       if (data && data.content && data.content.length > 0) {
         const list = data.content.map((p: any) => ({
           ...p,
           basePrice: p.price || p.basePrice
         }));
-        setProducts(list);
+        useProductStore.setState({ products: list });
       } else {
-        setProducts(MOCK_PRODUCTS);
+        useProductStore.setState({ products: MOCK_PRODUCTS as any });
       }
     } catch (err) {
-      setProducts(MOCK_PRODUCTS);
-    } finally {
-      setLoading(false);
+      useProductStore.setState({ products: MOCK_PRODUCTS as any });
     }
   };
 
@@ -84,12 +80,13 @@ export default function AdminProductsPage() {
     }
 
     try {
-      await productService.deleteProduct(id);
+      await deleteProduct(id);
       setSuccessMsg('🎉 Đã xóa sản phẩm thành công khỏi hệ thống!');
-      setProducts(products.filter(p => p.id !== id));
     } catch (err) {
       setSuccessMsg('🎉 Đã xóa sản phẩm thành công (Simulated)!');
-      setProducts(products.filter(p => p.id !== id));
+      useProductStore.setState({
+        products: products.filter(p => p.id !== id)
+      });
     }
 
     setTimeout(() => setSuccessMsg(''), 4000);

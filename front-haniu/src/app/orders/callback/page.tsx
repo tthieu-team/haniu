@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { fetchApi } from '@/utils/api';
+import { fetchApi } from '@/lib/api';
 import Link from 'next/link';
 
 function CallbackContent() {

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { productService } from '@/utils/productService';
-import ProductCard from '@/components/ProductCard';
+import { productService } from '@/services/product.service';
+import ProductCard from '@/components/product/ProductCard';
 
 interface Product {
   id: string;

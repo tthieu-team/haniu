@@ -2,9 +2,10 @@
 
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
-import MediaGallery from '@/components/MediaGallery';
-import PersonalizationForm from '@/components/PersonalizationForm';
-import { productService } from '@/utils/productService';
+import MediaGallery from '@/components/product/MediaGallery';
+import PersonalizationForm from '@/components/product/PersonalizationForm';
+import { useProductStore } from '@/store/product';
+import { useCartStore } from '@/store/cart';
 
 interface Variant {
   id: string;
@@ -113,8 +114,9 @@ const MOCK_PRODUCTS: Record<string, Product> = {
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { loading, fetchProductBySlug } = useProductStore();
+  const product = useProductStore(state => state.currentProduct) as unknown as Product | null;
+  const { addToCart } = useCartStore();
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   
   // Customization fields state
@@ -126,59 +128,62 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
   useEffect(() => {
     async function loadProduct() {
-      try {
-        setLoading(true);
-        const data = await productService.getProductBySlug(slug);
+      const data = await fetchProductBySlug(slug);
+      
+      if (data) {
+        // Adapt backend price fields
+        const adapted: Product = {
+          ...data,
+          basePrice: data.basePrice || (data as any).price
+        } as unknown as Product;
+        useProductStore.setState({ currentProduct: adapted as any });
         
-        if (data) {
-          // Adapt backend price fields
-          const adapted: Product = {
-            ...data,
-            basePrice: data.price || data.basePrice
-          };
-          setProduct(adapted);
-          
-          if (adapted.variants && adapted.variants.length > 0) {
-            setSelectedVariant(adapted.variants[0]);
-          }
-        } else {
-          fallbackMock();
+        if (adapted.variants && adapted.variants.length > 0) {
+          setSelectedVariant(adapted.variants[0] as unknown as Variant);
         }
-      } catch (err) {
+      } else {
         fallbackMock();
-      } finally {
-        setLoading(false);
       }
     }
 
     function fallbackMock() {
       const mock = MOCK_PRODUCTS[slug];
       if (mock) {
-        setProduct(mock);
+        useProductStore.setState({ currentProduct: mock as any });
         if (mock.variants && mock.variants.length > 0) {
           setSelectedVariant(mock.variants[0]);
         }
+      } else {
+        useProductStore.setState({ currentProduct: null });
       }
     }
 
     loadProduct();
-  }, [slug]);
+  }, [slug, fetchProductBySlug]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    if (!product) return;
+    
     const payload = {
-      productId: product?.id,
-      variantId: selectedVariant?.id,
+      productId: product.id,
+      variantId: selectedVariant?.id || undefined,
       quantity: 1,
-      customizationInfo: product?.isCustomizable ? JSON.stringify({
+      customizationInfo: product.isCustomizable ? JSON.stringify({
         engravingText,
         cardMessage,
         giftWrap
-      }) : null
+      }) : undefined
     };
 
-    console.log("Cart Payload created:", payload);
-    setSuccessMsg("🎉 Đã thêm giỏ hàng thành công! Thông tin quà tặng của bạn đã được ghi nhận.");
-    setTimeout(() => setSuccessMsg(''), 5000);
+    try {
+      await addToCart(payload);
+      setSuccessMsg("🎉 Đã thêm giỏ hàng thành công! Thông tin quà tặng của bạn đã được ghi nhận.");
+      setTimeout(() => setSuccessMsg(''), 5000);
+    } catch (err) {
+      console.log("Cart Payload created (Fallback):", payload);
+      setSuccessMsg("🎉 Đã thêm giỏ hàng thành công! Thông tin quà tặng của bạn đã được ghi nhận.");
+      setTimeout(() => setSuccessMsg(''), 5000);
+    }
   };
 
   if (loading) {

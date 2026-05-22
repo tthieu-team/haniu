@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import SpecManager from '@/components/SpecManager';
-import VariantManager from '@/components/VariantManager';
-import { productService } from '@/utils/productService';
+import SpecManager from '@/components/product/SpecManager';
+import VariantManager from '@/components/product/VariantManager';
+import { productService } from '@/services/product.service';
 
 interface VariantInput {
   sku: string;
