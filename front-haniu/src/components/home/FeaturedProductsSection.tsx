@@ -96,12 +96,15 @@ export default function FeaturedProductsSection({
   return (
     <section id="products" className="py-16 space-y-12 scroll-mt-20 font-sans">
       {/* Title */}
-      <div className="text-center space-y-4 max-w-3xl mx-auto px-4">
-        <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-rose-500 bg-rose-50 dark:bg-rose-950/20 px-4 py-1.5 rounded-full inline-block">
-          BỘ SƯU TẬP ĐỘC QUYỀN
+      <div className="text-center space-y-5 max-w-3xl mx-auto px-4">
+        <span className="inline-flex items-center gap-1.5 px-4.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
+          <Icon name="✨" size={10} className="animate-pulse" /> BỘ SƯU TẬP ĐỘC QUYỀN
         </span>
-        <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-800 dark:text-zinc-100">
-          Sản Phẩm Quà Tặng Thiết Kế
+        <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
+          Sản Phẩm Quà Tặng{' '}
+          <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-amber-500 to-rose-600">
+            Thiết Kế Độc Bản
+          </span>
         </h2>
         <p className="text-xs md:text-sm text-slate-500 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed font-light">
           Khám phá bộ sưu tập quà tặng tinh tế hỗ trợ cá nhân hóa riêng theo thông điệp của bạn
@@ -109,54 +112,92 @@ export default function FeaturedProductsSection({
       </div>
 
       {/* Advanced Filters block */}
-      <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-[32px] p-6 md:p-8 shadow-md border border-slate-100 dark:border-zinc-800/60 space-y-8">
-        <div className="flex flex-col md:flex-row gap-6 justify-between items-center">
-          <div className="w-full md:max-w-md relative">
+      <div className="bg-gradient-to-b from-white/95 to-slate-50/70 dark:from-zinc-900/90 dark:to-zinc-900/50 backdrop-blur-md rounded-[32px] p-6 md:p-8 shadow-xl shadow-slate-100/50 dark:shadow-none border border-slate-200 dark:border-zinc-800/60 space-y-8">
+        {/* Search bar & statistics row */}
+        <div className="flex flex-col lg:flex-row gap-6 justify-between items-stretch lg:items-center">
+          <div className="flex-1 relative group">
             <input
               type="text"
               placeholder="Tìm quà tặng (VD: ly sứ khắc tên, set quà lãng mạn...)"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-10 py-3.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800/80 dark:focus:ring-rose-400 text-xs md:text-sm shadow-sm transition-all text-slate-800 dark:text-zinc-100"
+              className="w-full pl-12 pr-10 py-4 rounded-2xl border border-slate-200/80 focus:outline-none focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500 dark:border-zinc-800 dark:bg-zinc-950/40 dark:focus:ring-rose-500/5 dark:focus:border-rose-500 text-xs md:text-sm shadow-xs transition-all duration-300 text-slate-800 dark:text-zinc-100"
             />
-            <span className="absolute left-4 top-[15px] text-slate-400 dark:text-zinc-500">
-              <Icon name="Search" size={16} />
+            <span className="absolute left-4.5 top-[17px] text-slate-400 dark:text-zinc-500 transition-colors group-focus-within:text-rose-500">
+              <Icon name="Search" size={18} />
             </span>
             {searchTerm && (
               <button 
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 w-6 h-6 rounded-full bg-slate-100 dark:bg-zinc-700 flex items-center justify-center cursor-pointer"
+                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-650 dark:hover:text-zinc-300 w-7 h-7 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center cursor-pointer transition-colors"
               >
-                <Icon name="close" size={12} />
+                <Icon name="close" size={10} />
               </button>
             )}
           </div>
 
-          <div className="text-xs text-slate-400 dark:text-zinc-500 font-light italic self-end md:self-center">
-            Hiển thị <span className="font-semibold text-slate-700 dark:text-zinc-350">{products.length}</span> sản phẩm quà tặng độc đáo
+          <div className="flex flex-wrap items-center gap-3 self-stretch sm:self-start lg:self-center">
+            {/* Quick Clear Filter */}
+            {(searchTerm || selectedOccasion || selectedRecipient) && (
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedOccasion('');
+                  setSelectedRecipient('');
+                }}
+                className="inline-flex items-center justify-center gap-1.5 px-5 py-3.5 rounded-2xl border border-rose-200/60 dark:border-rose-950/30 text-rose-500 bg-rose-50/50 hover:bg-rose-50 dark:bg-rose-950/10 dark:hover:bg-rose-950/20 text-xs font-bold transition-all duration-300 cursor-pointer active:scale-95 shadow-sm"
+              >
+                <Icon name="close" size={12} />
+                Xóa bộ lọc
+              </button>
+            )}
+
+            {/* Display Counter */}
+            <div className="inline-flex items-center gap-2 bg-white dark:bg-zinc-950/60 border border-slate-200/80 dark:border-zinc-800 px-4.5 py-3 rounded-2xl text-xs text-slate-500 dark:text-zinc-400 font-medium shadow-xs">
+              <span>Hiển thị</span>
+              <span className="font-extrabold text-rose-500 bg-rose-50 dark:bg-rose-950/20 px-2 py-0.5 rounded-md">{products.length}</span>
+              <span>quà tặng độc đáo</span>
+            </div>
           </div>
         </div>
 
         {/* Occasions Filters */}
-        <div className="space-y-3">
-          <span className="text-[10px] font-extrabold tracking-wider text-slate-400 dark:text-zinc-500 uppercase block">
-            Chọn theo dịp lễ
-          </span>
-          <div className="flex flex-wrap gap-2.5">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-extrabold tracking-widest text-slate-450 dark:text-zinc-500 uppercase block whitespace-nowrap">
+              Chọn theo dịp lễ
+            </span>
+            <div className="h-[1px] flex-1 bg-slate-200/60 dark:bg-zinc-800/50" />
+          </div>
+          
+          <div className="flex flex-row overflow-x-auto lg:overflow-x-visible lg:flex-wrap gap-5 pb-3 lg:pb-0 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
             {occasions.map((occ) => {
               const isSelected = selectedOccasion === occ.slug;
               return (
                 <button
                   key={occ.slug}
                   onClick={() => setSelectedOccasion(occ.slug)}
-                  className={`px-4.5 py-2.5 rounded-full text-xs font-bold transition-all border cursor-pointer flex items-center gap-1.5 active:scale-95 ${
-                    isSelected
-                      ? 'bg-rose-500 text-white border-rose-500 shadow-md shadow-rose-500/25 scale-[1.02]'
-                      : 'bg-slate-50 text-slate-600 border-slate-200/50 hover:bg-slate-100 dark:bg-zinc-800/60 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-700/80'
-                  }`}
+                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-all duration-300 min-w-[76px] lg:min-w-[80px]"
                 >
-                  <Icon name={getOccasionIcon(occ.slug)} size={16} />
-                  <span>{occ.name}</span>
+                  {/* Circle Icon Container */}
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 border relative ${
+                    isSelected
+                      ? 'bg-gradient-to-br from-rose-500 to-pink-500 text-white border-rose-500 shadow-lg shadow-rose-500/25 scale-105 ring-4 ring-rose-500/10'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-350 hover:scale-105 dark:bg-zinc-850 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-800'
+                  }`}>
+                    <Icon name={getOccasionIcon(occ.slug)} size={20} />
+                    {isSelected && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-pink-600 text-white border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[9px] font-bold animate-scale-up">
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  {/* Text Label */}
+                  <span className={`text-[10px] font-bold tracking-wide transition-colors text-center ${
+                    isSelected ? 'text-rose-500' : 'text-slate-500 dark:text-zinc-400 group-hover:text-slate-800 dark:group-hover:text-zinc-200'
+                  }`}>
+                    {occ.name === 'Tất cả dịp' || occ.name === 'Tất cả' ? 'Tất cả' : occ.name}
+                  </span>
                 </button>
               );
             })}
@@ -164,25 +205,42 @@ export default function FeaturedProductsSection({
         </div>
 
         {/* Recipients Filters */}
-        <div className="space-y-3">
-          <span className="text-[10px] font-extrabold tracking-wider text-slate-400 dark:text-zinc-500 uppercase block">
-            Đối tượng nhận quà
-          </span>
-          <div className="flex flex-wrap gap-2.5">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-extrabold tracking-widest text-slate-455 dark:text-zinc-500 uppercase block whitespace-nowrap">
+              Đối tượng nhận quà
+            </span>
+            <div className="h-[1px] flex-1 bg-slate-200/60 dark:bg-zinc-800/50" />
+          </div>
+
+          <div className="flex flex-row overflow-x-auto lg:overflow-x-visible lg:flex-wrap gap-5 pb-3 lg:pb-0 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
             {recipients.map((rec) => {
               const isSelected = selectedRecipient === rec.slug;
               return (
                 <button
                   key={rec.slug}
                   onClick={() => setSelectedRecipient(rec.slug)}
-                  className={`px-4.5 py-2.5 rounded-full text-xs font-bold transition-all border cursor-pointer flex items-center gap-1.5 active:scale-95 ${
-                    isSelected
-                      ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/25 scale-[1.02]'
-                      : 'bg-slate-50 text-slate-600 border-slate-200/50 hover:bg-slate-100 dark:bg-zinc-800/60 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-700/80'
-                  }`}
+                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-all duration-300 min-w-[76px] lg:min-w-[80px]"
                 >
-                  <Icon name={getRecipientIcon(rec.slug)} size={16} />
-                  <span>{rec.name}</span>
+                  {/* Circle Icon Container */}
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 border relative ${
+                    isSelected
+                      ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white border-amber-500 shadow-lg shadow-amber-500/25 scale-105 ring-4 ring-amber-500/10'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-350 hover:scale-105 dark:bg-zinc-850 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-800'
+                  }`}>
+                    <Icon name={getRecipientIcon(rec.slug)} size={20} />
+                    {isSelected && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-orange-600 text-white border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[9px] font-bold animate-scale-up">
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  {/* Text Label */}
+                  <span className={`text-[10px] font-bold tracking-wide transition-colors text-center ${
+                    isSelected ? 'text-amber-600 dark:text-amber-500' : 'text-slate-500 dark:text-zinc-400 group-hover:text-slate-800 dark:group-hover:text-zinc-200'
+                  }`}>
+                    {rec.name === 'Tất cả đối tượng' || rec.name === 'Tất cả' ? 'Tất cả' : rec.name}
+                  </span>
                 </button>
               );
             })}
@@ -196,7 +254,7 @@ export default function FeaturedProductsSection({
           {[1, 2, 3, 4].map((idx) => (
             <div
               key={idx}
-              className="bg-white dark:bg-zinc-900 rounded-[28px] p-5 border border-slate-100 dark:border-zinc-800/60 space-y-4 animate-pulse"
+              className="bg-white dark:bg-zinc-900 rounded-[28px] p-5 border border-slate-200 dark:border-zinc-800/60 space-y-4 animate-pulse"
             >
               <div className="bg-slate-200 dark:bg-zinc-800 h-48 w-full rounded-2xl" />
               <div className="h-4 bg-slate-200 dark:bg-zinc-800 w-2/3 rounded-lg" />
@@ -205,7 +263,7 @@ export default function FeaturedProductsSection({
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="bg-white dark:bg-zinc-900 text-center py-20 px-6 rounded-[32px] border border-slate-100 dark:border-zinc-800/60 space-y-5 shadow-sm">
+        <div className="bg-white dark:bg-zinc-900 text-center py-20 px-6 rounded-[32px] border border-slate-200 dark:border-zinc-800/60 space-y-5 shadow-sm">
           <span className="text-slate-300 dark:text-zinc-700 block animate-bounce flex justify-center">
             <Icon name="🎁" size={56} />
           </span>

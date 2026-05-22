@@ -210,7 +210,7 @@ export default function LiveConfigPanel() {
 
                     {hero.layoutType === 'split-grid' && (
                       <div className="space-y-3 bg-zinc-900/40 p-3 rounded-xl border border-zinc-800/40 my-2">
-                        <span className="text-[9px] font-bold text-amber-550 uppercase tracking-wider block border-b border-zinc-800/50 pb-1.5">Cấu hình Chia Lưới</span>
+                        <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider block border-b border-zinc-800/50 pb-1.5">Cấu hình Chia Lưới</span>
                         
                         <div className="space-y-1">
                           <label className="text-[10px] text-zinc-500 uppercase font-semibold">Slide chính bên trái</label>

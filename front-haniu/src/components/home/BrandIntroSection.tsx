@@ -37,13 +37,13 @@ export default function BrandIntroSection() {
             <div className="pt-2 flex flex-wrap gap-4">
               <a
                 href="/#products"
-                className="inline-flex items-center justify-center rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 px-6 py-3.5 text-xs font-bold shadow-md hover:scale-[1.02] active:scale-95 transition-all duration-300 border border-transparent dark:border-zinc-200"
+                className="inline-flex items-center justify-center rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 px-6 py-3.5 text-xs font-bold shadow-md hover:scale-[1.02] active:scale-95 transition-all duration-300 border border-transparent dark:border-zinc-200 w-full sm:w-44"
               >
                 Khám phá câu chuyện
               </a>
               <a
                 href="/#collections"
-                className="inline-flex items-center justify-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-350 px-6 py-3.5 text-xs font-bold shadow-xs hover:bg-slate-50 dark:hover:bg-zinc-850 hover:scale-[1.02] active:scale-95 transition-all duration-300"
+                className="inline-flex items-center justify-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-350 px-6 py-3.5 text-xs font-bold shadow-xs hover:bg-slate-50 dark:hover:bg-zinc-850 hover:scale-[1.02] active:scale-95 transition-all duration-300 w-full sm:w-44"
               >
                 Các bộ sưu tập
               </a>
@@ -56,7 +56,7 @@ export default function BrandIntroSection() {
               {brandIntro.stats.map((stat, idx) => (
                 <div
                   key={idx}
-                  className="p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/30 backdrop-blur-md shadow-lg shadow-slate-100/50 dark:shadow-none hover:border-rose-500/30 dark:hover:border-rose-500/20 hover:scale-[1.03] hover:shadow-xl hover:shadow-rose-500/5 transition-all duration-500 group"
+                  className="p-6 rounded-3xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/30 backdrop-blur-md shadow-lg shadow-slate-100/50 dark:shadow-none hover:border-rose-500/30 dark:hover:border-rose-500/20 hover:scale-[1.03] hover:shadow-xl hover:shadow-rose-500/5 transition-all duration-500 group"
                 >
                   <span className="block text-3xl sm:text-4xl font-extrabold text-transparent bg-gradient-to-br from-rose-500 to-amber-500 bg-clip-text group-hover:scale-105 transition-transform duration-500 origin-left">
                     {stat.value}

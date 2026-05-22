@@ -10,7 +10,7 @@ export default function TrustBar() {
   if (!isVisible) return null;
 
   return (
-    <section className="bg-slate-50 dark:bg-zinc-900/40 border-y border-slate-100 dark:border-zinc-800/80 py-6">
+    <section className="bg-slate-50 dark:bg-zinc-900/40 border-y border-slate-200 dark:border-zinc-800/80 py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-center justify-items-center text-center">
           {trust.items.map((item, idx) => (

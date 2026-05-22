@@ -34,7 +34,7 @@ export default function FAQSection() {
           return (
             <div
               key={idx}
-              className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-2xl overflow-hidden transition-all duration-300 shadow-sm"
+              className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800/80 rounded-2xl overflow-hidden transition-all duration-300 shadow-sm"
             >
               {/* Question Trigger */}
               <button
@@ -50,7 +50,7 @@ export default function FAQSection() {
               {/* Answer Content */}
               <div
                 className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                  isOpen ? 'max-h-96 border-t border-slate-50 dark:border-zinc-850' : 'max-h-0'
+                  isOpen ? 'max-h-96 border-t border-slate-200/50 dark:border-zinc-850' : 'max-h-0'
                 }`}
               >
                 <p className="p-6 text-xs text-slate-500 dark:text-zinc-450 leading-relaxed font-light whitespace-pre-line bg-slate-50/30 dark:bg-zinc-950/20">

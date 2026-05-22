@@ -9,6 +9,7 @@ import Icon from '@/components/common/Icons';
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import { useAuthStore } from '@/store/auth';
 import { useCartStore } from '@/store/cart';
+import { useThemeStore } from '@/store/theme';
 
 export default function Header() {
   const router = useRouter();
@@ -16,11 +17,17 @@ export default function Header() {
   const { header, announcementBar } = useHomeLayoutStore();
   const { user, isAuthenticated, clearAuth } = useAuthStore();
   const { cart, fetchCart } = useCartStore();
+  const { theme, toggleTheme } = useThemeStore();
 
+  const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchVal, setSearchVal] = useState('');
   const [showSearchInput, setShowSearchInput] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     fetchCart();
@@ -164,6 +171,15 @@ export default function Header() {
               </span>
             </Link>
 
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors flex items-center cursor-pointer"
+              title={mounted && theme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}
+            >
+              <Icon name={mounted && theme === 'dark' ? 'sun' : 'moon'} size={16} />
+            </button>
+
             {/* User Account / Login */}
             {isAuthenticated ? (
               <div className="relative group py-2">
@@ -205,10 +221,10 @@ export default function Header() {
             ) : (
               <Link
                 href="/login"
-                className="text-xs font-bold hover:text-rose-500 dark:hover:text-rose-400 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors flex items-center cursor-pointer"
                 title="Đăng nhập"
               >
-                <Icon name="user" size={16} /> <span className="hidden sm:inline">Đăng nhập</span>
+                <Icon name="user" size={16} />
               </Link>
             )}
 

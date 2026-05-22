@@ -1,24 +1,39 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--background-val, #f8fafc);
+  --foreground: var(--foreground-val, #1e293b);
+  --card: var(--card-val, #ffffff);
+  --border: var(--border-val, #e2e8f0);
+  --primary: var(--primary-val, #e11d48);
+  --muted: var(--muted-val, #64748b);
+  --accent: var(--accent-val, #fff1f2);
+}
+
+.dark {
+  --background: var(--background-val, #09090b);
+  --foreground: var(--foreground-val, #f4f4f5);
+  --card: var(--card-val, #18181b);
+  --border: var(--border-val, #27272a);
+  --primary: var(--primary-val, #f43f5e);
+  --muted: var(--muted-val, #94a3b8);
+  --accent: var(--accent-val, #4c0519);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card-bg: var(--card);
+  --color-border-color: var(--border);
+  --color-primary-color: var(--primary);
+  --color-muted-color: var(--muted);
+  --color-accent-color: var(--accent);
   --font-sans: var(--font-be-vietnam-pro);
   --font-mono: var(--font-geist-mono);
   --font-script: var(--font-dancing-script);
   --font-serif: var(--font-cormorant-garamond);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {

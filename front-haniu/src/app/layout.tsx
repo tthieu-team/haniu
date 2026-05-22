@@ -42,7 +42,44 @@ export default function RootLayout({
     <html
       lang="vi"
       className={`${beVietnamPro.variable} ${geistMono.variable} ${dancingScript.variable} ${cormorantGaramond.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var storedTheme = localStorage.getItem('theme');
+                  var systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  var activeTheme = storedTheme === 'dark' || (!storedTheme && systemPrefersDark) ? 'dark' : 'light';
+                  
+                  if (activeTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                  
+                  var storedConfigStr = localStorage.getItem('theme_config');
+                  if (storedConfigStr) {
+                    var config = JSON.parse(storedConfigStr);
+                    var colors = config[activeTheme];
+                    if (colors) {
+                      document.documentElement.style.setProperty('--background-val', colors.background);
+                      document.documentElement.style.setProperty('--foreground-val', colors.foreground);
+                      document.documentElement.style.setProperty('--card-val', colors.cardBg);
+                      document.documentElement.style.setProperty('--border-val', colors.borderColor);
+                      document.documentElement.style.setProperty('--primary-val', colors.primaryColor);
+                      document.documentElement.style.setProperty('--muted-val', colors.mutedColor);
+                      document.documentElement.style.setProperty('--accent-val', colors.accentColor);
+                    }
+                  }
+                } catch (e) {}
+              })()
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-full bg-slate-50 text-slate-800 dark:bg-zinc-950 dark:text-zinc-100 font-sans">
         <AuthProvider>
           <SiteLayout>{children}</SiteLayout>

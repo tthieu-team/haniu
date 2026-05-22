@@ -395,7 +395,7 @@ const DEFAULT_STATE = {
     subtitle: "Lựa chọn món quà hoàn hảo nhất cho những cột mốc ý nghĩa trong cuộc sống",
     items: [
       { name: "Quà Sinh Nhật", slug: "sinh-nhat", image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=500&auto=format&fit=crop&q=80", count: "24+ set quà" },
-      { name: "Quà Tốt Nghiệp", slug: "tot-nghiep", image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=500&auto=format&fit=crop&q=80", count: "12+ set quà" },
+      { name: "Quà Tốt Nghiệp", slug: "tot-nghiep", image: "https://images.unsplash.com/photo-1627556704302-624286467c65?w=600&auto=format&fit=crop&q=80", count: "12+ set quà" },
       { name: "Quà Cặp Đôi", slug: "cap-doi", image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500&auto=format&fit=crop&q=80", count: "18+ set quà" },
       { name: "Quà Doanh Nghiệp", slug: "doanh-nghiep", image: "https://images.unsplash.com/photo-1512909006721-3d6018887383?w=500&auto=format&fit=crop&q=80", count: "30+ set quà" },
     ],
@@ -412,7 +412,7 @@ const DEFAULT_STATE = {
   videoBanner: {
     title: "Nghệ Thuật Chế Tác Độc Bản",
     subtitle: "Khám phá quy trình tỉ mỉ để tạo ra một tác phẩm quà tặng được khắc laser cá nhân hóa bởi Haniu.",
-    videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-wrapping-a-gift-box-with-ribbon-39922-large.mp4",
     placeholderImage: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=1200&auto=format&fit=crop&q=80",
     buttonText: "Xem Thêm Câu Chuyện",
     buttonHref: "/#story",

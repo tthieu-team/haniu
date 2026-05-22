@@ -12,31 +12,37 @@ export default function SocialProofSection() {
   return (
     <section className="py-16 space-y-12">
       {/* Metrics Row */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-8 pb-8 border-b border-slate-100 dark:border-zinc-800">
-        <div className="space-y-2 text-center md:text-left max-w-md">
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-800 dark:text-zinc-100">
-            {proof.title}
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-8 pb-8 border-b border-slate-200 dark:border-zinc-800">
+        <div className="space-y-4 text-center lg:text-left max-w-lg">
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
+            <Icon name="★" size={10} className="animate-pulse" /> ĐÁNH GIÁ THỰC TẾ
+          </span>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
+            Cảm Nhận Từ{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-amber-500">
+              Khách Hàng
+            </span>
           </h2>
-          <p className="text-sm text-slate-400 dark:text-zinc-400 font-light">
-            Sự hài lòng của khách hàng là động lực lớn nhất để Haniu không ngừng sáng tạo.
+          <p className="text-xs md:text-sm text-slate-500 dark:text-zinc-400 font-light leading-relaxed">
+            Sự hài lòng của khách hàng là động lực lớn nhất để Haniu không ngừng sáng tạo và hoàn thiện từng hộp quà.
           </p>
         </div>
 
-        <div className="flex items-center gap-8 divide-x divide-slate-200 dark:divide-zinc-800 bg-slate-50 dark:bg-zinc-900/50 px-8 py-5 rounded-3xl border border-slate-100 dark:border-zinc-800/80">
+        <div className="flex items-center gap-8 divide-x divide-slate-200 dark:divide-zinc-800 bg-white/80 dark:bg-zinc-950/60 backdrop-blur-md px-8 py-5.5 rounded-[32px] border border-slate-200 dark:border-zinc-800/80 shadow-lg">
           <div className="text-center px-4">
             <span className="text-3xl font-black text-rose-500 flex items-center justify-center gap-1">
-              {proof.ratingScore} <Icon name="★" size={24} className="fill-current text-rose-500" />
+              {proof.ratingScore} <Icon name="★" size={20} className="fill-current text-rose-500" />
             </span>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-zinc-500">
-              Đánh Giá Trung Bình
+            <span className="text-[9px] uppercase font-extrabold tracking-widest text-slate-450 dark:text-zinc-500 block mt-1">
+              Đánh Giá
             </span>
           </div>
           <div className="text-center px-4 pl-8">
-            <span className="text-3xl font-black text-slate-800 dark:text-zinc-100 block">
+            <span className="text-3xl font-black text-slate-800 dark:text-zinc-150 block">
               {proof.reviewsCount}
             </span>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-zinc-500">
-              Khách Hàng Đã Tin Dùng
+            <span className="text-[9px] uppercase font-extrabold tracking-widest text-slate-450 dark:text-zinc-500 block mt-1">
+              Tin Dùng
             </span>
           </div>
         </div>
@@ -47,32 +53,37 @@ export default function SocialProofSection() {
         {proof.reviews.map((rev) => (
           <div
             key={rev.id}
-            className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/60 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+            className="group bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200 dark:border-zinc-800/60 p-8 rounded-[32px] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col justify-between relative overflow-hidden"
           >
-            <div className="space-y-4">
+            {/* Giant quote mark overlay */}
+            <span className="absolute top-1 right-5 text-[90px] text-slate-200/50 dark:text-zinc-850/50 font-serif pointer-events-none select-none select-none">
+              &ldquo;
+            </span>
+
+            <div className="space-y-4 relative z-10">
               {/* Star Rating */}
-              <div className="flex text-amber-400 gap-0.5">
+              <div className="flex text-amber-500 gap-0.5">
                 {Array.from({ length: rev.rating }).map((_, i) => (
-                  <Icon key={i} name="★" size={14} className="fill-current text-amber-400" />
+                  <Icon key={i} name="★" size={14} className="fill-current text-amber-500" />
                 ))}
               </div>
-              <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed font-light">
+              <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed font-light italic">
                 &ldquo;{rev.content}&rdquo;
               </p>
             </div>
 
             {/* Profile User */}
-            <div className="flex items-center gap-3 pt-6 mt-6 border-t border-slate-50 dark:border-zinc-850">
+            <div className="flex items-center gap-3 pt-6 mt-6 border-t border-slate-200/60 dark:border-zinc-800/80 relative z-10">
               <img
                 src={rev.avatar}
                 alt={rev.name}
-                className="w-10 h-10 rounded-full object-cover border border-slate-100 dark:border-zinc-800"
+                className="w-10 h-10 rounded-full object-cover border border-slate-200/80 dark:border-zinc-800"
               />
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-200">
+                <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-150">
                   {rev.name}
                 </h4>
-                <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-light">
+                <p className="text-[10px] text-slate-450 dark:text-zinc-500 font-light">
                   {rev.role}
                 </p>
               </div>

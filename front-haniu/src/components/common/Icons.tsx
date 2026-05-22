@@ -42,6 +42,8 @@ import {
   PartyPopper,
   Camera,
   Save,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -228,6 +230,14 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
     case 'Save':
     case '💾':
       return <Save size={size} className={className} {...props} />;
+    case 'sun':
+    case 'Sun':
+    case '☀️':
+      return <Sun size={size} className={className} {...props} />;
+    case 'moon':
+    case 'Moon':
+    case '🌙':
+      return <Moon size={size} className={className} {...props} />;
     default:
       // Fallback if no matching Lucide icon is found
       return <span className={`inline-block font-sans ${className}`}>{name}</span>;
