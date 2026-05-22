@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useProductStore } from '@/store/product';
+import Icon from '@/components/common/Icons';
 
 interface Product {
   id: string;
@@ -105,7 +106,7 @@ export default function AdminProductsPage() {
           href="/admin/products/new"
           className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2.5 px-4 shadow-sm shadow-rose-500/20 text-xs transition-all active:scale-95"
         >
-          ➕ Thêm sản phẩm quà tặng
+          <Icon name="plus" size={12} /> Thêm sản phẩm quà tặng
         </Link>
       </div>
 
@@ -174,15 +175,15 @@ export default function AdminProductsPage() {
                       <td className="px-6 py-4 text-right space-x-2">
                         <Link
                           href={`/admin/products/edit/${product.id}`}
-                          className="inline-block bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition-all"
+                          className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition-all"
                         >
-                          ✏️ Sửa
+                          <Icon name="edit" size={10} /> Sửa
                         </Link>
                         <button
                           onClick={() => handleDelete(product.id)}
-                          className="bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition-all"
+                          className="inline-flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition-all"
                         >
-                          🗑️ Xóa
+                          <Icon name="trash" size={10} /> Xóa
                         </button>
                       </td>
                     </tr>

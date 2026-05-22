@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { fetchApi } from '@/lib/api';
 import Link from 'next/link';
+import Icon from '@/components/common/Icons';
 
 function CallbackContent() {
   const searchParams = useSearchParams();
@@ -66,8 +67,8 @@ function CallbackContent() {
   if (status === 'success') {
     return (
       <div className="max-w-md mx-auto text-center py-16 px-4 space-y-6">
-        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600 text-3xl">
-          ✓
+        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600">
+          <Icon name="check" size={28} />
         </div>
         <div className="space-y-2">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white font-serif">Thanh toán thành công!</h1>
@@ -99,8 +100,8 @@ function CallbackContent() {
 
   return (
     <div className="max-w-md mx-auto text-center py-16 px-4 space-y-6">
-      <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto text-red-500 text-3xl font-bold">
-        ✕
+      <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto text-red-500">
+        <Icon name="close" size={28} />
       </div>
       <div className="space-y-2">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Thanh toán thất bại</h1>

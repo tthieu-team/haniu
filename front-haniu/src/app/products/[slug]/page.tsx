@@ -6,6 +6,7 @@ import MediaGallery from '@/components/product/MediaGallery';
 import PersonalizationForm from '@/components/product/PersonalizationForm';
 import { useProductStore } from '@/store/product';
 import { useCartStore } from '@/store/cart';
+import Icon from '@/components/common/Icons';
 
 interface Variant {
   id: string;
@@ -219,8 +220,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   return (
     <div className="space-y-12">
       {/* Back button */}
-      <Link href="/" className="inline-flex items-center text-xs font-semibold text-slate-500 hover:text-rose-500 transition-colors">
-        ⬅️ Trở lại danh sách sản phẩm
+      <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-rose-500 transition-colors">
+        <Icon name="arrow-left" size={14} /> Trở lại danh sách sản phẩm
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -319,9 +320,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           <div className="flex gap-4">
             <button
               onClick={handleAddToCart}
-              className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:text-zinc-950 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-md active:scale-95 text-sm"
+              className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:text-zinc-950 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-md active:scale-95 text-sm flex items-center justify-center gap-2"
             >
-              🛍️ Thêm Vào Giỏ Hàng
+              <Icon name="🛍️" size={16} /> Thêm Vào Giỏ Hàng
             </button>
             <button className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-sm">
               Mua Ngay

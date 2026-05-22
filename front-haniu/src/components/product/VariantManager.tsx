@@ -1,5 +1,7 @@
 'use client';
 
+import Icon from '@/components/common/Icons';
+
 interface VariantInput {
   sku: string;
   name: string;
@@ -32,9 +34,9 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
         <button
           type="button"
           onClick={addVariant}
-          className="text-xs text-rose-500 font-bold hover:underline"
+          className="text-xs text-rose-500 font-bold hover:underline flex items-center gap-1"
         >
-          ➕ Thêm biến thể mới
+          <Icon name="plus" size={12} /> Thêm biến thể mới
         </button>
       </div>
 
@@ -44,9 +46,9 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
             <button
               type="button"
               onClick={() => removeVariant(idx)}
-              className="absolute top-3 right-3 text-slate-400 hover:text-rose-500 font-bold"
+              className="absolute top-3 right-3 text-slate-400 hover:text-rose-500 font-bold flex items-center gap-1"
             >
-              ✕ Xóa biến thể
+              <Icon name="close" size={12} /> Xóa biến thể
             </button>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

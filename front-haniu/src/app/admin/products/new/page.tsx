@@ -6,6 +6,7 @@ import Link from 'next/link';
 import SpecManager from '@/components/product/SpecManager';
 import VariantManager from '@/components/product/VariantManager';
 import { productService } from '@/services/product.service';
+import Icon from '@/components/common/Icons';
 
 interface VariantInput {
   sku: string;
@@ -196,7 +197,9 @@ export default function NewProductPage() {
     <div className="space-y-8 max-w-4xl mx-auto">
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800 pb-5">
         <div>
-          <Link href="/admin/products" className="text-xs text-slate-400 hover:text-rose-500 font-semibold block mb-1">⬅️ Trở về bảng quản trị</Link>
+          <Link href="/admin/products" className="text-xs text-slate-400 hover:text-rose-500 font-semibold flex items-center gap-1 mb-1">
+            <Icon name="arrow-left" size={12} /> Trở về bảng quản trị
+          </Link>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-800 dark:text-zinc-100">Thêm Sản phẩm Quà tặng Mới</h1>
         </div>
       </div>
@@ -323,7 +326,9 @@ export default function NewProductPage() {
                 onChange={(e) => setIsCustomizable(e.target.checked)}
                 className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
               />
-              <span className="text-slate-600 font-bold">⚙️ Cho phép Khắc tên / Cá nhân hóa quà</span>
+              <span className="text-slate-600 font-bold flex items-center gap-1.5">
+                <Icon name="⚙️" size={14} className="text-rose-500" /> Cho phép Khắc tên / Cá nhân hóa quà
+              </span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer">
@@ -404,7 +409,7 @@ export default function NewProductPage() {
                 onChange={handleFileUpload}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
-              <span className="text-xl">📷</span>
+              <span className="text-xl flex justify-center text-slate-400"><Icon name="📷" size={24} /></span>
               <p className="text-xs text-slate-500 mt-2 font-semibold">Tải lên hình ảnh sản phẩm</p>
             </div>
 
@@ -416,9 +421,9 @@ export default function NewProductPage() {
                     <button
                       type="button"
                       onClick={() => setMediaList(mediaList.filter((_, i) => i !== idx))}
-                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold hover:bg-red-600 shadow"
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold hover:bg-red-600 shadow transition-all active:scale-90"
                     >
-                      ✕
+                      <Icon name="close" size={10} />
                     </button>
                   </div>
                 ))}
@@ -441,9 +446,18 @@ export default function NewProductPage() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs"
+            className="bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs flex items-center justify-center gap-1.5"
           >
-            {loading ? 'Đang xử lý...' : '💾 Lưu sản phẩm quà tặng'}
+            {loading ? (
+              <>
+                <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
+                Đang xử lý...
+              </>
+            ) : (
+              <>
+                <Icon name="💾" size={14} /> Lưu sản phẩm quà tặng
+              </>
+            )}
           </button>
         </div>
 

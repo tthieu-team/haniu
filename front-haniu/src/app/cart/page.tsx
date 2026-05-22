@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useCartStore } from '@/store/cart';
 import { useCouponStore } from '@/store/coupon';
 import Link from 'next/link';
+import Icon from '@/components/common/Icons';
 
 export default function CartPage() {
   const { cart, loading, fetchCart, updateQuantity, removeItem } = useCartStore();
@@ -172,8 +173,8 @@ export default function CartPage() {
                     </span>
                   )}
                   {item.customizationInfo && (
-                    <div className="text-[10px] text-rose-500/90 font-medium">
-                      🎨 Cá nhân hóa: {item.customizationInfo}
+                    <div className="text-[10px] text-rose-500/90 font-medium flex items-center gap-1">
+                      <Icon name="🎨" size={12} /> Cá nhân hóa: {item.customizationInfo}
                     </div>
                   )}
                   <div className="font-extrabold text-sm text-rose-500">{(item.unitPrice).toLocaleString()}đ</div>
@@ -183,22 +184,22 @@ export default function CartPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                    className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 font-bold text-xs"
+                    className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 flex items-center justify-center cursor-pointer"
                   >
-                    -
+                    <Icon name="minus" size={12} />
                   </button>
                   <span className="w-8 text-center text-xs font-bold">{item.quantity}</span>
                   <button
                     onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                    className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 font-bold text-xs"
+                    className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 flex items-center justify-center cursor-pointer"
                   >
-                    +
+                    <Icon name="plus" size={12} />
                   </button>
                   <button
                     onClick={() => handleRemoveItem(item.id)}
-                    className="w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 font-bold text-xs ml-2"
+                    className="w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center ml-2 cursor-pointer"
                   >
-                    ✕
+                    <Icon name="close" size={12} />
                   </button>
                 </div>
               </div>

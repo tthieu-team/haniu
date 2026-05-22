@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Icon from '@/components/common/Icons';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -10,8 +11,8 @@ function SuccessContent() {
 
   return (
     <div className="max-w-md mx-auto text-center py-16 px-4 space-y-6">
-      <div className="w-16 h-16 bg-green-150 rounded-full flex items-center justify-center mx-auto text-green-600 text-3xl">
-        ✓
+      <div className="w-16 h-16 bg-green-150 rounded-full flex items-center justify-center mx-auto text-green-600">
+        <Icon name="check" size={28} />
       </div>
       <div className="space-y-2">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Đặt hàng thành công!</h1>

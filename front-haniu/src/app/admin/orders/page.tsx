@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useOrderStore } from '@/store/order';
 import Link from 'next/link';
+import Icon from '@/components/common/Icons';
 
 interface OrderItem {
   id: string;
@@ -325,7 +326,9 @@ export default function AdminOrdersPage() {
                     
                     {item.customizationInfo && (
                       <div className="mt-2 bg-white dark:bg-zinc-800 p-2 rounded border border-slate-200/50 text-[10px] text-slate-500">
-                        <span className="block font-bold text-slate-700 dark:text-zinc-300">🎨 Yêu cầu khắc/thiệp:</span>
+                        <span className="font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1">
+                          <Icon name="🎨" size={14} className="text-cyan-500" /> Yêu cầu khắc/thiệp:
+                        </span>
                         <pre className="font-sans whitespace-pre-wrap">{item.customizationInfo}</pre>
                       </div>
                     )}

@@ -1,5 +1,7 @@
 'use client';
 
+import Icon from '@/components/common/Icons';
+
 interface SpecInput {
   key: string;
   value: string;
@@ -21,9 +23,9 @@ export default function SpecManager({ specs, setSpecs }: SpecManagerProps) {
         <button
           type="button"
           onClick={addSpec}
-          className="text-xs text-rose-500 font-bold hover:underline"
+          className="text-xs text-rose-500 font-bold hover:underline flex items-center gap-1"
         >
-          ➕ Thêm thông số mới
+          <Icon name="plus" size={12} /> Thêm thông số mới
         </button>
       </div>
 
@@ -55,9 +57,9 @@ export default function SpecManager({ specs, setSpecs }: SpecManagerProps) {
             <button
               type="button"
               onClick={() => removeSpec(idx)}
-              className="text-rose-500 hover:text-rose-700 font-bold"
+              className="text-rose-500 hover:text-rose-700 font-bold w-6 h-6 flex items-center justify-center rounded-full hover:bg-rose-50 dark:hover:bg-rose-950/20"
             >
-              ✕
+              <Icon name="close" size={14} />
             </button>
           </div>
         ))}

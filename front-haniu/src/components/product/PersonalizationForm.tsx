@@ -1,5 +1,7 @@
 'use client';
 
+import Icon from '@/components/common/Icons';
+
 interface PersonalizationFormProps {
   engravingText: string;
   setEngravingText: (val: string) => void;
@@ -20,7 +22,7 @@ export default function PersonalizationForm({
   return (
     <div className="bg-gradient-to-br from-amber-500/5 to-rose-500/5 border border-amber-500/10 rounded-3xl p-6 space-y-4 text-xs font-semibold">
       <div className="flex items-center gap-2">
-        <span className="text-lg">⚙️</span>
+        <Icon name="⚙️" size={16} className="text-amber-500" />
         <h3 className="font-bold text-sm text-amber-600 dark:text-amber-400 uppercase tracking-wider">Cấu hình cá nhân hóa quà tặng</h3>
       </div>
 

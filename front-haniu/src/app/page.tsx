@@ -1,8 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { productService } from '@/services/product.service';
-import ProductCard from '@/components/product/ProductCard';
+import {
+  HeroSection,
+  BrandIntroSection,
+  CategoriesSection,
+  FeaturedProductsSection,
+  BenefitsSection,
+  SocialProofSection,
+  CTASection,
+  FAQSection,
+  LiveConfigPanel,
+  TrustBar,
+  VideoBanner,
+  CollectionsSection,
+  UgcFeedSection,
+  BlogSection,
+  HowItWorksSection,
+  StorySection,
+} from '@/components/home';
 
 interface Product {
   id: string;
@@ -37,7 +55,10 @@ const MOCK_PRODUCTS: Product[] = [
     isNew: true,
     isCustomizable: true,
     category: { name: "Combo Quà Tặng", slug: "combo-qua-tang" },
-    media: [{ url: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=80", isThumbnail: true }],
+    media: [
+      { url: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=80", isThumbnail: true },
+      { url: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80", isThumbnail: false }
+    ],
     occasions: [{ name: "Lễ Tình Nhân", slug: "valentine" }, { name: "Sinh Nhật", slug: "sinh-nhat" }],
     recipients: [{ name: "Bạn Gái", slug: "ban-gai" }]
   },
@@ -53,8 +74,11 @@ const MOCK_PRODUCTS: Product[] = [
     isNew: false,
     isCustomizable: true,
     category: { name: "Sổ Da & Bút", slug: "so-da-but" },
-    media: [{ url: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=80", isThumbnail: true }],
-    occasions: [{ name: "Kỷ Niệm", slug: "ky-niem" }, { name: "Ngày Nhà Giáo 20-11", slug: "20-11" }],
+    media: [
+      { url: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=80", isThumbnail: true },
+      { url: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=80", isThumbnail: false }
+    ],
+    occasions: [{ name: "Kỷ Niệm", slug: "ky-niem" }, { name: "Ngày Ngày Nhà Giáo 20-11", slug: "20-11" }],
     recipients: [{ name: "Thầy Cô", slug: "thay-co" }, { name: "Đối Tác", slug: "doi-tac" }]
   },
   {
@@ -70,7 +94,10 @@ const MOCK_PRODUCTS: Product[] = [
     isNew: true,
     isCustomizable: false,
     category: { name: "Ly Sứ", slug: "ly-su" },
-    media: [{ url: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=80", isThumbnail: true }],
+    media: [
+      { url: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=80", isThumbnail: true },
+      { url: "https://images.unsplash.com/photo-1536304997881-a372c179924b?w=500&auto=format&fit=crop&q=80", isThumbnail: false }
+    ],
     occasions: [{ name: "Sinh Nhật", slug: "sinh-nhat" }],
     recipients: [{ name: "Bạn Bè", slug: "ban-be" }]
   },
@@ -87,13 +114,19 @@ const MOCK_PRODUCTS: Product[] = [
     isNew: true,
     isCustomizable: true,
     category: { name: "Đồ Lưu Niệm", slug: "do-luu-niem" },
-    media: [{ url: "https://images.unsplash.com/photo-1581783898377-1c85bf937427?w=500&auto=format&fit=crop&q=80", isThumbnail: true }],
+    media: [
+      { url: "https://images.unsplash.com/photo-1581783898377-1c85bf937427?w=500&auto=format&fit=crop&q=80", isThumbnail: true },
+      { url: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=500&auto=format&fit=crop&q=80", isThumbnail: false }
+    ],
     occasions: [{ name: "Quốc Khánh 2-9", slug: "quoc-khanh" }, { name: "Sự Kiện Đối Ngoại", slug: "su-kien" }],
     recipients: [{ name: "Đối Tác", slug: "doi-tac" }, { name: "Người Nước Ngoài", slug: "nuoc-ngoai" }]
   }
 ];
 
-export default function Home() {
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const searchParamVal = searchParams.get('search') || '';
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -121,6 +154,11 @@ export default function Home() {
     { name: "Đối Tác", slug: "doi-tac" }
   ];
 
+  // Sync Search term from Header query parameters
+  useEffect(() => {
+    setSearchTerm(searchParamVal);
+  }, [searchParamVal]);
+
   const loadProducts = async (cursorVal: string | null = null, append = false) => {
     try {
       if (append) {
@@ -133,10 +171,8 @@ export default function Home() {
       const size = 8; // Load 8 products at a time
 
       if (searchTerm.trim()) {
-        // Fallback or fuzzy search (usually standard pagination because Elasticsearch ranks by score)
         resData = await productService.searchProducts(searchTerm, 0, size);
       } else {
-        // Use cursor-based pagination!
         resData = await productService.getProductsCursor({
           cursor: cursorVal || undefined,
           size
@@ -208,148 +244,113 @@ export default function Home() {
     return () => clearTimeout(delayDebounce);
   }, [searchTerm, selectedOccasion, selectedRecipient]);
 
+  // Occasion Select trigger (scrolls to products & sets value)
+  const handleOccasionClick = (slug: string) => {
+    setSelectedOccasion(slug);
+    const target = document.getElementById('products');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="space-y-12">
-      {/* Hero banner */}
-      <section className="relative overflow-hidden rounded-3xl bg-slate-900 text-white py-20 px-8 sm:px-12 text-center md:text-left md:flex md:items-center md:justify-between gap-8 shadow-xl">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#fda4af,transparent_50%)] opacity-35" />
-        <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-900 to-transparent" />
-        
-        <div className="relative z-10 max-w-2xl space-y-6">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-3 py-1.5 text-xs font-semibold tracking-wider uppercase text-rose-400">
-            💝 Nghệ thuật tặng quà cá nhân hóa
-          </span>
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl leading-tight">
-            Gửi Trao Yêu Thương <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-amber-400 via-rose-400 to-amber-300 bg-clip-text text-transparent">
-              Trọn Vẹn Ý Nghĩa
-            </span>
-          </h1>
-          <p className="text-sm text-slate-300 max-w-lg leading-relaxed">
-            Hộp quà kết hợp cao cấp, ly tách gốm sứ độc bản, sổ tay da thật khắc tên cùng hệ thống cá nhân hóa giúp bạn lưu lại mọi kỷ niệm tinh tế nhất.
-          </p>
-        </div>
+    <div className="space-y-16 pb-16 font-sans">
+      {/* 3. HERO BANNER */}
+      <HeroSection onOccasionSelect={handleOccasionClick} />
 
-        <div className="relative z-10 mt-10 md:mt-0 flex justify-center">
-          <div className="glassmorphism p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl max-w-xs space-y-4 text-xs">
-            <h3 className="font-bold text-sm text-amber-300">🔥 Đang diễn ra: Flash Sale</h3>
-            <p className="text-[11px] text-slate-300">Nhập mã <code className="bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded font-mono font-bold">HANIU29</code> giảm ngay 15% cho set quà yêu nước nhân dịp Quốc khánh.</p>
-            <button onClick={() => setSelectedOccasion("quoc-khanh")} className="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2 px-4 rounded-xl transition-all shadow-md shadow-rose-500/20">
-              Săn Set Quà Ngay
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* 4. TRUST BAR */}
+      <TrustBar />
 
-      {/* Advanced Filters */}
-      <section className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-zinc-800 space-y-6">
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-          <div className="w-full md:max-w-md relative">
-            <input
-              type="text"
-              placeholder="Tìm quà tặng (VD: ly sứ khắc tên, set quà lãng mạn...)"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 dark:focus:ring-rose-400 text-sm shadow-sm transition-all"
-            />
-            <span className="absolute left-3 top-3.5 text-slate-400">🔍</span>
-          </div>
+      {/* BRAND INTRO / ABOUT */}
+      <BrandIntroSection />
 
-          <div className="text-xs text-slate-400 italic">
-            Hiển thị {products.length} sản phẩm quà tặng độc đáo
-          </div>
-        </div>
+      {/* 5. CATEGORIES SECTION */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <CategoriesSection
+          onOccasionSelect={handleOccasionClick}
+          selectedOccasion={selectedOccasion}
+        />
+      </div>
 
-        {/* Occasions Filters */}
-        <div className="space-y-2">
-          <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">Chọn theo dịp lễ</span>
-          <div className="flex flex-wrap gap-2">
-            {occasions.map(occ => (
-              <button
-                key={occ.slug}
-                onClick={() => setSelectedOccasion(occ.slug)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                  selectedOccasion === occ.slug
-                    ? 'bg-rose-500 text-white border-rose-500 shadow-md shadow-rose-500/20'
-                    : 'bg-slate-50 text-slate-600 border-slate-200/60 hover:bg-slate-100 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-700'
-                }`}
-              >
-                {occ.name}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* 6. FEATURED PRODUCTS (with search filtering) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <FeaturedProductsSection
+          products={products}
+          loading={loading}
+          loadingMore={loadingMore}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedOccasion={selectedOccasion}
+          setSelectedOccasion={setSelectedOccasion}
+          selectedRecipient={selectedRecipient}
+          setSelectedRecipient={setSelectedRecipient}
+          occasions={occasions}
+          recipients={recipients}
+          hasNextPage={hasNextPage}
+          handleLoadMore={handleLoadMore}
+        />
+      </div>
 
-        {/* Recipients Filters */}
-        <div className="space-y-2">
-          <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">Đối tượng nhận quà</span>
-          <div className="flex flex-wrap gap-2">
-            {recipients.map(rec => (
-              <button
-                key={rec.slug}
-                onClick={() => setSelectedRecipient(rec.slug)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                  selectedRecipient === rec.slug
-                    ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
-                    : 'bg-slate-50 text-slate-600 border-slate-200/60 hover:bg-slate-100 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-700'
-                }`}
-              >
-                {rec.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* 9. COLLECTIONS SECTION */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <CollectionsSection />
+      </div>
 
-      {/* Product List Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(idx => (
-            <div key={idx} className="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800 space-y-4 animate-pulse">
-              <div className="bg-slate-200 dark:bg-zinc-800 h-48 w-full rounded-xl" />
-              <div className="h-4 bg-slate-200 dark:bg-zinc-800 w-2/3 rounded" />
-              <div className="h-4 bg-slate-200 dark:bg-zinc-800 w-1/3 rounded" />
-            </div>
-          ))}
-        </div>
-      ) : products.length === 0 ? (
-        <div className="bg-white dark:bg-zinc-900 text-center py-16 px-4 rounded-3xl border border-slate-100 dark:border-zinc-800 space-y-3">
-          <span className="text-4xl">🎁</span>
-          <h3 className="font-bold text-lg text-slate-700 dark:text-zinc-300">Không tìm thấy sản phẩm phù hợp</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">Vui lòng thử lại bằng cách chọn một dịp khác hoặc gõ từ khóa tìm kiếm mới.</p>
-          <button onClick={() => { setSearchTerm(''); setSelectedOccasion(''); setSelectedRecipient(''); }} className="mt-4 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all">
-            Xóa bộ lọc
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map(product => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+      {/* 7. BENEFITS SECTION */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <BenefitsSection />
+      </div>
 
-          {/* Cursor Load More Button */}
-          {hasNextPage && (
-            <div className="flex justify-center pt-6">
-              <button
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 dark:bg-zinc-900 dark:border-zinc-800 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-200 font-bold py-3 px-8 rounded-2xl text-xs transition-all shadow-sm active:scale-95 disabled:opacity-50"
-              >
-                {loadingMore ? (
-                  <>
-                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-rose-500" />
-                    Đang tải thêm...
-                  </>
-                ) : (
-                  'Xem thêm sản phẩm quà tặng ⏳'
-                )}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+      {/* HOW IT WORKS */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <HowItWorksSection />
+      </div>
+
+      {/* 8. VIDEO BANNER */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <VideoBanner />
+      </div>
+
+      {/* STORY / CONTENT */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <StorySection />
+      </div>
+
+      {/* 10. REVIEWS SECTION */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SocialProofSection />
+      </div>
+
+      {/* 11. UGC / INSTAGRAM / TIKTOK FEED */}
+      <UgcFeedSection />
+
+      {/* 12. BLOG SECTION */}
+      <BlogSection />
+
+      {/* 13. CTA BANNER */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <CTASection />
+      </div>
+
+      {/* FAQ Accordions */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <FAQSection />
+      </div>
+
+      {/* Live Configuration Panel */}
+      <LiveConfigPanel />
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500" />
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }
