@@ -94,7 +94,7 @@ export default function FilterDrawer({
                 placeholder="Từ"
                 value={priceMin}
                 onChange={(e) => setPriceMin(e.target.value === '' ? '' : Number(e.target.value))}
-                className="w-1/2 text-xs bg-slate-50 dark:bg-zinc-900 rounded-xl px-3 py-2 border border-slate-100 dark:border-zinc-800 focus:outline-none"
+                className="w-1/2 text-base bg-slate-50 dark:bg-zinc-900 rounded-xl px-3 py-2 border border-slate-100 dark:border-zinc-800 focus:outline-none"
               />
               <span className="text-slate-300">-</span>
               <input
@@ -102,7 +102,7 @@ export default function FilterDrawer({
                 placeholder="Đến"
                 value={priceMax}
                 onChange={(e) => setPriceMax(e.target.value === '' ? '' : Number(e.target.value))}
-                className="w-1/2 text-xs bg-slate-50 dark:bg-zinc-900 rounded-xl px-3 py-2 border border-slate-100 dark:border-zinc-800 focus:outline-none"
+                className="w-1/2 text-base bg-slate-50 dark:bg-zinc-900 rounded-xl px-3 py-2 border border-slate-100 dark:border-zinc-800 focus:outline-none"
               />
             </div>
           </div>

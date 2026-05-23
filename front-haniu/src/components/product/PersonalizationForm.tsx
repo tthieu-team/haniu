@@ -34,7 +34,7 @@ export default function PersonalizationForm({
           placeholder="Nhập tên hoặc lời chúc muốn khắc (tối đa 50 ký tự)"
           value={engravingText}
           onChange={(e) => setEngravingText(e.target.value)}
-          className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm"
+          className="w-full px-3 py-2 text-base lg:text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm"
         />
       </div>
 
@@ -45,7 +45,7 @@ export default function PersonalizationForm({
           placeholder="Nhập nội dung thư chúc mừng gửi tới người nhận..."
           value={cardMessage}
           onChange={(e) => setCardMessage(e.target.value)}
-          className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm"
+          className="w-full px-3 py-2 text-base lg:text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm"
         />
       </div>
 
@@ -54,7 +54,7 @@ export default function PersonalizationForm({
         <select
           value={giftWrap}
           onChange={(e) => setGiftWrap(e.target.value)}
-          className="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm"
+          className="w-full px-3 py-2.5 text-base lg:text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm"
         >
           <option value="Red Ribbon">Ruy băng Đỏ Lãng Mạn</option>
           <option value="Gold Ribbon">Ruy băng Vàng Hoàng Gia</option>

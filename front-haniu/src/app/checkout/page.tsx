@@ -89,7 +89,7 @@ function CheckoutForm() {
                 required
                 value={formData.customerName}
                 onChange={e => setFormData({ ...formData, customerName: e.target.value })}
-                className="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
               />
             </div>
             <div>
@@ -99,7 +99,7 @@ function CheckoutForm() {
                 required
                 value={formData.customerPhone}
                 onChange={e => setFormData({ ...formData, customerPhone: e.target.value })}
-                className="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
               />
             </div>
             <div className="sm:col-span-2">
@@ -109,7 +109,7 @@ function CheckoutForm() {
                 required
                 value={formData.customerEmail}
                 onChange={e => setFormData({ ...formData, customerEmail: e.target.value })}
-                className="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
               />
             </div>
             <div>
@@ -119,7 +119,7 @@ function CheckoutForm() {
                 required
                 value={formData.shippingProvince}
                 onChange={e => setFormData({ ...formData, shippingProvince: e.target.value })}
-                className="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
               />
             </div>
             <div>
@@ -129,7 +129,7 @@ function CheckoutForm() {
                 required
                 value={formData.shippingDistrict}
                 onChange={e => setFormData({ ...formData, shippingDistrict: e.target.value })}
-                className="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
               />
             </div>
             <div>
@@ -139,7 +139,7 @@ function CheckoutForm() {
                 required
                 value={formData.shippingWard}
                 onChange={e => setFormData({ ...formData, shippingWard: e.target.value })}
-                className="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
               />
             </div>
             <div>
@@ -149,7 +149,7 @@ function CheckoutForm() {
                 required
                 value={formData.shippingAddressLine}
                 onChange={e => setFormData({ ...formData, shippingAddressLine: e.target.value })}
-                className="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
               />
             </div>
             <div className="sm:col-span-2">
@@ -157,7 +157,7 @@ function CheckoutForm() {
               <textarea
                 value={formData.note}
                 onChange={e => setFormData({ ...formData, note: e.target.value })}
-                className="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white h-20"
+                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white h-20"
               />
             </div>
           </div>

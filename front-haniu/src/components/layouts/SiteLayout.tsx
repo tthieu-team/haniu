@@ -21,11 +21,21 @@ export default function SiteLayout({
   const ptClass = isSticky
     ? (isAnnouncementBar ? 'pt-28 sm:pt-32 md:pt-36' : 'pt-20 sm:pt-24 md:pt-28')
     : 'pt-0';
+  const isAuth = pathname?.startsWith('/auth');
+
+  if (isAuth) {
+    return (
+      <>
+        <WelcomeSplash />
+        {children}
+      </>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
       <WelcomeSplash />
-      <Suspense fallback={<div className="h-20 bg-white dark:bg-zinc-950" />}>
+      <Suspense fallback={<div className="h-20 bg-white dark:bg-zinc-950" />} >
         <Header />
       </Suspense>
       {isHome ? (

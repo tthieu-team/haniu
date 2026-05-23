@@ -254,7 +254,7 @@ export default function Header() {
                   placeholder="Tìm kiếm set quà..."
                   value={searchVal}
                   onChange={(e) => setSearchVal(e.target.value)}
-                  className="w-full text-xs px-4 py-2.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-800 dark:text-zinc-100 focus:outline-none"
+                  className="w-full text-base px-4 py-2.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-800 dark:text-zinc-100 focus:outline-none"
                 />
                 <button
                   type="submit"

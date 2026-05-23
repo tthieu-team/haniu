@@ -219,7 +219,7 @@ export default function CartPage() {
                   placeholder="Nhập mã..."
                   value={couponCode}
                   onChange={e => setCouponCode(e.target.value)}
-                  className="flex-1 text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5 uppercase font-semibold text-slate-800 dark:text-white"
+                  className="flex-1 text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5 uppercase font-semibold text-slate-800 dark:text-white"
                 />
                 <button
                   type="submit"
