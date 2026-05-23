@@ -22,11 +22,12 @@ export default function SiteLayout({
     ? (isAnnouncementBar ? 'pt-28 sm:pt-32 md:pt-36' : 'pt-20 sm:pt-24 md:pt-28')
     : 'pt-0';
   const isAuth = pathname?.startsWith('/auth');
+  const isAdmin = pathname?.startsWith('/admin');
 
-  if (isAuth) {
+  if (isAuth || isAdmin) {
     return (
       <>
-        <WelcomeSplash />
+        {isAuth && <WelcomeSplash />}
         {children}
       </>
     );

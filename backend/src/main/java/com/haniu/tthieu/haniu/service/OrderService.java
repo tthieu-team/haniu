@@ -11,6 +11,7 @@ public interface OrderService {
     OrderResponseDto getOrderByCode(String orderCode);
     OrderResponseDto getOrderByTrackingToken(String trackingToken);
     List<OrderResponseDto> getOrdersByUser(String email);
+    List<OrderResponseDto> getAllOrders();
     OrderResponseDto updateOrderStatus(UUID orderId, String orderStatus);
     OrderResponseDto updatePaymentStatus(UUID orderId, String paymentStatus);
 }

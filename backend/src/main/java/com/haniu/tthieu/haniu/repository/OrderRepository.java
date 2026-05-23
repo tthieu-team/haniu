@@ -13,4 +13,5 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     Optional<Order> findByOrderCode(String orderCode);
     Optional<Order> findByTrackingToken(String trackingToken);
     List<Order> findByUserEmailOrderByCreatedAtDesc(String email);
+    List<Order> findAllByOrderByCreatedAtDesc();
 }

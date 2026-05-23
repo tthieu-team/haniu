@@ -34,6 +34,10 @@ export const orderService = {
     return fetchApi('/api/v1/orders/my-orders');
   },
 
+  getAllOrders: async () => {
+    return fetchApi('/api/v1/orders');
+  },
+
   updateOrderStatus: async (orderId: string, status: string) => {
     return fetchApi(`/api/v1/orders/${orderId}/status`, {
       method: 'PUT',

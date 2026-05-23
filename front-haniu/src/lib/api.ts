@@ -32,11 +32,12 @@ export async function fetchApi(path: string, options: RequestInit = {}): Promise
     'Content-Type': 'application/json',
   };
 
+  const token = useAuthStore.getState().token;
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('haniu_token');
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
     const sessionId = getOrCreateSessionId();
     if (sessionId) {
       headers['X-Session-ID'] = sessionId;
@@ -54,12 +55,11 @@ export async function fetchApi(path: string, options: RequestInit = {}): Promise
   // Handle 401 Unauthorized by attempting to refresh token
   if (
     response.status === 401 &&
-    typeof window !== 'undefined' &&
     !path.includes('/auth/refresh') &&
     !path.includes('/auth/login') &&
     !path.includes('/auth/register')
   ) {
-    const refreshToken = localStorage.getItem('haniu_refresh_token');
+    const refreshToken = useAuthStore.getState().refreshToken;
     if (refreshToken) {
       if (!isRefreshing) {
         isRefreshing = true;
@@ -75,14 +75,9 @@ export async function fetchApi(path: string, options: RequestInit = {}): Promise
           if (refreshRes.ok) {
             const data = await refreshRes.json();
             if (data?.accessToken) {
-              localStorage.setItem('haniu_token', data.accessToken);
-              if (data.refreshToken) {
-                localStorage.setItem('haniu_refresh_token', data.refreshToken);
-              }
-              
               // Sync Zustand Auth Store
               const { setAuth } = useAuthStore.getState();
-              setAuth(data.accessToken, { fullName: data.fullName, role: data.role });
+              setAuth(data.accessToken, data.refreshToken || refreshToken, { fullName: data.fullName, role: data.role });
               
               onRefreshed(data.accessToken);
               isRefreshing = false;
@@ -134,4 +129,12 @@ export async function fetchApi(path: string, options: RequestInit = {}): Promise
   }
 
   return response.json();
+}
+
+export function getFullImageUrl(url: string | null | undefined): string {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    return url;
+  }
+  return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
 }

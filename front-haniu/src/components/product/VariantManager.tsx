@@ -58,7 +58,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                   type="text"
                   required
                   placeholder="VD: Hộp đỏ Size S"
-                  value={item.name}
+                  value={item.name || ''}
                   onChange={(e) => {
                     const list = [...variantsList];
                     list[idx].name = e.target.value;
@@ -74,7 +74,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                   type="text"
                   required
                   placeholder="VD: SKU-MUG-RED-S"
-                  value={item.sku}
+                  value={item.sku || ''}
                   onChange={(e) => {
                     const list = [...variantsList];
                     list[idx].sku = e.target.value;
@@ -89,7 +89,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                 <input
                   type="text"
                   placeholder="Size S, M, L"
-                  value={item.size}
+                  value={item.size || ''}
                   onChange={(e) => {
                     const list = [...variantsList];
                     list[idx].size = e.target.value;
@@ -104,7 +104,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                 <input
                   type="text"
                   placeholder="Đỏ, Xanh"
-                  value={item.color}
+                  value={item.color || ''}
                   onChange={(e) => {
                     const list = [...variantsList];
                     list[idx].color = e.target.value;

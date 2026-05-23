@@ -10,4 +10,8 @@ import java.util.UUID;
 @Repository
 public interface ProductVariantRepository extends JpaRepository<ProductVariant, UUID> {
     List<ProductVariant> findByProductId(UUID productId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM ProductVariant pv WHERE pv.product.id = :productId")
+    void deleteByProductId(UUID productId);
 }

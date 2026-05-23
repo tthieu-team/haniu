@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getFullImageUrl } from '@/lib/api';
 
 interface Media {
   id: string;
@@ -37,7 +38,7 @@ export default function MediaGallery({ mediaList, name }: MediaGalleryProps) {
     <div className="space-y-6">
       <div className="aspect-square bg-white dark:bg-zinc-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-zinc-800 shadow-sm relative">
         <img
-          src={activeImage}
+          src={getFullImageUrl(activeImage)}
           alt={name}
           className="w-full h-full object-cover"
         />
@@ -54,7 +55,7 @@ export default function MediaGallery({ mediaList, name }: MediaGalleryProps) {
                 activeImage === med.url ? 'border-rose-500 shadow-sm' : 'border-transparent opacity-80 hover:opacity-100'
               }`}
             >
-              <img src={med.url} alt="sub" className="w-full h-full object-cover" />
+              <img src={getFullImageUrl(med.url)} alt="sub" className="w-full h-full object-cover" />
             </button>
           ))}
         </div>

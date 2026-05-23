@@ -35,13 +35,13 @@ interface Order {
 }
 
 export default function AdminOrdersPage() {
-  const { orders, loading, fetchMyOrders, updateOrderStatus, updatePaymentStatus } = useOrderStore();
+  const { orders, loading, fetchAllOrders, updateOrderStatus, updatePaymentStatus } = useOrderStore();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [filterStatus, setFilterStatus] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   const loadOrders = async () => {
-    const res = await fetchMyOrders();
+    const res = await fetchAllOrders();
     if (!res || res.length === 0) {
       // Mock data for premium fallback
       useOrderStore.setState({

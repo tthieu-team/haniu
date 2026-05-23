@@ -7,6 +7,10 @@ import SpecManager from '@/components/product/SpecManager';
 import VariantManager from '@/components/product/VariantManager';
 import { productService } from '@/services/product.service';
 import Icon from '@/components/common/Icons';
+import { getFullImageUrl } from '@/lib/api';
+import BasicInfoForm from '@/components/admin/product/BasicInfoForm';
+import CategorizationForm from '@/components/admin/product/CategorizationForm';
+import ImageUploadForm from '@/components/admin/product/ImageUploadForm';
 
 interface VariantInput {
   id?: string;
@@ -189,42 +193,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     loadProduct();
   }, [id]);
 
-  const addMedia = (url: string) => {
-    setMediaList([...mediaList, {
-      url,
-      type: 'IMAGE',
-      altText: name || 'Product image',
-      isThumbnail: mediaList.length === 0,
-      sortOrder: mediaList.length + 1
-    }]);
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const file = files[0];
-
-    try {
-      setSaveLoading(true);
-      const data = await productService.uploadImage(file);
-      if (data && data.url) {
-        addMedia(data.url);
-        setSuccessMsg('🎉 Tải ảnh lên thành công!');
-        setTimeout(() => setSuccessMsg(''), 3000);
-      } else {
-        throw new Error();
-      }
-    } catch (err) {
-      const tempUrl = URL.createObjectURL(file);
-      addMedia(tempUrl);
-      setSuccessMsg('🎉 Tải ảnh lên thành công (Local Fallback)!');
-      setTimeout(() => setSuccessMsg(''), 3000);
-    } finally {
-      setSaveLoading(false);
-    }
-  };
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -283,32 +251,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     { id: "6cde07fb-b783-4a11-893f-d3c26cbdfa53", name: "Đồ Lưu Niệm" }
   ];
 
-  const occasionsList = [
-    { id: "123e4567-e89b-12d3-a456-426614174001", name: "Lễ Tình Nhân (Valentine)" },
-    { id: "123e4567-e89b-12d3-a456-426614174002", name: "Sinh Nhật" },
-    { id: "123e4567-e89b-12d3-a456-426614174003", name: "Ngày Nhà Giáo 20-11" },
-    { id: "123e4567-e89b-12d3-a456-426614174004", name: "Quốc Khánh 2-9" }
-  ];
-
-  const recipientsList = [
-    { id: "223e4567-e89b-12d3-a456-426614174001", name: "Bạn Gái" },
-    { id: "223e4567-e89b-12d3-a456-426614174002", name: "Bạn Trai" },
-    { id: "223e4567-e89b-12d3-a456-426614174003", name: "Thầy Cô" },
-    { id: "223e4567-e89b-12d3-a456-426614174004", name: "Đối Tác" }
-  ];
-
-  const toggleOccasion = (id: string) => {
-    setSelectedOccasions(prev =>
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-    );
-  };
-
-  const toggleRecipient = (id: string) => {
-    setSelectedRecipients(prev =>
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-    );
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -343,213 +285,52 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       <form onSubmit={handleSave} className="space-y-8 text-xs font-medium">
         
         {/* Basic Info */}
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6">
-          <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400 border-b border-slate-50 dark:border-zinc-800 pb-2">Thông tin cơ bản</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="block text-slate-500">Tên sản phẩm quà tặng *</label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="block text-slate-500">Mã SKU định danh *</label>
-              <input
-                type="text"
-                required
-                value={sku}
-                onChange={(e) => setSku(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-slate-500">Đường dẫn Slug</label>
-              <input
-                type="text"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-slate-500">Danh mục sản phẩm *</label>
-              <select
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm"
-              >
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-slate-500">Mô tả quà tặng</label>
-            <textarea
-              rows={4}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-slate-50 dark:border-zinc-800">
-            <div className="space-y-2">
-              <label className="block text-slate-500">Giá bán lẻ (đ) *</label>
-              <input
-                type="number"
-                required
-                value={basePrice}
-                onChange={(e) => setBasePrice(parseFloat(e.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-semibold"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-slate-500">Giá khuyến mại (đ)</label>
-              <input
-                type="number"
-                value={salePrice}
-                onChange={(e) => setSalePrice(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-semibold text-rose-500"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-slate-500">Tồn kho *</label>
-              <input
-                type="number"
-                required
-                value={stock}
-                onChange={(e) => setStock(parseInt(e.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-6 pt-4 border-t border-slate-50 dark:border-zinc-800">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isCustomizable}
-                onChange={(e) => setIsCustomizable(e.target.checked)}
-                className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
-              />
-              <span className="text-slate-600 font-bold flex items-center gap-1.5">
-                <Icon name="⚙️" size={14} className="text-rose-500" /> Cho phép Khắc tên / Cá nhân hóa quà
-              </span>
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isFeatured}
-                onChange={(e) => setIsFeatured(e.target.checked)}
-                className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
-              />
-              <span className="text-slate-600">Sản phẩm Nổi bật</span>
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isNew}
-                onChange={(e) => setIsNew(e.target.checked)}
-                className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
-              />
-              <span className="text-slate-600">Sản phẩm mới</span>
-            </label>
-          </div>
-        </div>
+        <BasicInfoForm
+          name={name}
+          setName={setName}
+          sku={sku}
+          setSku={setSku}
+          slug={slug}
+          setSlug={setSlug}
+          categoryId={categoryId}
+          setCategoryId={setCategoryId}
+          categories={categories}
+          description={description}
+          setDescription={setDescription}
+          basePrice={basePrice}
+          setBasePrice={setBasePrice}
+          salePrice={salePrice}
+          setSalePrice={setSalePrice}
+          stock={stock}
+          setStock={setStock}
+          isCustomizable={isCustomizable}
+          setIsCustomizable={setIsCustomizable}
+          isFeatured={isFeatured}
+          setIsFeatured={setIsFeatured}
+          isNew={isNew}
+          setIsNew={setIsNew}
+        />
 
         {/* Occasions & Recipients */}
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6">
-          <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400 border-b border-slate-50 dark:border-zinc-800 pb-2">Phân loại Dịp lễ & Người nhận</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-3">
-              <label className="block text-slate-500 font-semibold uppercase tracking-wider text-[10px]">Thích hợp các Dịp lễ nào?</label>
-              <div className="space-y-2">
-                {occasionsList.map(occ => (
-                  <label key={occ.id} className="flex items-center gap-2.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedOccasions.includes(occ.id)}
-                      onChange={() => toggleOccasion(occ.id)}
-                      className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
-                    />
-                    <span className="text-slate-600 dark:text-zinc-300">{occ.name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <label className="block text-slate-500 font-semibold uppercase tracking-wider text-[10px]">Thích hợp tặng cho Đối tượng nào?</label>
-              <div className="space-y-2">
-                {recipientsList.map(rec => (
-                  <label key={rec.id} className="flex items-center gap-2.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedRecipients.includes(rec.id)}
-                      onChange={() => toggleRecipient(rec.id)}
-                      className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
-                    />
-                    <span className="text-slate-600 dark:text-zinc-300">{rec.name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        <CategorizationForm
+          selectedOccasions={selectedOccasions}
+          setSelectedOccasions={setSelectedOccasions}
+          selectedRecipients={selectedRecipients}
+          setSelectedRecipients={setSelectedRecipients}
+        />
 
         {/* Dynamic Specifications */}
         <SpecManager specs={specs} setSpecs={setSpecs} />
 
-        {/* Media */}
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6">
-          <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400 border-b border-slate-50 dark:border-zinc-800 pb-2">Hình ảnh sản phẩm</h3>
-          
-          <div className="space-y-4">
-            <div className="border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl p-8 text-center bg-slate-50/50 dark:bg-zinc-950/20 relative">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <span className="text-xl flex justify-center text-slate-400"><Icon name="📷" size={24} /></span>
-              <p className="text-xs text-slate-500 mt-2 font-semibold">Tải lên hình ảnh sản phẩm</p>
-            </div>
-
-            {mediaList.length > 0 && (
-              <div className="grid grid-cols-4 gap-4">
-                {mediaList.map((m, idx) => (
-                  <div key={idx} className="relative aspect-square border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden group bg-slate-50">
-                    <img src={m.url} alt="Uploaded" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => setMediaList(mediaList.filter((_, i) => i !== idx))}
-                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold hover:bg-red-600 shadow transition-all active:scale-90"
-                    >
-                      <Icon name="close" size={10} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Product Media Manager */}
+        <ImageUploadForm
+          mediaList={mediaList}
+          setMediaList={setMediaList}
+          loading={saveLoading}
+          setLoading={setSaveLoading}
+          setSuccessMsg={setSuccessMsg}
+          setErrorMsg={setErrorMsg}
+        />
 
         {/* Variations */}
         <VariantManager variantsList={variantsList} setVariantsList={setVariantsList} basePrice={basePrice} />

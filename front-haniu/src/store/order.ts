@@ -40,6 +40,7 @@ interface OrderState {
   fetchOrderByCode: (orderCode: string) => Promise<Order | null>;
   fetchOrderByTrackingToken: (token: string) => Promise<Order | null>;
   fetchMyOrders: () => Promise<Order[]>;
+  fetchAllOrders: () => Promise<Order[]>;
   updateOrderStatus: (orderId: string, status: string) => Promise<Order | null>;
   updatePaymentStatus: (orderId: string, status: string) => Promise<Order | null>;
   createPaymentLink: (orderId: string, gateway: string) => Promise<any>;
@@ -100,6 +101,18 @@ export const useOrderStore = create<OrderState>((set) => ({
       return data || [];
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi lấy danh sách đơn hàng' });
+      return [];
+    }
+  },
+
+  fetchAllOrders: async () => {
+    set({ loading: true, error: null });
+    try {
+      const data = await orderService.getAllOrders();
+      set({ orders: data || [], loading: false });
+      return data || [];
+    } catch (err: any) {
+      set({ loading: false, error: err.message || 'Lỗi lấy tất cả đơn hàng' });
       return [];
     }
   },

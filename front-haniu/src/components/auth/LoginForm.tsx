@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Icon from '@/components/common/Icons';
 import { authService } from '@/services/auth.service';
+import { useAuthStore } from '@/store/auth';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -56,29 +57,42 @@ export default function LoginForm() {
       setErrorMsg('');
 
       const payload = {
-        username: emailOrPhone,
+        email: emailOrPhone,
         password: password
       };
 
-      await authService.login(payload);
+      const res = await authService.login(payload);
 
       setSuccess(true);
       setTimeout(() => {
-        router.push('/');
+        const { user } = useAuthStore.getState();
+        if (user?.role === 'ADMIN') {
+          router.push('/admin');
+        } else {
+          router.push('/');
+        }
       }, 1500);
 
     } catch (err: any) {
       setErrorMsg(err?.message || 'Email hoặc mật khẩu không chính xác.');
 
       // Fallback for demo/development if backend is not seeded/reachable
-      if (emailOrPhone === 'test@haniu.vn' || emailOrPhone === '0987654321') {
+      if (emailOrPhone === 'admin@haniu.vn' || emailOrPhone === 'test@haniu.vn' || emailOrPhone === '0987654321') {
         if (password === '123456') {
           setErrorMsg('');
           setSuccess(true);
-          const { setAuth } = require('@/store/auth').useAuthStore.getState();
-          setAuth('mock-jwt-token', { fullName: 'Nguyễn Văn Haniu', role: 'USER' });
+          const isDemoAdmin = emailOrPhone === 'admin@haniu.vn';
+          const { setAuth } = useAuthStore.getState();
+          setAuth('mock-jwt-token', 'mock-refresh-token', {
+            fullName: isDemoAdmin ? 'Haniu Admin' : 'Nguyễn Văn Haniu',
+            role: isDemoAdmin ? 'ADMIN' : 'USER'
+          });
           setTimeout(() => {
-            router.push('/');
+            if (isDemoAdmin) {
+              router.push('/admin');
+            } else {
+              router.push('/');
+            }
           }, 1500);
           return;
         }
@@ -126,7 +140,7 @@ export default function LoginForm() {
 
       // Seed mock auth
       const { setAuth } = require('@/store/auth').useAuthStore.getState();
-      setAuth('mock-otp-jwt-token', { fullName: 'Khách hàng OTP', role: 'USER' });
+      setAuth('mock-otp-jwt-token', 'mock-otp-refresh-token', { fullName: 'Khách hàng OTP', role: 'USER' });
 
       setSuccess(true);
       setTimeout(() => {

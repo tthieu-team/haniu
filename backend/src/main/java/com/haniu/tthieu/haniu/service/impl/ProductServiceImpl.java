@@ -197,8 +197,8 @@ public class ProductServiceImpl implements ProductService {
         Product savedProduct = productRepository.save(product);
 
         // Delete old variants and save new ones
-        List<ProductVariant> oldVariants = productVariantRepository.findByProductId(id);
-        productVariantRepository.deleteAll(oldVariants);
+        productVariantRepository.deleteByProductId(id);
+        productVariantRepository.flush();
 
         List<ProductVariant> savedVariants = new ArrayList<>();
         if (request.getVariants() != null) {
