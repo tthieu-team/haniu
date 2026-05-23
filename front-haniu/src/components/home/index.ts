@@ -14,4 +14,5 @@ export { default as VideoBanner } from './VideoBanner';
 export { default as CollectionsSection } from './CollectionsSection';
 export { default as UgcFeedSection } from './UgcFeedSection';
 export { default as BlogSection } from './BlogSection';
-
+export { default as ScrollReveal } from './ScrollReveal';
+export { default as BackToTop } from './BackToTop';

@@ -44,6 +44,9 @@ import {
   Save,
   Sun,
   Moon,
+  Filter,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -238,6 +241,19 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
     case 'Moon':
     case '🌙':
       return <Moon size={size} className={className} {...props} />;
+    case 'filter':
+    case 'Filter':
+    case 'bộ lọc':
+    case 'Bộ lọc':
+      return <Filter size={size} className={className} {...props} />;
+    case 'grid':
+    case 'Grid':
+    case 'layout-grid':
+    case 'LayoutGrid':
+      return <LayoutGrid size={size} className={className} {...props} />;
+    case 'list':
+    case 'List':
+      return <List size={size} className={className} {...props} />;
     default:
       // Fallback if no matching Lucide icon is found
       return <span className={`inline-block font-sans ${className}`}>{name}</span>;

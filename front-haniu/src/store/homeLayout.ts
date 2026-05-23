@@ -52,6 +52,8 @@ export interface HeroConfig {
 export interface TrustItem {
   icon: string;
   text: string;
+  title?: string;
+  desc?: string;
 }
 
 export interface TrustBarConfig {
@@ -206,6 +208,13 @@ export interface BrandIntroConfig {
   stats: BrandIntroStat[];
 }
 
+export interface WelcomeScreenConfig {
+  isEnabled: boolean;
+  welcomeText: string;
+  welcomeSubtitle: string;
+  durationMs: number;
+}
+
 export interface HomeLayoutState {
   // Visibility toggles for the 10 main page body blocks
   visibility: {
@@ -244,6 +253,7 @@ export interface HomeLayoutState {
   cta: CtaConfig;
   faq: FaqConfig;
   footer: FooterConfig;
+  welcomeScreen: WelcomeScreenConfig;
 
   // Actions
   toggleVisibility: (section: keyof HomeLayoutState['visibility']) => void;
@@ -268,6 +278,7 @@ export interface HomeLayoutState {
   updateCta: (config: Partial<CtaConfig>) => void;
   updateFaq: (config: Partial<FaqConfig>) => void;
   updateFooter: (config: Partial<FooterConfig>) => void;
+  updateWelcomeScreen: (config: Partial<WelcomeScreenConfig>) => void;
   resetAll: () => void;
 }
 
@@ -297,8 +308,6 @@ const DEFAULT_STATE = {
       { name: "Sản phẩm", href: "/#products" },
       { name: "Bộ sưu tập", href: "/#collections" },
       { name: "Câu chuyện", href: "/#story" },
-      { name: "Tin tức", href: "/#blog" },
-      { name: "Hỏi đáp", href: "/#faq" },
     ],
     isSticky: true,
   },
@@ -373,10 +382,10 @@ const DEFAULT_STATE = {
   },
   trustBar: {
     items: [
-      { icon: "★", text: "50.000+ Khách hàng tin dùng" },
-      { icon: "🚚", text: "Giao hỏa tốc 2 giờ nội thành" },
-      { icon: "🔄", text: "Đổi trả dễ dàng trong 30 ngày" },
-      { icon: "🛡️", text: "Bảo mật thanh toán 100%" },
+      { icon: "★", text: "50.000+ Khách hàng tin dùng", title: "50.000+", desc: "Khách hàng tin chọn" },
+      { icon: "🚚", text: "Giao hỏa tốc 2 giờ nội thành", title: "Giao Hỏa Tốc", desc: "Trong 2 giờ nội thành" },
+      { icon: "🔄", text: "Đổi trả dễ dàng trong 30 ngày", title: "Đổi Trả Dễ Dàng", desc: "Miễn phí trong 30 ngày" },
+      { icon: "🛡️", text: "Bảo mật thanh toán 100%", title: "Bảo Mật 100%", desc: "Thanh toán tuyệt đối an toàn" },
     ],
   },
   brandIntro: {
@@ -500,6 +509,14 @@ const DEFAULT_STATE = {
         image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500&auto=format&fit=crop&q=80",
         date: "10 Tháng 5, 2026",
         href: "/#blog"
+      },
+      {
+        id: "b4",
+        title: "5 set quà tặng kỷ niệm ngày cưới ngọt ngào và lãng mạn nhất",
+        summary: "Gợi ý những set quà tặng kỷ niệm ngày cưới thiết kế tinh tế hỗ trợ khắc tên, ngày cưới kỷ niệm ý nghĩa của hai vợ chồng.",
+        image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80",
+        date: "05 Tháng 5, 2026",
+        href: "/#blog"
       }
     ]
   },
@@ -533,6 +550,12 @@ const DEFAULT_STATE = {
     facebookUrl: "https://facebook.com/haniu",
     instagramUrl: "https://instagram.com/haniu",
     tiktokUrl: "https://tiktok.com/@haniu",
+  },
+  welcomeScreen: {
+    isEnabled: true,
+    welcomeText: "HANIU GIFT SHOP",
+    welcomeSubtitle: "Thiết kế độc bản - Trọn vẹn yêu thương",
+    durationMs: 2500,
   },
 };
 
@@ -670,10 +693,15 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
           footer: { ...state.footer, ...config },
         })),
 
+      updateWelcomeScreen: (config) =>
+        set((state) => ({
+          welcomeScreen: { ...state.welcomeScreen, ...config },
+        })),
+
       resetAll: () => set(DEFAULT_STATE),
     }),
     {
-      name: 'haniu-home-layout-config-v4',
+      name: 'haniu-home-layout-config-v7',
     }
   )
 );

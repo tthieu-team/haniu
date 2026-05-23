@@ -10,6 +10,7 @@ import { useHomeLayoutStore } from '@/store/homeLayout';
 import { useAuthStore } from '@/store/auth';
 import { useCartStore } from '@/store/cart';
 import { useThemeStore } from '@/store/theme';
+import { useWishlistStore } from '@/store/wishlist';
 
 export default function Header() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function Header() {
   const { user, isAuthenticated, clearAuth } = useAuthStore();
   const { cart, fetchCart } = useCartStore();
   const { theme, toggleTheme } = useThemeStore();
+  const wishlistItems = useWishlistStore((state) => state.items);
 
   const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -62,11 +64,11 @@ export default function Header() {
     }
   };
 
-  const menuLinks = [
-    { name: 'Shop', href: '/#products' },
-    { name: 'Collections', href: '/#collections' },
-    { name: 'About', href: '/#story' },
-    { name: 'Blog', href: '/#blog' },
+  const menuLinks = header?.menuLinks?.length ? header.menuLinks : [
+    { name: 'Trang chủ', href: '/' },
+    { name: 'Sản phẩm', href: '/#products' },
+    { name: 'Bộ sưu tập', href: '/#collections' },
+    { name: 'Câu chuyện', href: '/#story' },
   ];
 
   return (
@@ -75,14 +77,14 @@ export default function Header() {
     }`}>
       {/* 2. ANNOUNCEMENT BAR */}
       {announcementBar.isEnabled && (
-        <div className="w-full bg-rose-600 text-white text-[11px] py-2.5 px-4 text-center font-semibold tracking-wide transition-all duration-350 shadow-sm">
+        <div className="w-full bg-rose-600 text-white text-[10px] sm:text-[11px] py-2 sm:py-2.5 px-2 sm:px-4 text-center font-semibold tracking-wide transition-all duration-350 shadow-sm">
           <a
             href={announcementBar.linkHref || '#products'}
-            className="hover:underline flex items-center justify-center gap-1.5 cursor-pointer"
+            className="hover:underline flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 cursor-pointer leading-relaxed"
           >
             <span>{announcementBar.text}</span>
             {announcementBar.linkText && (
-              <span className="underline font-bold ml-1">{announcementBar.linkText} →</span>
+              <span className="underline font-bold">{announcementBar.linkText} →</span>
             )}
           </a>
         </div>
@@ -106,15 +108,12 @@ export default function Header() {
           <div className="hidden md:block">
             <Navbar isScrolled={isScrolled} menuLinks={menuLinks} />
           </div>
-
           {/* Right: Search, Account, Wishlist, Cart */}
-          <div className="flex items-center gap-4 lg:gap-6">
-            {/* Search Bar Form */}
+          <div className="flex items-center gap-2 md:gap-4 lg:gap-6">
+            {/* Search Bar Form (Desktop Only) */}
             <form
               onSubmit={handleSearchSubmit}
-              className={`relative items-center ${
-                showSearchInput ? 'flex' : 'hidden md:flex'
-              }`}
+              className="hidden md:flex relative items-center"
             >
               <input
                 type="text"
@@ -138,28 +137,19 @@ export default function Header() {
               )}
             </form>
 
-            {/* Mobile search toggle */}
-            <button
-              onClick={() => setShowSearchInput(!showSearchInput)}
-              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 md:hidden cursor-pointer"
-              title="Tìm kiếm"
-            >
-              <Icon name="search" size={16} />
-            </button>
-
-            {/* Wishlist Link */}
+            {/* Wishlist Link (Desktop Only) */}
             <Link
               href="/wishlist"
-              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors flex items-center relative cursor-pointer"
+              className="hidden md:flex p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors items-center relative cursor-pointer"
               title="Danh sách yêu thích"
             >
               <Icon name="heart" size={16} className="text-rose-500" />
               <span className="absolute -top-1.5 -right-1 bg-rose-500 text-white text-[8px] font-black rounded-full h-4 w-4 flex items-center justify-center border border-white dark:border-zinc-950 shadow-sm">
-                0
+                {wishlistItems.length}
               </span>
             </Link>
 
-            {/* Cart Link */}
+            {/* Cart Link (Always Show) */}
             <Link
               href="/cart"
               className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors flex items-center relative cursor-pointer"
@@ -171,19 +161,19 @@ export default function Header() {
               </span>
             </Link>
 
-            {/* Theme Toggle */}
+            {/* Theme Toggle (Desktop Only) */}
             <button
               onClick={toggleTheme}
-              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors flex items-center cursor-pointer"
+              className="hidden md:flex p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors items-center cursor-pointer"
               title={mounted && theme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}
             >
               <Icon name={mounted && theme === 'dark' ? 'sun' : 'moon'} size={16} />
             </button>
 
-            {/* User Account / Login */}
+            {/* User Account / Login (Desktop Only) */}
             {isAuthenticated ? (
-              <div className="relative group py-2">
-                <button className="flex items-center gap-1.5 text-xs font-semibold hover:text-rose-500 dark:hover:text-rose-450 cursor-pointer">
+              <div className="hidden md:block relative group py-2">
+                <button className="flex items-center gap-1.5 text-xs font-semibold hover:text-rose-500 dark:hover:text-rose-455 cursor-pointer">
                   <Icon name="user" size={16} /> <span className="hidden sm:inline">{user?.fullName.split(' ').slice(-1)[0]}</span>
                 </button>
                 <div className="absolute right-0 top-full pt-2 w-44 opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto transition-all duration-300 z-50">
@@ -220,8 +210,8 @@ export default function Header() {
               </div>
             ) : (
               <Link
-                href="/login"
-                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors flex items-center cursor-pointer"
+                href="/auth/login"
+                className="hidden md:flex p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors items-center cursor-pointer"
                 title="Đăng nhập"
               >
                 <Icon name="user" size={16} />
@@ -249,13 +239,13 @@ export default function Header() {
                   key={idx}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="text-xs font-semibold hover:text-rose-500 px-2 py-1 transition-all"
+                  className="text-xs font-bold hover:text-rose-500 px-2 py-2 border-b border-slate-50 dark:border-zinc-900/50 transition-all"
                 >
                   {link.name}
                 </Link>
               ))}
 
-              <hr className="border-slate-100 dark:border-zinc-850" />
+              <hr className="border-slate-100 dark:border-zinc-850 my-1" />
 
               {/* Mobile Search inside drawer */}
               <form onSubmit={handleSearchSubmit} className="relative w-full">
@@ -274,15 +264,65 @@ export default function Header() {
                 </button>
               </form>
 
-              {user?.role === 'ADMIN' && (
-                <Link
-                  href="/admin/products"
-                  onClick={() => setMobileOpen(false)}
-                  className="w-full text-center bg-slate-900 text-white dark:bg-zinc-800 font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5"
+              {/* Wishlist, Theme Toggle and Account for Mobile Drawer */}
+              <div className="flex items-center justify-between gap-3 pt-2">
+                {/* Theme Toggle Mobile */}
+                <button
+                  onClick={toggleTheme}
+                  className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900 text-slate-700 dark:text-zinc-350 border border-slate-100 dark:border-zinc-800/80 cursor-pointer"
                 >
-                  <Icon name="shield" size={14} /> Quản trị Admin
+                  <Icon name={mounted && theme === 'dark' ? 'sun' : 'moon'} size={13} />
+                  <span>{mounted && theme === 'dark' ? 'Sáng' : 'Tối'}</span>
+                </button>
+
+                {/* Wishlist Link Mobile */}
+                <Link
+                  href="/wishlist"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900 text-rose-500 border border-slate-100 dark:border-zinc-800/80 cursor-pointer"
+                >
+                  <Icon name="heart" size={13} className="text-rose-500" />
+                  <span>Yêu thích ({wishlistItems.length})</span>
                 </Link>
-              )}
+              </div>
+
+              {/* User Account / Login Mobile */}
+              <div className="pt-1">
+                {isAuthenticated ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 text-slate-700 dark:text-zinc-350">
+                      <Icon name="user" size={13} />
+                      <span>Chào, {user?.fullName.split(' ').slice(-1)[0]}</span>
+                    </div>
+                    {user?.role === 'ADMIN' && (
+                      <Link
+                        href="/admin/products"
+                        onClick={() => setMobileOpen(false)}
+                        className="w-full text-center bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                      >
+                        <Icon name="shield" size={13} /> Quản trị Admin
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => {
+                        clearAuth();
+                        setMobileOpen(false);
+                      }}
+                      className="w-full text-center bg-rose-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                    >
+                      Đăng xuất
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="w-full text-center bg-slate-900 text-white dark:bg-zinc-800 font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                  >
+                    <Icon name="user" size={13} /> Đăng nhập
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         )}

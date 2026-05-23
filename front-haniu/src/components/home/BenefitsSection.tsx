@@ -10,13 +10,13 @@ export default function BenefitsSection() {
   if (!isVisible) return null;
 
   return (
-    <section className="py-16 bg-gradient-to-b from-slate-50/50 to-white/20 dark:from-zinc-900/10 dark:to-zinc-950/5 p-8 md:p-12 rounded-[40px] border border-slate-200 dark:border-zinc-800/60 space-y-12">
+    <section className="py-10 md:py-16 bg-gradient-to-b from-slate-50/50 to-white/20 dark:from-zinc-900/10 dark:to-zinc-950/5 p-5 md:p-12 rounded-3xl md:rounded-[40px] border border-slate-200 dark:border-zinc-800/60 space-y-8 md:space-y-12">
       {/* Title */}
-      <div className="text-center space-y-4 max-w-3xl mx-auto px-4">
-        <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
+      <div className="text-center space-y-3 md:space-y-4 max-w-3xl mx-auto px-4">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
           <Icon name="✨" size={10} className="animate-pulse" /> DỊCH VỤ TRỌN GÓI
         </span>
-        <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
+        <h2 className="text-2xl md:text-4xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
           Trải Nghiệm{' '}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-violet-500">
             Dịch Vụ Khác Biệt
@@ -26,7 +26,7 @@ export default function BenefitsSection() {
       </div>
 
       {/* Cards list */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {benefits.items.map((item, idx) => {
           const styles = [
             { bg: 'bg-rose-50 dark:bg-rose-950/20 text-rose-500 border-rose-100 dark:border-rose-900/30', hoverBorder: 'hover:border-rose-400 dark:hover:border-rose-800' },
@@ -39,16 +39,16 @@ export default function BenefitsSection() {
           return (
             <div
               key={idx}
-              className={`group bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/60 p-7 rounded-[28px] shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500 flex flex-col space-y-5 cursor-pointer ${currentStyle.hoverBorder}`}
+              className={`group bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/60 p-5 md:p-7 rounded-2xl md:rounded-[28px] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col space-y-4 md:space-y-5 cursor-pointer ${currentStyle.hoverBorder}`}
             >
-              <span className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-transform duration-500 group-hover:scale-110 ${currentStyle.bg}`}>
-                <Icon name={item.icon} size={26} />
+              <span className={`w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center border transition-transform duration-300 group-hover:scale-110 ${currentStyle.bg}`}>
+                <Icon name={item.icon} size={22} className="w-[22px] h-[22px] md:w-[26px] md:h-[26px]" />
               </span>
-              <div className="space-y-2">
-                <h3 className="font-extrabold text-sm text-slate-800 dark:text-zinc-100 tracking-wide">
+              <div className="space-y-1.5 md:space-y-2">
+                <h3 className="font-extrabold text-xs md:text-sm text-slate-800 dark:text-zinc-100 tracking-wide">
                   {item.title}
                 </h3>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-relaxed font-light">
+                <p className="text-[11px] md:text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-light">
                   {item.desc}
                 </p>
               </div>

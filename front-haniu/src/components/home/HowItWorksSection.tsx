@@ -27,14 +27,11 @@ export default function HowItWorksSection() {
       </div>
 
       {/* Grid of Steps */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 relative">
-        {/* Connection line between steps (desktop only) */}
-        <div className="hidden lg:block absolute top-[44px] left-12 right-12 h-[2px] bg-gradient-to-r from-rose-200 via-amber-200 to-rose-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 z-0" />
-
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {how.steps.map((step, idx) => (
-          <div key={idx} className="relative z-10 flex flex-col space-y-5 group p-6 rounded-[28px] bg-slate-50/40 dark:bg-zinc-900/15 border border-transparent hover:border-slate-200/80 dark:hover:border-zinc-800/80 hover:bg-white dark:hover:bg-zinc-900/40 transition-all duration-500 shadow-xs hover:shadow-lg">
+          <div key={idx} className="relative z-10 flex flex-col space-y-5 group p-7 rounded-[32px] bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200 dark:border-zinc-800/80 hover:border-rose-400 dark:hover:border-rose-800 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer">
             {/* Number Indicator */}
-            <div className="w-14 h-14 rounded-2xl bg-white dark:bg-zinc-950 border border-slate-200/80 dark:border-zinc-800/80 flex items-center justify-center font-serif text-lg font-extrabold text-rose-500 shadow-sm group-hover:bg-gradient-to-br group-hover:from-rose-500 group-hover:to-pink-500 group-hover:text-white group-hover:border-rose-500 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-rose-500/20 transition-all duration-500">
+            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20 flex items-center justify-center font-serif text-sm font-black text-rose-500 shadow-xs group-hover:bg-gradient-to-br group-hover:from-rose-500 group-hover:to-pink-500 group-hover:text-white group-hover:border-rose-500 transition-all duration-500">
               {step.number}
             </div>
 

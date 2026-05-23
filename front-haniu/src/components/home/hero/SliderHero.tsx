@@ -40,7 +40,7 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
 
   return (
     <section
-      className="relative overflow-hidden w-full bg-[#FAF5F2] h-[500px] sm:h-[620px] md:h-[720px] lg:h-[800px] group"
+      className="relative overflow-hidden w-full bg-[#FAF5F2] h-[550px] sm:h-[680px] lg:h-screen group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -54,8 +54,8 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
               key={slide.id || idx}
               className={`absolute inset-0 w-full h-full transition-all duration-1000 ease-in-out ${
                 isActive
-                  ? 'opacity-100 scale-100 z-10 pointer-events-auto'
-                  : 'opacity-0 scale-[1.02] z-0 pointer-events-none'
+                  ? 'opacity-100 scale-100 z-10 pointer-events-auto visible'
+                  : 'opacity-0 scale-[1.02] z-0 pointer-events-none invisible'
               }`}
             >
               {/* Background Image Container */}
@@ -71,11 +71,11 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(254,243,199,0.2),transparent_50%)]" />
 
                 {/* Gradient direction based on text alignment to protect readability */}
-                <div className={`absolute inset-0 ${
+                <div className={`absolute inset-0 bg-[#FAF5F2]/92 sm:bg-transparent ${
                   slide.textLayout === 'left'
-                    ? 'bg-gradient-to-r from-[#FAF5F2] via-[#FAF5F2]/95 sm:via-[#FAF5F2]/80 to-transparent'
+                    ? 'sm:bg-gradient-to-r sm:from-[#FAF5F2] sm:via-[#FAF5F2]/95 sm:to-transparent'
                     : slide.textLayout === 'right'
-                    ? 'bg-gradient-to-l from-[#FAF5F2] via-[#FAF5F2]/95 sm:via-[#FAF5F2]/80 to-transparent'
+                    ? 'sm:bg-gradient-to-l sm:from-[#FAF5F2] sm:via-[#FAF5F2]/95 sm:to-transparent'
                     : 'bg-[#FAF5F2]/85 sm:bg-[#FAF5F2]/75'
                 }`} />
               </div>
@@ -86,20 +86,30 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
                   ? (isAnnouncementBar ? 'pt-28 sm:pt-32 md:pt-36' : 'pt-20 sm:pt-24 md:pt-28')
                   : 'pt-0'
               }`}>
-                <div className={`w-full flex ${
+                <div className={`w-full flex justify-center ${
                   slide.textLayout === 'left'
-                    ? 'justify-start'
+                    ? 'sm:justify-start'
                     : slide.textLayout === 'right'
-                    ? 'justify-end'
-                    : 'justify-center'
+                    ? 'sm:justify-end'
+                    : 'sm:justify-center'
                 }`}>
                   {/* Content card */}
-                  <div className={`relative max-w-[520px] space-y-5 md:space-y-6 ${
-                    slide.textLayout === 'center' ? 'text-center' : 'text-left'
+                  <div className={`relative max-w-[520px] space-y-5 md:space-y-6 text-center ${
+                    slide.textLayout === 'left'
+                      ? 'sm:text-left'
+                      : slide.textLayout === 'right'
+                      ? 'sm:text-right'
+                      : 'sm:text-center'
                   }`}>
                     {/* Badge */}
                     {slide.badgeText && (
-                      <div className={`flex ${slide.textLayout === 'center' ? 'justify-center' : 'justify-start'}`}>
+                      <div className={`flex justify-center ${
+                        slide.textLayout === 'left'
+                          ? 'sm:justify-start'
+                          : slide.textLayout === 'right'
+                          ? 'sm:justify-end'
+                          : 'sm:justify-center'
+                      }`}>
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEBEA] border border-[#F5D0CD] px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#C67B71] shadow-xs">
                           <Icon name="heart" size={10} className="fill-[#C67B71] text-[#C67B71]" />
                           {slide.badgeText}
@@ -109,14 +119,14 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
 
                     {/* Heading Typography combination */}
                     <div className="relative">
-                      <h1 className="leading-none text-[#3A2312] select-none">
+                      <h1 className="leading-tight sm:leading-none text-[#3A2312] select-none">
                         {slide.scriptTitle && (
-                          <span className="block font-script text-4xl sm:text-5xl md:text-6xl text-[#C67B71] italic font-normal tracking-wide leading-normal mb-[-0.1em] ml-1">
+                          <span className="block font-script text-3xl sm:text-5xl md:text-6xl text-[#C67B71] italic font-normal tracking-wide leading-normal mb-1 sm:mb-[-0.1em] ml-1">
                             {slide.scriptTitle}
                           </span>
                         )}
                         {slide.boldTitle && (
-                          <span className="block font-serif text-4xl sm:text-6xl md:text-7xl font-bold uppercase tracking-[0.05em] leading-tight mt-1">
+                          <span className="block font-serif text-3xl sm:text-6xl md:text-7xl font-bold uppercase tracking-[0.05em] leading-tight mt-1">
                             {slide.boldTitle}
                           </span>
                         )}
@@ -149,12 +159,18 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
                     </div>
 
                     {/* Subtitle / Message */}
-                    <p className="text-xs sm:text-sm md:text-base text-[#5E4E43] font-light leading-relaxed max-w-md">
+                    <p className="text-xs sm:text-sm md:text-base text-[#5E4E43] font-light leading-relaxed max-w-sm sm:max-w-md mx-auto sm:mx-0">
                       {slide.subtitle}
                     </p>
 
                     {/* Call to Action */}
-                    <div className={`pt-2 flex ${slide.textLayout === 'center' ? 'justify-center' : 'justify-start'}`}>
+                    <div className={`pt-2 flex justify-center ${
+                      slide.textLayout === 'left'
+                        ? 'sm:justify-start'
+                        : slide.textLayout === 'right'
+                        ? 'sm:justify-end'
+                        : 'sm:justify-center'
+                    }`}>
                       <a
                         href={slide.ctaHref}
                         className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#E07A7C] to-[#C67B71] px-7 py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#C67B71]/25 hover:shadow-[#C67B71]/45 hover:scale-[1.02] active:scale-95 transition-all duration-300 cursor-pointer"
@@ -190,19 +206,19 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
         })}
       </div>
 
-      {/* Navigation chevrons (shown on hover) */}
+      {/* Navigation chevrons (shown on hover/always on mobile) */}
       {slides.length > 1 && (
         <>
           <button
             onClick={handlePrev}
-            className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/40 hover:bg-white/80 border border-white/40 text-[#C67B71] backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md cursor-pointer hover:scale-105 active:scale-95"
+            className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/40 hover:bg-white/80 border border-white/40 text-[#C67B71] backdrop-blur-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 shadow-md cursor-pointer hover:scale-105 active:scale-95"
             aria-label="Previous slide"
           >
             <Icon name="arrow-left" size={16} />
           </button>
           <button
             onClick={handleNext}
-            className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/40 hover:bg-white/80 border border-white/40 text-[#C67B71] backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md cursor-pointer hover:scale-105 active:scale-95"
+            className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/40 hover:bg-white/80 border border-white/40 text-[#C67B71] backdrop-blur-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 shadow-md cursor-pointer hover:scale-105 active:scale-95"
             aria-label="Next slide"
           >
             <Icon name="arrow-right" size={16} />

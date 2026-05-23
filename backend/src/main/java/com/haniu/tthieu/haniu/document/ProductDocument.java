@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Document(indexName = "products")
+@Document(indexName = "products", createIndex = false)
 @Getter
 @Setter
 @NoArgsConstructor

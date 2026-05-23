@@ -1,4 +1,4 @@
-import { fetchApi } from '@/lib/api';
+import { fetchApi, API_BASE_URL } from '@/lib/api';
 
 export interface ProductRequestPayload {
   name: string;
@@ -108,7 +108,6 @@ export const productService = {
   },
 
   uploadImage: async (file: File) => {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
     const formData = new FormData();
     formData.append('file', file);
 

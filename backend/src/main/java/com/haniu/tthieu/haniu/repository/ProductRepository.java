@@ -23,4 +23,14 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     Optional<Product> findBySlugFetchAll(@Param("slug") String slug);
 
     Optional<Product> findBySlug(String slug);
+
+    @Query("SELECT p FROM Product p " +
+           "WHERE p.status = :status AND (" +
+           "lower(p.name) LIKE lower(concat('%', :keyword, '%')) OR " +
+           "lower(p.description) LIKE lower(concat('%', :keyword, '%')) OR " +
+           "lower(p.sku) LIKE lower(concat('%', :keyword, '%')))")
+    org.springframework.data.domain.Page<Product> searchProductsFallback(
+            @Param("keyword") String keyword,
+            @Param("status") com.haniu.tthieu.haniu.entity.enums.ProductStatus status,
+            org.springframework.data.domain.Pageable pageable);
 }

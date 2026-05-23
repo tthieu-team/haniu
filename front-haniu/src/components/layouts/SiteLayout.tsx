@@ -5,6 +5,7 @@ import Footer from './footer';
 import { usePathname } from 'next/navigation';
 import { Suspense } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
+import WelcomeSplash from '@/components/common/WelcomeSplash';
 
 export default function SiteLayout({
   children,
@@ -17,12 +18,13 @@ export default function SiteLayout({
   const isSticky = useHomeLayoutStore((state) => state.header.isSticky);
   const isAnnouncementBar = useHomeLayoutStore((state) => state.announcementBar.isEnabled);
 
-  const ptClass = isSticky 
-    ? (isAnnouncementBar ? 'pt-28 sm:pt-32 md:pt-36' : 'pt-20 sm:pt-24 md:pt-28') 
+  const ptClass = isSticky
+    ? (isAnnouncementBar ? 'pt-28 sm:pt-32 md:pt-36' : 'pt-20 sm:pt-24 md:pt-28')
     : 'pt-0';
 
   return (
     <div className="flex flex-col min-h-screen">
+      <WelcomeSplash />
       <Suspense fallback={<div className="h-20 bg-white dark:bg-zinc-950" />}>
         <Header />
       </Suspense>

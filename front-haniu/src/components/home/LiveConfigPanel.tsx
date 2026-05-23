@@ -29,6 +29,7 @@ export default function LiveConfigPanel() {
     cta,
     faq,
     footer,
+    welcomeScreen,
     toggleVisibility,
     updateHeader,
     updateAnnouncementBar,
@@ -51,6 +52,7 @@ export default function LiveConfigPanel() {
     updateCta,
     updateFaq,
     updateFooter,
+    updateWelcomeScreen,
     resetAll,
   } = useHomeLayoutStore();
 
@@ -59,10 +61,10 @@ export default function LiveConfigPanel() {
       {/* Floating Gear Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 items-center gap-2 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 border border-slate-700/30 cursor-pointer text-xs font-bold font-sans"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 border border-slate-700/30 cursor-pointer text-xs font-bold font-sans sm:px-5"
       >
         <Icon name="⚙️" size={18} />
-        <span>Cấu hình giao diện</span>
+        <span className="hidden sm:inline">Cấu hình giao diện</span>
       </button>
 
       {/* Slide-over Drawer Panel */}
@@ -124,6 +126,26 @@ export default function LiveConfigPanel() {
                   </span>
 
                   <div className="space-y-3">
+                    {/* Welcome Screen Toggle */}
+                    <label
+                      className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-950/40 hover:bg-zinc-950 border border-zinc-800/80 cursor-pointer transition-colors"
+                    >
+                      <span className="text-xs font-semibold text-rose-450 flex items-center gap-1.5">
+                        <Icon name="✨" size={14} className="animate-pulse text-rose-500" />
+                        <span>Màn chào mừng (Welcome Splash)</span>
+                      </span>
+
+                      <div className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={welcomeScreen?.isEnabled || false}
+                          onChange={(e) => updateWelcomeScreen({ isEnabled: e.target.checked })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-9 h-5 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
+                      </div>
+                    </label>
+
                     {Object.entries(visibility).map(([section, value]) => (
                       <label
                         key={section}
@@ -162,6 +184,45 @@ export default function LiveConfigPanel() {
                 </div>
               ) : (
                 <div className="space-y-6">
+                  {/* Welcome Splash settings */}
+                  <div className="space-y-3 bg-zinc-950/30 p-4 rounded-2xl border border-zinc-800/60">
+                    <span className="text-[10px] font-bold text-rose-450 uppercase tracking-widest block border-b border-zinc-800 pb-1.5 mb-2 flex items-center gap-1">
+                      <Icon name="✨" size={10} /> MÀN HÌNH CHÀO MỪNG (Splash)
+                    </span>
+                    <div className="space-y-2.5">
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Dòng chữ chào mừng</label>
+                        <input
+                          type="text"
+                          value={welcomeScreen?.welcomeText || ''}
+                          onChange={(e) => updateWelcomeScreen({ welcomeText: e.target.value })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Phụ đề chào mừng</label>
+                        <input
+                          type="text"
+                          value={welcomeScreen?.welcomeSubtitle || ''}
+                          onChange={(e) => updateWelcomeScreen({ welcomeSubtitle: e.target.value })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Thời gian hiển thị (ms)</label>
+                        <input
+                          type="number"
+                          step={500}
+                          min={1000}
+                          max={10000}
+                          value={welcomeScreen?.durationMs || 2500}
+                          onChange={(e) => updateWelcomeScreen({ durationMs: Number(e.target.value) })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Announcement bar */}
                   <div className="space-y-3 bg-zinc-950/30 p-4 rounded-2xl border border-zinc-800/60">
                     <span className="text-[10px] font-bold text-rose-450 uppercase tracking-widest block border-b border-zinc-800 pb-1.5 mb-2">

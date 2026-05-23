@@ -20,6 +20,8 @@ import {
   BlogSection,
   HowItWorksSection,
   StorySection,
+  ScrollReveal,
+  BackToTop,
 } from '@/components/home';
 
 interface Product {
@@ -262,83 +264,112 @@ function HomeContent() {
       <TrustBar />
 
       {/* BRAND INTRO / ABOUT */}
-      <BrandIntroSection />
+      <ScrollReveal>
+        <BrandIntroSection />
+      </ScrollReveal>
 
       {/* 5. CATEGORIES SECTION */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <CategoriesSection
-          onOccasionSelect={handleOccasionClick}
-          selectedOccasion={selectedOccasion}
-        />
-      </div>
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <CategoriesSection
+            onOccasionSelect={handleOccasionClick}
+            selectedOccasion={selectedOccasion}
+          />
+        </div>
+      </ScrollReveal>
 
       {/* 6. FEATURED PRODUCTS (with search filtering) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <FeaturedProductsSection
-          products={products}
-          loading={loading}
-          loadingMore={loadingMore}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          selectedOccasion={selectedOccasion}
-          setSelectedOccasion={setSelectedOccasion}
-          selectedRecipient={selectedRecipient}
-          setSelectedRecipient={setSelectedRecipient}
-          occasions={occasions}
-          recipients={recipients}
-          hasNextPage={hasNextPage}
-          handleLoadMore={handleLoadMore}
-        />
-      </div>
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <FeaturedProductsSection
+            products={products}
+            loading={loading}
+            loadingMore={loadingMore}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedOccasion={selectedOccasion}
+            setSelectedOccasion={setSelectedOccasion}
+            selectedRecipient={selectedRecipient}
+            setSelectedRecipient={setSelectedRecipient}
+            occasions={occasions}
+            recipients={recipients}
+            hasNextPage={hasNextPage}
+            handleLoadMore={handleLoadMore}
+          />
+        </div>
+      </ScrollReveal>
 
       {/* 9. COLLECTIONS SECTION */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <CollectionsSection />
-      </div>
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <CollectionsSection />
+        </div>
+      </ScrollReveal>
 
       {/* 7. BENEFITS SECTION */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <BenefitsSection />
-      </div>
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <BenefitsSection />
+        </div>
+      </ScrollReveal>
 
       {/* HOW IT WORKS */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <HowItWorksSection />
-      </div>
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <HowItWorksSection />
+        </div>
+      </ScrollReveal>
 
       {/* 8. VIDEO BANNER */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <VideoBanner />
-      </div>
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <VideoBanner />
+        </div>
+      </ScrollReveal>
 
       {/* STORY / CONTENT */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <StorySection />
-      </div>
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <StorySection />
+        </div>
+      </ScrollReveal>
 
       {/* 10. REVIEWS SECTION */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SocialProofSection />
-      </div>
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SocialProofSection />
+        </div>
+      </ScrollReveal>
 
       {/* 11. UGC / INSTAGRAM / TIKTOK FEED */}
-      <UgcFeedSection />
+      <ScrollReveal>
+        <UgcFeedSection />
+      </ScrollReveal>
 
       {/* 12. BLOG SECTION */}
-      <BlogSection />
+      <ScrollReveal>
+        <BlogSection />
+      </ScrollReveal>
 
       {/* 13. CTA BANNER */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <CTASection />
-      </div>
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <CTASection />
+        </div>
+      </ScrollReveal>
 
       {/* FAQ Accordions */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <FAQSection />
-      </div>
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <FAQSection />
+        </div>
+      </ScrollReveal>
 
       {/* Live Configuration Panel */}
       <LiveConfigPanel />
+
+      {/* Back to Top button with scroll progress */}
+      <BackToTop />
     </div>
   );
 }

@@ -33,15 +33,15 @@ export default function SocialProofSection() {
             <span className="text-3xl font-black text-rose-500 flex items-center justify-center gap-1">
               {proof.ratingScore} <Icon name="★" size={20} className="fill-current text-rose-500" />
             </span>
-            <span className="text-[9px] uppercase font-extrabold tracking-widest text-slate-450 dark:text-zinc-500 block mt-1">
+            <span className="text-[9px] uppercase font-extrabold tracking-widest text-slate-500 dark:text-zinc-400 block mt-1">
               Đánh Giá
             </span>
           </div>
           <div className="text-center px-4 pl-8">
-            <span className="text-3xl font-black text-slate-800 dark:text-zinc-150 block">
+            <span className="text-3xl font-black text-slate-800 dark:text-zinc-100 block">
               {proof.reviewsCount}
             </span>
-            <span className="text-[9px] uppercase font-extrabold tracking-widest text-slate-450 dark:text-zinc-500 block mt-1">
+            <span className="text-[9px] uppercase font-extrabold tracking-widest text-slate-500 dark:text-zinc-400 block mt-1">
               Tin Dùng
             </span>
           </div>
@@ -80,10 +80,10 @@ export default function SocialProofSection() {
                 className="w-10 h-10 rounded-full object-cover border border-slate-200/80 dark:border-zinc-800"
               />
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-150">
+                <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-100">
                   {rev.name}
                 </h4>
-                <p className="text-[10px] text-slate-450 dark:text-zinc-500 font-light">
+                <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-light">
                   {rev.role}
                 </p>
               </div>
