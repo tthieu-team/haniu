@@ -1,0 +1,348 @@
+package com.haniu.tthieu.haniu.config;
+
+import com.haniu.tthieu.haniu.entity.enums.ProductStatus;
+import com.haniu.tthieu.haniu.entity.product.*;
+import com.haniu.tthieu.haniu.repository.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class DatabaseSeeder implements CommandLineRunner {
+
+    private final CategoryRepository categoryRepository;
+    private final OccasionRepository occasionRepository;
+    private final RecipientRepository recipientRepository;
+    private final ProductRepository productRepository;
+    private final ProductVariantRepository productVariantRepository;
+    private final BrandRepository brandRepository;
+    private final CollectionRepository collectionRepository;
+
+    @Override
+    @Transactional
+    public void run(String... args) throws Exception {
+        if (categoryRepository.count() > 0) {
+            log.info("Database already seeded. Skipping seeder.");
+            return;
+        }
+
+        log.info("Seeding initial database data...");
+
+        // 1. Seed Brand
+        Brand brand = Brand.builder()
+                .name("Haniu Gift Shop")
+                .slug("haniu-gift-shop")
+                .description("Thương hiệu quà tặng cao cấp Haniu")
+                .isActive(true)
+                .build();
+        brand = brandRepository.save(brand);
+
+        // 2. Seed Collection
+        Collection collection = Collection.builder()
+                .name("Bộ sưu tập quà tặng gỗ khắc tên")
+                .slug("bst-qua-tang-go-khac-ten")
+                .description("Các sản phẩm quà tặng gỗ tự nhiên, hỗ trợ khắc tên và thông điệp cá nhân hóa.")
+                .isActive(true)
+                .build();
+        collection = collectionRepository.save(collection);
+
+        // 3. Seed Categories
+        Category lySu = Category.builder()
+                .name("Ly sứ")
+                .slug("ly-su")
+                .description("Các mẫu ly cốc sứ cao cấp, in hình và khắc chữ theo yêu cầu")
+                .isActive(true)
+                .isFeatured(true)
+                .sortOrder(1)
+                .build();
+        lySu = categoryRepository.save(lySu);
+
+        Category soDa = Category.builder()
+                .name("Sổ da")
+                .slug("so-da")
+                .description("Sổ tay bìa da thật, thiết kế sang trọng, thích hợp làm quà tặng doanh nghiệp")
+                .isActive(true)
+                .isFeatured(true)
+                .sortOrder(2)
+                .build();
+        soDa = categoryRepository.save(soDa);
+
+        Category hoaSap = Category.builder()
+                .name("Hoa sáp")
+                .slug("hoa-sap")
+                .description("Hộp quà hoa hồng sáp thơm vĩnh cửu tinh tế, lãng mạn")
+                .isActive(true)
+                .isFeatured(true)
+                .sortOrder(3)
+                .build();
+        hoaSap = categoryRepository.save(hoaSap);
+
+        Category comboQua = Category.builder()
+                .name("Combo quà tặng")
+                .slug("combo-qua-tang")
+                .description("Các set quà phối sẵn sang trọng cho mọi dịp đặc biệt")
+                .isActive(true)
+                .isFeatured(true)
+                .sortOrder(4)
+                .build();
+        comboQua = categoryRepository.save(comboQua);
+
+        // 4. Seed Occasions
+        Occasion sinhNhat = Occasion.builder()
+                .name("Sinh nhật")
+                .slug("sinh-nhat")
+                .description("Quà tặng sinh nhật ý nghĩa cho bạn bè và người thân")
+                .startDate("01-01")
+                .endDate("12-31")
+                .isActive(true)
+                .build();
+        sinhNhat = occasionRepository.save(sinhNhat);
+
+        Occasion leTinhNhan = Occasion.builder()
+                .name("Lễ tình nhân")
+                .slug("le-tinh-nhan")
+                .description("Quà tặng Valentine lãng mạn và ngọt ngào")
+                .startDate("02-14")
+                .endDate("02-14")
+                .isActive(true)
+                .build();
+        leTinhNhan = occasionRepository.save(leTinhNhan);
+
+        Occasion quocKhanh = Occasion.builder()
+                .name("Quốc khánh 2-9")
+                .slug("quoc-khanh-2-9")
+                .description("Quà lưu niệm yêu nước nhân dịp Quốc khánh nước Cộng hòa Xã hội Chủ nghĩa Việt Nam")
+                .startDate("09-02")
+                .endDate("09-02")
+                .isActive(true)
+                .build();
+        quocKhanh = occasionRepository.save(quocKhanh);
+
+        Occasion nhaGiao = Occasion.builder()
+                .name("Ngày nhà giáo 20-11")
+                .slug("ngay-nha-giao-20-11")
+                .description("Quà tri ân thầy cô giáo nhân ngày 20-11")
+                .startDate("11-20")
+                .endDate("11-20")
+                .isActive(true)
+                .build();
+        nhaGiao = occasionRepository.save(nhaGiao);
+
+        // 5. Seed Recipients
+        Recipient banTrai = Recipient.builder()
+                .name("Bạn trai")
+                .slug("ban-trai")
+                .description("Quà tặng nam tính, độc đáo cho bạn trai")
+                .isActive(true)
+                .build();
+        banTrai = recipientRepository.save(banTrai);
+
+        Recipient banGai = Recipient.builder()
+                .name("Bạn gái")
+                .slug("ban-gai")
+                .description("Quà tặng tinh tế, lãng mạn cho bạn gái")
+                .isActive(true)
+                .build();
+        banGai = recipientRepository.save(banGai);
+
+        Recipient thayCo = Recipient.builder()
+                .name("Thầy cô")
+                .slug("thay-co")
+                .description("Quà tặng trang trọng tri ân thầy cô giáo")
+                .isActive(true)
+                .build();
+        thayCo = recipientRepository.save(thayCo);
+
+        Recipient boMe = Recipient.builder()
+                .name("Bố mẹ")
+                .slug("bo-me")
+                .description("Quà tặng sức khỏe, hiếu kính dành cho đấng sinh thành")
+                .isActive(true)
+                .build();
+        boMe = recipientRepository.save(boMe);
+
+        Recipient doiTac = Recipient.builder()
+                .name("Đối tác")
+                .slug("doi-tac")
+                .description("Quà tặng sang trọng cho doanh nghiệp và khách hàng đối tác")
+                .isActive(true)
+                .build();
+        doiTac = recipientRepository.save(doiTac);
+
+        // 6. Seed Products
+        // Product 1: Ly sứ khắc tên
+        Set<Occasion> p1Occasions = new HashSet<>(List.of(sinhNhat, nhaGiao));
+        Set<Recipient> p1Recipients = new HashSet<>(List.of(banTrai, banGai, thayCo));
+        Product p1 = Product.builder()
+                .category(lySu)
+                .brand(brand)
+                .collection(collection)
+                .occasions(p1Occasions)
+                .recipients(p1Recipients)
+                .name("Ly sứ khắc tên cao cấp Haniu")
+                .slug("ly-su-khac-ten-cao-cap-haniu")
+                .sku("LYSU-KHACTEN-01")
+                .shortDescription("Ly sứ men trắng cao cấp hỗ trợ khắc tên và in hình theo yêu cầu riêng biệt.")
+                .description("Sản phẩm được làm từ đất sét trắng chọn lọc, nung ở nhiệt độ 1300 độ C loại bỏ hoàn toàn tạp chất có hại. Công nghệ khắc laser sắc nét giúp bạn lưu giữ thông điệp và hình ảnh cá nhân hóa độc đáo trên thân cốc.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=600")
+                .price(new BigDecimal("150000.00"))
+                .salePrice(new BigDecimal("120000.00"))
+                .costPrice(new BigDecimal("50000.00"))
+                .stock(100)
+                .material("Gốm sứ tráng men")
+                .color("Trắng tuyết")
+                .status(ProductStatus.PUBLISHED)
+                .isFeatured(true)
+                .isNew(true)
+                .isCustomizable(true)
+                .layoutTemplate("DEFAULT")
+                .specifications("{\"Dung tích\": \"350ml\", \"Chiều cao\": \"9.5cm\", \"Đường kính miệng\": \"8cm\"}")
+                .publishedAt(LocalDateTime.now())
+                .build();
+        p1 = productRepository.save(p1);
+
+        ProductVariant p1v1 = ProductVariant.builder()
+                .product(p1)
+                .name("Ly sứ khắc tên - 350ml")
+                .sku("LYSU-KHACTEN-01-350")
+                .price(new BigDecimal("150000.00"))
+                .salePrice(new BigDecimal("120000.00"))
+                .stock(50)
+                .isActive(true)
+                .build();
+        productVariantRepository.save(p1v1);
+
+        // Product 2: Sổ tay bìa da
+        Set<Occasion> p2Occasions = new HashSet<>(List.of(sinhNhat));
+        Set<Recipient> p2Recipients = new HashSet<>(List.of(doiTac, thayCo, boMe));
+        Product p2 = Product.builder()
+                .category(soDa)
+                .brand(brand)
+                .occasions(p2Occasions)
+                .recipients(p2Recipients)
+                .name("Sổ tay bìa da khắc logo")
+                .slug("so-tay-bia-da-khac-logo")
+                .sku("SODA-KHACLOGO-02")
+                .shortDescription("Sổ tay A5 bìa da PU cao cấp tích hợp khe cài bút và ngăn đựng card visit tiện lợi.")
+                .description("Cuốn sổ được chế tác tinh xảo với chất liệu da PU cao cấp mềm mịn, chống thấm nước tốt. Ruột sổ dùng giấy chống lóa định lượng 80gsm viết cực êm, không lem mực.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1531346878377-a5be20888e57?q=80&w=600")
+                .price(new BigDecimal("250000.00"))
+                .costPrice(new BigDecimal("90000.00"))
+                .stock(200)
+                .material("Da PU, Giấy Woodfree")
+                .color("Nâu vân gỗ")
+                .status(ProductStatus.PUBLISHED)
+                .isFeatured(true)
+                .isNew(true)
+                .isCustomizable(true)
+                .layoutTemplate("DEFAULT")
+                .specifications("{\"Kích thước\": \"A5 (14.8 x 21 cm)\", \"Số trang\": \"200 trang\", \"Định lượng\": \"80gsm\"}")
+                .publishedAt(LocalDateTime.now())
+                .build();
+        p2 = productRepository.save(p2);
+
+        ProductVariant p2v1 = ProductVariant.builder()
+                .product(p2)
+                .name("Sổ tay bìa da - Nâu vân gỗ")
+                .sku("SODA-KHACLOGO-02-BROWN")
+                .price(new BigDecimal("250000.00"))
+                .stock(100)
+                .isActive(true)
+                .build();
+        productVariantRepository.save(p2v1);
+
+        // Product 3: Hộp quà hoa sáp và gấu bông
+        Set<Occasion> p3Occasions = new HashSet<>(List.of(leTinhNhan, sinhNhat));
+        Set<Recipient> p3Recipients = new HashSet<>(List.of(banGai));
+        Product p3 = Product.builder()
+                .category(hoaSap)
+                .brand(brand)
+                .occasions(p3Occasions)
+                .recipients(p3Recipients)
+                .name("Hộp quà hoa hồng sáp thơm và gấu bông")
+                .slug("hop-qua-hoa-hong-sap-thom-va-gau-bong")
+                .sku("HOASAP-GAUBONG-03")
+                .shortDescription("Hộp quà tặng trái tim chứa hoa sáp đỏ và chú gấu bông nhỏ ngọt ngào.")
+                .description("Những bông hoa hồng được làm tỉ mỉ từ sáp thơm tự nhiên, mang hương thơm dịu nhẹ thoang thoảng và độ bền màu vĩnh cửu. Đây là món quà tuyệt vời nhất dành tặng nửa kia trong các dịp kỷ niệm.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600")
+                .price(new BigDecimal("350000.00"))
+                .salePrice(new BigDecimal("299000.00"))
+                .costPrice(new BigDecimal("120000.00"))
+                .stock(80)
+                .material("Sáp tự nhiên, Hộp bìa cứng")
+                .color("Đỏ nhung")
+                .status(ProductStatus.PUBLISHED)
+                .isFeatured(true)
+                .isNew(false)
+                .isCustomizable(false)
+                .layoutTemplate("DEFAULT")
+                .specifications("{\"Kích thước hộp\": \"25x25x12cm\", \"Số lượng hoa\": \"19 bông\", \"Độ bền hương\": \"Up to 3 years\"}")
+                .publishedAt(LocalDateTime.now())
+                .build();
+        p3 = productRepository.save(p3);
+
+        ProductVariant p3v1 = ProductVariant.builder()
+                .product(p3)
+                .name("Hộp quà hoa sáp đỏ - Gấu nâu")
+                .sku("HOASAP-GAUBONG-03-RED")
+                .price(new BigDecimal("350000.00"))
+                .salePrice(new BigDecimal("299000.00"))
+                .stock(40)
+                .isActive(true)
+                .build();
+        productVariantRepository.save(p3v1);
+
+        // Product 4: Set quà tặng Quốc Khánh 2-9
+        Set<Occasion> p4Occasions = new HashSet<>(List.of(quocKhanh));
+        Set<Recipient> p4Recipients = new HashSet<>(List.of(doiTac, boMe));
+        Product p4 = Product.builder()
+                .category(comboQua)
+                .brand(brand)
+                .collection(collection)
+                .occasions(p4Occasions)
+                .recipients(p4Recipients)
+                .name("Set quà tặng Quốc Khánh 2-9 độc bản")
+                .slug("set-qua-tang-quoc-khanh-2-9-doc-ban")
+                .sku("COMBO-QUOCKHANH-04")
+                .shortDescription("Combo quà tặng gỗ đặc biệt in hình bản đồ Việt Nam và cờ đỏ sao vàng.")
+                .description("Hộp quà tặng gỗ thông cao cấp chứa một chiếc bình giữ nhiệt vỏ tre khắc bản đồ hình chữ S, một chiếc bút gỗ khắc tên và một cuốn sổ bìa gỗ độc đáo. Thể hiện niềm tự hào dân tộc và lòng yêu nước sâu sắc.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1607344645866-009c320c5ab8?q=80&w=600")
+                .price(new BigDecimal("50000.00")) // standard 500k but let's set it to 500000
+                .price(new BigDecimal("500000.00"))
+                .costPrice(new BigDecimal("180000.00"))
+                .stock(50)
+                .material("Gỗ thông tự nhiên, Tre, Inox 304")
+                .color("Vàng tre tự nhiên")
+                .status(ProductStatus.PUBLISHED)
+                .isFeatured(true)
+                .isNew(true)
+                .isCustomizable(true)
+                .layoutTemplate("DEFAULT")
+                .specifications("{\"Hộp gỗ\": \"30x22x10cm\", \"Bình tre\": \"500ml\", \"Sổ gỗ\": \"A5\"}")
+                .publishedAt(LocalDateTime.now())
+                .build();
+        p4 = productRepository.save(p4);
+
+        ProductVariant p4v1 = ProductVariant.builder()
+                .product(p4)
+                .name("Set quà tặng Quốc Khánh 2-9 - Tiêu Chuẩn")
+                .sku("COMBO-QUOCKHANH-04-STD")
+                .price(new BigDecimal("500000.00"))
+                .stock(30)
+                .isActive(true)
+                .build();
+        productVariantRepository.save(p4v1);
+
+        log.info("Database successfully seeded with standard Haniu Gift Shop catalog!");
+    }
+}

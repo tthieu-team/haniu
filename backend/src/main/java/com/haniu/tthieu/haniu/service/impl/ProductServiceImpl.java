@@ -36,6 +36,22 @@ public class ProductServiceImpl implements ProductService {
     private final OccasionRepository occasionRepository;
     private final RecipientRepository recipientRepository;
     private final ProductElasticsearchRepository productElasticsearchRepository;
+    private final co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
+    private boolean isElasticsearchAvailable = false;
+
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        try {
+            log.info("Checking Elasticsearch connection...");
+            co.elastic.clients.transport.endpoints.BooleanResponse response = elasticsearchClient.ping();
+            isElasticsearchAvailable = response.value();
+            log.info("Elasticsearch connection status: {}", isElasticsearchAvailable ? "AVAILABLE" : "UNAVAILABLE");
+        } catch (Exception e) {
+            log.warn("Elasticsearch is not available. Search fallback to PostgreSQL will be used. Error: {}", e.getMessage());
+            isElasticsearchAvailable = false;
+        }
+    }
 
     @Override
     public ProductResponseDto createProduct(ProductRequestDto request) {
@@ -257,7 +273,13 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
 
         // Remove from Elasticsearch
-        productElasticsearchRepository.deleteById(id.toString());
+        if (isElasticsearchAvailable) {
+            try {
+                productElasticsearchRepository.deleteById(id.toString());
+            } catch (Exception e) {
+                log.error("Failed to delete product {} from Elasticsearch", id, e);
+            }
+        }
     }
 
     @Override
@@ -273,75 +295,102 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public Page<ProductDocument> searchProducts(String keyword, Pageable pageable) {
-        return productElasticsearchRepository.searchPublishedProducts(keyword, pageable);
+        if (isElasticsearchAvailable) {
+            try {
+                return productElasticsearchRepository.searchPublishedProducts(keyword, pageable);
+            } catch (Exception e) {
+                log.warn("Elasticsearch query failed, falling back to database search. Error: {}", e.getMessage());
+            }
+        }
+
+        // Fallback: search in database
+        log.info("Performing fallback search in PostgreSQL for keyword: {}", keyword);
+        Page<Product> dbProducts = productRepository.searchProductsFallback(
+                keyword, 
+                com.haniu.tthieu.haniu.entity.enums.ProductStatus.PUBLISHED, 
+                pageable
+        );
+
+        // Map Page<Product> to Page<ProductDocument>
+        return dbProducts.map(this::mapToDocument);
+    }
+
+    private ProductDocument mapToDocument(Product product) {
+        List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
+        List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
+
+        String thumbnail = media.stream()
+                .filter(ProductMedia::isThumbnail)
+                .map(ProductMedia::getUrl)
+                .findFirst()
+                .orElse(media.isEmpty() ? null : media.getFirst().getUrl());
+
+        List<ProductDocument.VariantDocument> variantDocs = variants.stream()
+                .map(v -> ProductDocument.VariantDocument.builder()
+                        .id(v.getId().toString())
+                        .sku(v.getSku())
+                        .name(v.getName())
+                        .color(v.getColor())
+                        .size(v.getSize())
+                        .material(v.getMaterial())
+                        .price(v.getPrice())
+                        .salePrice(v.getSalePrice())
+                        .stock(v.getStock())
+                        .build())
+                .toList();
+
+        List<ProductDocument.MediaDocument> mediaDocs = media.stream()
+                .map(m -> ProductDocument.MediaDocument.builder()
+                        .url(m.getUrl())
+                        .type(m.getType().name())
+                        .altText(m.getAltText())
+                        .isThumbnail(m.isThumbnail())
+                        .sortOrder(m.getSortOrder())
+                        .build())
+                .toList();
+
+        List<String> occasionSlugs = product.getOccasions() != null ?
+                product.getOccasions().stream().map(Occasion::getSlug).toList() : Collections.emptyList();
+
+        List<String> recipientSlugs = product.getRecipients() != null ?
+                product.getRecipients().stream().map(Recipient::getSlug).toList() : Collections.emptyList();
+
+        return ProductDocument.builder()
+                .id(product.getId().toString())
+                .categoryId(product.getCategory().getId().toString())
+                .categoryName(product.getCategory().getName())
+                .brandId(product.getBrand() != null ? product.getBrand().getId().toString() : null)
+                .brandName(product.getBrand() != null ? product.getBrand().getName() : null)
+                .collectionId(product.getCollection() != null ? product.getCollection().getId().toString() : null)
+                .collectionName(product.getCollection() != null ? product.getCollection().getName() : null)
+                .occasions(occasionSlugs)
+                .recipients(recipientSlugs)
+                .name(product.getName())
+                .slug(product.getSlug())
+                .sku(product.getSku())
+                .description(product.getDescription())
+                .thumbnailUrl(thumbnail)
+                .price(product.getPrice())
+                .salePrice(product.getSalePrice())
+                .stock(product.getStock())
+                .status(product.getStatus().name())
+                .layoutTemplate(product.getLayoutTemplate())
+                .layoutConfig(product.getLayoutConfig())
+                .specifications(product.getSpecifications())
+                .isFeatured(product.isFeatured())
+                .isNew(product.isNew())
+                .variants(variantDocs)
+                .medias(mediaDocs)
+                .build();
     }
 
     private void syncToElasticsearch(Product product, List<ProductVariant> variants, List<ProductMedia> media) {
+        if (!isElasticsearchAvailable) {
+            log.debug("Elasticsearch is not available, skipping sync for product {}", product.getId());
+            return;
+        }
         try {
-            String thumbnail = media.stream()
-                    .filter(ProductMedia::isThumbnail)
-                    .map(ProductMedia::getUrl)
-                    .findFirst()
-                    .orElse(media.isEmpty() ? null : media.getFirst().getUrl());
-
-            List<ProductDocument.VariantDocument> variantDocs = variants.stream()
-                    .map(v -> ProductDocument.VariantDocument.builder()
-                            .id(v.getId().toString())
-                            .sku(v.getSku())
-                            .name(v.getName())
-                            .color(v.getColor())
-                            .size(v.getSize())
-                            .material(v.getMaterial())
-                            .price(v.getPrice())
-                            .salePrice(v.getSalePrice())
-                            .stock(v.getStock())
-                            .build())
-                    .toList();
-
-            List<ProductDocument.MediaDocument> mediaDocs = media.stream()
-                    .map(m -> ProductDocument.MediaDocument.builder()
-                            .url(m.getUrl())
-                            .type(m.getType().name())
-                            .altText(m.getAltText())
-                            .isThumbnail(m.isThumbnail())
-                            .sortOrder(m.getSortOrder())
-                            .build())
-                    .toList();
-
-            List<String> occasionSlugs = product.getOccasions() != null ?
-                    product.getOccasions().stream().map(Occasion::getSlug).toList() : Collections.emptyList();
-
-            List<String> recipientSlugs = product.getRecipients() != null ?
-                    product.getRecipients().stream().map(Recipient::getSlug).toList() : Collections.emptyList();
-
-            ProductDocument doc = ProductDocument.builder()
-                    .id(product.getId().toString())
-                    .categoryId(product.getCategory().getId().toString())
-                    .categoryName(product.getCategory().getName())
-                    .brandId(product.getBrand() != null ? product.getBrand().getId().toString() : null)
-                    .brandName(product.getBrand() != null ? product.getBrand().getName() : null)
-                    .collectionId(product.getCollection() != null ? product.getCollection().getId().toString() : null)
-                    .collectionName(product.getCollection() != null ? product.getCollection().getName() : null)
-                    .occasions(occasionSlugs)
-                    .recipients(recipientSlugs)
-                    .name(product.getName())
-                    .slug(product.getSlug())
-                    .sku(product.getSku())
-                    .description(product.getDescription())
-                    .thumbnailUrl(thumbnail)
-                    .price(product.getPrice())
-                    .salePrice(product.getSalePrice())
-                    .stock(product.getStock())
-                    .status(product.getStatus().name())
-                    .layoutTemplate(product.getLayoutTemplate())
-                    .layoutConfig(product.getLayoutConfig())
-                    .specifications(product.getSpecifications())
-                    .isFeatured(product.isFeatured())
-                    .isNew(product.isNew())
-                    .variants(variantDocs)
-                    .medias(mediaDocs)
-                    .build();
-
+            ProductDocument doc = mapToDocument(product);
             productElasticsearchRepository.save(doc);
             log.info("Successfully synced product {} to Elasticsearch", product.getId());
         } catch (Exception e) {
