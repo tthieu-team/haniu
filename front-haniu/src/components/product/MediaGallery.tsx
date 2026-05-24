@@ -17,7 +17,12 @@ interface MediaGalleryProps {
 }
 
 export default function MediaGallery({ mediaList, name }: MediaGalleryProps) {
-  const [activeImage, setActiveImage] = useState('');
+  const [activeImage, setActiveImage] = useState(() => {
+    if (mediaList && mediaList.length > 0) {
+      return mediaList.find(m => m.isThumbnail)?.url || mediaList[0].url;
+    }
+    return '';
+  });
 
   useEffect(() => {
     if (mediaList && mediaList.length > 0) {

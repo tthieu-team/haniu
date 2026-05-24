@@ -1,5 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { catalogService, Occasion, Recipient } from '@/services/catalog.service';
+
 interface CategorizationFormProps {
   selectedOccasions: string[];
   setSelectedOccasions: (v: string[] | ((prev: string[]) => string[])) => void;
@@ -7,25 +10,52 @@ interface CategorizationFormProps {
   setSelectedRecipients: (v: string[] | ((prev: string[]) => string[])) => void;
 }
 
+const DEFAULT_OCCASIONS = [
+  { id: "123e4567-e89b-12d3-a456-426614174001", name: "Lễ Tình Nhân (Valentine)" },
+  { id: "123e4567-e89b-12d3-a456-426614174002", name: "Sinh Nhật" },
+  { id: "123e4567-e89b-12d3-a456-426614174003", name: "Ngày Nhà Giáo 20-11" },
+  { id: "123e4567-e89b-12d3-a456-426614174004", name: "Quốc Khánh 2-9" }
+];
+
+const DEFAULT_RECIPIENTS = [
+  { id: "223e4567-e89b-12d3-a456-426614174001", name: "Bạn Gái" },
+  { id: "223e4567-e89b-12d3-a456-426614174002", name: "Bạn Trai" },
+  { id: "223e4567-e89b-12d3-a456-426614174003", name: "Thầy Cô" },
+  { id: "223e4567-e89b-12d3-a456-426614174004", name: "Đối Tác" }
+];
+
 export default function CategorizationForm({
   selectedOccasions,
   setSelectedOccasions,
   selectedRecipients,
   setSelectedRecipients,
 }: CategorizationFormProps) {
-  const occasionsList = [
-    { id: "123e4567-e89b-12d3-a456-426614174001", name: "Lễ Tình Nhân (Valentine)" },
-    { id: "123e4567-e89b-12d3-a456-426614174002", name: "Sinh Nhật" },
-    { id: "123e4567-e89b-12d3-a456-426614174003", name: "Ngày Nhà Giáo 20-11" },
-    { id: "123e4567-e89b-12d3-a456-426614174004", name: "Quốc Khánh 2-9" }
-  ];
+  const [occasionsList, setOccasionsList] = useState<any[]>(DEFAULT_OCCASIONS);
+  const [recipientsList, setRecipientsList] = useState<any[]>(DEFAULT_RECIPIENTS);
 
-  const recipientsList = [
-    { id: "223e4567-e89b-12d3-a456-426614174001", name: "Bạn Gái" },
-    { id: "223e4567-e89b-12d3-a456-426614174002", name: "Bạn Trai" },
-    { id: "223e4567-e89b-12d3-a456-426614174003", name: "Thầy Cô" },
-    { id: "223e4567-e89b-12d3-a456-426614174004", name: "Đối Tác" }
-  ];
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const occs = await catalogService.getAllOccasions();
+        const recs = await catalogService.getAllRecipients();
+        
+        if (occs && occs.length > 0) {
+          setOccasionsList(occs);
+        } else {
+          setOccasionsList(DEFAULT_OCCASIONS);
+        }
+        
+        if (recs && recs.length > 0) {
+          setRecipientsList(recs);
+        } else {
+          setRecipientsList(DEFAULT_RECIPIENTS);
+        }
+      } catch (err) {
+        console.error('Lỗi khi tải dữ liệu phân loại:', err);
+      }
+    }
+    loadData();
+  }, []);
 
   const toggleOccasion = (id: string) => {
     setSelectedOccasions(prev =>

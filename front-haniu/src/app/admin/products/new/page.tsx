@@ -1,16 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SpecManager from '@/components/product/SpecManager';
 import VariantManager from '@/components/product/VariantManager';
 import { productService } from '@/services/product.service';
+import { catalogService } from '@/services/catalog.service';
 import Icon from '@/components/common/Icons';
 import { getFullImageUrl } from '@/lib/api';
 import BasicInfoForm from '@/components/admin/product/BasicInfoForm';
 import CategorizationForm from '@/components/admin/product/CategorizationForm';
 import ImageUploadForm from '@/components/admin/product/ImageUploadForm';
+
+const DEFAULT_CATEGORIES = [
+  { id: "8bc6cdbb-b6cb-4b71-b0db-3cdb4b7c7b12", name: "Combo Quà Tặng" },
+  { id: "a50c8b9d-472e-4b21-995a-6a56e0cfd17c", name: "Sổ Da & Bút" },
+  { id: "7bf807db-5e04-4cda-9218-e3cf4d8c071a", name: "Ly Sứ" },
+  { id: "6cde07fb-b783-4a11-893f-d3c26cbdfa53", name: "Đồ Lưu Niệm" }
+];
 
 interface VariantInput {
   sku: string;
@@ -49,7 +57,7 @@ export default function NewProductPage() {
   const [slug, setSlug] = useState('');
   const [sku, setSku] = useState('');
   const [description, setDescription] = useState('');
-  const [categoryId, setCategoryId] = useState('8bc6cdbb-b6cb-4b71-b0db-3cdb4b7c7b12'); // mock category
+  const [categoryId, setCategoryId] = useState('');
   const [brandId, setBrandId] = useState('');
   const [collectionId, setCollectionId] = useState('');
   const [basePrice, setBasePrice] = useState(0);
@@ -76,6 +84,26 @@ export default function NewProductPage() {
   // Nested Lists
   const [mediaList, setMediaList] = useState<MediaInput[]>([]);
   const [variantsList, setVariantsList] = useState<VariantInput[]>([]);
+
+  const [categories, setCategories] = useState<any[]>(DEFAULT_CATEGORIES);
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const catData = await catalogService.getAllCategories();
+        if (catData && catData.length > 0) {
+          setCategories(catData);
+          setCategoryId(catData[0].id || '');
+        } else {
+          setCategoryId(DEFAULT_CATEGORIES[0].id || '');
+        }
+      } catch (err) {
+        console.error('Lỗi khi tải danh sách danh mục:', err);
+        setCategoryId(DEFAULT_CATEGORIES[0].id || '');
+      }
+    }
+    loadCategories();
+  }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,12 +156,7 @@ export default function NewProductPage() {
     }
   };
 
-  const categories = [
-    { id: "8bc6cdbb-b6cb-4b71-b0db-3cdb4b7c7b12", name: "Combo Quà Tặng" },
-    { id: "a50c8b9d-472e-4b21-995a-6a56e0cfd17c", name: "Sổ Da & Bút" },
-    { id: "7bf807db-5e04-4cda-9218-e3cf4d8c071a", name: "Ly Sứ" },
-    { id: "6cde07fb-b783-4a11-893f-d3c26cbdfa53", name: "Đồ Lưu Niệm" }
-  ];
+
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">

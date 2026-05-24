@@ -131,8 +131,8 @@ export async function fetchApi(path: string, options: RequestInit = {}): Promise
   return response.json();
 }
 
-export function getFullImageUrl(url: string | null | undefined): string {
-  if (!url) return '';
+export function getFullImageUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
   if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
     return url;
   }
