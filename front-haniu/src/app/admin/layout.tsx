@@ -61,6 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Người nhận', href: '/admin/recipients', icon: 'users' },
     { name: 'Đơn hàng', href: '/admin/orders', icon: 'bag' },
     { name: 'Mã giảm giá', href: '/admin/coupons', icon: 'star' },
+    { name: 'Cấu hình giao diện', href: '/admin/layout-config', icon: 'palette' },
   ];
 
   // Breadcrumbs calculation

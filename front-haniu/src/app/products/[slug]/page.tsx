@@ -37,17 +37,26 @@ interface Product {
   sku: string;
   description: string;
   basePrice: number;
-  salePrice?: number;
+  salePrice?: number | null;
   stock: number;
   isFeatured: boolean;
   isNew: boolean;
   isCustomizable: boolean;
-  category?: { name: string; slug: string };
-  brand?: { name: string; slug: string };
-  collection?: { name: string; slug: string };
+  allowAdminChat?: boolean;
+  allowPhotoUpload?: boolean;
+  allowPhotobooth?: boolean;
+  category?: { id?: string; name: string; slug: string };
+  brand?: { id?: string; name: string; slug: string } | null;
+  collection?: { id?: string; name: string; slug: string } | null;
+  occasions?: Array<{ id: string; name: string; slug: string }>;
+  recipients?: Array<{ id: string; name: string; slug: string }>;
+  attributes?: Array<{ id: string; name: string; value: string }>;
   specifications?: string; // JSONB String
   layoutTemplate?: string;
   layoutConfig?: string;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  seoKeywords?: string | null;
   variants?: Variant[];
   media?: Media[];
 }
@@ -132,10 +141,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       const data = await fetchProductBySlug(slug);
       
       if (data) {
-        // Adapt backend price fields
+        // Adapt backend price, boolean, and media thumbnail fields
         const adapted: Product = {
           ...data,
-          basePrice: data.basePrice || (data as any).price
+          basePrice: data.basePrice || (data as any).price || 0,
+          isFeatured: (data as any).featured ?? (data as any).isFeatured ?? false,
+          isNew: (data as any).new ?? (data as any).isNew ?? false,
+          isCustomizable: (data as any).customizable ?? (data as any).isCustomizable ?? false,
+          media: data.media?.map((m: any) => ({
+            ...m,
+            isThumbnail: m.thumbnail ?? m.isThumbnail ?? false
+          })) || []
         } as unknown as Product;
         useProductStore.setState({ currentProduct: adapted as any });
         
@@ -161,6 +177,31 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
     loadProduct();
   }, [slug, fetchProductBySlug]);
+
+  // Dynamic SEO metadata client-side update
+  useEffect(() => {
+    if (product) {
+      document.title = product.seoTitle || `${product.name} | Haniu Gift Shop`;
+      
+      // Set description meta tag
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+      }
+      metaDesc.setAttribute('content', product.seoDescription || product.description || '');
+
+      // Set keywords meta tag
+      let metaKeywords = document.querySelector('meta[name="keywords"]');
+      if (!metaKeywords) {
+        metaKeywords = document.createElement('meta');
+        metaKeywords.setAttribute('name', 'keywords');
+        document.head.appendChild(metaKeywords);
+      }
+      metaKeywords.setAttribute('content', product.seoKeywords || '');
+    }
+  }, [product]);
 
   const handleAddToCart = async () => {
     if (!product) return;
@@ -204,14 +245,21 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     );
   }
 
-  // Parse specifications
-  let parsedSpecs: Record<string, string> = {};
+  // Parse specifications and combine with attributes
+  let combinedSpecs: Record<string, string> = {};
+  let includedItems: Record<string, string> = {};
   try {
     if (product.specifications) {
-      parsedSpecs = JSON.parse(product.specifications);
+      combinedSpecs = JSON.parse(product.specifications);
+      includedItems = JSON.parse(product.specifications);
     }
   } catch (e) {
     // ignore
+  }
+  if (product.attributes && Array.isArray(product.attributes)) {
+    product.attributes.forEach(attr => {
+      combinedSpecs[attr.name] = attr.value;
+    });
   }
 
   const currentPrice = selectedVariant?.salePrice || selectedVariant?.price || product.salePrice || product.basePrice;
@@ -230,11 +278,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           <MediaGallery mediaList={product.media} name={product.name} />
 
           {/* Specifications Box */}
-          {Object.keys(parsedSpecs).length > 0 && (
+          {Object.keys(combinedSpecs).length > 0 && (
             <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 space-y-4">
               <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400">Thông số kỹ thuật</h3>
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                {Object.entries(parsedSpecs).map(([key, val]) => (
+                {Object.entries(combinedSpecs).map(([key, val]) => (
                   <div key={key} className="border-b border-slate-50 dark:border-zinc-800 pb-2 text-xs">
                     <dt className="text-slate-400 font-medium">{key}</dt>
                     <dd className="text-sm font-semibold text-slate-700 dark:text-zinc-200 mt-0.5">{val}</dd>
@@ -243,20 +291,72 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               </dl>
             </div>
           )}
+
+          {/* Included Items Box */}
+          {Object.keys(includedItems).length > 0 && (
+            <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 space-y-4">
+              <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400 flex items-center gap-2">
+                🎁 Chi tiết bộ quà tặng gồm
+              </h3>
+              <div className="grid grid-cols-1 gap-3">
+                {Object.entries(includedItems).map(([item, detail]) => (
+                  <div key={item} className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-zinc-950/40 rounded-2xl border border-slate-100/50 dark:border-zinc-800/40">
+                    <span className="font-bold text-sm text-slate-800 dark:text-zinc-200 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                      {item}
+                    </span>
+                    <span className="text-xs font-mono font-bold text-rose-500 bg-rose-500/10 px-2.5 py-1 rounded-lg">
+                      {detail}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right: Buy options & personalization panel */}
         <div className="lg:col-span-5 space-y-8">
           <div className="space-y-4">
-            {product.category && (
-              <span className="bg-rose-100 text-rose-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                {product.category.name}
-              </span>
-            )}
+            <div className="flex flex-wrap gap-2 items-center">
+              {product.category && (
+                <span className="bg-rose-100 text-rose-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                  {product.category.name}
+                </span>
+              )}
+              {product.brand && (
+                <span className="bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                  Hãng: {product.brand.name}
+                </span>
+              )}
+              {product.collection && (
+                <span className="bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-amber-100 dark:border-amber-900/30">
+                  {product.collection.name}
+                </span>
+              )}
+              {product.isFeatured && (
+                <span className="bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                  Nổi bật
+                </span>
+              )}
+              {product.isNew && (
+                <span className="bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                  Mới
+                </span>
+              )}
+            </div>
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-800 dark:text-zinc-100">
               {product.name}
             </h1>
-            <p className="text-xs text-slate-400">Mã SKU: <span className="font-mono">{selectedVariant?.sku || product.sku}</span></p>
+            <div className="flex justify-between items-center text-xs text-slate-400">
+              <p>Mã SKU: <span className="font-mono">{selectedVariant?.sku || product.sku}</span></p>
+              <p className="font-semibold">
+                Tình trạng: {selectedVariant 
+                  ? (selectedVariant.stock > 0 ? `Còn hàng (${selectedVariant.stock})` : 'Hết hàng') 
+                  : (product.stock > 0 ? `Còn hàng (${product.stock})` : 'Hết hàng')
+                }
+              </p>
+            </div>
           </div>
 
           {/* Price container */}
@@ -274,6 +374,32 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           <p className="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
             {product.description}
           </p>
+
+          {/* Occasions & Recipients Tags */}
+          {((product.occasions && product.occasions.length > 0) || (product.recipients && product.recipients.length > 0)) && (
+            <div className="bg-slate-50 dark:bg-zinc-900/30 p-4 rounded-2xl space-y-3 border border-slate-100 dark:border-zinc-800/50">
+              {product.occasions && product.occasions.length > 0 && (
+                <div className="flex flex-wrap gap-2 items-center text-xs">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Dịp tặng:</span>
+                  {product.occasions.map(o => (
+                    <span key={o.id} className="bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded-lg text-xs font-semibold">
+                      {o.name}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {product.recipients && product.recipients.length > 0 && (
+                <div className="flex flex-wrap gap-2 items-center text-xs">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Đối tượng:</span>
+                  {product.recipients.map(r => (
+                    <span key={r.id} className="bg-sky-50 dark:bg-sky-950/20 text-sky-600 dark:text-sky-400 px-2.5 py-1 rounded-lg text-xs font-semibold">
+                      {r.name}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Variants Selector */}
           {product.variants && product.variants.length > 0 && (
@@ -308,6 +434,48 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               giftWrap={giftWrap}
               setGiftWrap={setGiftWrap}
             />
+          )}
+
+          {/* Service Options (Chat, Photo Upload, Photobooth) */}
+          {product.allowAdminChat && (
+            <div className="bg-sky-500/5 border border-sky-500/10 p-4 rounded-2xl flex items-center justify-between animate-fade-in">
+              <div>
+                <h4 className="text-xs font-bold text-sky-700 dark:text-sky-400 flex items-center gap-1.5">
+                  <Icon name="💬" size={14} /> Tư vấn thiết kế trực tiếp
+                </h4>
+                <p className="text-[10px] text-slate-500 mt-1">Trực tiếp thảo luận các yêu cầu đặc biệt với Haniu Admin.</p>
+              </div>
+              <button type="button" className="bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95 flex items-center gap-1 cursor-pointer">
+                Chat ngay
+              </button>
+            </div>
+          )}
+
+          {product.allowPhotoUpload && (
+            <div className="space-y-2.5 animate-fade-in">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Tải ảnh thiết kế của bạn (Tùy chọn)</label>
+              <div className="border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl p-4 text-center hover:border-rose-500 dark:hover:border-rose-400 transition-colors cursor-pointer">
+                <span className="inline-block p-2 bg-slate-100 dark:bg-zinc-800 rounded-full text-slate-600 dark:text-zinc-400 mb-2">
+                  <Icon name="📷" size={16} />
+                </span>
+                <p className="text-xs text-slate-500 font-semibold">Nhấp để tải ảnh lên</p>
+                <p className="text-[9px] text-slate-400 mt-0.5">Định dạng hỗ trợ: JPG, PNG (tối đa 5MB)</p>
+              </div>
+            </div>
+          )}
+
+          {product.allowPhotobooth && (
+            <div className="bg-indigo-500/5 border border-indigo-500/10 p-4 rounded-2xl flex items-center justify-between animate-fade-in">
+              <div>
+                <h4 className="text-xs font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
+                  <Icon name="🎨" size={14} /> Trải nghiệm Photobooth Haniu
+                </h4>
+                <p className="text-[10px] text-slate-500 mt-1">Thiết kế mẫu in và xem mô phỏng 3D ngay trên ứng dụng.</p>
+              </div>
+              <button type="button" className="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95 flex items-center gap-1 cursor-pointer">
+                Mở Photobooth
+              </button>
+            </div>
           )}
 
           {/* Success messages & buttons */}

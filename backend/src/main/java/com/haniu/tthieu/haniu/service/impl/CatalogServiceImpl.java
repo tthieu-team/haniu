@@ -21,6 +21,7 @@ public class CatalogServiceImpl implements CatalogService {
     private final CollectionRepository collectionRepository;
     private final OccasionRepository occasionRepository;
     private final RecipientRepository recipientRepository;
+    private final AttributeDefinitionRepository attributeDefinitionRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -137,5 +138,27 @@ public class CatalogServiceImpl implements CatalogService {
     @Override
     public void deleteRecipient(UUID id) {
         recipientRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AttributeDefinition> getAttributeDefinitionsByCategory(UUID categoryId) {
+        return attributeDefinitionRepository.findByCategoryIdOrCategoryIsNull(categoryId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AttributeDefinition> getGlobalAttributeDefinitions() {
+        return attributeDefinitionRepository.findByCategoryIsNull();
+    }
+
+    @Override
+    public AttributeDefinition createAttributeDefinition(AttributeDefinition def) {
+        return attributeDefinitionRepository.save(def);
+    }
+
+    @Override
+    public void deleteAttributeDefinition(UUID id) {
+        attributeDefinitionRepository.deleteById(id);
     }
 }

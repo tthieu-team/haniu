@@ -28,6 +28,9 @@ public class ProductRequestDto {
     private boolean isFeatured;
     private boolean isNew;
     private boolean isCustomizable;
+    private boolean allowAdminChat;
+    private boolean allowPhotoUpload;
+    private boolean allowPhotobooth;
     private ProductStatus status;
     
     private String layoutTemplate;
@@ -43,6 +46,17 @@ public class ProductRequestDto {
     
     private List<VariantRequestDto> variants;
     private List<MediaRequestDto> media;
+    private List<AttributeRequestDto> attributes;
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AttributeRequestDto {
+        private String name;
+        private String value;
+    }
 
     @Getter
     @Setter

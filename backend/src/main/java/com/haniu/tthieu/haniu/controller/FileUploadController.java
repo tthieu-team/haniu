@@ -61,4 +61,11 @@ public class FileUploadController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @DeleteMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, String>> deleteFile(@RequestParam("url") String url) {
+        storageService.delete(url);
+        return ResponseEntity.ok(Map.of("message", "Xóa file thành công"));
+    }
 }

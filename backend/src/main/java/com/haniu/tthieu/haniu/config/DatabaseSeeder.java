@@ -9,6 +9,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.haniu.tthieu.haniu.entity.enums.Role;
+import com.haniu.tthieu.haniu.entity.enums.UserStatus;
+import com.haniu.tthieu.haniu.entity.user.User;
+import com.haniu.tthieu.haniu.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -27,10 +33,15 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final ProductVariantRepository productVariantRepository;
     private final BrandRepository brandRepository;
     private final CollectionRepository collectionRepository;
+    private final AttributeDefinitionRepository attributeDefinitionRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        seedUsers();
+
         if (categoryRepository.count() > 0) {
             log.info("Database already seeded. Skipping seeder.");
             return;
@@ -96,6 +107,75 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .sortOrder(4)
                 .build();
         comboQua = categoryRepository.save(comboQua);
+
+        // Seed Attribute Definitions
+        if (attributeDefinitionRepository.count() == 0) {
+            log.info("Seeding dynamic Attribute Definitions...");
+            
+            // Global Attributes
+            AttributeDefinition xuatXu = AttributeDefinition.builder()
+                    .name("Xuất xứ")
+                    .code("xuat_xu")
+                    .type(com.haniu.tthieu.haniu.entity.enums.AttributeType.TEXT)
+                    .isRequired(false)
+                    .isFilterable(true)
+                    .build();
+            attributeDefinitionRepository.save(xuatXu);
+
+            AttributeDefinition baoHanh = AttributeDefinition.builder()
+                    .name("Thời gian bảo hành")
+                    .code("bao_hanh")
+                    .type(com.haniu.tthieu.haniu.entity.enums.AttributeType.SELECT)
+                    .options("[\"Không bảo hành\", \"3 tháng\", \"6 tháng\", \"12 tháng\"]")
+                    .isRequired(false)
+                    .isFilterable(false)
+                    .build();
+            attributeDefinitionRepository.save(baoHanh);
+
+            // Category Specific: Sổ da (soDa)
+            AttributeDefinition chatLieuBia = AttributeDefinition.builder()
+                    .category(soDa)
+                    .name("Chất liệu bìa")
+                    .code("chat_lieu_bia")
+                    .type(com.haniu.tthieu.haniu.entity.enums.AttributeType.SELECT)
+                    .options("[\"Da PU cao cấp\", \"Da bò thật 100%\", \"Da Simili\", \"Da Microfiber\"]")
+                    .isRequired(true)
+                    .isFilterable(true)
+                    .build();
+            attributeDefinitionRepository.save(chatLieuBia);
+
+            AttributeDefinition soTrang = AttributeDefinition.builder()
+                    .category(soDa)
+                    .name("Số trang")
+                    .code("so_trang")
+                    .type(com.haniu.tthieu.haniu.entity.enums.AttributeType.NUMBER)
+                    .isRequired(false)
+                    .isFilterable(false)
+                    .build();
+            attributeDefinitionRepository.save(soTrang);
+
+            // Category Specific: Ly sứ (lySu)
+            AttributeDefinition dungTich = AttributeDefinition.builder()
+                    .category(lySu)
+                    .name("Dung tích ly")
+                    .code("dung_tich")
+                    .type(com.haniu.tthieu.haniu.entity.enums.AttributeType.SELECT)
+                    .options("[\"250ml\", \"350ml\", \"450ml\", \"500ml\"]")
+                    .isRequired(true)
+                    .isFilterable(true)
+                    .build();
+            attributeDefinitionRepository.save(dungTich);
+
+            AttributeDefinition coNap = AttributeDefinition.builder()
+                    .category(lySu)
+                    .name("Có nắp đậy")
+                    .code("nap_day")
+                    .type(com.haniu.tthieu.haniu.entity.enums.AttributeType.BOOLEAN)
+                    .isRequired(false)
+                    .isFilterable(true)
+                    .build();
+            attributeDefinitionRepository.save(coNap);
+        }
 
         // 4. Seed Occasions
         Occasion sinhNhat = Occasion.builder()
@@ -344,5 +424,39 @@ public class DatabaseSeeder implements CommandLineRunner {
         productVariantRepository.save(p4v1);
 
         log.info("Database successfully seeded with standard Haniu Gift Shop catalog!");
+    }
+
+    private void seedUsers() {
+        if (!userRepository.existsByEmail("admin@haniu.vn")) {
+            log.info("Seeding admin user...");
+            User admin = User.builder()
+                    .email("admin@haniu.vn")
+                    .password(passwordEncoder.encode("123456"))
+                    .fullName("Haniu Admin")
+                    .phone("0987654321")
+                    .role(Role.ADMIN)
+                    .status(UserStatus.ACTIVE)
+                    .emailVerified(true)
+                    .phoneVerified(true)
+                    .build();
+            userRepository.save(admin);
+            log.info("Admin user successfully seeded!");
+        }
+
+        if (!userRepository.existsByEmail("test@haniu.vn")) {
+            log.info("Seeding test user...");
+            User testUser = User.builder()
+                    .email("test@haniu.vn")
+                    .password(passwordEncoder.encode("123456"))
+                    .fullName("Nguyễn Văn Haniu")
+                    .phone("0987654321")
+                    .role(Role.USER)
+                    .status(UserStatus.ACTIVE)
+                    .emailVerified(true)
+                    .phoneVerified(true)
+                    .build();
+            userRepository.save(testUser);
+            log.info("Test user successfully seeded!");
+        }
     }
 }

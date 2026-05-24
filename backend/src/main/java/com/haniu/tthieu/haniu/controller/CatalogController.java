@@ -106,4 +106,26 @@ public class CatalogController {
         catalogService.deleteRecipient(id);
         return ResponseEntity.noContent().build();
     }
+
+    // Attribute Definitions
+    @GetMapping("/attribute-definitions")
+    public ResponseEntity<List<AttributeDefinition>> getAttributeDefinitions(
+            @RequestParam(required = false) UUID categoryId) {
+        if (categoryId != null) {
+            return ResponseEntity.ok(catalogService.getAttributeDefinitionsByCategory(categoryId));
+        } else {
+            return ResponseEntity.ok(catalogService.getGlobalAttributeDefinitions());
+        }
+    }
+
+    @PostMapping("/attribute-definitions")
+    public ResponseEntity<AttributeDefinition> createAttributeDefinition(@RequestBody AttributeDefinition def) {
+        return ResponseEntity.ok(catalogService.createAttributeDefinition(def));
+    }
+
+    @DeleteMapping("/attribute-definitions/{id}")
+    public ResponseEntity<Void> deleteAttributeDefinition(@PathVariable UUID id) {
+        catalogService.deleteAttributeDefinition(id);
+        return ResponseEntity.noContent().build();
+    }
 }

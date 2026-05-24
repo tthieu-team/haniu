@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { systemConfigService } from '@/services/systemConfig.service';
 
 export interface HeaderConfig {
   logoText: string;
@@ -280,6 +281,10 @@ export interface HomeLayoutState {
   updateFooter: (config: Partial<FooterConfig>) => void;
   updateWelcomeScreen: (config: Partial<WelcomeScreenConfig>) => void;
   resetAll: () => void;
+  isLoading: boolean;
+  isSaving: boolean;
+  fetchConfigFromServer: () => Promise<void>;
+  saveConfigToServer: () => Promise<void>;
 }
 
 const DEFAULT_STATE = {
@@ -561,8 +566,10 @@ const DEFAULT_STATE = {
 
 export const useHomeLayoutStore = create<HomeLayoutState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...DEFAULT_STATE,
+      isLoading: false,
+      isSaving: false,
 
       toggleVisibility: (section) =>
         set((state) => ({
@@ -699,6 +706,60 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
         })),
 
       resetAll: () => set(DEFAULT_STATE),
+
+      fetchConfigFromServer: async () => {
+        set({ isLoading: true });
+        try {
+          const res = await systemConfigService.getConfig('HOME_LAYOUT');
+          if (res && res.configValue) {
+            const parsed = typeof res.configValue === 'string' ? JSON.parse(res.configValue) : res.configValue;
+            set((state) => ({
+              ...state,
+              ...parsed,
+              isLoading: false,
+            }));
+          } else {
+            set({ isLoading: false });
+          }
+        } catch (err) {
+          console.error('Failed to fetch home layout config from server:', err);
+          set({ isLoading: false });
+        }
+      },
+
+      saveConfigToServer: async () => {
+        set({ isSaving: true });
+        try {
+          const state = get();
+          const dataToSave = {
+            visibility: state.visibility,
+            header: state.header,
+            announcementBar: state.announcementBar,
+            hero: state.hero,
+            trustBar: state.trustBar,
+            brandIntro: state.brandIntro,
+            categories: state.categories,
+            benefits: state.benefits,
+            videoBanner: state.videoBanner,
+            collections: state.collections,
+            socialProof: state.socialProof,
+            howItWorks: state.howItWorks,
+            ugcFeed: state.ugcFeed,
+            blog: state.blog,
+            story: state.story,
+            cta: state.cta,
+            faq: state.faq,
+            footer: state.footer,
+            welcomeScreen: state.welcomeScreen,
+          };
+          await systemConfigService.updateConfig('HOME_LAYOUT', dataToSave);
+          set({ isSaving: false });
+        } catch (err) {
+          console.error('Failed to save home layout config to server:', err);
+          set({ isSaving: false });
+          throw err;
+        }
+      },
     }),
     {
       name: 'haniu-home-layout-config-v7',

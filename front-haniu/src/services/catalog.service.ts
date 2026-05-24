@@ -146,4 +146,9 @@ export const catalogService = {
       method: 'DELETE',
     });
   },
+
+  // Attribute Definitions
+  getAttributeDefinitions: async (categoryId?: string): Promise<any[]> => {
+    return fetchApi(`/api/v1/catalog/attribute-definitions${categoryId ? `?categoryId=${categoryId}` : ''}`);
+  },
 };

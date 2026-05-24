@@ -115,6 +115,54 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
               </div>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-slate-100 dark:border-zinc-800/40">
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 uppercase">Chất liệu</label>
+                <input
+                  type="text"
+                  placeholder="Gỗ, Sứ, Da..."
+                  value={item.material || ''}
+                  onChange={(e) => {
+                    const list = [...variantsList];
+                    list[idx].material = e.target.value;
+                    setVariantsList(list);
+                  }}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 uppercase">Trọng lượng (kg)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.5"
+                  value={item.weight || ''}
+                  onChange={(e) => {
+                    const list = [...variantsList];
+                    list[idx].weight = e.target.value ? parseFloat(e.target.value) : undefined;
+                    setVariantsList(list);
+                  }}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 uppercase">Đường dẫn ảnh biến thể</label>
+                <input
+                  type="text"
+                  placeholder="https://..."
+                  value={item.imageUrl || ''}
+                  onChange={(e) => {
+                    const list = [...variantsList];
+                    list[idx].imageUrl = e.target.value;
+                    setVariantsList(list);
+                  }}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                />
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-4 pt-2 border-t border-slate-100 dark:border-zinc-800/40">
               <div className="space-y-1">
                 <label className="text-[10px] text-slate-400 uppercase font-semibold">Giá bán lẻ (đ) *</label>

@@ -12,6 +12,9 @@ import { getFullImageUrl } from '@/lib/api';
 import BasicInfoForm from '@/components/admin/product/BasicInfoForm';
 import CategorizationForm from '@/components/admin/product/CategorizationForm';
 import ImageUploadForm from '@/components/admin/product/ImageUploadForm';
+import CategoryAttributesForm from '@/components/admin/product/CategoryAttributesForm';
+import ProductPreviewPanel from '@/components/admin/product/ProductPreviewPanel';
+import { ProductPreviewModal } from '@/components/admin/product/ProductPreviewModal';
 
 const DEFAULT_CATEGORIES = [
   { id: "8bc6cdbb-b6cb-4b71-b0db-3cdb4b7c7b12", name: "Combo Quà Tặng" },
@@ -51,6 +54,7 @@ export default function NewProductPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   // Form Fields
   const [name, setName] = useState('');
@@ -66,6 +70,9 @@ export default function NewProductPage() {
   const [isFeatured, setIsFeatured] = useState(false);
   const [isNew, setIsNew] = useState(true);
   const [isCustomizable, setIsCustomizable] = useState(false);
+  const [allowAdminChat, setAllowAdminChat] = useState(false);
+  const [allowPhotoUpload, setAllowPhotoUpload] = useState(false);
+  const [allowPhotobooth, setAllowPhotobooth] = useState(false);
   const [status, setStatus] = useState('PUBLISHED');
 
   const [layoutTemplate, setLayoutTemplate] = useState('DEFAULT');
@@ -86,6 +93,9 @@ export default function NewProductPage() {
   const [variantsList, setVariantsList] = useState<VariantInput[]>([]);
 
   const [categories, setCategories] = useState<any[]>(DEFAULT_CATEGORIES);
+  const [brands, setBrands] = useState<any[]>([]);
+  const [collections, setCollections] = useState<any[]>([]);
+  const [attributes, setAttributes] = useState<Record<string, string>>({});
 
   useEffect(() => {
     async function loadCategories() {
@@ -103,6 +113,20 @@ export default function NewProductPage() {
       }
     }
     loadCategories();
+  }, []);
+
+  useEffect(() => {
+    async function loadBrandsAndCollections() {
+      try {
+        const brandsData = await catalogService.getAllBrands();
+        const collectionsData = await catalogService.getAllCollections();
+        setBrands(brandsData || []);
+        setCollections(collectionsData || []);
+      } catch (err) {
+        console.error('Lỗi khi tải thương hiệu và bộ sưu tập:', err);
+      }
+    }
+    loadBrandsAndCollections();
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -127,6 +151,9 @@ export default function NewProductPage() {
       isFeatured,
       isNew,
       isCustomizable,
+      allowAdminChat,
+      allowPhotoUpload,
+      allowPhotobooth,
       status,
       layoutTemplate,
       layoutConfig,
@@ -134,7 +161,8 @@ export default function NewProductPage() {
       occasions: selectedOccasions,
       recipients: selectedRecipients,
       variants: variantsList,
-      media: mediaList
+      media: mediaList,
+      attributes: Object.entries(attributes).map(([name, value]) => ({ name, value })),
     };
 
     try {
@@ -158,8 +186,37 @@ export default function NewProductPage() {
 
 
 
+  const activeCategory = categories.find(c => c.id === categoryId);
+  const activeBrand = brands.find(b => b.id === brandId);
+  const activeCollection = collections.find(c => c.id === collectionId);
+
+  const specsMapForPreview: Record<string, string> = {};
+  specs.forEach(s => {
+    if (s.key.trim()) specsMapForPreview[s.key.trim()] = s.value;
+  });
+
+  const previewProductData = {
+    name: name || 'Tên sản phẩm quà tặng',
+    sku: sku || 'SKU-XXXX',
+    description: description || 'Mô tả chi tiết sản phẩm sẽ xuất hiện ở đây...',
+    basePrice: basePrice || 0,
+    salePrice: salePrice ? parseFloat(salePrice) : null,
+    stock: stock,
+    isCustomizable: isCustomizable,
+    allowAdminChat: allowAdminChat,
+    allowPhotoUpload: allowPhotoUpload,
+    allowPhotobooth: allowPhotobooth,
+    categoryName: activeCategory?.name,
+    brandName: activeBrand?.name,
+    collectionName: activeCollection?.name,
+    specifications: specsMapForPreview,
+    attributes: attributes,
+    media: mediaList,
+    variants: variantsList,
+  };
+
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
+    <div className="space-y-8 max-w-[1600px] mx-auto px-4">
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800 pb-5">
         <div>
           <Link href="/admin/products" className="text-xs text-slate-400 hover:text-rose-500 font-semibold flex items-center gap-1 mb-1">
@@ -181,86 +238,132 @@ export default function NewProductPage() {
         </div>
       )}
 
-      <form onSubmit={handleSave} className="space-y-8 text-xs font-medium">
-        
-        {/* Basic Info */}
-        <BasicInfoForm
-          name={name}
-          setName={setName}
-          sku={sku}
-          setSku={setSku}
-          slug={slug}
-          setSlug={setSlug}
-          categoryId={categoryId}
-          setCategoryId={setCategoryId}
-          categories={categories}
-          description={description}
-          setDescription={setDescription}
-          basePrice={basePrice}
-          setBasePrice={setBasePrice}
-          salePrice={salePrice}
-          setSalePrice={setSalePrice}
-          stock={stock}
-          setStock={setStock}
-          isCustomizable={isCustomizable}
-          setIsCustomizable={setIsCustomizable}
-          isFeatured={isFeatured}
-          setIsFeatured={setIsFeatured}
-          isNew={isNew}
-          setIsNew={setIsNew}
-        />
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+        {/* Left Column: Form */}
+        <form onSubmit={handleSave} className="xl:col-span-7 space-y-8 text-xs font-medium">
+          
+          {/* Basic Info */}
+          <BasicInfoForm
+            name={name}
+            setName={setName}
+            sku={sku}
+            setSku={setSku}
+            slug={slug}
+            setSlug={setSlug}
+            categoryId={categoryId}
+            setCategoryId={setCategoryId}
+            categories={categories}
+            brandId={brandId}
+            setBrandId={setBrandId}
+            brands={brands}
+            collectionId={collectionId}
+            setCollectionId={setCollectionId}
+            collections={collections}
+            description={description}
+            setDescription={setDescription}
+            basePrice={basePrice}
+            setBasePrice={setBasePrice}
+            salePrice={salePrice}
+            setSalePrice={setSalePrice}
+            stock={stock}
+            setStock={setStock}
+            isCustomizable={isCustomizable}
+            setIsCustomizable={setIsCustomizable}
+            isFeatured={isFeatured}
+            setIsFeatured={setIsFeatured}
+            isNew={isNew}
+            setIsNew={setIsNew}
+            allowAdminChat={allowAdminChat}
+            setAllowAdminChat={setAllowAdminChat}
+            allowPhotoUpload={allowPhotoUpload}
+            setAllowPhotoUpload={setAllowPhotoUpload}
+            allowPhotobooth={allowPhotobooth}
+            setAllowPhotobooth={setAllowPhotobooth}
+          />
 
-        {/* Occasions & Recipients */}
-        <CategorizationForm
-          selectedOccasions={selectedOccasions}
-          setSelectedOccasions={setSelectedOccasions}
-          selectedRecipients={selectedRecipients}
-          setSelectedRecipients={setSelectedRecipients}
-        />
+          {/* Category dynamic attributes */}
+          <CategoryAttributesForm
+            categoryId={categoryId}
+            attributes={attributes}
+            setAttributes={setAttributes}
+          />
 
-        {/* Dynamic Specifications */}
-        <SpecManager specs={specs} setSpecs={setSpecs} />
+          {/* Occasions & Recipients */}
+          <CategorizationForm
+            selectedOccasions={selectedOccasions}
+            setSelectedOccasions={setSelectedOccasions}
+            selectedRecipients={selectedRecipients}
+            setSelectedRecipients={setSelectedRecipients}
+          />
 
-        {/* Product Media Manager */}
-        <ImageUploadForm
-          mediaList={mediaList}
-          setMediaList={setMediaList}
-          loading={loading}
-          setLoading={setLoading}
-          setSuccessMsg={setSuccessMsg}
-          setErrorMsg={setErrorMsg}
-        />
+          {/* Dynamic Specifications */}
+          <SpecManager specs={specs} setSpecs={setSpecs} />
 
-        {/* Variations creator */}
-        <VariantManager variantsList={variantsList} setVariantsList={setVariantsList} basePrice={basePrice} />
+          {/* Product Media Manager */}
+          <ImageUploadForm
+            mediaList={mediaList}
+            setMediaList={setMediaList}
+            loading={loading}
+            setLoading={setLoading}
+            setSuccessMsg={setSuccessMsg}
+            setErrorMsg={setErrorMsg}
+          />
 
-        {/* Submit Bar */}
-        <div className="flex gap-4 justify-end pt-4">
-          <Link
-            href="/admin/products"
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
-          >
-            Hủy bỏ
-          </Link>
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs flex items-center justify-center gap-1.5"
-          >
-            {loading ? (
-              <>
-                <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
-                Đang xử lý...
-              </>
-            ) : (
-              <>
-                <Icon name="💾" size={14} /> Lưu sản phẩm quà tặng
-              </>
-            )}
-          </button>
+          {/* Variations creator */}
+          <VariantManager variantsList={variantsList} setVariantsList={setVariantsList} basePrice={basePrice} />
+
+          {/* Submit Bar */}
+          <div className="flex gap-4 justify-end pt-4">
+            <Link
+              href="/admin/products"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+            >
+              Hủy bỏ
+            </Link>
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs flex items-center justify-center gap-1.5"
+            >
+              {loading ? (
+                <>
+                  <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
+                  Đang xử lý...
+                </>
+              ) : (
+                <>
+                  <Icon name="💾" size={14} /> Lưu sản phẩm quà tặng
+                </>
+              )}
+            </button>
+          </div>
+
+        </form>
+
+        {/* Right Column: Live Preview */}
+        <div className="xl:col-span-5 hidden xl:block sticky top-8 max-h-[calc(100vh-6rem)] overflow-y-auto space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400 flex items-center gap-2">
+              <span className="inline-block w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+              Trực quan chi tiết (Live Preview)
+            </h3>
+            <button
+              type="button"
+              onClick={() => setIsPreviewModalOpen(true)}
+              className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800/50 text-slate-600 dark:text-zinc-400 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Icon name="eye" size={12} /> Xem kích thước chuẩn
+            </button>
+          </div>
+          <ProductPreviewPanel product={previewProductData} />
         </div>
+      </div>
 
-      </form>
+      <ProductPreviewModal
+        isOpen={isPreviewModalOpen}
+        onClose={() => setIsPreviewModalOpen(false)}
+        product={previewProductData}
+      />
     </div>
   );
 }

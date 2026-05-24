@@ -31,6 +31,9 @@ public class ProductResponseDto {
     private boolean isFeatured;
     private boolean isNew;
     private boolean isCustomizable;
+    private boolean allowAdminChat;
+    private boolean allowPhotoUpload;
+    private boolean allowPhotobooth;
     private ProductStatus status;
     
     private String layoutTemplate;
@@ -45,6 +48,18 @@ public class ProductResponseDto {
     private List<RecipientInfo> recipients;
     private List<VariantResponseDto> variants;
     private List<MediaResponseDto> media;
+    private List<AttributeResponseDto> attributes;
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AttributeResponseDto {
+        private UUID id;
+        private String name;
+        private String value;
+    }
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

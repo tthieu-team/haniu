@@ -35,6 +35,7 @@ public class ProductServiceImpl implements ProductService {
     private final CollectionRepository collectionRepository;
     private final OccasionRepository occasionRepository;
     private final RecipientRepository recipientRepository;
+    private final ProductAttributeRepository productAttributeRepository;
     private final ProductElasticsearchRepository productElasticsearchRepository;
     private final co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
 
@@ -80,6 +81,9 @@ public class ProductServiceImpl implements ProductService {
                 .isFeatured(request.isFeatured())
                 .isNew(request.isNew())
                 .isCustomizable(request.isCustomizable())
+                .allowAdminChat(request.isAllowAdminChat())
+                .allowPhotoUpload(request.isAllowPhotoUpload())
+                .allowPhotobooth(request.isAllowPhotobooth())
                 .status(request.getStatus())
                 .layoutTemplate(request.getLayoutTemplate())
                 .layoutConfig(request.getLayoutConfig())
@@ -140,10 +144,23 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
+        // Save Attributes
+        List<ProductAttribute> savedAttributes = new ArrayList<>();
+        if (request.getAttributes() != null) {
+            for (ProductRequestDto.AttributeRequestDto aDto : request.getAttributes()) {
+                ProductAttribute attribute = ProductAttribute.builder()
+                        .product(savedProduct)
+                        .attributeName(aDto.getName())
+                        .attributeValue(aDto.getValue())
+                        .build();
+                savedAttributes.add(productAttributeRepository.save(attribute));
+            }
+        }
+
         // Sync to Elasticsearch
         syncToElasticsearch(savedProduct, savedVariants, savedMedia);
 
-        return mapToResponseDto(savedProduct, savedVariants, savedMedia);
+        return mapToResponseDto(savedProduct, savedVariants, savedMedia, savedAttributes);
     }
 
     @Override
@@ -175,6 +192,9 @@ public class ProductServiceImpl implements ProductService {
         product.setFeatured(request.isFeatured());
         product.setNew(request.isNew());
         product.setCustomizable(request.isCustomizable());
+        product.setAllowAdminChat(request.isAllowAdminChat());
+        product.setAllowPhotoUpload(request.isAllowPhotoUpload());
+        product.setAllowPhotobooth(request.isAllowPhotobooth());
         product.setStatus(request.getStatus());
         product.setLayoutTemplate(request.getLayoutTemplate());
         product.setLayoutConfig(request.getLayoutConfig());
@@ -238,10 +258,26 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
+        // Delete old attributes and save new ones
+        productAttributeRepository.deleteByProductId(id);
+        productAttributeRepository.flush();
+
+        List<ProductAttribute> savedAttributes = new ArrayList<>();
+        if (request.getAttributes() != null) {
+            for (ProductRequestDto.AttributeRequestDto aDto : request.getAttributes()) {
+                ProductAttribute attribute = ProductAttribute.builder()
+                        .product(savedProduct)
+                        .attributeName(aDto.getName())
+                        .attributeValue(aDto.getValue())
+                        .build();
+                savedAttributes.add(productAttributeRepository.save(attribute));
+            }
+        }
+
         // Sync to Elasticsearch
         syncToElasticsearch(savedProduct, savedVariants, savedMedia);
 
-        return mapToResponseDto(savedProduct, savedVariants, savedMedia);
+        return mapToResponseDto(savedProduct, savedVariants, savedMedia, savedAttributes);
     }
 
     @Override
@@ -251,7 +287,8 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         List<ProductVariant> variants = productVariantRepository.findByProductId(id);
         List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(id);
-        return mapToResponseDto(product, variants, media);
+        List<ProductAttribute> attributes = productAttributeRepository.findByProductId(id);
+        return mapToResponseDto(product, variants, media, attributes);
     }
 
     @Override
@@ -261,7 +298,8 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found with slug: " + slug));
         List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
         List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
-        return mapToResponseDto(product, variants, media);
+        List<ProductAttribute> attributes = productAttributeRepository.findByProductId(product.getId());
+        return mapToResponseDto(product, variants, media, attributes);
     }
 
     @Override
@@ -288,7 +326,8 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findAll(spec, pageable).map(product -> {
             List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
             List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
-            return mapToResponseDto(product, variants, media);
+            List<ProductAttribute> attributes = productAttributeRepository.findByProductId(product.getId());
+            return mapToResponseDto(product, variants, media, attributes);
         });
     }
 
@@ -398,7 +437,15 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    private ProductResponseDto mapToResponseDto(Product product, List<ProductVariant> variants, List<ProductMedia> media) {
+    private ProductResponseDto mapToResponseDto(Product product, List<ProductVariant> variants, List<ProductMedia> media, List<ProductAttribute> attributes) {
+        List<ProductResponseDto.AttributeResponseDto> attrList = attributes != null ? attributes.stream()
+                .map(a -> ProductResponseDto.AttributeResponseDto.builder()
+                        .id(a.getId())
+                        .name(a.getAttributeName())
+                        .value(a.getAttributeValue())
+                        .build())
+                .collect(Collectors.toList()) : Collections.emptyList();
+
         ProductResponseDto.CategoryInfo catInfo = ProductResponseDto.CategoryInfo.builder()
                 .id(product.getCategory().getId())
                 .name(product.getCategory().getName())
@@ -480,6 +527,9 @@ public class ProductServiceImpl implements ProductService {
                 .isFeatured(product.isFeatured())
                 .isNew(product.isNew())
                 .isCustomizable(product.isCustomizable())
+                .allowAdminChat(product.isAllowAdminChat())
+                .allowPhotoUpload(product.isAllowPhotoUpload())
+                .allowPhotobooth(product.isAllowPhotobooth())
                 .status(product.getStatus())
                 .layoutTemplate(product.getLayoutTemplate())
                 .layoutConfig(product.getLayoutConfig())
@@ -491,6 +541,7 @@ public class ProductServiceImpl implements ProductService {
                 .recipients(recInfos)
                 .variants(varList)
                 .media(mediaList)
+                .attributes(attrList)
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();
@@ -569,7 +620,8 @@ public class ProductServiceImpl implements ProductService {
                 .map(product -> {
                     List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
                     List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
-                    return mapToResponseDto(product, variants, media);
+                    List<ProductAttribute> attributes = productAttributeRepository.findByProductId(product.getId());
+                    return mapToResponseDto(product, variants, media, attributes);
                 })
                 .collect(Collectors.toList());
 

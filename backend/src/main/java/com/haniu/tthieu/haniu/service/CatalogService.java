@@ -26,4 +26,9 @@ public interface CatalogService {
     List<Recipient> getAllRecipients();
     Recipient createRecipient(Recipient recipient);
     void deleteRecipient(UUID id);
+
+    List<AttributeDefinition> getAttributeDefinitionsByCategory(UUID categoryId);
+    List<AttributeDefinition> getGlobalAttributeDefinitions();
+    AttributeDefinition createAttributeDefinition(AttributeDefinition def);
+    void deleteAttributeDefinition(UUID id);
 }

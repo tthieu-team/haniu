@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
+import { useAuthStore } from '@/store/auth';
 import Icon from '@/components/common/Icons';
 
 export default function LiveConfigPanel() {
@@ -9,6 +10,10 @@ export default function LiveConfigPanel() {
   const [activeTab, setActiveTab] = useState<'visibility' | 'text'>('visibility');
   const [editingSlideId, setEditingSlideId] = useState<string>('');
   const [editingCardId, setEditingCardId] = useState<string>('feat-1');
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+
+  const { user, isAuthenticated } = useAuthStore();
+  const isAdmin = isAuthenticated && user?.role === 'ADMIN';
 
   const {
     visibility,
@@ -54,7 +59,28 @@ export default function LiveConfigPanel() {
     updateFooter,
     updateWelcomeScreen,
     resetAll,
+    saveConfigToServer,
+    isSaving,
   } = useHomeLayoutStore();
+
+  const handleSaveSettings = async () => {
+    if (isAdmin) {
+      setSyncStatus('saving');
+      try {
+        await saveConfigToServer();
+        setSyncStatus('success');
+        setTimeout(() => {
+          setSyncStatus('idle');
+          setIsOpen(false);
+        }, 1500);
+      } catch (err) {
+        setSyncStatus('error');
+        setTimeout(() => setSyncStatus('idle'), 3000);
+      }
+    } else {
+      setIsOpen(false);
+    }
+  };
 
   return (
     <>
@@ -823,23 +849,34 @@ export default function LiveConfigPanel() {
             </div>
 
             {/* Footer buttons */}
-            <div className="p-6 border-t border-zinc-800 bg-zinc-950 flex gap-4">
-              <button
-                onClick={() => {
-                  if (confirm('Khôi phục toàn bộ giao diện và nội dung về mặc định?')) {
-                    resetAll();
-                  }
-                }}
-                className="flex-1 border border-zinc-700 hover:border-zinc-500 text-zinc-300 font-bold py-3.5 px-4 rounded-2xl text-xs transition-all cursor-pointer hover:bg-zinc-900 text-center"
-              >
-                Reset mặc định
-              </button>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 px-4 rounded-2xl text-xs transition-all cursor-pointer shadow-lg shadow-rose-500/20 text-center"
-              >
-                Lưu cài đặt
-              </button>
+            <div className="p-6 border-t border-zinc-800 bg-zinc-950 flex flex-col gap-3">
+              {isAdmin && (
+                <div className="text-[10px] text-zinc-400 font-semibold text-center mb-1">
+                  {syncStatus === 'saving' && '⏳ Đang đồng bộ lên máy chủ...'}
+                  {syncStatus === 'success' && '✅ Đồng bộ thành công! 🎉'}
+                  {syncStatus === 'error' && '❌ Đồng bộ thất bại, vui lòng thử lại.'}
+                  {syncStatus === 'idle' && '⚙️ Bạn là Admin, cài đặt sẽ được lưu lên database máy chủ.'}
+                </div>
+              )}
+              <div className="flex gap-4">
+                <button
+                  onClick={() => {
+                    if (confirm('Khôi phục toàn bộ giao diện và nội dung về mặc định?')) {
+                      resetAll();
+                    }
+                  }}
+                  className="flex-1 border border-zinc-700 hover:border-zinc-500 text-zinc-300 font-bold py-3.5 px-4 rounded-2xl text-xs transition-all cursor-pointer hover:bg-zinc-900 text-center"
+                >
+                  Reset mặc định
+                </button>
+                <button
+                  onClick={handleSaveSettings}
+                  disabled={syncStatus === 'saving'}
+                  className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 px-4 rounded-2xl text-xs transition-all cursor-pointer shadow-lg shadow-rose-500/20 text-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {syncStatus === 'saving' ? 'Đang lưu...' : 'Lưu cài đặt'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

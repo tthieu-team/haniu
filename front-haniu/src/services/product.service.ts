@@ -121,5 +121,11 @@ export const productService = {
     }
 
     return response.json();
+  },
+
+  deleteFile: async (url: string) => {
+    return fetchApi(`/api/v1/uploads?url=${encodeURIComponent(url)}`, {
+      method: 'DELETE',
+    });
   }
 };

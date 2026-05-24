@@ -11,6 +11,8 @@ import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -66,6 +68,10 @@ public class Product {
         inverseJoinColumns = @JoinColumn(name = "recipient_id")
     )
     private Set<Recipient> recipients;
+    
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ProductAttribute> attributes = new ArrayList<>();
 
 
 
@@ -125,6 +131,17 @@ public class Product {
     @Builder.Default
     private boolean isCustomizable = false;
 
+    @Column(name = "allow_admin_chat", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean allowAdminChat = false;
+
+    @Column(name = "allow_photo_upload", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean allowPhotoUpload = false;
+
+    @Column(name = "allow_photobooth", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean allowPhotobooth = false;
 
     @Column(name = "average_rating", precision = 3, scale = 2)
     @Builder.Default

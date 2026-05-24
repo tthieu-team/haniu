@@ -12,6 +12,12 @@ interface BasicInfoFormProps {
   categoryId: string;
   setCategoryId: (v: string) => void;
   categories: Array<{ id: string; name: string }>;
+  brandId: string;
+  setBrandId: (v: string) => void;
+  brands: Array<{ id: string; name: string }>;
+  collectionId: string;
+  setCollectionId: (v: string) => void;
+  collections: Array<{ id: string; name: string }>;
   description: string;
   setDescription: (v: string) => void;
   basePrice: number;
@@ -26,6 +32,12 @@ interface BasicInfoFormProps {
   setIsFeatured: (v: boolean) => void;
   isNew: boolean;
   setIsNew: (v: boolean) => void;
+  allowAdminChat: boolean;
+  setAllowAdminChat: (v: boolean) => void;
+  allowPhotoUpload: boolean;
+  setAllowPhotoUpload: (v: boolean) => void;
+  allowPhotobooth: boolean;
+  setAllowPhotobooth: (v: boolean) => void;
 }
 
 export default function BasicInfoForm({
@@ -38,6 +50,12 @@ export default function BasicInfoForm({
   categoryId,
   setCategoryId,
   categories,
+  brandId,
+  setBrandId,
+  brands = [],
+  collectionId,
+  setCollectionId,
+  collections = [],
   description,
   setDescription,
   basePrice,
@@ -52,6 +70,12 @@ export default function BasicInfoForm({
   setIsFeatured,
   isNew,
   setIsNew,
+  allowAdminChat,
+  setAllowAdminChat,
+  allowPhotoUpload,
+  setAllowPhotoUpload,
+  allowPhotobooth,
+  setAllowPhotobooth,
 }: BasicInfoFormProps) {
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6 text-xs font-semibold">
@@ -59,8 +83,8 @@ export default function BasicInfoForm({
         Thông tin cơ bản
       </h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="space-y-2 md:col-span-2">
           <label className="block text-slate-500">Tên sản phẩm quà tặng *</label>
           <input
             type="text"
@@ -83,7 +107,7 @@ export default function BasicInfoForm({
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
           />
         </div>
-
+ 
         <div className="space-y-2">
           <label className="block text-slate-500">Đường dẫn Slug (Tùy chọn)</label>
           <input
@@ -94,7 +118,7 @@ export default function BasicInfoForm({
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
           />
         </div>
-
+ 
         <div className="space-y-2">
           <label className="block text-slate-500">Danh mục sản phẩm *</label>
           <select
@@ -105,6 +129,34 @@ export default function BasicInfoForm({
             <option value="" disabled>Chọn danh mục</option>
             {categories.map(cat => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-slate-500">Thương hiệu (Brand)</label>
+          <select
+            value={brandId || ''}
+            onChange={(e) => setBrandId(e.target.value)}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
+          >
+            <option value="">Chọn thương hiệu (Tùy chọn)</option>
+            {brands.map(b => (
+              <option key={b.id} value={b.id}>{b.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-2 md:col-span-3">
+          <label className="block text-slate-500">Bộ sưu tập (Collection)</label>
+          <select
+            value={collectionId || ''}
+            onChange={(e) => setCollectionId(e.target.value)}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
+          >
+            <option value="">Chọn bộ sưu tập (Tùy chọn)</option>
+            {collections.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
         </div>
@@ -162,10 +214,46 @@ export default function BasicInfoForm({
             type="checkbox"
             checked={isCustomizable}
             onChange={(e) => setIsCustomizable(e.target.checked)}
-            className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
+            className="rounded border-slate-300 text-rose-500 focus:ring-rose-500 animate-fade-in"
           />
           <span className="text-slate-600 dark:text-zinc-300 font-bold flex items-center gap-1.5">
             <Icon name="⚙️" size={14} className="text-rose-500" /> Cho phép Khắc tên / Cá nhân hóa quà
+          </span>
+        </label>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={allowAdminChat}
+            onChange={(e) => setAllowAdminChat(e.target.checked)}
+            className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
+          />
+          <span className="text-slate-600 dark:text-zinc-300 font-bold flex items-center gap-1.5">
+            💬 Có thể chat với Admin
+          </span>
+        </label>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={allowPhotoUpload}
+            onChange={(e) => setAllowPhotoUpload(e.target.checked)}
+            className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
+          />
+          <span className="text-slate-600 dark:text-zinc-300 font-bold flex items-center gap-1.5">
+            📷 Có thể tải lên ảnh thiết kế
+          </span>
+        </label>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={allowPhotobooth}
+            onChange={(e) => setAllowPhotobooth(e.target.checked)}
+            className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
+          />
+          <span className="text-slate-600 dark:text-zinc-300 font-bold flex items-center gap-1.5">
+            🖼️ Có thể tải Photobooth bằng ứng dụng
           </span>
         </label>
 
