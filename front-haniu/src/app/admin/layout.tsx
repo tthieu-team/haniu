@@ -56,6 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const menuItems: SidebarItem[] = [
     { name: 'Dashboard', href: '/admin', icon: 'grid' },
     { name: 'Sản phẩm', href: '/admin/products', icon: 'gift' },
+    { name: 'Danh mục', href: '/admin/categories', icon: 'list' },
     { name: 'Dịp lễ', href: '/admin/occasions', icon: 'cake' },
     { name: 'Người nhận', href: '/admin/recipients', icon: 'users' },
     { name: 'Đơn hàng', href: '/admin/orders', icon: 'bag' },

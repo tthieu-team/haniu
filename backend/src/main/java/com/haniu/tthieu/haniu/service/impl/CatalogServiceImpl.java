@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,8 +34,45 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
+    public Category updateCategory(UUID id, Category categoryDetails) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        category.setName(categoryDetails.getName());
+        category.setSlug(categoryDetails.getSlug());
+        category.setDescription(categoryDetails.getDescription());
+        category.setImageUrl(categoryDetails.getImageUrl());
+        category.setBannerUrl(categoryDetails.getBannerUrl());
+        category.setSortOrder(categoryDetails.getSortOrder());
+        category.setActive(categoryDetails.isActive());
+        category.setFeatured(categoryDetails.isFeatured());
+        category.setSeoTitle(categoryDetails.getSeoTitle());
+        category.setSeoDescription(categoryDetails.getSeoDescription());
+        category.setSeoKeywords(categoryDetails.getSeoKeywords());
+        
+        // Handle parent category update
+        if (categoryDetails.getParent() != null && categoryDetails.getParent().getId() != null) {
+            Category parent = categoryRepository.findById(categoryDetails.getParent().getId())
+                    .orElseThrow(() -> new RuntimeException("Parent category not found"));
+            
+            // Prevent cyclic dependency (parent cannot be itself)
+            if (parent.getId().equals(id)) {
+                throw new RuntimeException("A category cannot be its own parent");
+            }
+            category.setParent(parent);
+        } else {
+            category.setParent(null);
+        }
+
+        return categoryRepository.save(category);
+    }
+
+    @Override
     public void deleteCategory(UUID id) {
-        categoryRepository.deleteById(id);
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        category.setDeletedAt(LocalDateTime.now());
+        categoryRepository.save(category);
     }
 
     @Override

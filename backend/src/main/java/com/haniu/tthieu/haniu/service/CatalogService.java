@@ -8,6 +8,7 @@ import java.util.UUID;
 public interface CatalogService {
     List<Category> getAllCategories();
     Category createCategory(Category category);
+    Category updateCategory(UUID id, Category category);
     void deleteCategory(UUID id);
 
     List<Brand> getAllBrands();

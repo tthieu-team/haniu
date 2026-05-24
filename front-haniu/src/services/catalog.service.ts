@@ -30,7 +30,14 @@ export interface Category {
   slug: string;
   description?: string;
   imageUrl?: string;
+  bannerUrl?: string;
+  sortOrder?: number;
   isActive: boolean;
+  isFeatured?: boolean;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  parent?: Category | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -93,6 +100,12 @@ export const catalogService = {
   createCategory: async (payload: Category): Promise<Category> => {
     return fetchApi('/api/v1/catalog/categories', {
       method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+  updateCategory: async (id: string, payload: Category): Promise<Category> => {
+    return fetchApi(`/api/v1/catalog/categories/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(payload),
     });
   },

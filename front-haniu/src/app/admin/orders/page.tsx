@@ -21,6 +21,9 @@ interface Order {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
+  subtotalPrice?: number;
+  shippingFee?: number;
+  discountAmount?: number;
   totalPrice: number;
   paymentMethod: string;
   paymentStatus: string;
@@ -34,74 +37,110 @@ interface Order {
   items: OrderItem[];
 }
 
+function renderCustomizationInfo(info: string | undefined | null) {
+  if (!info) return null;
+  try {
+    const parsed = JSON.parse(info);
+    if (typeof parsed === 'object' && parsed !== null) {
+      return (
+        <div className="space-y-1 mt-1 text-[10px]">
+          {Object.entries(parsed).map(([key, value]) => {
+            if (!value) return null;
+            let label = key;
+            if (key === 'text') label = 'Khắc chữ/Lời chúc';
+            else if (key === 'card') label = 'Mẫu thiệp';
+            else if (key === 'note') label = 'Ghi chú thêm';
+            
+            return (
+              <div key={key} className="flex justify-between border-b border-slate-100 dark:border-zinc-800 pb-0.5 last:border-0 last:pb-0">
+                <span className="text-slate-400 capitalize font-medium">{label}:</span>
+                <span className="font-semibold text-slate-700 dark:text-zinc-300">{String(value)}</span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+  } catch (e) {
+    // Ignore and fallback to raw text
+  }
+  return <pre className="font-sans whitespace-pre-wrap">{info}</pre>;
+}
+
 export default function AdminOrdersPage() {
-  const { orders, loading, fetchAllOrders, updateOrderStatus, updatePaymentStatus } = useOrderStore();
+  const { orders, loading, error, fetchAllOrders, updateOrderStatus, updatePaymentStatus } = useOrderStore();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [filterStatus, setFilterStatus] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   const loadOrders = async () => {
-    const res = await fetchAllOrders();
-    if (!res || res.length === 0) {
-      // Mock data for premium fallback
-      useOrderStore.setState({
-        orders: [
-          {
-            id: "ord-1",
-            orderCode: "HN-1716301234567",
-            customerName: "Nguyễn Văn A",
-            customerPhone: "0901234567",
-            customerEmail: "vana@gmail.com",
-            totalPrice: 520000,
-            paymentMethod: "MOMO",
-            paymentStatus: "PENDING",
-            orderStatus: "PENDING",
-            orderedAt: "2026-05-21T10:00:00",
-            shippingProvince: "Hà Nội",
-            shippingDistrict: "Cầu Giấy",
-            shippingWard: "Dịch Vọng",
-            shippingAddressLine: "Số 15 Ngõ 20 Trần Thái Tông",
-            note: "Gói quà cẩn thận giúp mình nhé",
-            items: [
-              {
-                id: "item-1",
-                productName: "Hộp Quà Lãng Mạn - Eternal Love",
-                variantName: "Standard",
-                quantity: 1,
-                unitPrice: 490000,
-                totalPrice: 490000,
-                customizationInfo: '{"text":"Chúc mừng sinh nhật Trang","card":"Merry Christmas"}'
-              }
-            ]
-          },
-          {
-            id: "ord-2",
-            orderCode: "HN-1716309876543",
-            customerName: "Trần Thị B",
-            customerPhone: "0987654321",
-            customerEmail: "thib@gmail.com",
-            totalPrice: 180000,
-            paymentMethod: "COD",
-            paymentStatus: "PAID",
-            orderStatus: "DELIVERED",
-            orderedAt: "2026-05-20T14:30:00",
-            shippingProvince: "Hồ Chí Minh",
-            shippingDistrict: "Quận 1",
-            shippingWard: "Bến Nghé",
-            shippingAddressLine: "120 Lê Lợi",
-            items: [
-              {
-                id: "item-2",
-                productName: "Ly Sứ Cao Cấp Men Hỏa Biến",
-                quantity: 1,
-                unitPrice: 180000,
-                totalPrice: 180000
-              }
-            ]
-          }
-        ]
-      });
-    }
+    await fetchAllOrders();
+  };
+
+  const handleLoadMockData = () => {
+    useOrderStore.setState({
+      orders: [
+        {
+          id: "ord-1",
+          orderCode: "HN-1716301234567",
+          customerName: "Nguyễn Văn A",
+          customerPhone: "0901234567",
+          customerEmail: "vana@gmail.com",
+          subtotalPrice: 490000,
+          shippingFee: 30000,
+          discountAmount: 0,
+          totalPrice: 520000,
+          paymentMethod: "MOMO",
+          paymentStatus: "PENDING",
+          orderStatus: "PENDING",
+          orderedAt: "2026-05-21T10:00:00",
+          shippingProvince: "Hà Nội",
+          shippingDistrict: "Cầu Giấy",
+          shippingWard: "Dịch Vọng",
+          shippingAddressLine: "Số 15 Ngõ 20 Trần Thái Tông",
+          note: "Gói quà cẩn thận giúp mình nhé",
+          items: [
+            {
+              id: "item-1",
+              productName: "Hộp Quà Lãng Mạn - Eternal Love",
+              variantName: "Standard",
+              quantity: 1,
+              unitPrice: 490000,
+              totalPrice: 490000,
+              customizationInfo: '{"text":"Chúc mừng sinh nhật Trang","card":"Merry Christmas"}'
+            }
+          ]
+        },
+        {
+          id: "ord-2",
+          orderCode: "HN-1716309876543",
+          customerName: "Trần Thị B",
+          customerPhone: "0987654321",
+          customerEmail: "thib@gmail.com",
+          subtotalPrice: 180000,
+          shippingFee: 30000,
+          discountAmount: 30000,
+          totalPrice: 180000,
+          paymentMethod: "COD",
+          paymentStatus: "PAID",
+          orderStatus: "DELIVERED",
+          orderedAt: "2026-05-20T14:30:00",
+          shippingProvince: "Hồ Chí Minh",
+          shippingDistrict: "Quận 1",
+          shippingWard: "Bến Nghé",
+          shippingAddressLine: "120 Lê Lợi",
+          items: [
+            {
+              id: "item-2",
+              productName: "Ly Sứ Cao Cấp Men Hỏa Biến",
+              quantity: 1,
+              unitPrice: 180000,
+              totalPrice: 180000
+            }
+          ]
+        }
+      ]
+    });
   };
 
   useEffect(() => {
@@ -115,14 +154,8 @@ export default function AdminOrdersPage() {
         setSelectedOrder(prev => prev ? { ...prev, orderStatus: newStatus } : null);
       }
       alert("Cập nhật trạng thái đơn hàng thành công!");
-    } catch (err) {
-      // Direct mock update if backend fails for any local reason
-      useOrderStore.setState({
-        orders: orders.map(o => o.id === orderId ? { ...o, orderStatus: newStatus } : o)
-      });
-      if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder(prev => prev ? { ...prev, orderStatus: newStatus } : null);
-      }
+    } catch (err: any) {
+      alert(`Cập nhật trạng thái giao hàng thất bại: ${err.message || 'Lỗi không xác định'}`);
     }
   };
 
@@ -133,13 +166,8 @@ export default function AdminOrdersPage() {
         setSelectedOrder(prev => prev ? { ...prev, paymentStatus: newPaymentStatus } : null);
       }
       alert("Cập nhật trạng thái thanh toán thành công!");
-    } catch (err) {
-      useOrderStore.setState({
-        orders: orders.map(o => o.id === orderId ? { ...o, paymentStatus: newPaymentStatus } : o)
-      });
-      if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder(prev => prev ? { ...prev, paymentStatus: newPaymentStatus } : null);
-      }
+    } catch (err: any) {
+      alert(`Cập nhật trạng thái thanh toán thất bại: ${err.message || 'Lỗi không xác định'}`);
     }
   };
 
@@ -202,9 +230,35 @@ export default function AdminOrdersPage() {
         {/* Orders List */}
         <div className="lg:col-span-2 space-y-4">
           {loading ? (
-            <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl text-center text-slate-400">Đang tải danh sách đơn hàng...</div>
+            <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl text-center text-slate-400">
+              <div className="flex flex-col items-center justify-center gap-2 py-4">
+                <svg className="animate-spin h-6 w-6 text-rose-500" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <span className="text-xs font-semibold">Đang tải danh sách đơn hàng...</span>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl text-center border border-rose-100/50 dark:border-rose-950/20 space-y-3">
+              <p className="text-rose-500 text-xs font-bold">Lỗi tải danh sách: {error}</p>
+              <button 
+                onClick={loadOrders}
+                className="px-4 py-2 text-xs font-semibold rounded-xl bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/10 transition-colors"
+              >
+                Tải lại danh sách
+              </button>
+            </div>
           ) : filteredOrders.length === 0 ? (
-            <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl text-center text-slate-400">Không tìm thấy đơn hàng nào.</div>
+            <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl text-center text-slate-400 space-y-3">
+              <p className="text-xs font-semibold">Không tìm thấy đơn hàng nào.</p>
+              <button 
+                onClick={handleLoadMockData}
+                className="px-3 py-1.5 text-[10px] font-bold rounded-lg border border-slate-200 hover:bg-slate-50 dark:border-zinc-800 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"
+              >
+                Nạp dữ liệu mẫu để thử nghiệm (Demo)
+              </button>
+            </div>
           ) : (
             filteredOrders.map(order => (
               <div
@@ -312,6 +366,33 @@ export default function AdminOrdersPage() {
                 </div>
               </div>
 
+              {/* Payment Breakdown */}
+              <div className="space-y-2 pt-4 border-t border-slate-100 dark:border-zinc-800 text-xs">
+                <h4 className="font-bold text-slate-700 dark:text-zinc-300 mb-1">Chi tiết thanh toán</h4>
+                <div className="flex justify-between text-slate-500">
+                  <span>Tạm tính:</span>
+                  <span>{(selectedOrder.subtotalPrice || (selectedOrder.totalPrice - (selectedOrder.shippingFee || 30000) + (selectedOrder.discountAmount || 0))).toLocaleString('vi-VN')}đ</span>
+                </div>
+                <div className="flex justify-between text-slate-500">
+                  <span>Phí vận chuyển:</span>
+                  <span>{(selectedOrder.shippingFee || 30000).toLocaleString('vi-VN')}đ</span>
+                </div>
+                {selectedOrder.discountAmount ? (
+                  <div className="flex justify-between text-emerald-500 font-medium">
+                    <span>Giảm giá:</span>
+                    <span>-{selectedOrder.discountAmount.toLocaleString('vi-VN')}đ</span>
+                  </div>
+                ) : null}
+                <div className="flex justify-between font-bold text-slate-800 dark:text-zinc-200 border-t border-dashed border-slate-150 dark:border-zinc-800 pt-2">
+                  <span>Tổng cộng:</span>
+                  <span className="text-rose-500">{selectedOrder.totalPrice.toLocaleString('vi-VN')}đ</span>
+                </div>
+                <div className="flex justify-between text-slate-500 text-[10px]">
+                  <span>Phương thức:</span>
+                  <span className="font-semibold text-slate-700 dark:text-zinc-300">{selectedOrder.paymentMethod}</span>
+                </div>
+              </div>
+
               {/* Items List */}
               <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-zinc-800">
                 <h4 className="text-xs font-bold text-slate-700 dark:text-zinc-300">Sản phẩm đã đặt</h4>
@@ -326,10 +407,10 @@ export default function AdminOrdersPage() {
                     
                     {item.customizationInfo && (
                       <div className="mt-2 bg-white dark:bg-zinc-800 p-2 rounded border border-slate-200/50 text-[10px] text-slate-500">
-                        <span className="font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1">
+                        <span className="font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1 mb-1 block">
                           <Icon name="🎨" size={14} className="text-cyan-500" /> Yêu cầu khắc/thiệp:
                         </span>
-                        <pre className="font-sans whitespace-pre-wrap">{item.customizationInfo}</pre>
+                        {renderCustomizationInfo(item.customizationInfo)}
                       </div>
                     )}
                   </div>

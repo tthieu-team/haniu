@@ -28,6 +28,11 @@ public class CatalogController {
         return ResponseEntity.ok(catalogService.createCategory(category));
     }
 
+    @PutMapping("/categories/{id}")
+    public ResponseEntity<Category> updateCategory(@PathVariable UUID id, @RequestBody Category category) {
+        return ResponseEntity.ok(catalogService.updateCategory(id, category));
+    }
+
     @DeleteMapping("/categories/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
         catalogService.deleteCategory(id);

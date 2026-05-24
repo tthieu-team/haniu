@@ -21,37 +21,7 @@ export default function AdminCouponsPage() {
   });
 
   const loadCoupons = async () => {
-    const res = await fetchCoupons();
-    if (!res || res.length === 0) {
-      // Premium mock data fallback
-      useCouponStore.setState({
-        coupons: [
-          {
-            id: "cp-1",
-            code: "HANIUNEW",
-            name: "Chào bạn mới",
-            description: "Giảm 10% cho đơn hàng đầu tiên tối thiểu 200k",
-            discountType: "PERCENT",
-            discountValue: 10,
-            minOrderValue: 200000,
-            maxDiscount: 50000,
-            usageLimit: 500,
-            active: true
-          },
-          {
-            id: "cp-2",
-            code: "LOVE50K",
-            name: "Quà tặng yêu thương",
-            description: "Giảm trực tiếp 50k cho đơn hàng từ 500k",
-            discountType: "FIXED",
-            discountValue: 50000,
-            minOrderValue: 500000,
-            usageLimit: 200,
-            active: true
-          }
-        ]
-      });
-    }
+    await fetchCoupons();
   };
 
   useEffect(() => {
@@ -70,19 +40,8 @@ export default function AdminCouponsPage() {
       }
       setIsEditing(false);
       loadCoupons();
-    } catch (err) {
-      // Local fallback simulator
-      if (currentCoupon.id) {
-        useCouponStore.setState({
-          coupons: coupons.map(c => c.id === currentCoupon.id ? currentCoupon : c)
-        });
-      } else {
-        useCouponStore.setState({
-          coupons: [...coupons, { ...currentCoupon, id: 'cp-' + Date.now() }]
-        });
-      }
-      setIsEditing(false);
-      alert('Đã lưu Coupon thành công!');
+    } catch (err: any) {
+      alert(err.message || 'Lỗi khi lưu Coupon!');
     }
   };
 
@@ -96,11 +55,8 @@ export default function AdminCouponsPage() {
     try {
       await deleteCoupon(id);
       loadCoupons();
-    } catch (err) {
-      useCouponStore.setState({
-        coupons: coupons.filter(c => c.id !== id)
-      });
-      alert('Đã xóa Coupon thành công!');
+    } catch (err: any) {
+      alert(err.message || 'Lỗi khi xóa Coupon!');
     }
   };
 

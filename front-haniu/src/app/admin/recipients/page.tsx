@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { catalogService, Recipient } from '@/services/catalog.service';
+import { Recipient } from '@/services/catalog.service';
 import { productService } from '@/services/product.service';
+import { useRecipientStore } from '@/store/recipient';
 import { getFullImageUrl } from '@/lib/api';
 import Link from 'next/link';
 import Icon from '@/components/common/Icons';
 
 export default function AdminRecipientsPage() {
-  const [recipients, setRecipients] = useState<Recipient[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { recipients, loading, fetchRecipients, saveRecipient, deleteRecipient } = useRecipientStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
   
@@ -31,15 +31,7 @@ export default function AdminRecipientsPage() {
   const [uploading, setUploading] = useState(false);
 
   const loadRecipients = async () => {
-    try {
-      setLoading(true);
-      const data = await catalogService.getAllRecipients();
-      setRecipients(data || []);
-    } catch (err) {
-      console.error('Không thể tải danh sách đối tượng người nhận:', err);
-    } finally {
-      setLoading(false);
-    }
+    await fetchRecipients();
   };
 
   useEffect(() => {
@@ -138,11 +130,10 @@ export default function AdminRecipientsPage() {
     try {
       setSubmitLoading(true);
       setErrorMsg('');
-      await catalogService.createRecipient(payload);
+      await saveRecipient(payload);
       setSuccessMsg(editingId ? 'Cập nhật đối tượng thành công! 🎉' : 'Thêm đối tượng mới thành công! 🎉');
       setTimeout(() => {
         setIsModalOpen(false);
-        loadRecipients();
       }, 1000);
     } catch (err: any) {
       setErrorMsg(err.message || 'Lỗi khi lưu đối tượng người nhận.');
@@ -154,10 +145,9 @@ export default function AdminRecipientsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa đối tượng người nhận này không?')) return;
     try {
-      await catalogService.deleteRecipient(id);
+      await deleteRecipient(id);
       setSuccessMsg('Xóa đối tượng thành công! 🎉');
       setTimeout(() => setSuccessMsg(''), 2000);
-      loadRecipients();
     } catch (err: any) {
       alert(err.message || 'Lỗi khi xóa đối tượng người nhận.');
     }

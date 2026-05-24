@@ -17,6 +17,25 @@ interface CouponState {
   deleteCoupon: (id: string) => Promise<void>;
 }
 
+const normalizeCoupon = (c: any): CouponPayload => {
+  if (!c) return c;
+  const activeVal = c.active !== undefined ? c.active : (c.isActive !== undefined ? c.isActive : true);
+  return {
+    ...c,
+    active: activeVal,
+    isActive: activeVal,
+  };
+};
+
+const preparePayload = (payload: CouponPayload): CouponPayload => {
+  const activeVal = payload.active !== undefined ? payload.active : (payload.isActive !== undefined ? payload.isActive : true);
+  return {
+    ...payload,
+    active: activeVal,
+    isActive: activeVal,
+  };
+};
+
 export const useCouponStore = create<CouponState>((set, get) => ({
   coupons: [],
   appliedCoupon: null,
@@ -28,8 +47,9 @@ export const useCouponStore = create<CouponState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const data = await couponService.getAllCoupons();
-      set({ coupons: data || [], loading: false });
-      return data || [];
+      const normalized = (data || []).map(normalizeCoupon);
+      set({ coupons: normalized, loading: false });
+      return normalized;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi lấy danh sách coupon' });
       return [];
@@ -40,8 +60,9 @@ export const useCouponStore = create<CouponState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const data = await couponService.getCouponByCode(code);
+      const normalized = normalizeCoupon(data);
       set({ loading: false });
-      return data;
+      return normalized;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi lấy thông tin coupon' });
       return null;
@@ -52,31 +73,32 @@ export const useCouponStore = create<CouponState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const coupon = await couponService.getCouponByCode(code);
-      if (!coupon || !coupon.active) {
+      const normalized = normalizeCoupon(coupon);
+      if (!normalized || !normalized.active) {
         set({ error: 'Mã giảm giá không hợp lệ hoặc đã hết hạn', loading: false });
         return null;
       }
 
-      if (coupon.minOrderValue && subtotal < coupon.minOrderValue) {
+      if (normalized.minOrderValue && subtotal < normalized.minOrderValue) {
         set({
-          error: `Đơn hàng tối thiểu ${coupon.minOrderValue.toLocaleString()}đ để dùng mã`,
+          error: `Đơn hàng tối thiểu ${normalized.minOrderValue.toLocaleString()}đ để dùng mã`,
           loading: false,
         });
         return null;
       }
 
       let discount = 0;
-      if (coupon.discountType === 'PERCENT') {
-        discount = subtotal * (coupon.discountValue / 100);
-        if (coupon.maxDiscount && discount > coupon.maxDiscount) {
-          discount = coupon.maxDiscount;
+      if (normalized.discountType === 'PERCENT') {
+        discount = subtotal * (normalized.discountValue / 100);
+        if (normalized.maxDiscount && discount > normalized.maxDiscount) {
+          discount = normalized.maxDiscount;
         }
       } else {
-        discount = coupon.discountValue;
+        discount = normalized.discountValue;
       }
 
       set({
-        appliedCoupon: coupon,
+        appliedCoupon: normalized,
         discountAmount: discount,
         error: null,
         loading: false,
@@ -86,7 +108,7 @@ export const useCouponStore = create<CouponState>((set, get) => ({
         localStorage.setItem('haniu_active_coupon', code);
       }
 
-      return coupon;
+      return normalized;
     } catch (err: any) {
       set({
         error: err.message || 'Mã giảm giá không chính xác',
@@ -106,12 +128,14 @@ export const useCouponStore = create<CouponState>((set, get) => ({
   createCoupon: async (payload) => {
     set({ loading: true, error: null });
     try {
-      const data = await couponService.createCoupon(payload);
+      const body = preparePayload(payload);
+      const data = await couponService.createCoupon(body);
+      const normalized = normalizeCoupon(data);
       set((state) => ({
-        coupons: [data, ...state.coupons],
+        coupons: [normalized, ...state.coupons],
         loading: false,
       }));
-      return data;
+      return normalized;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi tạo coupon' });
       throw err;
@@ -121,12 +145,14 @@ export const useCouponStore = create<CouponState>((set, get) => ({
   updateCoupon: async (id, payload) => {
     set({ loading: true, error: null });
     try {
-      const data = await couponService.updateCoupon(id, payload);
+      const body = preparePayload(payload);
+      const data = await couponService.updateCoupon(id, body);
+      const normalized = normalizeCoupon(data);
       set((state) => ({
-        coupons: state.coupons.map((c) => (c.id === id ? data : c)),
+        coupons: state.coupons.map((c) => (c.id === id ? normalized : c)),
         loading: false,
       }));
-      return data;
+      return normalized;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi cập nhật coupon' });
       throw err;

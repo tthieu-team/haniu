@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { catalogService, Occasion } from '@/services/catalog.service';
+import { Occasion } from '@/services/catalog.service';
 import { productService } from '@/services/product.service';
+import { useOccasionStore } from '@/store/occasion';
 import { getFullImageUrl } from '@/lib/api';
 import Link from 'next/link';
 import Icon from '@/components/common/Icons';
 
 export default function AdminOccasionsPage() {
-  const [occasions, setOccasions] = useState<Occasion[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { occasions, loading, fetchOccasions, saveOccasion, deleteOccasion } = useOccasionStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
   
@@ -33,15 +33,7 @@ export default function AdminOccasionsPage() {
   const [uploading, setUploading] = useState(false);
 
   const loadOccasions = async () => {
-    try {
-      setLoading(true);
-      const data = await catalogService.getAllOccasions();
-      setOccasions(data || []);
-    } catch (err) {
-      console.error('Không thể tải danh sách dịp lễ:', err);
-    } finally {
-      setLoading(false);
-    }
+    await fetchOccasions();
   };
 
   useEffect(() => {
@@ -146,11 +138,10 @@ export default function AdminOccasionsPage() {
     try {
       setSubmitLoading(true);
       setErrorMsg('');
-      await catalogService.createOccasion(payload);
+      await saveOccasion(payload);
       setSuccessMsg(editingId ? 'Cập nhật dịp lễ thành công! 🎉' : 'Thêm dịp lễ mới thành công! 🎉');
       setTimeout(() => {
         setIsModalOpen(false);
-        loadOccasions();
       }, 1000);
     } catch (err: any) {
       setErrorMsg(err.message || 'Lỗi khi lưu dịp lễ.');
@@ -162,10 +153,9 @@ export default function AdminOccasionsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa dịp lễ này không?')) return;
     try {
-      await catalogService.deleteOccasion(id);
+      await deleteOccasion(id);
       setSuccessMsg('Xóa dịp lễ thành công! 🎉');
       setTimeout(() => setSuccessMsg(''), 2000);
-      loadOccasions();
     } catch (err: any) {
       alert(err.message || 'Lỗi khi xóa dịp lễ.');
     }

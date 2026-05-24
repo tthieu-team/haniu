@@ -17,6 +17,9 @@ export interface Order {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
+  subtotalPrice?: number;
+  shippingFee?: number;
+  discountAmount?: number;
   totalPrice: number;
   paymentMethod: string;
   paymentStatus: string;
