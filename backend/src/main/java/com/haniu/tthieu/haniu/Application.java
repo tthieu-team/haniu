@@ -36,8 +36,30 @@ public class Application {
 				dbUrl = dbUrl.substring(1, dbUrl.length() - 1);
 			}
 			
-			if (dbUrl.startsWith("postgresql://")) {
-				dbUrl = "jdbc:" + dbUrl;
+			String cleanUrl = dbUrl;
+			if (cleanUrl.startsWith("jdbc:")) {
+				cleanUrl = cleanUrl.substring(5);
+			}
+			
+			if (cleanUrl.startsWith("postgresql://") || cleanUrl.startsWith("postgres://")) {
+				int schemeIdx = cleanUrl.indexOf("://");
+				String remainder = cleanUrl.substring(schemeIdx + 3);
+				int atIdx = remainder.lastIndexOf('@');
+				if (atIdx != -1) {
+					String credentials = remainder.substring(0, atIdx);
+					String hostDb = remainder.substring(atIdx + 1);
+					
+					int colonIdx = credentials.indexOf(':');
+					String username = colonIdx != -1 ? credentials.substring(0, colonIdx) : credentials;
+					String password = colonIdx != -1 ? credentials.substring(colonIdx + 1) : "";
+					
+					System.setProperty("spring.datasource.username", username);
+					System.setProperty("spring.datasource.password", password);
+					
+					dbUrl = "jdbc:postgresql://" + hostDb;
+				} else {
+					dbUrl = "jdbc:postgresql://" + remainder;
+				}
 			}
 			System.setProperty("DATABASE_URL_POSTGRE", dbUrl);
 			System.out.println("Normalized database connection URL: " + dbUrl);
