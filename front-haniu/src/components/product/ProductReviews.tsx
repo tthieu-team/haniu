@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useAuthStore } from '@/store/auth';
 import { fetchApi } from '@/lib/api';
 

@@ -7,8 +7,11 @@ interface Attribute {
   name: string;
   value: string;
 }
-
-
+interface ProductSpecificationsProps {
+  specificationsString?: string | null;
+  includedItemsString?: string | null;
+  attributes?: Attribute[];
+}
 
 export default function ProductSpecifications({
   specificationsString,
