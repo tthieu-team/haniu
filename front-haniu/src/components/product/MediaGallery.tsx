@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { getFullImageUrl } from '@/lib/api';
 
 interface Media {
-  id: string;
+  id?: string;
   url: string;
   type: string;
   altText?: string;

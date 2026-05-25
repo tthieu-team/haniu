@@ -18,6 +18,7 @@ export interface Product {
   brand?: { id: string; name: string };
   collection?: { id: string; name: string };
   specifications?: string;
+  includedItems?: string;
   occasions?: Array<{ id: string; name: string }>;
   recipients?: Array<{ id: string; name: string }>;
   media?: Array<{ id: string; url: string; type: string; isThumbnail: boolean; altText: string; sortOrder: number }>;

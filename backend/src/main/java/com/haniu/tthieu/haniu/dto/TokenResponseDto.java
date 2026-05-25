@@ -15,4 +15,6 @@ public class TokenResponseDto {
     private String tokenType;
     private String role;
     private String fullName;
+    private String email;
+    private String phone;
 }

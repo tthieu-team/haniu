@@ -11,6 +11,7 @@ import { useAuthStore } from '@/store/auth';
 import { useCartStore } from '@/store/cart';
 import { useThemeStore } from '@/store/theme';
 import { useWishlistStore } from '@/store/wishlist';
+import { authService } from '@/services/auth.service';
 
 export default function Header() {
   const router = useRouter();
@@ -200,7 +201,7 @@ export default function Header() {
                       </Link>
                     )}
                     <button
-                      onClick={clearAuth}
+                      onClick={() => authService.logout()}
                       className="text-left text-xs font-semibold text-rose-500 hover:text-rose-600 px-2 py-1.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/20 cursor-pointer"
                     >
                       Đăng xuất
@@ -305,7 +306,7 @@ export default function Header() {
                     )}
                     <button
                       onClick={() => {
-                        clearAuth();
+                        authService.logout();
                         setMobileOpen(false);
                       }}
                       className="w-full text-center bg-rose-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"

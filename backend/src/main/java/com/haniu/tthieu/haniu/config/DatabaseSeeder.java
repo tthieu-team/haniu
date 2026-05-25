@@ -43,7 +43,9 @@ public class DatabaseSeeder implements CommandLineRunner {
         seedUsers();
 
         if (categoryRepository.count() > 0) {
-            log.info("Database already seeded. Skipping seeder.");
+            log.info("Database already seeded. Updating existing product prices if needed.");
+            updatePricesForExistingProducts();
+            seedAccessories();
             return;
         }
 
@@ -275,8 +277,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .shortDescription("Ly sứ men trắng cao cấp hỗ trợ khắc tên và in hình theo yêu cầu riêng biệt.")
                 .description("Sản phẩm được làm từ đất sét trắng chọn lọc, nung ở nhiệt độ 1300 độ C loại bỏ hoàn toàn tạp chất có hại. Công nghệ khắc laser sắc nét giúp bạn lưu giữ thông điệp và hình ảnh cá nhân hóa độc đáo trên thân cốc.")
                 .thumbnailUrl("https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=600")
-                .price(new BigDecimal("150000.00"))
-                .salePrice(new BigDecimal("120000.00"))
+                .price(new BigDecimal("500000.00"))
+                .salePrice(new BigDecimal("100000.00"))
                 .costPrice(new BigDecimal("50000.00"))
                 .stock(100)
                 .material("Gốm sứ tráng men")
@@ -287,6 +289,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .isCustomizable(true)
                 .layoutTemplate("DEFAULT")
                 .specifications("{\"Dung tích\": \"350ml\", \"Chiều cao\": \"9.5cm\", \"Đường kính miệng\": \"8cm\"}")
+                .includedItems("{\"Cốc sứ Haniu tráng men\": \"1 chiếc\", \"Thìa inox mạ vàng\": \"1 chiếc\", \"Đế lót gỗ\": \"1 chiếc\", \"Hộp giấy quà tặng\": \"1 chiếc\"}")
                 .publishedAt(LocalDateTime.now())
                 .build();
         p1 = productRepository.save(p1);
@@ -295,8 +298,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .product(p1)
                 .name("Ly sứ khắc tên - 350ml")
                 .sku("LYSU-KHACTEN-01-350")
-                .price(new BigDecimal("150000.00"))
-                .salePrice(new BigDecimal("120000.00"))
+                .price(new BigDecimal("500000.00"))
+                .salePrice(new BigDecimal("100000.00"))
                 .stock(50)
                 .isActive(true)
                 .build();
@@ -327,6 +330,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .isCustomizable(true)
                 .layoutTemplate("DEFAULT")
                 .specifications("{\"Kích thước\": \"A5 (14.8 x 21 cm)\", \"Số trang\": \"200 trang\", \"Định lượng\": \"80gsm\"}")
+                .includedItems("{\"Sổ tay bìa da PU\": \"1 cuốn\", \"Bút ký kim loại khắc tên\": \"1 chiếc\", \"Hộp xi carton lót lụa\": \"1 chiếc\"}")
                 .publishedAt(LocalDateTime.now())
                 .build();
         p2 = productRepository.save(p2);
@@ -367,6 +371,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .isCustomizable(false)
                 .layoutTemplate("DEFAULT")
                 .specifications("{\"Kích thước hộp\": \"25x25x12cm\", \"Số lượng hoa\": \"19 bông\", \"Độ bền hương\": \"Up to 3 years\"}")
+                .includedItems("{\"Hộp đựng bìa cứng trái tim\": \"1 chiếc\", \"Hoa hồng sáp thơm\": \"19 bông\", \"Gấu bông nhỏ\": \"1 chiếc\", \"Đèn Led đom đóm\": \"1 bộ\"}")
                 .publishedAt(LocalDateTime.now())
                 .build();
         p3 = productRepository.save(p3);
@@ -397,8 +402,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .shortDescription("Combo quà tặng gỗ đặc biệt in hình bản đồ Việt Nam và cờ đỏ sao vàng.")
                 .description("Hộp quà tặng gỗ thông cao cấp chứa một chiếc bình giữ nhiệt vỏ tre khắc bản đồ hình chữ S, một chiếc bút gỗ khắc tên và một cuốn sổ bìa gỗ độc đáo. Thể hiện niềm tự hào dân tộc và lòng yêu nước sâu sắc.")
                 .thumbnailUrl("https://images.unsplash.com/photo-1607344645866-009c320c5ab8?q=80&w=600")
-                .price(new BigDecimal("50000.00")) // standard 500k but let's set it to 500000
                 .price(new BigDecimal("500000.00"))
+                .salePrice(new BigDecimal("100000.00"))
                 .costPrice(new BigDecimal("180000.00"))
                 .stock(50)
                 .material("Gỗ thông tự nhiên, Tre, Inox 304")
@@ -409,6 +414,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .isCustomizable(true)
                 .layoutTemplate("DEFAULT")
                 .specifications("{\"Hộp gỗ\": \"30x22x10cm\", \"Bình tre\": \"500ml\", \"Sổ gỗ\": \"A5\"}")
+                .includedItems("{\"Hộp gỗ thông khắc laser\": \"1 chiếc\", \"Bình giữ nhiệt vỏ tre\": \"1 chiếc\", \"Sổ tay gỗ cao cấp\": \"1 cuốn\", \"Bút gỗ tre ký tên\": \"1 chiếc\"}")
                 .publishedAt(LocalDateTime.now())
                 .build();
         p4 = productRepository.save(p4);
@@ -418,12 +424,50 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .name("Set quà tặng Quốc Khánh 2-9 - Tiêu Chuẩn")
                 .sku("COMBO-QUOCKHANH-04-STD")
                 .price(new BigDecimal("500000.00"))
+                .salePrice(new BigDecimal("100000.00"))
                 .stock(30)
                 .isActive(true)
                 .build();
         productVariantRepository.save(p4v1);
 
         log.info("Database successfully seeded with standard Haniu Gift Shop catalog!");
+        seedAccessories();
+    }
+
+    private void updatePricesForExistingProducts() {
+        productRepository.findBySlug("ly-su-khac-ten-cao-cap-haniu").ifPresent(p1 -> {
+            p1.setPrice(new BigDecimal("500000.00"));
+            p1.setSalePrice(new BigDecimal("100000.00"));
+            p1.setIncludedItems("{\"Cốc sứ Haniu tráng men\": \"1 chiếc\", \"Thìa inox mạ vàng\": \"1 chiếc\", \"Đế lót gỗ\": \"1 chiếc\", \"Hộp giấy quà tặng\": \"1 chiếc\"}");
+            productRepository.save(p1);
+            productVariantRepository.findByProductId(p1.getId()).forEach(v -> {
+                v.setPrice(new BigDecimal("500000.00"));
+                v.setSalePrice(new BigDecimal("100000.00"));
+                productVariantRepository.save(v);
+            });
+        });
+
+        productRepository.findBySlug("so-tay-bia-da-khac-logo").ifPresent(p2 -> {
+            p2.setIncludedItems("{\"Sổ tay bìa da PU\": \"1 cuốn\", \"Bút ký kim loại khắc tên\": \"1 chiếc\", \"Hộp xi carton lót lụa\": \"1 chiếc\"}");
+            productRepository.save(p2);
+        });
+
+        productRepository.findBySlug("hop-qua-hoa-hong-sap-thom-va-gau-bong").ifPresent(p3 -> {
+            p3.setIncludedItems("{\"Hộp đựng bìa cứng trái tim\": \"1 chiếc\", \"Hoa hồng sáp thơm\": \"19 bông\", \"Gấu bông nhỏ\": \"1 chiếc\", \"Đèn Led đom đóm\": \"1 bộ\"}");
+            productRepository.save(p3);
+        });
+
+        productRepository.findBySlug("set-qua-tang-quoc-khanh-2-9-doc-ban").ifPresent(p4 -> {
+            p4.setPrice(new BigDecimal("500000.00"));
+            p4.setSalePrice(new BigDecimal("100000.00"));
+            p4.setIncludedItems("{\"Hộp gỗ thông khắc laser\": \"1 chiếc\", \"Bình giữ nhiệt vỏ tre\": \"1 chiếc\", \"Sổ tay gỗ cao cấp\": \"1 cuốn\", \"Bút gỗ tre ký tên\": \"1 chiếc\"}");
+            productRepository.save(p4);
+            productVariantRepository.findByProductId(p4.getId()).forEach(v -> {
+                v.setPrice(new BigDecimal("500000.00"));
+                v.setSalePrice(new BigDecimal("100000.00"));
+                productVariantRepository.save(v);
+            });
+        });
     }
 
     private void seedUsers() {
@@ -458,5 +502,120 @@ public class DatabaseSeeder implements CommandLineRunner {
             userRepository.save(testUser);
             log.info("Test user successfully seeded!");
         }
+    }
+
+    private void seedAccessories() {
+        if (productRepository.findBySlug("thiep-chuc-mung-thiet-ke-rieng").isPresent()) {
+            return;
+        }
+
+        log.info("Seeding accessory products for cross-sell...");
+        Category phuKien = categoryRepository.findBySlug("phu-kien-qua-tang").orElseGet(() -> {
+            Category cat = Category.builder()
+                    .name("Phụ kiện quà tặng")
+                    .slug("phu-kien-qua-tang")
+                    .description("Thiệp, túi, hộp quà và các dịch vụ đi kèm")
+                    .isActive(true)
+                    .isFeatured(true)
+                    .sortOrder(5)
+                    .build();
+            return categoryRepository.save(cat);
+        });
+
+        Brand brand = brandRepository.findBySlug("haniu-gift-shop").orElse(null);
+
+        Product thiep = Product.builder()
+                .category(phuKien)
+                .brand(brand)
+                .name("Thiệp chúc mừng thiết kế riêng Haniu")
+                .slug("thiep-chuc-mung-thiet-ke-rieng")
+                .sku("ACC-THIEP-01")
+                .shortDescription("Thiệp viết tay ý nghĩa kèm phong bì sang trọng")
+                .description("Thiệp được in trên giấy mỹ thuật cao cấp dập chìm họa tiết vintage sắc nét, đi kèm bao bì nhung sang trọng.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?q=80&w=600")
+                .price(new BigDecimal("15000.00"))
+                .costPrice(new BigDecimal("3000.00"))
+                .stock(9999)
+                .material("Giấy mỹ thuật")
+                .color("Kem/Kraft")
+                .status(ProductStatus.PUBLISHED)
+                .isFeatured(false)
+                .isNew(false)
+                .isCustomizable(false)
+                .layoutTemplate("DEFAULT")
+                .publishedAt(LocalDateTime.now())
+                .build();
+        productRepository.save(thiep);
+
+        Product tui = Product.builder()
+                .category(phuKien)
+                .brand(brand)
+                .name("Túi quà Haniu cao cấp")
+                .slug("tui-qua-haniu-cao-cap")
+                .sku("ACC-TUI-02")
+                .shortDescription("Túi giấy kraft quai vải lịch sự, sang trọng")
+                .description("Túi quà được thiết kế với chất liệu carton gấp nếp dầy dặn, quai xách ruy băng lụa mềm mại tạo nên vẻ ngoài cực kỳ sang trọng.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=600")
+                .price(new BigDecimal("20000.00"))
+                .costPrice(new BigDecimal("5000.00"))
+                .stock(9999)
+                .material("Giấy bìa Kraft cứng")
+                .color("Đỏ đô / Nâu Kraft")
+                .status(ProductStatus.PUBLISHED)
+                .isFeatured(false)
+                .isNew(false)
+                .isCustomizable(false)
+                .layoutTemplate("DEFAULT")
+                .publishedAt(LocalDateTime.now())
+                .build();
+        productRepository.save(tui);
+
+        Product laser = Product.builder()
+                .category(phuKien)
+                .brand(brand)
+                .name("Dịch vụ khắc laser Premium")
+                .slug("dich-vu-khac-laser-premium")
+                .sku("ACC-LASER-03")
+                .shortDescription("Khắc tên, logo doanh nghiệp sắc nét lên sản phẩm")
+                .description("Sử dụng công nghệ khắc laser fiber/CO2 tiên tiến của Đức, đảm bảo chi tiết sắc nét và bền bỉ mãi mãi với thời gian.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=600")
+                .price(new BigDecimal("50000.00"))
+                .costPrice(new BigDecimal("0.00"))
+                .stock(9999)
+                .material("Dịch vụ gia công")
+                .color("Tự chọn")
+                .status(ProductStatus.PUBLISHED)
+                .isFeatured(false)
+                .isNew(false)
+                .isCustomizable(false)
+                .layoutTemplate("DEFAULT")
+                .publishedAt(LocalDateTime.now())
+                .build();
+        productRepository.save(laser);
+
+        Product hop = Product.builder()
+                .category(phuKien)
+                .brand(brand)
+                .name("Hộp quà gỗ thông tự nhiên Haniu")
+                .slug("hop-qua-go-thong-tu-nhien")
+                .sku("ACC-HOPGO-04")
+                .shortDescription("Hộp gỗ khóa đồng sang trọng nâng tầm bộ quà")
+                .description("Hộp quà được chế tác thủ công từ gỗ thông nhập khẩu Chile, vân gỗ tự nhiên sơn phủ bóng mờ chống ẩm mốc kèm khóa đồng cổ điển.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1607344645866-009c320c5ab8?q=80&w=600")
+                .price(new BigDecimal("100000.00"))
+                .costPrice(new BigDecimal("40000.00"))
+                .stock(9999)
+                .material("Gỗ thông Chile")
+                .color("Vàng gỗ tự nhiên")
+                .status(ProductStatus.PUBLISHED)
+                .isFeatured(false)
+                .isNew(false)
+                .isCustomizable(false)
+                .layoutTemplate("DEFAULT")
+                .publishedAt(LocalDateTime.now())
+                .build();
+        productRepository.save(hop);
+
+        log.info("Accessory products seeded successfully!");
     }
 }

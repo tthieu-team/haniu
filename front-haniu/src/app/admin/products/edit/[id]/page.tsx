@@ -4,6 +4,7 @@ import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SpecManager from '@/components/product/SpecManager';
+import IncludedItemsManager from '@/components/product/IncludedItemsManager';
 import VariantManager from '@/components/product/VariantManager';
 import { productService } from '@/services/product.service';
 import { catalogService } from '@/services/catalog.service';
@@ -143,6 +144,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   // Dynamic Specs
   const [specs, setSpecs] = useState<SpecInput[]>([]);
+  const [includedItems, setIncludedItems] = useState<SpecInput[]>([]);
 
   // Nested Lists
   const [mediaList, setMediaList] = useState<MediaInput[]>([]);
@@ -238,6 +240,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         }
       }
 
+      if (data.includedItems) {
+        try {
+          const parsed = JSON.parse(data.includedItems);
+          setIncludedItems(Object.entries(parsed).map(([key, value]) => ({ key, value: String(value) })));
+        } catch {
+          // ignore
+        }
+      } else {
+        setIncludedItems([]);
+      }
+
       if (data.attributes) {
         const attrsObj: Record<string, string> = {};
         data.attributes.forEach((a: any) => {
@@ -275,6 +288,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       if (s.key.trim()) specsMap[s.key.trim()] = s.value.trim();
     });
 
+    const includedItemsMap: Record<string, string> = {};
+    includedItems.forEach(item => {
+      if (item.key.trim()) includedItemsMap[item.key.trim()] = item.value.trim();
+    });
+
     const payload = {
       name,
       slug: slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
@@ -299,6 +317,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       layoutTemplate,
       layoutConfig,
       specifications: JSON.stringify(specsMap),
+      includedItems: JSON.stringify(includedItemsMap),
       seoTitle: seoTitle || null,
       seoDescription: seoDescription || null,
       seoKeywords: seoKeywords || null,
@@ -354,6 +373,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     if (s.key.trim()) specsMapForPreview[s.key.trim()] = s.value;
   });
 
+  const includedItemsMapForPreview: Record<string, string> = {};
+  includedItems.forEach(item => {
+    if (item.key.trim()) includedItemsMapForPreview[item.key.trim()] = item.value;
+  });
+
   const previewProductData = {
     name: name || 'Tên sản phẩm quà tặng',
     sku: sku || 'SKU-XXXX',
@@ -369,6 +393,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     brandName: activeBrand?.name,
     collectionName: activeCollection?.name,
     specifications: specsMapForPreview,
+    includedItems: includedItemsMapForPreview,
     attributes: attributes,
     media: mediaList,
     variants: variantsList,
@@ -457,6 +482,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
           {/* Dynamic Specifications */}
           <SpecManager specs={specs} setSpecs={setSpecs} />
+
+          {/* Dynamic Included Items */}
+          <IncludedItemsManager items={includedItems} setItems={setIncludedItems} />
 
           {/* SEO & Layout Configuration */}
           <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6 text-xs font-semibold">

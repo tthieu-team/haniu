@@ -18,6 +18,7 @@ export interface ProductRequestPayload {
   layoutTemplate?: string;
   layoutConfig?: string;
   specifications?: string;
+  includedItems?: string;
   occasions?: string[];
   recipients?: string[];
   variants?: any[];

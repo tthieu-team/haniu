@@ -36,6 +36,7 @@ public class ProductRequestDto {
     private String layoutTemplate;
     private String layoutConfig;
     private String specifications;
+    private String includedItems;
     
     private String seoTitle;
     private String seoDescription;

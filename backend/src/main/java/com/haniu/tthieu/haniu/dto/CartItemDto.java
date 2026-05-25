@@ -25,4 +25,11 @@ public class CartItemDto {
     private BigDecimal unitPrice;
     private BigDecimal totalPrice;
     private String customizationInfo;
+    
+    // Additional fields for rich display & stock verification
+    private BigDecimal originalPrice;
+    private int stock;
+    private String color;
+    private String size;
+    private String material;
 }

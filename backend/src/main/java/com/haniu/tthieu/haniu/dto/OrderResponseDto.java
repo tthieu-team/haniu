@@ -33,6 +33,7 @@ public class OrderResponseDto {
     private String paymentMethod;
     private String paymentStatus;
     private String orderStatus;
+    private String shippingMethod;
     private LocalDateTime orderedAt;
     private List<OrderItemResponseDto> items;
 

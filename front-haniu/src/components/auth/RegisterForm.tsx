@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Icon from '@/components/common/Icons';
 import { authService } from '@/services/auth.service';
+import { useCartStore } from '@/store/cart';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -144,7 +145,12 @@ export default function RegisterForm() {
         setErrorMsg('');
         setSuccess(true);
         const { setAuth } = require('@/store/auth').useAuthStore.getState();
-        setAuth('mock-register-token', { fullName, role: 'USER' });
+        setAuth('mock-register-token', 'mock-refresh-token', { fullName, role: 'USER' });
+        try {
+          useCartStore.getState().mergeCarts();
+        } catch (e) {
+          console.error('Failed to merge carts on mock register', e);
+        }
         setTimeout(() => {
           router.push('/');
         }, 1500);

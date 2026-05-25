@@ -18,6 +18,7 @@ interface Product {
   status: string;
   category?: { name: string };
   media?: Array<{ url: string; isThumbnail: boolean }>;
+  includedItems?: string;
 }
 
 const MOCK_PRODUCTS: Product[] = [
@@ -49,6 +50,16 @@ const MOCK_PRODUCTS: Product[] = [
     media: [{ url: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=100&auto=format&fit=crop&q=80", isThumbnail: true }]
   }
 ];
+
+const getIncludedItemsCount = (jsonStr?: string) => {
+  if (!jsonStr) return 0;
+  try {
+    const parsed = JSON.parse(jsonStr);
+    return Object.keys(parsed).length;
+  } catch {
+    return 0;
+  }
+};
 
 export default function AdminProductsPage() {
   const { products, loading, fetchProducts, deleteProduct } = useProductStore();
@@ -147,9 +158,16 @@ export default function AdminProductsPage() {
                         <div className="w-10 aspect-square rounded-lg overflow-hidden bg-slate-50 border border-slate-100 dark:border-zinc-800 flex-shrink-0">
                           <img src={thumbnail} alt={product.name} className="w-full h-full object-cover" />
                         </div>
-                        <span className="font-semibold text-slate-700 dark:text-zinc-200 line-clamp-1 max-w-[200px]">
-                          {product.name}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-slate-700 dark:text-zinc-200 line-clamp-1 max-w-[200px]">
+                            {product.name}
+                          </span>
+                          {getIncludedItemsCount(product.includedItems) > 0 && (
+                            <span className="text-[10px] text-rose-500 font-semibold mt-0.5 flex items-center gap-0.5">
+                              🎁 Combo: {getIncludedItemsCount(product.includedItems)} vật phẩm
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 font-mono text-[10px] text-slate-400">{product.sku}</td>
                       <td className="px-6 py-4 text-slate-500">{product.category?.name || 'Chưa phân loại'}</td>
@@ -170,6 +188,11 @@ export default function AdminProductsPage() {
                         )}
                         {product.isCustomizable && (
                           <span className="bg-cyan-500/10 text-cyan-600 text-[9px] font-bold px-1.5 py-0.5 rounded">Personalized</span>
+                        )}
+                        {getIncludedItemsCount(product.includedItems) > 0 && (
+                          <span className="bg-rose-500/10 text-rose-600 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                            Combo
+                          </span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-right space-x-2">

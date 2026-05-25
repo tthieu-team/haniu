@@ -38,6 +38,7 @@ interface PreviewProduct {
   brandName?: string;
   collectionName?: string;
   specifications: Record<string, string>; // parsed specs
+  includedItems?: Record<string, string>; // parsed included items
   attributes: Record<string, string>; // parsed category/global attributes
   media: Media[];
   variants: Variant[];
@@ -181,6 +182,23 @@ export default function ProductPreviewPanel({ product }: ProductPreviewPanelProp
                 </div>
               );
             })}
+          </dl>
+        </div>
+      )}
+
+      {/* Included items preview */}
+      {product.includedItems && Object.keys(product.includedItems).length > 0 && (
+        <div className="bg-slate-50 dark:bg-zinc-950/30 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/60 space-y-3">
+          <h3 className="font-bold text-[10px] tracking-wider uppercase text-slate-400 border-b border-slate-200/50 dark:border-zinc-800/50 pb-1.5 flex items-center gap-1">
+            🎁 Chi tiết bộ quà tặng gồm
+          </h3>
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-[11px]">
+            {Object.entries(product.includedItems).map(([item, qty]) => (
+              <div key={item} className="border-b border-slate-200/30 dark:border-zinc-800/20 pb-1.5 font-normal">
+                <dt className="text-slate-400">{item}</dt>
+                <dd className="text-slate-700 dark:text-zinc-200 font-bold mt-0.5">{qty}</dd>
+              </div>
+            ))}
           </dl>
         </div>
       )}

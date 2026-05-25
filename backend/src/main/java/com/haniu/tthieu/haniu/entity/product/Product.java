@@ -180,6 +180,10 @@ public class Product {
     @Column(name = "specifications", columnDefinition = "jsonb")
     private String specifications;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "included_items", columnDefinition = "jsonb")
+    private String includedItems;
+
     @Column(name = "published_at")
     private LocalDateTime publishedAt;
 

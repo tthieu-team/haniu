@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SpecManager from '@/components/product/SpecManager';
+import IncludedItemsManager from '@/components/product/IncludedItemsManager';
 import VariantManager from '@/components/product/VariantManager';
 import { productService } from '@/services/product.service';
 import { catalogService } from '@/services/catalog.service';
@@ -88,6 +89,8 @@ export default function NewProductPage() {
     { key: 'Kích thước', value: '20 x 15 x 5 cm' }
   ]);
 
+  const [includedItems, setIncludedItems] = useState<SpecInput[]>([]);
+
   // Nested Lists
   const [mediaList, setMediaList] = useState<MediaInput[]>([]);
   const [variantsList, setVariantsList] = useState<VariantInput[]>([]);
@@ -137,6 +140,11 @@ export default function NewProductPage() {
       if (s.key.trim()) specsMap[s.key.trim()] = s.value.trim();
     });
 
+    const includedItemsMap: Record<string, string> = {};
+    includedItems.forEach(item => {
+      if (item.key.trim()) includedItemsMap[item.key.trim()] = item.value.trim();
+    });
+
     const payload = {
       name,
       slug: slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
@@ -158,6 +166,7 @@ export default function NewProductPage() {
       layoutTemplate,
       layoutConfig,
       specifications: JSON.stringify(specsMap),
+      includedItems: JSON.stringify(includedItemsMap),
       occasions: selectedOccasions,
       recipients: selectedRecipients,
       variants: variantsList,
@@ -195,6 +204,11 @@ export default function NewProductPage() {
     if (s.key.trim()) specsMapForPreview[s.key.trim()] = s.value;
   });
 
+  const includedItemsMapForPreview: Record<string, string> = {};
+  includedItems.forEach(item => {
+    if (item.key.trim()) includedItemsMapForPreview[item.key.trim()] = item.value;
+  });
+
   const previewProductData = {
     name: name || 'Tên sản phẩm quà tặng',
     sku: sku || 'SKU-XXXX',
@@ -210,6 +224,7 @@ export default function NewProductPage() {
     brandName: activeBrand?.name,
     collectionName: activeCollection?.name,
     specifications: specsMapForPreview,
+    includedItems: includedItemsMapForPreview,
     attributes: attributes,
     media: mediaList,
     variants: variantsList,
@@ -298,6 +313,9 @@ export default function NewProductPage() {
 
           {/* Dynamic Specifications */}
           <SpecManager specs={specs} setSpecs={setSpecs} />
+
+          {/* Dynamic Included Items */}
+          <IncludedItemsManager items={includedItems} setItems={setIncludedItems} />
 
           {/* Product Media Manager */}
           <ImageUploadForm

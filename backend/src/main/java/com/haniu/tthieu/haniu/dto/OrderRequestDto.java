@@ -33,4 +33,5 @@ public class OrderRequestDto {
     private String note;
     private String paymentMethod; // e.g. COD, MOMO, VNPAY
     private String couponCode;
+    private String shippingMethod; // e.g. STANDARD, FAST, EXPRESS
 }

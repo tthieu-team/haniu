@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Icon from '@/components/common/Icons';
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth';
+import { useCartStore } from '@/store/cart';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -87,6 +88,11 @@ export default function LoginForm() {
             fullName: isDemoAdmin ? 'Haniu Admin' : 'Nguyễn Văn Haniu',
             role: isDemoAdmin ? 'ADMIN' : 'USER'
           });
+          try {
+            useCartStore.getState().mergeCarts();
+          } catch (e) {
+            console.error('Failed to merge carts on mock login', e);
+          }
           setTimeout(() => {
             if (isDemoAdmin) {
               router.push('/admin');
@@ -141,6 +147,11 @@ export default function LoginForm() {
       // Seed mock auth
       const { setAuth } = require('@/store/auth').useAuthStore.getState();
       setAuth('mock-otp-jwt-token', 'mock-otp-refresh-token', { fullName: 'Khách hàng OTP', role: 'USER' });
+      try {
+        useCartStore.getState().mergeCarts();
+      } catch (e) {
+        console.error('Failed to merge carts on OTP mock login', e);
+      }
 
       setSuccess(true);
       setTimeout(() => {

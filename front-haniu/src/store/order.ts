@@ -24,6 +24,7 @@ export interface Order {
   paymentMethod: string;
   paymentStatus: string;
   orderStatus: string;
+  shippingMethod?: string;
   orderedAt: string;
   shippingProvince: string;
   shippingDistrict: string;

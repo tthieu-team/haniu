@@ -115,7 +115,16 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        BigDecimal shippingFee = BigDecimal.valueOf(30000); // Standard shipping fee
+        BigDecimal shippingFee = BigDecimal.valueOf(30000); // default standard shipping fee
+        String shippingMethodStr = request.getShippingMethod() != null ? request.getShippingMethod().toUpperCase() : "STANDARD";
+        if ("FAST".equals(shippingMethodStr)) {
+            shippingFee = subtotal.compareTo(BigDecimal.valueOf(500000)) >= 0 ? BigDecimal.ZERO : BigDecimal.valueOf(50000);
+        } else if ("EXPRESS".equals(shippingMethodStr)) {
+            shippingFee = subtotal.compareTo(BigDecimal.valueOf(1000000)) >= 0 ? BigDecimal.ZERO : BigDecimal.valueOf(100000);
+        } else { // STANDARD
+            shippingFee = subtotal.compareTo(BigDecimal.valueOf(300000)) >= 0 ? BigDecimal.ZERO : BigDecimal.valueOf(30000);
+        }
+
         BigDecimal total = subtotal.add(shippingFee).subtract(discount);
         if (total.compareTo(BigDecimal.ZERO) < 0) {
             total = BigDecimal.ZERO;
@@ -135,6 +144,7 @@ public class OrderServiceImpl implements OrderService {
                 .shippingDistrict(request.getShippingDistrict())
                 .shippingWard(request.getShippingWard())
                 .shippingAddressLine(request.getShippingAddressLine())
+                .shippingMethod(shippingMethodStr)
                 .note(request.getNote())
                 .subtotalPrice(subtotal)
                 .shippingFee(shippingFee)
@@ -279,6 +289,7 @@ public class OrderServiceImpl implements OrderService {
                 .paymentMethod(order.getPaymentMethod().name())
                 .paymentStatus(order.getPaymentStatus().name())
                 .orderStatus(order.getOrderStatus().name())
+                .shippingMethod(order.getShippingMethod())
                 .orderedAt(order.getOrderedAt())
                 .items(itemDtos)
                 .build();

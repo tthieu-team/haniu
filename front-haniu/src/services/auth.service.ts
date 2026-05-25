@@ -1,5 +1,6 @@
 import { fetchApi } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
+import { useCartStore } from '@/store/cart';
 
 export const authService = {
   register: async (payload: any) => {
@@ -10,7 +11,19 @@ export const authService = {
     if (res?.accessToken) {
       // Sync Zustand Store
       const { setAuth } = useAuthStore.getState();
-      setAuth(res.accessToken, res.refreshToken, { fullName: res.fullName, role: res.role });
+      setAuth(res.accessToken, res.refreshToken, { 
+        fullName: res.fullName, 
+        role: res.role,
+        email: res.email,
+        phone: res.phone
+      });
+      
+      // Merge carts
+      try {
+        await useCartStore.getState().mergeCarts();
+      } catch (err) {
+        console.error('Failed to merge carts on register', err);
+      }
     }
     return res;
   },
@@ -23,7 +36,19 @@ export const authService = {
     if (res?.accessToken) {
       // Sync Zustand Store
       const { setAuth } = useAuthStore.getState();
-      setAuth(res.accessToken, res.refreshToken, { fullName: res.fullName, role: res.role });
+      setAuth(res.accessToken, res.refreshToken, { 
+        fullName: res.fullName, 
+        role: res.role,
+        email: res.email,
+        phone: res.phone
+      });
+      
+      // Merge carts
+      try {
+        await useCartStore.getState().mergeCarts();
+      } catch (err) {
+        console.error('Failed to merge carts on login', err);
+      }
     }
     return res;
   },
@@ -43,6 +68,14 @@ export const authService = {
     
     // Sync Zustand Store
     clearAuth();
+    
+    // Clear and refetch guest cart
+    try {
+      useCartStore.getState().clearCartState();
+      await useCartStore.getState().fetchCart();
+    } catch (err) {
+      console.error('Failed to refresh guest cart on logout', err);
+    }
   },
 
   getCurrentUser: () => {

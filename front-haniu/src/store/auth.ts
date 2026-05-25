@@ -26,6 +26,8 @@ function eraseCookie(name: string) {
 export interface User {
   fullName: string;
   role: string;
+  email?: string;
+  phone?: string;
 }
 
 interface AuthState {

@@ -66,6 +66,9 @@ public class Order {
     @Column(name = "shipping_address_line", columnDefinition = "TEXT", nullable = false)
     private String shippingAddressLine;
 
+    @Column(name = "shipping_method", length = 50)
+    private String shippingMethod;
+
     @Column(columnDefinition = "TEXT")
     private String note;
 

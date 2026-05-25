@@ -12,6 +12,7 @@ export interface OrderRequestPayload {
   note?: string;
   paymentMethod: string;
   couponCode?: string;
+  shippingMethod: string;
 }
 
 export const orderService = {

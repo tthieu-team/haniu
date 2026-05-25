@@ -49,7 +49,7 @@ public class CartServiceImpl implements CartService {
         if (request.getVariantId() != null) {
             variant = productVariantRepository.findById(request.getVariantId())
                     .orElseThrow(() -> new RuntimeException("Variant not found"));
-            price = variant.getPrice();
+            price = variant.getSalePrice() != null ? variant.getSalePrice() : variant.getPrice();
         } else if (product.getSalePrice() != null) {
             price = product.getSalePrice();
         }
@@ -221,6 +221,12 @@ public class CartServiceImpl implements CartService {
                     .findFirst()
                     .orElse(media.isEmpty() ? null : media.get(0).getUrl());
 
+            BigDecimal originalPrice = item.getVariant() != null ? item.getVariant().getPrice() : item.getProduct().getPrice();
+            int stock = item.getVariant() != null ? item.getVariant().getStock() : item.getProduct().getStock();
+            String color = item.getVariant() != null ? item.getVariant().getColor() : item.getProduct().getColor();
+            String size = item.getVariant() != null ? item.getVariant().getSize() : null;
+            String material = item.getVariant() != null ? item.getVariant().getMaterial() : item.getProduct().getMaterial();
+
             return CartItemDto.builder()
                     .id(item.getId())
                     .productId(item.getProduct().getId())
@@ -234,6 +240,11 @@ public class CartServiceImpl implements CartService {
                     .unitPrice(item.getUnitPrice())
                     .totalPrice(item.getTotalPrice())
                     .customizationInfo(item.getCustomizationInfo())
+                    .originalPrice(originalPrice)
+                    .stock(stock)
+                    .color(color)
+                    .size(size)
+                    .material(material)
                     .build();
         }).collect(Collectors.toList());
 

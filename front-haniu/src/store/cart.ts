@@ -14,6 +14,11 @@ export interface CartItem {
   unitPrice: number;
   totalPrice: number;
   customizationInfo?: string;
+  originalPrice?: number;
+  stock?: number;
+  color?: string;
+  size?: string;
+  material?: string;
 }
 
 export interface Cart {

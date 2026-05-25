@@ -88,6 +88,7 @@ public class ProductServiceImpl implements ProductService {
                 .layoutTemplate(request.getLayoutTemplate())
                 .layoutConfig(request.getLayoutConfig())
                 .specifications(request.getSpecifications())
+                .includedItems(request.getIncludedItems())
                 .seoTitle(request.getSeoTitle())
                 .seoDescription(request.getSeoDescription())
                 .seoKeywords(request.getSeoKeywords())
@@ -199,6 +200,7 @@ public class ProductServiceImpl implements ProductService {
         product.setLayoutTemplate(request.getLayoutTemplate());
         product.setLayoutConfig(request.getLayoutConfig());
         product.setSpecifications(request.getSpecifications());
+        product.setIncludedItems(request.getIncludedItems());
         product.setSeoTitle(request.getSeoTitle());
         product.setSeoDescription(request.getSeoDescription());
         product.setSeoKeywords(request.getSeoKeywords());
@@ -534,6 +536,7 @@ public class ProductServiceImpl implements ProductService {
                 .layoutTemplate(product.getLayoutTemplate())
                 .layoutConfig(product.getLayoutConfig())
                 .specifications(product.getSpecifications())
+                .includedItems(product.getIncludedItems())
                 .seoTitle(product.getSeoTitle())
                 .seoDescription(product.getSeoDescription())
                 .seoKeywords(product.getSeoKeywords())
