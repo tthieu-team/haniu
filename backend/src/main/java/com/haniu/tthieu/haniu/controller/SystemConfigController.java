@@ -21,7 +21,7 @@ public class SystemConfigController {
     public ResponseEntity<?> getConfig(@PathVariable String key) {
         SystemConfig config = systemConfigService.getConfig(key);
         if (config == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(config);
     }

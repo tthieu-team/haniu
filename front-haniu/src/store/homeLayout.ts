@@ -310,9 +310,10 @@ const DEFAULT_STATE = {
     logoSubtitle: "",
     menuLinks: [
       { name: "Trang chủ", href: "/" },
-      { name: "Sản phẩm", href: "/#products" },
+      { name: "Sản phẩm", href: "/products" },
       { name: "Bộ sưu tập", href: "/#collections" },
       { name: "Câu chuyện", href: "/#story" },
+      { name: "Yêu thích", href: "/wishlist" },
     ],
     isSticky: true,
   },
@@ -762,7 +763,7 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
       },
     }),
     {
-      name: 'haniu-home-layout-config-v7',
+      name: 'haniu-home-layout-config-v8',
     }
   )
 );
