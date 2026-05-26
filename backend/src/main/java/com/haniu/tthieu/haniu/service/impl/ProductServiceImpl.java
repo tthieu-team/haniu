@@ -364,7 +364,7 @@ public class ProductServiceImpl implements ProductService {
                 .filter(ProductMedia::isThumbnail)
                 .map(ProductMedia::getUrl)
                 .findFirst()
-                .orElse(media.isEmpty() ? null : media.getFirst().getUrl());
+                .orElse(media.isEmpty() ? null : media.get(0).getUrl());
 
         List<ProductDocument.VariantDocument> variantDocs = variants.stream()
                 .map(v -> ProductDocument.VariantDocument.builder()

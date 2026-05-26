@@ -5,36 +5,31 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Icon from '@/components/common/Icons';
 import { authService } from '@/services/auth.service';
-import { useCartStore } from '@/store/cart';
 
-export default function RegisterForm() {
+export default function ForgotPasswordForm() {
   const router = useRouter();
-  const [fullName, setFullName] = useState('');
-  const [emailOrPhone, setEmailOrPhone] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [step, setStep] = useState<'email' | 'reset'>('email');
+
+  // Reset fields
+  const [otpCode, setOtpCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
-
-  // Verification step states
-  const [step, setStep] = useState<'form' | 'verify'>('form');
-  const [otpCode, setOtpCode] = useState('');
   const [countdown, setCountdown] = useState(0);
 
-  // Status & loading states
+  // Statuses
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [success, setSuccess] = useState(false);
 
-  // Password strength meter logic
-  const getPasswordStrength = (pass: string): { label: string; score: number; colorClass: string; barWidth: string } => {
+  // Password strength meter
+  const getPasswordStrength = (pass: string) => {
     if (!pass) return { label: '', score: 0, colorClass: 'bg-slate-200', barWidth: 'w-0' };
     if (pass.length < 6) return { label: 'Yếu (Tối thiểu 6 ký tự)', score: 1, colorClass: 'bg-rose-500', barWidth: 'w-1/3' };
 
     let score = 1;
-    // Has digits
     if (/\d/.test(pass)) score++;
-    // Has uppercase or special chars
     if (/[A-Z]/.test(pass) || /[^A-Za-z0-9]/.test(pass)) score++;
 
     if (score === 2) {
@@ -43,9 +38,9 @@ export default function RegisterForm() {
     return { label: 'Mạnh', score: 3, colorClass: 'bg-emerald-500', barWidth: 'w-full' };
   };
 
-  const strength = getPasswordStrength(password);
+  const strength = getPasswordStrength(newPassword);
 
-  // Count down for OTP resend
+  // Countdown timer
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
@@ -53,32 +48,45 @@ export default function RegisterForm() {
     }
   }, [countdown]);
 
-  // Validation functions
   const isEmailValid = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
-  const isPhoneValid = (val: string) => /^(0|84)[3|5|7|8|9][0-9]{8}$/.test(val);
-  const isEmailOrPhoneValid = isEmailValid(emailOrPhone) || isPhoneValid(emailOrPhone);
-  const isPasswordMatch = password === confirmPassword;
+  const isPasswordMatch = newPassword === confirmPassword;
 
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
+  const handleSendEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !emailOrPhone || !password || !confirmPassword) {
-      setErrorMsg('Vui lòng điền đầy đủ tất cả các trường.');
+    if (!email) {
+      setErrorMsg('Vui lòng nhập địa chỉ email.');
       return;
     }
-    if (!isEmailValid(emailOrPhone)) {
-      setErrorMsg('Vui lòng đăng ký bằng địa chỉ Email hợp lệ để nhận mã xác thực OTP.');
+    if (!isEmailValid(email)) {
+      setErrorMsg('Định dạng email chưa chính xác.');
       return;
     }
-    if (password.length < 6) {
-      setErrorMsg('Mật khẩu tối thiểu phải từ 6 ký tự.');
+
+    try {
+      setLoading(true);
+      setErrorMsg('');
+      await authService.forgotPassword(email);
+      setStep('reset');
+      setCountdown(59);
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Không thể gửi mã đặt lại mật khẩu. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode || otpCode.length < 6) {
+      setErrorMsg('Vui lòng nhập đủ 6 chữ số mã OTP.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setErrorMsg('Mật khẩu mới tối thiểu 6 ký tự.');
       return;
     }
     if (!isPasswordMatch) {
-      setErrorMsg('Mật khẩu nhập lại không trùng khớp.');
-      return;
-    }
-    if (!agreeTerms) {
-      setErrorMsg('Bạn cần đồng ý với các Điều khoản & Chính sách.');
+      setErrorMsg('Mật khẩu xác nhận chưa trùng khớp.');
       return;
     }
 
@@ -87,17 +95,20 @@ export default function RegisterForm() {
       setErrorMsg('');
 
       const payload = {
-        fullName,
-        email: emailOrPhone,
-        password
+        email,
+        code: otpCode,
+        newPassword
       };
 
-      await authService.register(payload);
-      setStep('verify');
-      setCountdown(59);
+      await authService.resetPassword(payload);
+      setSuccess(true);
+
+      setTimeout(() => {
+        router.push('/auth/login');
+      }, 2000);
 
     } catch (err: any) {
-      setErrorMsg(err?.message || 'Đăng ký không thành công. Vui lòng thử lại.');
+      setErrorMsg(err?.message || 'Mã OTP không đúng hoặc đã hết hạn.');
     } finally {
       setLoading(false);
     }
@@ -107,38 +118,10 @@ export default function RegisterForm() {
     try {
       setLoading(true);
       setErrorMsg('');
-      await authService.resendOtp(emailOrPhone);
+      await authService.forgotPassword(email);
       setCountdown(59);
     } catch (err: any) {
-      setErrorMsg(err?.message || 'Không thể gửi lại OTP. Vui lòng thử lại.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (otpCode.length < 6) {
-      setErrorMsg('Vui lòng nhập đủ 6 chữ số mã OTP.');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setErrorMsg('');
-
-      await authService.verifyEmail({
-        email: emailOrPhone,
-        code: otpCode
-      });
-
-      setSuccess(true);
-      setTimeout(() => {
-        router.push('/');
-      }, 1500);
-
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'Mã OTP không hợp lệ hoặc đã hết hạn.');
+      setErrorMsg(err?.message || 'Không thể gửi lại mã OTP. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -146,7 +129,7 @@ export default function RegisterForm() {
 
   return (
     <div className="w-full max-w-[420px] mx-auto p-4 sm:p-5 xl:p-6 bg-white dark:bg-zinc-900 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-xl dark:shadow-black/50 transition-all duration-300 relative overflow-hidden">
-
+      
       {/* Success Animation Overlay */}
       {success && (
         <div className="absolute inset-0 bg-white/95 dark:bg-zinc-900/95 z-50 flex flex-col items-center justify-center p-6 animate-fade-in">
@@ -156,24 +139,24 @@ export default function RegisterForm() {
             </svg>
             <div className="absolute inset-0 rounded-full border-4 border-emerald-500/30 animate-ping" />
           </div>
-          <h3 className="mt-6 text-lg font-bold text-slate-800 dark:text-white">
-            Tạo tài khoản thành công!
+          <h3 className="mt-6 text-lg font-bold text-slate-800 dark:text-white text-center">
+            Đặt lại mật khẩu thành công!
           </h3>
-          <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">
-            Đang đăng nhập tự động và chuyển hướng...
+          <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500 text-center">
+            Mật khẩu mới đã được lưu. Đang chuyển bạn về trang đăng nhập...
           </p>
         </div>
       )}
 
-      {/* Title */}
+      {/* Header */}
       <div className="text-center mb-4 xl:mb-6">
         <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">
-          {step === 'form' ? 'Tạo tài khoản mới' : 'Xác thực tài khoản'}
+          {step === 'email' ? 'Quên mật khẩu' : 'Đặt lại mật khẩu'}
         </h1>
         <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">
-          {step === 'form'
-            ? 'Đăng ký nhanh chóng để nhận nhiều ưu đãi quà tặng hấp dẫn'
-            : `Nhập mã OTP được gửi tới ${emailOrPhone}`}
+          {step === 'email'
+            ? 'Nhập email liên kết với tài khoản của bạn để nhận OTP'
+            : `Nhập mã xác thực gửi tới ${email}`}
         </p>
       </div>
 
@@ -185,83 +168,90 @@ export default function RegisterForm() {
         </div>
       )}
 
-      {step === 'form' ? (
-        <form onSubmit={handleRegisterSubmit} className="space-y-3.5 xl:space-y-4">
-          {/* Full Name field */}
-          <div className="relative border border-slate-200 dark:border-zinc-800 focus-within:border-rose-500 rounded-2xl transition-colors bg-slate-50/50 dark:bg-zinc-950/40">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-              <Icon name="user" size={15} />
-            </span>
-            <input
-              type="text"
-              id="fullName"
-              placeholder=" "
-              required
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="peer w-full pl-11 pr-4 pt-5 pb-1.5 text-base lg:text-xs bg-transparent focus:outline-none text-slate-800 dark:text-white"
-            />
-            <label
-              htmlFor="fullName"
-              className="absolute left-11 top-3.5 text-xs text-slate-400 pointer-events-none transition-all duration-200 peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-rose-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-1.5"
-            >
-              Họ và tên
-            </label>
-          </div>
-
-          {/* Email / Phone Field */}
+      {step === 'email' ? (
+        <form onSubmit={handleSendEmailSubmit} className="space-y-4">
           <div className="space-y-1">
             <div className="relative border border-slate-200 dark:border-zinc-800 focus-within:border-rose-500 rounded-2xl transition-colors bg-slate-50/50 dark:bg-zinc-950/40">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
                 <Icon name="mail" size={15} />
               </span>
               <input
-                type="text"
-                id="emailOrPhone"
+                type="email"
+                id="email"
                 placeholder=" "
                 required
-                value={emailOrPhone}
-                onChange={(e) => setEmailOrPhone(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="peer w-full pl-11 pr-4 pt-5 pb-1.5 text-base lg:text-xs bg-transparent focus:outline-none text-slate-800 dark:text-white"
               />
               <label
-                htmlFor="emailOrPhone"
+                htmlFor="email"
                 className="absolute left-11 top-3.5 text-xs text-slate-400 pointer-events-none transition-all duration-200 peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-rose-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-1.5"
               >
-                Email hoặc Số điện thoại
+                Địa chỉ Email của bạn
               </label>
             </div>
-            {emailOrPhone && (
+            {email && (
               <div className="px-1 text-[10px] font-bold">
-                {isEmailOrPhoneValid ? (
-                  <span className="text-emerald-500 flex items-center gap-1">✓ Định dạng hợp lệ</span>
+                {isEmailValid(email) ? (
+                  <span className="text-emerald-500 flex items-center gap-1">✓ Email hợp lệ</span>
                 ) : (
-                  <span className="text-rose-500 flex items-center gap-1">✕ Nhập đúng định dạng Email/SĐT</span>
+                  <span className="text-rose-500 flex items-center gap-1">✕ Email không đúng định dạng</span>
                 )}
               </div>
             )}
           </div>
 
-          {/* Password Field */}
-          <div className="space-y-1.5">
+          <button
+            type="submit"
+            disabled={loading || !isEmailValid(email)}
+            className="w-full py-3.5 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 disabled:from-slate-300 disabled:to-slate-350 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            {loading ? 'Đang gửi yêu cầu...' : 'Gửi mã xác thực'}
+          </button>
+        </form>
+      ) : (
+        <form onSubmit={handleResetSubmit} className="space-y-4 animate-fade-in">
+          {/* OTP Code */}
+          <div className="relative border border-slate-200 dark:border-zinc-800 focus-within:border-rose-500 rounded-2xl transition-colors bg-slate-50/50 dark:bg-zinc-950/40">
+            <input
+              type="text"
+              id="otp"
+              maxLength={6}
+              placeholder=" "
+              required
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+              className="peer w-full px-4 pt-5 pb-1.5 text-center text-base lg:text-sm font-black tracking-[0.5em] bg-transparent focus:outline-none text-slate-800 dark:text-white"
+            />
+            <label
+              htmlFor="otp"
+              className="absolute left-0 right-0 mx-auto w-fit top-3.5 text-xs text-slate-400 pointer-events-none transition-all duration-200 peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-rose-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-1.5"
+            >
+              Nhập mã OTP 6 chữ số
+            </label>
+          </div>
+
+          {/* New Password */}
+          <div className="space-y-1">
             <div className="relative border border-slate-200 dark:border-zinc-800 focus-within:border-rose-500 rounded-2xl transition-colors bg-slate-50/50 dark:bg-zinc-950/40">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
                 <Icon name="shield" size={15} />
               </span>
               <input
                 type={showPassword ? 'text' : 'password'}
-                id="password"
+                id="newPassword"
                 placeholder=" "
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
                 className="peer w-full pl-11 pr-11 pt-5 pb-1.5 text-base lg:text-xs bg-transparent focus:outline-none text-slate-800 dark:text-white"
               />
               <label
-                htmlFor="password"
+                htmlFor="newPassword"
                 className="absolute left-11 top-3.5 text-xs text-slate-400 pointer-events-none transition-all duration-200 peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-rose-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-1.5"
               >
-                Mật khẩu
+                Mật khẩu mới
               </label>
               <button
                 type="button"
@@ -271,8 +261,7 @@ export default function RegisterForm() {
                 <Icon name="eye" size={15} />
               </button>
             </div>
-            {/* Strength Meter Graphic */}
-            {password && (
+            {newPassword && (
               <div className="space-y-1 px-1">
                 <div className="h-1 w-full bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div className={`h-full transition-all duration-300 ${strength.colorClass} ${strength.barWidth}`} />
@@ -287,7 +276,7 @@ export default function RegisterForm() {
             )}
           </div>
 
-          {/* Confirm Password Field */}
+          {/* Confirm Password */}
           <div className="space-y-1">
             <div className="relative border border-slate-200 dark:border-zinc-800 focus-within:border-rose-500 rounded-2xl transition-colors bg-slate-50/50 dark:bg-zinc-950/40">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
@@ -306,7 +295,7 @@ export default function RegisterForm() {
                 htmlFor="confirmPassword"
                 className="absolute left-11 top-3.5 text-xs text-slate-400 pointer-events-none transition-all duration-200 peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-rose-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-1.5"
               >
-                Nhập lại mật khẩu
+                Nhập lại mật khẩu mới
               </label>
             </div>
             {confirmPassword && (
@@ -320,64 +309,7 @@ export default function RegisterForm() {
             )}
           </div>
 
-          {/* Terms Agreement Check */}
-          <label className="flex items-start gap-2.5 text-xs text-slate-500 dark:text-zinc-400 cursor-pointer pt-1 select-none">
-            <input
-              type="checkbox"
-              checked={agreeTerms}
-              required
-              onChange={(e) => setAgreeTerms(e.target.checked)}
-              className="rounded border-slate-200 dark:border-zinc-800 text-rose-500 focus:ring-rose-500/50 w-4 h-4 mt-0.5 cursor-pointer shrink-0"
-            />
-            <span className="leading-tight">
-              Tôi đồng ý với{' '}
-              <Link href="/terms" className="font-bold text-rose-500 hover:underline">
-                Điều khoản dịch vụ
-              </Link>{' '}
-              &{' '}
-              <Link href="/privacy" className="font-bold text-rose-500 hover:underline">
-                Chính sách bảo mật
-              </Link>{' '}
-              của Haniu.
-            </span>
-          </label>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 mt-1 xl:mt-2 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 disabled:from-slate-300 disabled:to-slate-350 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
-          >
-            {loading ? 'Đang xử lý...' : 'Tạo tài khoản'}
-          </button>
-        </form>
-      ) : (
-        <form onSubmit={handleVerifySubmit} className="space-y-5 animate-fade-in">
-          <div className="text-center p-4 bg-amber-50/40 dark:bg-zinc-950/60 rounded-2xl border border-amber-100/50 dark:border-zinc-850">
-            <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
-              Mã kích hoạt OTP đã được gửi. Bạn vui lòng nhập mã bên dưới để hoàn tất xác thực đăng ký.
-            </p>
-          </div>
-
-          <div className="relative border border-slate-200 dark:border-zinc-800 focus-within:border-rose-500 rounded-2xl transition-colors bg-slate-50/50 dark:bg-zinc-950/40">
-            <input
-              type="text"
-              id="verifyCode"
-              maxLength={6}
-              placeholder=" "
-              required
-              value={otpCode}
-              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-              className="peer w-full px-4 pt-5 pb-1.5 text-center text-base lg:text-sm font-black tracking-[0.5em] bg-transparent focus:outline-none text-slate-800 dark:text-white"
-            />
-            <label
-              htmlFor="verifyCode"
-              className="absolute left-0 right-0 mx-auto w-fit top-3.5 text-xs text-slate-400 pointer-events-none transition-all duration-200 peer-focus:text-[10px] peer-focus:top-1.5 peer-focus:text-rose-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-1.5"
-            >
-              Nhập mã 6 chữ số
-            </label>
-          </div>
-
+          {/* Countdown & Resend */}
           <div className="flex justify-center text-xs">
             {countdown > 0 ? (
               <span className="text-slate-400">Gửi lại mã sau <strong className="text-rose-500">{countdown}s</strong></span>
@@ -392,11 +324,12 @@ export default function RegisterForm() {
             )}
           </div>
 
+          {/* Buttons */}
           <div className="flex gap-3">
             <button
               type="button"
               onClick={() => {
-                setStep('form');
+                setStep('email');
                 setErrorMsg('');
               }}
               className="flex-1 py-3 border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-850 text-slate-600 dark:text-zinc-300 font-bold text-xs rounded-2xl transition-all cursor-pointer text-center"
@@ -405,10 +338,10 @@ export default function RegisterForm() {
             </button>
             <button
               type="submit"
-              disabled={loading || otpCode.length < 6}
-              className="flex-1 py-3 bg-rose-500 hover:bg-rose-600 disabled:bg-slate-350 text-white font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+              disabled={loading || otpCode.length < 6 || !isPasswordMatch}
+              className="flex-1 py-3 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 disabled:from-slate-300 disabled:to-slate-350 text-white font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              {loading ? 'Đang xác thực...' : 'Kích hoạt tài khoản'}
+              {loading ? 'Đang cập nhật...' : 'Đổi mật khẩu'}
             </button>
           </div>
         </form>

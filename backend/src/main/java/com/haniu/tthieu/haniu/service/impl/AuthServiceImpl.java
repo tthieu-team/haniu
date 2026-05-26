@@ -3,20 +3,29 @@ package com.haniu.tthieu.haniu.service.impl;
 import com.haniu.tthieu.haniu.dto.LoginRequestDto;
 import com.haniu.tthieu.haniu.dto.RegisterRequestDto;
 import com.haniu.tthieu.haniu.dto.TokenResponseDto;
+import com.haniu.tthieu.haniu.dto.VerifyEmailRequestDto;
+import com.haniu.tthieu.haniu.dto.ResendOtpRequestDto;
+import com.haniu.tthieu.haniu.dto.ForgotPasswordRequestDto;
+import com.haniu.tthieu.haniu.dto.ResetPasswordRequestDto;
 import com.haniu.tthieu.haniu.entity.enums.Role;
 import com.haniu.tthieu.haniu.entity.enums.UserStatus;
 import com.haniu.tthieu.haniu.entity.user.RefreshToken;
 import com.haniu.tthieu.haniu.entity.user.User;
+import com.haniu.tthieu.haniu.entity.user.VerificationCode;
 import com.haniu.tthieu.haniu.repository.RefreshTokenRepository;
 import com.haniu.tthieu.haniu.repository.UserRepository;
+import com.haniu.tthieu.haniu.repository.VerificationCodeRepository;
 import com.haniu.tthieu.haniu.security.JwtTokenProvider;
 import com.haniu.tthieu.haniu.service.AuthService;
+import com.haniu.tthieu.haniu.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -28,27 +37,46 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final VerificationCodeRepository verificationCodeRepository;
+    private final EmailService emailService;
 
     @Override
     public TokenResponseDto register(RegisterRequestDto request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email is already in use");
+        Optional<User> existingUserOpt = userRepository.findByEmail(request.getEmail());
+        User user;
+        if (existingUserOpt.isPresent()) {
+            User existing = existingUserOpt.get();
+            if (existing.getStatus() == UserStatus.ACTIVE) {
+                throw new RuntimeException("Email is already in use");
+            }
+            // If status is PENDING, we update user info and generate new OTP
+            existing.setFullName(request.getFullName());
+            existing.setPassword(passwordEncoder.encode(request.getPassword()));
+            existing.setPhone(request.getPhone());
+            user = userRepository.save(existing);
+        } else {
+            user = User.builder()
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .fullName(request.getFullName())
+                    .phone(request.getPhone())
+                    .role(Role.USER)
+                    .status(UserStatus.PENDING)
+                    .emailVerified(false)
+                    .phoneVerified(false)
+                    .build();
+            user = userRepository.save(user);
         }
 
-        User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .fullName(request.getFullName())
-                .phone(request.getPhone())
-                .role(Role.USER)
-                .status(UserStatus.ACTIVE)
-                .emailVerified(false)
-                .phoneVerified(false)
+        saveAndSendOtp(user.getEmail());
+
+        // Return token DTO with null accessToken so frontend doesn't auto-login yet
+        return TokenResponseDto.builder()
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .role(user.getRole().name())
                 .build();
-
-        user = userRepository.save(user);
-
-        return generateTokens(user);
     }
 
     @Override
@@ -60,14 +88,62 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
+        if (user.getStatus() == UserStatus.PENDING) {
+            throw new RuntimeException("Tài khoản chưa được xác thực. Vui lòng xác thực mã OTP gửi qua Email.");
+        }
+
         if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new RuntimeException("User account is not active");
+            throw new RuntimeException("Tài khoản đã bị khóa hoặc không hoạt động.");
         }
 
         user.setLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
 
         return generateTokens(user);
+    }
+
+    @Override
+    public TokenResponseDto verifyEmail(VerifyEmailRequestDto request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        if (user.getStatus() == UserStatus.ACTIVE && user.isEmailVerified()) {
+            return generateTokens(user);
+        }
+
+        VerificationCode verificationCode = verificationCodeRepository
+                .findFirstByEmailAndVerifiedFalseOrderByExpiresAtDesc(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Mã OTP không tồn tại hoặc đã được xác thực"));
+
+        if (verificationCode.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Mã OTP đã hết hạn");
+        }
+
+        if (!verificationCode.getCode().equals(request.getCode())) {
+            throw new RuntimeException("Mã OTP không chính xác");
+        }
+
+        verificationCode.setVerified(true);
+        verificationCodeRepository.save(verificationCode);
+
+        user.setStatus(UserStatus.ACTIVE);
+        user.setEmailVerified(true);
+        user.setLastLoginAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        return generateTokens(user);
+    }
+
+    @Override
+    public void resendOtp(ResendOtpRequestDto request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        if (user.getStatus() == UserStatus.ACTIVE) {
+            throw new RuntimeException("Tài khoản đã được kích hoạt.");
+        }
+
+        saveAndSendOtp(user.getEmail());
     }
 
     @Override
@@ -95,6 +171,24 @@ public class AuthServiceImpl implements AuthService {
         });
     }
 
+    private void saveAndSendOtp(String email) {
+        String code = generateOtpCode();
+        VerificationCode verificationCode = VerificationCode.builder()
+                .email(email)
+                .code(code)
+                .expiresAt(LocalDateTime.now().plusMinutes(5))
+                .verified(false)
+                .build();
+        verificationCodeRepository.save(verificationCode);
+        emailService.sendVerificationCode(email, code);
+    }
+
+    private String generateOtpCode() {
+        SecureRandom random = new SecureRandom();
+        int num = 100000 + random.nextInt(900000);
+        return String.valueOf(num);
+    }
+
     private TokenResponseDto generateTokens(User user) {
         String accessToken = jwtTokenProvider.generateToken(user.getEmail(), user.getRole().name());
         String refreshTokenStr = UUID.randomUUID().toString();
@@ -117,5 +211,49 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .build();
+    }
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequestDto request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với email này."));
+
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new RuntimeException("Tài khoản này hiện đang không hoạt động hoặc chưa được kích hoạt.");
+        }
+
+        String code = generateOtpCode();
+        VerificationCode verificationCode = VerificationCode.builder()
+                .email(user.getEmail())
+                .code(code)
+                .expiresAt(LocalDateTime.now().plusMinutes(5))
+                .verified(false)
+                .build();
+        verificationCodeRepository.save(verificationCode);
+        emailService.sendPasswordResetCode(user.getEmail(), code);
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordRequestDto request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với email này."));
+
+        VerificationCode verificationCode = verificationCodeRepository
+                .findFirstByEmailAndVerifiedFalseOrderByExpiresAtDesc(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Mã OTP đặt lại mật khẩu không hợp lệ hoặc đã sử dụng."));
+
+        if (verificationCode.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Mã OTP đã hết hạn.");
+        }
+
+        if (!verificationCode.getCode().equals(request.getCode())) {
+            throw new RuntimeException("Mã OTP không chính xác.");
+        }
+
+        verificationCode.setVerified(true);
+        verificationCodeRepository.save(verificationCode);
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 }

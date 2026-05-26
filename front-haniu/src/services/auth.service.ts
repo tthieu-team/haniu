@@ -3,6 +3,52 @@ import { useAuthStore } from '@/store/auth';
 import { useCartStore } from '@/store/cart';
 
 export const authService = {
+  verifyEmail: async (payload: { email: string; code: string }) => {
+    const res = await fetchApi('/api/v1/auth/verify-email', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    if (res?.accessToken) {
+      // Sync Zustand Store
+      const { setAuth } = useAuthStore.getState();
+      setAuth(res.accessToken, res.refreshToken, { 
+        fullName: res.fullName, 
+        role: res.role,
+        email: res.email,
+        phone: res.phone
+      });
+      
+      // Merge carts
+      try {
+        await useCartStore.getState().mergeCarts();
+      } catch (err) {
+        console.error('Failed to merge carts on verifyEmail', err);
+      }
+    }
+    return res;
+  },
+
+  resendOtp: async (email: string) => {
+    return await fetchApi('/api/v1/auth/resend-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  forgotPassword: async (email: string) => {
+    return await fetchApi('/api/v1/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  resetPassword: async (payload: any) => {
+    return await fetchApi('/api/v1/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
   register: async (payload: any) => {
     const res = await fetchApi('/api/v1/auth/register', {
       method: 'POST',
