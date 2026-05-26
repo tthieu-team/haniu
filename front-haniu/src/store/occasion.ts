@@ -11,6 +11,25 @@ interface OccasionState {
   deleteOccasion: (id: string) => Promise<void>;
 }
 
+const normalizeOccasion = (o: any): Occasion => {
+  if (!o) return o;
+  const activeVal = o.active !== undefined ? o.active : (o.isActive !== undefined ? o.isActive : true);
+  return {
+    ...o,
+    active: activeVal,
+    isActive: activeVal,
+  };
+};
+
+const preparePayload = (payload: Occasion): any => {
+  const activeVal = payload.isActive !== undefined ? payload.isActive : ((payload as any).active !== undefined ? (payload as any).active : true);
+  return {
+    ...payload,
+    active: activeVal,
+    isActive: activeVal,
+  };
+};
+
 export const useOccasionStore = create<OccasionState>((set) => ({
   occasions: [],
   loading: false,
@@ -20,8 +39,9 @@ export const useOccasionStore = create<OccasionState>((set) => ({
     set({ loading: true, error: null });
     try {
       const data = await catalogService.getAllOccasions();
-      set({ occasions: data || [], loading: false });
-      return data || [];
+      const normalized = (data || []).map(normalizeOccasion);
+      set({ occasions: normalized, loading: false });
+      return normalized;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi lấy danh sách dịp lễ' });
       return [];
@@ -31,18 +51,20 @@ export const useOccasionStore = create<OccasionState>((set) => ({
   saveOccasion: async (payload) => {
     set({ loading: true, error: null });
     try {
-      const data = await catalogService.createOccasion(payload);
+      const body = preparePayload(payload);
+      const data = await catalogService.createOccasion(body);
+      const normalized = normalizeOccasion(data);
       set((state) => {
-        const exists = state.occasions.some((o) => o.id === data.id);
+        const exists = state.occasions.some((o) => o.id === normalized.id);
         const updatedOccasions = exists
-          ? state.occasions.map((o) => (o.id === data.id ? data : o))
-          : [data, ...state.occasions];
+          ? state.occasions.map((o) => (o.id === normalized.id ? normalized : o))
+          : [normalized, ...state.occasions];
         return {
           occasions: updatedOccasions,
           loading: false,
         };
       });
-      return data;
+      return normalized;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi lưu thông tin dịp lễ' });
       throw err;

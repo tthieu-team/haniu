@@ -11,6 +11,25 @@ interface RecipientState {
   deleteRecipient: (id: string) => Promise<void>;
 }
 
+const normalizeRecipient = (r: any): Recipient => {
+  if (!r) return r;
+  const activeVal = r.active !== undefined ? r.active : (r.isActive !== undefined ? r.isActive : true);
+  return {
+    ...r,
+    active: activeVal,
+    isActive: activeVal,
+  };
+};
+
+const preparePayload = (payload: Recipient): any => {
+  const activeVal = payload.isActive !== undefined ? payload.isActive : ((payload as any).active !== undefined ? (payload as any).active : true);
+  return {
+    ...payload,
+    active: activeVal,
+    isActive: activeVal,
+  };
+};
+
 export const useRecipientStore = create<RecipientState>((set) => ({
   recipients: [],
   loading: false,
@@ -20,8 +39,9 @@ export const useRecipientStore = create<RecipientState>((set) => ({
     set({ loading: true, error: null });
     try {
       const data = await catalogService.getAllRecipients();
-      set({ recipients: data || [], loading: false });
-      return data || [];
+      const normalized = (data || []).map(normalizeRecipient);
+      set({ recipients: normalized, loading: false });
+      return normalized;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi lấy danh sách đối tượng người nhận' });
       return [];
@@ -31,18 +51,20 @@ export const useRecipientStore = create<RecipientState>((set) => ({
   saveRecipient: async (payload) => {
     set({ loading: true, error: null });
     try {
-      const data = await catalogService.createRecipient(payload);
+      const body = preparePayload(payload);
+      const data = await catalogService.createRecipient(body);
+      const normalized = normalizeRecipient(data);
       set((state) => {
-        const exists = state.recipients.some((r) => r.id === data.id);
+        const exists = state.recipients.some((r) => r.id === normalized.id);
         const updatedRecipients = exists
-          ? state.recipients.map((r) => (r.id === data.id ? data : r))
-          : [data, ...state.recipients];
+          ? state.recipients.map((r) => (r.id === normalized.id ? normalized : r))
+          : [normalized, ...state.recipients];
         return {
           recipients: updatedRecipients,
           loading: false,
         };
       });
-      return data;
+      return normalized;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi lưu thông tin đối tượng người nhận' });
       throw err;

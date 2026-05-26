@@ -19,6 +19,7 @@ import com.haniu.tthieu.haniu.security.JwtTokenProvider;
 import com.haniu.tthieu.haniu.service.AuthService;
 import com.haniu.tthieu.haniu.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -180,7 +182,15 @@ public class AuthServiceImpl implements AuthService {
                 .verified(false)
                 .build();
         verificationCodeRepository.save(verificationCode);
-        emailService.sendVerificationCode(email, code);
+        try {
+            emailService.sendVerificationCode(email, code);
+        } catch (Exception e) {
+            log.error("=================================================");
+            log.error("GỬI EMAIL XÁC THỰC THẤT BẠI CHO EMAIL: {}", email);
+            log.error("MÃ OTP XÁC THỰC CỦA BẠN LÀ: {}", code);
+            log.error("Chi tiết lỗi: {}", e.getMessage());
+            log.error("=================================================");
+        }
     }
 
     private String generateOtpCode() {
@@ -230,7 +240,15 @@ public class AuthServiceImpl implements AuthService {
                 .verified(false)
                 .build();
         verificationCodeRepository.save(verificationCode);
-        emailService.sendPasswordResetCode(user.getEmail(), code);
+        try {
+            emailService.sendPasswordResetCode(user.getEmail(), code);
+        } catch (Exception e) {
+            log.error("=================================================");
+            log.error("GỬI EMAIL ĐẶT LẠI MẬT KHẨU THẤT BẠI CHO EMAIL: {}", user.getEmail());
+            log.error("MÃ OTP ĐẶT LẠI MẬT KHẨU CỦA BẠN LÀ: {}", code);
+            log.error("Chi tiết lỗi: {}", e.getMessage());
+            log.error("=================================================");
+        }
     }
 
     @Override

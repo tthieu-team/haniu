@@ -12,6 +12,33 @@ interface CategoryState {
   deleteCategory: (id: string) => Promise<void>;
 }
 
+const normalizeCategory = (c: any): Category => {
+  if (!c) return c;
+  const activeVal = c.active !== undefined ? c.active : (c.isActive !== undefined ? c.isActive : true);
+  const featuredVal = c.featured !== undefined ? c.featured : (c.isFeatured !== undefined ? c.isFeatured : false);
+  return {
+    ...c,
+    active: activeVal,
+    isActive: activeVal,
+    featured: featuredVal,
+    isFeatured: featuredVal,
+    parent: c.parent ? normalizeCategory(c.parent) : null,
+  };
+};
+
+const preparePayload = (payload: Category): any => {
+  const activeVal = payload.isActive !== undefined ? payload.isActive : ((payload as any).active !== undefined ? (payload as any).active : true);
+  const featuredVal = payload.isFeatured !== undefined ? payload.isFeatured : ((payload as any).featured !== undefined ? (payload as any).featured : false);
+  return {
+    ...payload,
+    active: activeVal,
+    isActive: activeVal,
+    featured: featuredVal,
+    isFeatured: featuredVal,
+    parent: payload.parent ? preparePayload(payload.parent) : null,
+  };
+};
+
 export const useCategoryStore = create<CategoryState>((set) => ({
   categories: [],
   loading: false,
@@ -21,8 +48,9 @@ export const useCategoryStore = create<CategoryState>((set) => ({
     set({ loading: true, error: null });
     try {
       const data = await catalogService.getAllCategories();
-      set({ categories: data || [], loading: false });
-      return data || [];
+      const normalized = (data || []).map(normalizeCategory);
+      set({ categories: normalized, loading: false });
+      return normalized;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi lấy danh sách danh mục' });
       return [];
@@ -32,12 +60,14 @@ export const useCategoryStore = create<CategoryState>((set) => ({
   createCategory: async (payload) => {
     set({ loading: true, error: null });
     try {
-      const data = await catalogService.createCategory(payload);
+      const body = preparePayload(payload);
+      const data = await catalogService.createCategory(body);
+      const normalized = normalizeCategory(data);
       set((state) => ({
-        categories: [data, ...state.categories],
+        categories: [normalized, ...state.categories],
         loading: false,
       }));
-      return data;
+      return normalized;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi thêm danh mục mới' });
       throw err;
@@ -47,12 +77,14 @@ export const useCategoryStore = create<CategoryState>((set) => ({
   updateCategory: async (id, payload) => {
     set({ loading: true, error: null });
     try {
-      const data = await catalogService.updateCategory(id, payload);
+      const body = preparePayload(payload);
+      const data = await catalogService.updateCategory(id, body);
+      const normalized = normalizeCategory(data);
       set((state) => ({
-        categories: state.categories.map((c) => (c.id === id ? data : c)),
+        categories: state.categories.map((c) => (c.id === id ? normalized : c)),
         loading: false,
       }));
-      return data;
+      return normalized;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi cập nhật danh mục' });
       throw err;
