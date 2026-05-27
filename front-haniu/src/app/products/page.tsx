@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useProductStore } from '@/store/product';
 import ProductCard from '@/components/product/ProductCard';
 import QuickViewModal from '@/components/product/QuickViewModal';
 import Icon from '@/components/common/Icons';
@@ -13,255 +12,317 @@ import FilterSidebar from './components/FilterSidebar';
 import FilterDrawer from './components/FilterDrawer';
 import ProductToolbar from './components/ProductToolbar';
 import SkeletonCard from './components/SkeletonCard';
+import CategoryPillsBar from './components/CategoryPillsBar';
+import ActiveFilterTags from './components/ActiveFilterTags';
+import EmptyState from './components/EmptyState';
+import ProductListSeo from './components/ProductListSeo';
+import { MOCK_CATALOG_PRODUCTS, SORT_OPTIONS } from './components/mockProducts';
 
-// Rich Mock Catalog Data for full offline fallback
-const MOCK_CATALOG_PRODUCTS = [
-  {
-    id: "m1",
-    name: "Hộp Quà Lãng Mạn - Eternal Love Special Edition",
-    slug: "hop-qua-lang-man-eternal-love",
-    sku: "GIFT-EL-001",
-    description: "Set quà tặng cao cấp gồm hoa sáp thơm, ly sứ khắc tên, thiệp viết tay và đèn LED trang trí lãng mạn.",
-    basePrice: 590000,
-    salePrice: 490000,
-    stock: 50,
-    isFeatured: true,
-    isNew: true,
-    isCustomizable: true,
-    category: { name: "Combo Quà Tặng", slug: "combo-qua-tang" },
-    media: [{ url: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=80", isThumbnail: true }]
-  },
-  {
-    id: "m2",
-    name: "Sổ Tay Da Thật Khắc Tên Cá Nhân Hóa",
-    slug: "so-tay-da-that-khac-ten",
-    sku: "GIFT-NB-002",
-    description: "Sổ bìa da bò thật cao cấp, giấy nhám kraft vintage, hỗ trợ khắc laze tên và lời chúc ý nghĩa theo yêu cầu.",
-    basePrice: 350000,
-    stock: 120,
-    isFeatured: true,
-    isNew: false,
-    isCustomizable: true,
-    category: { name: "Sổ Da & Bút", slug: "so-da-but" },
-    media: [{ url: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=80", isThumbnail: true }]
-  },
-  {
-    id: "m3",
-    name: "Ly Sứ Cao Cấp Vẽ Tay - Men Hỏa Biến",
-    slug: "ly-su-men-hoa-bien",
-    sku: "GIFT-MUG-003",
-    description: "Ly sứ Bát Tràng tráng men hỏa biến độc bản, chế tác tinh xảo, màu sắc biến đổi theo nhiệt độ lò.",
-    basePrice: 220000,
-    salePrice: 180000,
-    stock: 200,
-    isFeatured: false,
-    isNew: true,
-    isCustomizable: false,
-    category: { name: "Ly Sứ", slug: "ly-su" },
-    media: [{ url: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=80", isThumbnail: true }]
-  },
-  {
-    id: "m4",
-    name: "Set Quà Lưu Niệm Đồ Gỗ Bản Đồ Việt Nam",
-    slug: "tranh-go-ban-do-viet-nam",
-    sku: "GIFT-WOOD-004",
-    description: "Tranh khắc gỗ 3D Bản đồ Việt Nam đầy đủ Hoàng Sa, Trường Sa, sử dụng chất liệu gỗ tự nhiên sơn dầu bảo vệ.",
-    basePrice: 1200000,
-    salePrice: 950000,
-    stock: 15,
-    isFeatured: true,
-    isNew: true,
-    isCustomizable: true,
-    category: { name: "Đồ Lưu Niệm", slug: "do-luu-niem" },
-    media: [{ url: "https://images.unsplash.com/photo-1581783898377-1c85bf937427?w=500&auto=format&fit=crop&q=80", isThumbnail: true }]
-  },
-  {
-    id: "m5",
-    name: "Bút Ký Kim Loại Khắc Tên Mạ Vàng Lux",
-    slug: "but-ky-kim-loai-khac-ten",
-    sku: "GIFT-PEN-005",
-    description: "Bút dạ bi kim loại mạ vàng sang trọng, nét mực trơn tru, đi kèm hộp nhung lót lụa cao cấp làm quà tặng doanh nghiệp.",
-    basePrice: 290000,
-    stock: 80,
-    isFeatured: false,
-    isNew: false,
-    isCustomizable: true,
-    category: { name: "Sổ Da & Bút", slug: "so-da-but" },
-    media: [{ url: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=500&auto=format&fit=crop&q=80", isThumbnail: true }]
-  },
-  {
-    id: "m6",
-    name: "Cốc Giữ Nhiệt Laze Khắc Logo Hộp Sang Trọng",
-    slug: "coc-giu-nhiet-khac-logo",
-    sku: "GIFT-MUG-006",
-    description: "Ly giữ nhiệt thép không gỉ 304 dung tích 500ml, giữ nóng lạnh 12 giờ, hỗ trợ thiết kế khắc laze tên hoặc logo doanh nghiệp.",
-    basePrice: 280000,
-    salePrice: 240000,
-    stock: 150,
-    isFeatured: false,
-    isNew: true,
-    isCustomizable: true,
-    category: { name: "Ly Sứ", slug: "ly-su" },
-    media: [{ url: "https://images.unsplash.com/photo-1577937927133-66ef06acdf18?w=500&auto=format&fit=crop&q=80", isThumbnail: true }]
-  },
-  {
-    id: "m7",
-    name: "Set Hộp Trà Cao Cấp Gỗ Hương Tự Nhiên",
-    slug: "set-hop-tra-go-huong",
-    sku: "GIFT-TEA-007",
-    description: "Hộp đựng trà chế tác thủ công từ gỗ hương đỏ nguyên khối, mùi thơm tự nhiên kết hợp cùng trà ô long thượng hạng.",
-    basePrice: 750000,
-    stock: 35,
-    isFeatured: true,
-    isNew: false,
-    isCustomizable: false,
-    category: { name: "Đồ Lưu Niệm", slug: "do-luu-niem" },
-    media: [{ url: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&auto=format&fit=crop&q=80", isThumbnail: true }]
-  },
-  {
-    id: "m8",
-    name: "Album Ảnh Gỗ Gấp Gọn Lưu Giữ Kỷ Niệm",
-    slug: "album-anh-go-luu-niem",
-    sku: "GIFT-ALB-008",
-    description: "Album ảnh trang bìa gỗ ép cao cấp, ruột giấy mỹ thuật đen dày dặn, tặng kèm decal góc dán ảnh và bút nhũ viết lời chúc.",
-    basePrice: 420000,
-    salePrice: 380000,
-    stock: 90,
-    isFeatured: true,
-    isNew: false,
-    isCustomizable: true,
-    category: { name: "Đồ Lưu Niệm", slug: "do-luu-niem" },
-    media: [{ url: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=500&auto=format&fit=crop&q=80", isThumbnail: true }]
-  }
-];
-
-const CATEGORIES = [
-  { name: 'Tất cả danh mục', slug: '' },
-  { name: 'Combo Quà Tặng', slug: 'combo-qua-tang' },
-  { name: 'Sổ Da & Bút', slug: 'so-da-but' },
-  { name: 'Ly Sứ', slug: 'ly-su' },
-  { name: 'Đồ Lưu Niệm', slug: 'do-luu-niem' }
-];
-
-const SORT_OPTIONS = [
-  { name: 'Mới nhất', value: 'newest' },
-  { name: 'Giá tăng dần', value: 'price-asc' },
-  { name: 'Giá giảm dần', value: 'price-desc' },
-  { name: 'Phổ biến/Bán chạy', value: 'sales' }
-];
+import { catalogService, Category, Brand, Collection } from '@/services/catalog.service';
+import { productService } from '@/services/product.service';
 
 function ProductsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Search parameters mapping
+  // Read URL search params
   const paramSearch = searchParams.get('search') || '';
   const paramCat = searchParams.get('category') || '';
+  const paramBrand = searchParams.get('brand') || '';
+  const paramCollection = searchParams.get('collection') || '';
   const paramSort = searchParams.get('sort') || 'newest';
+  const paramMinPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : '';
+  const paramMaxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : '';
+  const paramCustomizable = searchParams.get('customizable') === 'true';
 
-  // Zustand Store binding
-  const storeProducts = useProductStore((state) => state.products);
-  const fetchStoreProducts = useProductStore((state) => state.fetchProducts);
-  const searchStoreProducts = useProductStore((state) => state.searchProducts);
+  // Dynamic lists from backend
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
 
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState(paramSearch);
+  const [selectedCat, setSelectedCat] = useState(paramCat);
+  const [selectedBrand, setSelectedBrand] = useState(paramBrand);
+  const [selectedCollection, setSelectedCollection] = useState(paramCollection);
+  const [sortOption, setSortOption] = useState(paramSort);
+  const [customizableOnly, setCustomizableOnly] = useState(paramCustomizable);
+  const [priceMin, setPriceMin] = useState<number | ''>(paramMinPrice);
+  const [priceMax, setPriceMax] = useState<number | ''>(paramMaxPrice);
+
+  // Products and loading
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
 
-  // Filter conditions states
-  const [searchQuery, setSearchQuery] = useState(paramSearch);
-  const [selectedCat, setSelectedCat] = useState(paramCat);
-  const [sortOption, setSortOption] = useState(paramSort);
-  const [customizableOnly, setCustomizableOnly] = useState(false);
-  const [priceMin, setPriceMin] = useState<number | ''>('');
-  const [priceMax, setPriceMax] = useState<number | ''>('');
+  // Pagination cursor and page states
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Fallback to Mock Catalog Data if store is empty
-  const products = storeProducts.length > 0 ? storeProducts : MOCK_CATALOG_PRODUCTS;
+  // Helper to resolve UUID from slug
+  const resolveSlugToId = (slugOrId: string, list: Array<{ id?: string; slug: string }>) => {
+    if (!slugOrId) return undefined;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidRegex.test(slugOrId)) return slugOrId;
+    const found = list.find((item) => item.slug === slugOrId);
+    return found?.id;
+  };
 
-  // Synchronize URL search params
+  // Sync title tag for SEO
+  useEffect(() => {
+    if (catalogLoaded) {
+      const activeCat = categories.find(c => c.id === selectedCat || c.slug === selectedCat);
+      const title = activeCat ? `${activeCat.name} | Haniu Quà Tặng` : 'Bộ Sưu Tập Quà Tặng Cao Cấp | Haniu';
+      document.title = title;
+    }
+  }, [selectedCat, categories, catalogLoaded]);
+
+  // Fetch catalogs on mount
+  useEffect(() => {
+    const fetchCatalogs = async () => {
+      try {
+        const [catsData, brandsData, collsData] = await Promise.all([
+          catalogService.getAllCategories(),
+          catalogService.getAllBrands(),
+          catalogService.getAllCollections()
+        ]);
+        setCategories(catsData || []);
+        setBrands(brandsData || []);
+        setCollections(collsData || []);
+      } catch (err) {
+        console.error("Failed to load catalog data:", err);
+      } finally {
+        setCatalogLoaded(true);
+      }
+    };
+    fetchCatalogs();
+  }, []);
+
+  // Update states whenever URL params change
   useEffect(() => {
     setSearchQuery(paramSearch);
     setSelectedCat(paramCat);
+    setSelectedBrand(paramBrand);
+    setSelectedCollection(paramCollection);
     setSortOption(paramSort);
-  }, [paramSearch, paramCat, paramSort]);
+    setPriceMin(paramMinPrice);
+    setPriceMax(paramMaxPrice);
+    setCustomizableOnly(paramCustomizable);
+  }, [
+    paramSearch,
+    paramCat,
+    paramBrand,
+    paramCollection,
+    paramSort,
+    paramMinPrice,
+    paramMaxPrice,
+    paramCustomizable
+  ]);
 
-  // Load products from Zustand store
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      const filters: any = {};
-      if (selectedCat) {
-        filters.categoryId = selectedCat;
-      }
-      if (sortOption === 'price-asc') {
-        filters.sortBy = 'basePrice';
-        filters.sortDir = 'asc';
-      } else if (sortOption === 'price-desc') {
-        filters.sortBy = 'basePrice';
-        filters.sortDir = 'desc';
-      }
-
-      if (searchQuery.trim()) {
-        await searchStoreProducts(searchQuery, 0, 40);
+  // Function to push parameters to URL (Source of truth)
+  const updateUrlParams = (updates: any) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.keys(updates).forEach((key) => {
+      const val = updates[key];
+      if (val === undefined || val === null || val === '') {
+        params.delete(key);
       } else {
-        await fetchStoreProducts(filters);
+        params.set(key, String(val));
       }
-    } catch (error) {
-      console.error("Zustand store fetch failed:", error);
+    });
+    router.push(`/products?${params.toString()}`);
+  };
+
+  // Local mock filtering helper for fallback
+  const filterMockProductsLocal = () => {
+    let list = [...MOCK_CATALOG_PRODUCTS];
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(p => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
+    }
+    if (selectedCat) {
+      list = list.filter(p => p.category?.slug === selectedCat || (p.category as any)?.id === selectedCat);
+    }
+    if (customizableOnly) {
+      list = list.filter(p => p.isCustomizable);
+    }
+    if (priceMin !== '') {
+      list = list.filter(p => (p.salePrice || p.basePrice || 0) >= priceMin);
+    }
+    if (priceMax !== '') {
+      list = list.filter(p => (p.salePrice || p.basePrice || 0) <= priceMax);
+    }
+    list = [...list].sort((a: any, b: any) => {
+      const priceA = a.salePrice || a.basePrice || 0;
+      const priceB = b.salePrice || b.basePrice || 0;
+      if (sortOption === 'price-asc') return priceA - priceB;
+      if (sortOption === 'price-desc') return priceB - priceA;
+      if (sortOption === 'sales') return b.stock - a.stock;
+      return b.id.localeCompare(a.id);
+    });
+    return list;
+  };
+
+  // Main loader function
+  const loadProducts = async (reset = false) => {
+    if (reset) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
+
+    try {
+      const size = 12;
+      const targetPage = reset ? 0 : currentPage + 1;
+      const cursorVal = reset ? null : nextCursor;
+
+      const catId = resolveSlugToId(selectedCat, categories);
+      const brandId = resolveSlugToId(selectedBrand, brands);
+      const collId = resolveSlugToId(selectedCollection, collections);
+
+      let resData: any = null;
+      let newProducts: any[] = [];
+      let hasNext = false;
+      let nextC: string | null = null;
+      let totalP = 1;
+
+      if (searchQuery.trim() !== '') {
+        // Mode A: Search Mode (page-based)
+        resData = await productService.searchProducts(searchQuery, targetPage, size);
+        if (resData) {
+          const content = resData.content || [];
+          newProducts = content.map((item: any) => ({
+            ...item,
+            id: item.id || item._id,
+            basePrice: item.price !== undefined ? item.price : item.basePrice,
+            category: item.categoryName ? { id: item.categoryId, name: item.categoryName } : item.category
+          }));
+          totalP = resData.totalPages || 1;
+          hasNext = targetPage < totalP - 1;
+        }
+      } else if (sortOption === 'newest') {
+        // Mode C: Cursor Mode (default sorting newest)
+        resData = await productService.getProductsCursor({
+          categoryId: catId,
+          brandId: brandId,
+          collectionId: collId,
+          cursor: cursorVal || undefined,
+          size
+        });
+        if (resData) {
+          newProducts = resData.content || [];
+          nextC = resData.nextCursor || null;
+          hasNext = resData.hasNext || false;
+        }
+      } else {
+        // Mode B: Standard/Offset Mode (price sorting/sales, page-based)
+        let sortBy = 'createdAt';
+        let sortDir = 'desc';
+        if (sortOption === 'price-asc') {
+          sortBy = 'price';
+          sortDir = 'asc';
+        } else if (sortOption === 'price-desc') {
+          sortBy = 'price';
+          sortDir = 'desc';
+        } else if (sortOption === 'sales') {
+          sortBy = 'totalSold';
+          sortDir = 'desc';
+        }
+
+        resData = await productService.getProducts({
+          categoryId: catId,
+          brandId: brandId,
+          collectionId: collId,
+          page: targetPage,
+          size,
+          sortBy,
+          sortDir,
+          status: 'PUBLISHED'
+        });
+        if (resData) {
+          newProducts = resData.content || [];
+          totalP = resData.totalPages || 1;
+          hasNext = targetPage < totalP - 1;
+        }
+      }
+
+      // Offline mock fallback if no items are in database
+      if (reset && (!newProducts || newProducts.length === 0)) {
+        const fallback = filterMockProductsLocal();
+        setProducts(fallback);
+        setHasNextPage(false);
+        setNextCursor(null);
+        setCurrentPage(0);
+        setTotalPages(1);
+      } else {
+        if (reset) {
+          setProducts(newProducts);
+        } else {
+          setProducts((prev) => [...prev, ...newProducts]);
+        }
+        setNextCursor(nextC);
+        setHasNextPage(hasNext);
+        setCurrentPage(targetPage);
+        setTotalPages(totalP);
+      }
+    } catch (err) {
+      console.error("Failed to load products from backend:", err);
+      if (reset) {
+        const fallback = filterMockProductsLocal();
+        setProducts(fallback);
+        setHasNextPage(false);
+        setNextCursor(null);
+        setCurrentPage(0);
+        setTotalPages(1);
+      }
     } finally {
-      // Soft skeleton rendering duration
-      setTimeout(() => setLoading(false), 450);
+      // Small visual delay for loading transitions
+      setTimeout(() => {
+        setLoading(false);
+        setLoadingMore(false);
+      }, 350);
     }
   };
 
+  // Trigger product fetch whenever URL query parameters change (and after catalog loads)
   useEffect(() => {
-    fetchProducts();
-  }, [searchQuery, selectedCat, sortOption]);
+    if (catalogLoaded) {
+      loadProducts(true);
+    }
+  }, [
+    catalogLoaded,
+    paramSearch,
+    paramCat,
+    paramBrand,
+    paramCollection,
+    paramSort,
+    paramMinPrice,
+    paramMaxPrice,
+    paramCustomizable
+  ]);
 
-  // Advanced client-side filtering logic (handles complex tags that backend might lack)
+  // Client side filters (for price and custom check tags)
   const filteredProducts = products.filter((product: any) => {
-    // 1. Category Filter
-    if (selectedCat && product.category?.slug !== selectedCat && product.category?.id !== selectedCat) {
-      return false;
-    }
-    // 2. Customizable check
-    if (customizableOnly && !product.isCustomizable) {
-      return false;
-    }
-    // 3. Price range check
-    const currentPrice = product.salePrice || product.basePrice || 0;
-    if (priceMin !== '' && currentPrice < priceMin) {
-      return false;
-    }
-    if (priceMax !== '' && currentPrice > priceMax) {
-      return false;
-    }
-    // 4. Client Search Query matching
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchName = product.name?.toLowerCase().includes(q);
-      const matchDesc = product.description?.toLowerCase().includes(q);
-      if (!matchName && !matchDesc) return false;
-    }
+    // 1. Customizable
+    if (customizableOnly && !product.isCustomizable) return false;
+    // 2. Price range
+    const price = product.salePrice || product.basePrice || product.price || 0;
+    if (priceMin !== '' && price < priceMin) return false;
+    if (priceMax !== '' && price > priceMax) return false;
     return true;
   });
 
-  // Client side sorting logic (as helper)
-  const sortedProducts = [...filteredProducts].sort((a: any, b: any) => {
-    const priceA = a.salePrice || a.basePrice || 0;
-    const priceB = b.salePrice || b.basePrice || 0;
-
-    if (sortOption === 'price-asc') return priceA - priceB;
-    if (sortOption === 'price-desc') return priceB - priceA;
-    if (sortOption === 'sales') return b.stock - a.stock;
-    return b.id.localeCompare(a.id);
-  });
-
   const clearAllFilters = () => {
-    setSelectedCat('');
     setSearchQuery('');
+    setSelectedCat('');
+    setSelectedBrand('');
+    setSelectedCollection('');
     setCustomizableOnly(false);
     setPriceMin('');
     setPriceMax('');
@@ -271,204 +332,288 @@ function ProductsContent() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams();
-    if (searchQuery) params.set('search', searchQuery);
-    if (selectedCat) params.set('category', selectedCat);
-    params.set('sort', sortOption);
-    router.push(`/products?${params.toString()}`);
+    updateUrlParams({ search: searchQuery });
+  };
+
+  // Build active filters array
+  const getActiveFilters = () => {
+    const list = [];
+    if (selectedCat) {
+      const found = categories.find(c => c.id === selectedCat || c.slug === selectedCat);
+      list.push({ key: 'category', label: `Danh mục: ${found ? found.name : selectedCat}` });
+    }
+    if (selectedBrand) {
+      const found = brands.find(b => b.id === selectedBrand || b.slug === selectedBrand);
+      list.push({ key: 'brand', label: `Thương hiệu: ${found ? found.name : selectedBrand}` });
+    }
+    if (selectedCollection) {
+      const found = collections.find(c => c.id === selectedCollection || c.slug === selectedCollection);
+      list.push({ key: 'collection', label: `Bộ sưu tập: ${found ? found.name : selectedCollection}` });
+    }
+    if (customizableOnly) {
+      list.push({ key: 'customizable', label: 'Khắc tên theo yêu cầu' });
+    }
+    if (priceMin !== '' || priceMax !== '') {
+      let label = 'Giá: ';
+      if (priceMin !== '' && priceMax !== '') label += `${(priceMin / 1000)}k - ${(priceMax / 1000)}k`;
+      else if (priceMin !== '') label += `> ${(priceMin / 1000)}k`;
+      else if (priceMax !== '') label += `< ${(priceMax / 1000)}k`;
+      list.push({ key: 'price', label });
+    }
+    if (searchQuery.trim()) {
+      list.push({ key: 'search', label: `Tìm kiếm: "${searchQuery}"` });
+    }
+    return list;
+  };
+
+  const removeFilter = (key: string) => {
+    switch (key) {
+      case 'category':
+        updateUrlParams({ category: '' });
+        break;
+      case 'brand':
+        updateUrlParams({ brand: '' });
+        break;
+      case 'collection':
+        updateUrlParams({ collection: '' });
+        break;
+      case 'customizable':
+        updateUrlParams({ customizable: '' });
+        break;
+      case 'price':
+        updateUrlParams({ minPrice: '', maxPrice: '' });
+        break;
+      case 'search':
+        updateUrlParams({ search: '' });
+        break;
+    }
   };
 
   return (
-    <div className="w-full py-20 relative overflow-hidden font-sans min-h-screen">
-      {/* Breadcrumbs */}
-      <nav className="text-xs text-slate-400 dark:text-zinc-500 mb-6 flex items-center gap-1.5 font-light">
+    <div className="w-full py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden font-sans min-h-screen bg-slate-50/30 dark:bg-zinc-950">
+
+      {/* Breadcrumbs Navigation */}
+      <nav className="text-xs text-slate-400 dark:text-zinc-500 mb-6 flex items-center gap-1.5 font-medium max-w-7xl mx-auto">
         <Link href="/" className="hover:text-rose-500 transition-colors">Trang chủ</Link>
         <span>&gt;</span>
-        <span className="text-slate-600 dark:text-zinc-300 font-normal">Bộ sưu tập quà tặng</span>
+        <span className="text-slate-600 dark:text-zinc-300">Sản phẩm quà tặng</span>
+        {selectedCat && (
+          <>
+            <span>&gt;</span>
+            <span className="text-rose-500 font-bold">
+              {categories.find(c => c.id === selectedCat || c.slug === selectedCat)?.name || selectedCat}
+            </span>
+          </>
+        )}
       </nav>
 
-      {/* Hero Category Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-100 dark:border-zinc-800/80 pb-6 mb-8 gap-4">
+      {/* Main Page Title Header */}
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between border-b border-slate-100 dark:border-zinc-850 pb-6 mb-8 gap-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-black text-slate-800 dark:text-zinc-100 tracking-tight uppercase">
-            {CATEGORIES.find(c => c.slug === selectedCat)?.name || 'Bộ Sưu Tập Quà Tặng'}
+          <h1 className="text-3xl font-black text-slate-800 dark:text-zinc-100 tracking-tight uppercase bg-gradient-to-r from-slate-900 to-slate-700 dark:from-zinc-100 dark:to-zinc-350 bg-clip-text text-transparent">
+            {categories.find((c) => c.id === selectedCat || c.slug === selectedCat)?.name || 'Bộ Sưu Tập Quà Tặng'}
           </h1>
-          <p className="text-xs text-slate-500 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
-            Khám phá thế giới quà tặng thủ công được chế tác tỉ mỉ, hỗ trợ cá nhân hóa khắc tên và thiết kế riêng biệt gửi trọn tâm ý của bạn.
+          <p className="text-xs text-slate-450 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
+            Hộp quà tặng thủ công nghệ thuật cá nhân hóa khắc tên riêng và lời chúc theo yêu cầu, chế tác độc bản gửi trọn thành ý của bạn.
           </p>
         </div>
-        <div className="text-xs text-slate-400 dark:text-zinc-500 font-light whitespace-nowrap self-start md:self-end bg-slate-50 dark:bg-zinc-900/40 px-4 py-2 rounded-full border border-slate-100 dark:border-zinc-800/80">
-          Hiển thị <span className="font-semibold text-slate-700 dark:text-zinc-200">{sortedProducts.length}</span> sản phẩm
-        </div>
       </div>
 
-      {/* Main Catalog View Grid */}
-      <div className="flex flex-col lg:flex-row gap-8 relative items-start">
-        
-        {/* 1. Desktop Sticky Filter Sidebar */}
-        <FilterSidebar
+      <div className="max-w-7xl mx-auto">
+
+        {/* Horizontal scrollable category pill bar on top for quick selector */}
+        <CategoryPillsBar
+          categories={categories}
           selectedCat={selectedCat}
-          setSelectedCat={setSelectedCat}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          customizableOnly={customizableOnly}
-          setCustomizableOnly={setCustomizableOnly}
-          priceMin={priceMin}
-          setPriceMin={setPriceMin}
-          priceMax={priceMax}
-          setPriceMax={setPriceMax}
-          clearAllFilters={clearAllFilters}
-          handleSearchSubmit={handleSearchSubmit}
-          categories={CATEGORIES}
+          onSelectCategory={(cat) => updateUrlParams({ category: cat })}
         />
 
-        {/* 2. Product Area (Toolbar + Grid) */}
-        <div className="flex-1 w-full space-y-6">
-          
-          {/* Sticky Toolbar bar */}
-          <ProductToolbar
-            onOpenFilters={() => setMobileFilterOpen(true)}
-            sortOption={sortOption}
-            setSortOption={setSortOption}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            sortOptions={SORT_OPTIONS}
+        {/* Active Filter Tags Row */}
+        <ActiveFilterTags
+          activeFilters={getActiveFilters()}
+          onRemoveFilter={removeFilter}
+          onClearAll={clearAllFilters}
+        />
+
+        {/* Main Catalog View Grid */}
+        <div className="flex flex-col lg:flex-row gap-8 relative items-start">
+
+          {/* Desktop Sidebar filter */}
+          <FilterSidebar
+            selectedCat={selectedCat}
+            setSelectedCat={(cat) => updateUrlParams({ category: cat })}
+            selectedBrand={selectedBrand}
+            setSelectedBrand={(brand) => updateUrlParams({ brand: brand })}
+            selectedCollection={selectedCollection}
+            setSelectedCollection={(coll) => updateUrlParams({ collection: coll })}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            customizableOnly={customizableOnly}
+            setCustomizableOnly={(val) => updateUrlParams({ customizable: val ? 'true' : '' })}
+            priceMin={priceMin}
+            setPriceMin={(val) => updateUrlParams({ minPrice: val })}
+            priceMax={priceMax}
+            setPriceMax={(val) => updateUrlParams({ maxPrice: val })}
+            clearAllFilters={clearAllFilters}
+            handleSearchSubmit={handleSearchSubmit}
+            categories={categories}
+            brands={brands}
+            collections={collections}
           />
 
-          {/* Product Grid Area */}
-          {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </div>
-          ) : sortedProducts.length === 0 ? (
-            /* Empty State */
-            <div className="flex flex-col items-center justify-center py-20 text-center space-y-5 bg-slate-50/50 dark:bg-zinc-900/10 rounded-[32px] border border-dashed border-slate-200 dark:border-zinc-850">
-              <div className="w-16 h-16 rounded-full bg-rose-50 dark:bg-rose-950/20 text-rose-500 flex items-center justify-center shadow-xs">
-                <Icon name="search" size={24} />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-extrabold text-slate-800 dark:text-zinc-150">Không tìm thấy sản phẩm phù hợp</h3>
-                <p className="text-xs text-slate-400 dark:text-zinc-500 font-light max-w-sm">
-                  Hãy thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh lại bộ lọc để tìm sản phẩm mong muốn.
-                </p>
-              </div>
-              <button
-                onClick={clearAllFilters}
-                className="bg-rose-500 text-white text-xs font-bold px-6 py-3 rounded-2xl shadow-md hover:bg-rose-600 active:scale-98 transition-all cursor-pointer"
-              >
-                Xóa tất cả bộ lọc
-              </button>
-            </div>
-          ) : viewMode === 'list' ? (
-            /* List View mode */
-            <div className="space-y-4">
-              {sortedProducts.map((product: any) => (
-                <div 
-                  key={product.id}
-                  className="group bg-white dark:bg-zinc-900 rounded-[28px] border border-slate-100 dark:border-zinc-800/80 p-5 flex flex-col sm:flex-row gap-5 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden"
-                >
-                  {/* Thumbnail */}
-                  <div className="w-full sm:w-44 aspect-square bg-slate-50 dark:bg-zinc-950 rounded-2xl overflow-hidden shrink-0 relative">
-                    <img 
-                      src={product.media?.[0]?.url || 'https://via.placeholder.com/300'} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out"
-                    />
-                  </div>
-                  {/* Info details */}
-                  <div className="flex-1 flex flex-col justify-between py-1">
-                    <div className="space-y-2">
-                      <span className="text-[9px] font-black uppercase text-rose-500 tracking-wider">
-                        {product.category?.name}
-                      </span>
-                      <h3 className="text-base font-extrabold text-slate-800 dark:text-zinc-150 hover:text-rose-500 transition-colors">
-                        <Link href={`/products/${product.slug}`}>{product.name}</Link>
-                      </h3>
-                      <p className="text-xs text-slate-400 dark:text-zinc-500 font-light line-clamp-2 max-w-xl">
-                        {product.description}
-                      </p>
-                    </div>
-                    {/* Price and buy details */}
-                    <div className="flex items-end justify-between pt-4 sm:pt-0">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-lg font-black text-rose-500">
-                          {(product.salePrice || product.basePrice || 0).toLocaleString('vi-VN')}đ
-                        </span>
-                        {product.salePrice && (
-                          <span className="text-xs text-slate-400 line-through">
-                            {(product.basePrice || 0).toLocaleString('vi-VN')}đ
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setQuickViewProduct(product)}
-                          className="bg-slate-50 dark:bg-zinc-800 hover:bg-rose-50 text-slate-600 dark:text-zinc-300 dark:hover:text-rose-400 p-2.5 rounded-xl border border-slate-200/50 dark:border-zinc-800/80 transition-all cursor-pointer"
-                          title="Xem nhanh"
-                        >
-                          <Icon name="eye" size={13} />
-                        </button>
-                        <Link 
-                          href={`/products/${product.slug}`}
-                          className="bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all active:scale-98"
-                        >
-                          Chi tiết
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            /* Standard Grid view mode */
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-              {sortedProducts.map((product: any) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onQuickView={setQuickViewProduct}
-                />
-              ))}
-            </div>
-          )}
+          {/* Product grid list panel */}
+          <div className="flex-1 w-full space-y-6">
 
-          {/* Simple load more hybrid pagination */}
-          {sortedProducts.length > 0 && (
-            <div className="pt-8 text-center">
-              <span className="inline-block text-xs text-slate-400 dark:text-zinc-500 font-light mb-3 block">
-                Đang hiển thị {sortedProducts.length} / {products.length} sản phẩm
-              </span>
-              <button
-                disabled={loading}
-                className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 text-slate-700 dark:text-zinc-300 font-bold px-8 py-3.5 rounded-2xl text-xs shadow-xs hover:shadow-md transition-all active:scale-98 cursor-pointer disabled:opacity-50"
-              >
-                Tải thêm sản phẩm
-              </button>
-            </div>
-          )}
+            {/* Toolbar sorting and display toggles */}
+            <ProductToolbar
+              onOpenFilters={() => setMobileFilterOpen(true)}
+              sortOption={sortOption}
+              setSortOption={(opt) => updateUrlParams({ sort: opt })}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              sortOptions={SORT_OPTIONS}
+              totalCount={filteredProducts.length}
+            />
+
+            {/* Content loading state */}
+            {loading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              /* Empty state matching the home styling */
+              <EmptyState onClearFilters={clearAllFilters} />
+            ) : viewMode === 'list' ? (
+              /* List Mode layout */
+              <div className="space-y-4">
+                {filteredProducts.map((product: any) => (
+                  <div
+                    key={product.id}
+                    className="group bg-white dark:bg-zinc-950 rounded-[28px] border border-slate-100 dark:border-zinc-850 p-5 flex flex-col sm:flex-row gap-5 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden"
+                  >
+                    <div className="w-full sm:w-44 aspect-square bg-slate-50 dark:bg-zinc-900 rounded-2xl overflow-hidden shrink-0 relative">
+                      <img
+                        src={product.media?.[0]?.url || product.thumbnailUrl || 'https://via.placeholder.com/300'}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out"
+                      />
+                      {product.isFeatured && (
+                        <span className="absolute top-3 left-3 bg-amber-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-xs uppercase tracking-wider">
+                          Nổi bật
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex-1 flex flex-col justify-between py-1">
+                      <div className="space-y-2">
+                        <span className="text-[9px] font-black uppercase text-rose-500 tracking-wider">
+                          {product.category?.name || 'Quà Tặng'}
+                        </span>
+                        <h3 className="text-base font-extrabold text-slate-800 dark:text-zinc-150 hover:text-rose-500 transition-colors">
+                          <Link href={`/products/${product.slug}`}>{product.name}</Link>
+                        </h3>
+                        <p className="text-xs text-slate-400 dark:text-zinc-500 font-light line-clamp-2 max-w-xl leading-relaxed">
+                          {product.description}
+                        </p>
+                      </div>
+
+                      <div className="flex items-end justify-between pt-4 sm:pt-0">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-lg font-black text-rose-500">
+                            {(product.salePrice || product.basePrice || product.price || 0).toLocaleString('vi-VN')}đ
+                          </span>
+                          {(product.salePrice && product.basePrice) && (
+                            <span className="text-xs text-slate-400 line-through">
+                              {(product.basePrice || 0).toLocaleString('vi-VN')}đ
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setQuickViewProduct(product)}
+                            className="bg-slate-50 dark:bg-zinc-900 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-slate-650 dark:text-zinc-300 dark:hover:text-rose-400 p-2.5 rounded-xl border border-slate-200/40 dark:border-zinc-800 transition-all cursor-pointer"
+                            title="Xem nhanh"
+                          >
+                            <Icon name="eye" size={13} />
+                          </button>
+                          <Link
+                            href={`/products/${product.slug}`}
+                            className="bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all active:scale-98"
+                          >
+                            Chi tiết
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              /* Grid Mode layout */
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {filteredProducts.map((product: any) => (
+                  <ProductCard
+                    key={product.id}
+                    product={{
+                      ...product,
+                      // Adapt schema differences
+                      basePrice: product.basePrice || product.price
+                    }}
+                    onQuickView={setQuickViewProduct}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Pagination Load More footer control */}
+            {hasNextPage && (
+              <div className="pt-8 text-center space-y-3">
+                <span className="inline-block text-[10px] text-slate-400 dark:text-zinc-550 font-medium tracking-wider uppercase block">
+                  Đã tải {products.length} sản phẩm từ hệ thống
+                </span>
+                <button
+                  onClick={() => loadProducts(false)}
+                  disabled={loadingMore}
+                  className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:border-slate-350 dark:hover:border-zinc-750 text-slate-700 dark:text-zinc-300 font-bold px-8 py-3.5 rounded-2xl text-xs shadow-xs hover:shadow-md transition-all active:scale-98 cursor-pointer disabled:opacity-50 inline-flex items-center gap-2"
+                >
+                  {loadingMore && <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-slate-600 dark:border-zinc-300" />}
+                  <span>Tải thêm sản phẩm</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Rich SEO Content Section at the bottom of the page */}
+        <ProductListSeo />
+
       </div>
 
-      {/* 3. Mobile Filter Drawer / Bottom Sheet */}
+      {/* Mobile Drawer filter panel */}
       <FilterDrawer
         isOpen={mobileFilterOpen}
         onClose={() => setMobileFilterOpen(false)}
         selectedCat={selectedCat}
-        setSelectedCat={setSelectedCat}
+        setSelectedCat={(cat) => updateUrlParams({ category: cat })}
+        selectedBrand={selectedBrand}
+        setSelectedBrand={(brand) => updateUrlParams({ brand: brand })}
+        selectedCollection={selectedCollection}
+        setSelectedCollection={(coll) => updateUrlParams({ collection: coll })}
         customizableOnly={customizableOnly}
-        setCustomizableOnly={setCustomizableOnly}
+        setCustomizableOnly={(val) => updateUrlParams({ customizable: val ? 'true' : '' })}
         priceMin={priceMin}
-        setPriceMin={setPriceMin}
+        setPriceMin={(val) => updateUrlParams({ minPrice: val })}
         priceMax={priceMax}
-        setPriceMax={setPriceMax}
+        setPriceMax={(val) => updateUrlParams({ maxPrice: val })}
         clearAllFilters={clearAllFilters}
-        categories={CATEGORIES}
+        categories={categories}
+        brands={brands}
+        collections={collections}
       />
 
-      {/* Reusable Quick View Modal Component */}
+      {/* Quick view modal details */}
       <QuickViewModal
         product={quickViewProduct}
         isOpen={quickViewProduct !== null}
@@ -481,8 +626,8 @@ function ProductsContent() {
 export default function ProductsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500" />
+      <div className="min-h-screen flex justify-center items-center bg-slate-50 dark:bg-zinc-950">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-rose-500" />
       </div>
     }>
       <ProductsContent />

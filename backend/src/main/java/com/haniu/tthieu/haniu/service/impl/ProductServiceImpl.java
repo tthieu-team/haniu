@@ -38,6 +38,8 @@ public class ProductServiceImpl implements ProductService {
     private final ProductAttributeRepository productAttributeRepository;
     private final ProductElasticsearchRepository productElasticsearchRepository;
     private final co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+    private final OrderItemRepository orderItemRepository;
+    private final CartItemRepository cartItemRepository;
 
     private boolean isElasticsearchAvailable = false;
 
@@ -218,30 +220,86 @@ public class ProductServiceImpl implements ProductService {
 
         Product savedProduct = productRepository.save(product);
 
-        // Delete old variants and save new ones
-        productVariantRepository.deleteByProductId(id);
-        productVariantRepository.flush();
-
+        // Manage product variants: update, delete, or soft-delete
+        List<ProductVariant> existingVariants = productVariantRepository.findByProductId(id);
+        Set<UUID> keptVariantIds = new HashSet<>();
         List<ProductVariant> savedVariants = new ArrayList<>();
+
         if (request.getVariants() != null) {
             for (ProductRequestDto.VariantRequestDto vDto : request.getVariants()) {
-                ProductVariant variant = ProductVariant.builder()
-                        .product(savedProduct)
-                        .sku(vDto.getSku())
-                        .name(vDto.getName())
-                        .color(vDto.getColor())
-                        .size(vDto.getSize())
-                        .material(vDto.getMaterial())
-                        .price(vDto.getPrice())
-                        .salePrice(vDto.getSalePrice())
-                        .stock(vDto.getStock())
-                        .weight(vDto.getWeight())
-                        .imageUrl(vDto.getImageUrl())
-                        .specifications(vDto.getSpecifications())
-                        .build();
-                savedVariants.add(productVariantRepository.save(variant));
+                ProductVariant variantToSave = null;
+
+                // 1. Try matching by ID first
+                if (vDto.getId() != null) {
+                    variantToSave = existingVariants.stream()
+                            .filter(v -> v.getId().equals(vDto.getId()))
+                            .findFirst()
+                            .orElse(null);
+                }
+
+                // 2. Try matching by SKU next (if not found by ID)
+                if (variantToSave == null && vDto.getSku() != null) {
+                    variantToSave = existingVariants.stream()
+                            .filter(v -> vDto.getSku().equals(v.getSku()))
+                            .findFirst()
+                            .orElse(null);
+                }
+
+                if (variantToSave != null) {
+                    // Update fields of the existing variant
+                    variantToSave.setSku(vDto.getSku());
+                    variantToSave.setName(vDto.getName());
+                    variantToSave.setColor(vDto.getColor());
+                    variantToSave.setSize(vDto.getSize());
+                    variantToSave.setMaterial(vDto.getMaterial());
+                    variantToSave.setPrice(vDto.getPrice());
+                    variantToSave.setSalePrice(vDto.getSalePrice());
+                    variantToSave.setStock(vDto.getStock());
+                    variantToSave.setWeight(vDto.getWeight());
+                    variantToSave.setImageUrl(vDto.getImageUrl());
+                    variantToSave.setSpecifications(vDto.getSpecifications());
+                    variantToSave.setActive(true); // Re-activate if it was inactive
+                } else {
+                    // Create a new variant
+                    variantToSave = ProductVariant.builder()
+                            .product(savedProduct)
+                            .sku(vDto.getSku())
+                            .name(vDto.getName())
+                            .color(vDto.getColor())
+                            .size(vDto.getSize())
+                            .material(vDto.getMaterial())
+                            .price(vDto.getPrice())
+                            .salePrice(vDto.getSalePrice())
+                            .stock(vDto.getStock())
+                            .weight(vDto.getWeight())
+                            .imageUrl(vDto.getImageUrl())
+                            .specifications(vDto.getSpecifications())
+                            .isActive(true)
+                            .build();
+                }
+
+                ProductVariant saved = productVariantRepository.save(variantToSave);
+                savedVariants.add(saved);
+                keptVariantIds.add(saved.getId());
             }
         }
+
+        // Clean up or soft-delete variants not present in the update request
+        for (ProductVariant existingVar : existingVariants) {
+            if (!keptVariantIds.contains(existingVar.getId())) {
+                boolean isReferenced = orderItemRepository.existsByVariantId(existingVar.getId());
+                if (isReferenced) {
+                    // Soft delete: keep in DB but set isActive = false
+                    existingVar.setActive(false);
+                    productVariantRepository.save(existingVar);
+                } else {
+                    // Hard delete: remove from cart items first, then delete variant
+                    cartItemRepository.deleteByVariantId(existingVar.getId());
+                    productVariantRepository.delete(existingVar);
+                }
+            }
+        }
+        productVariantRepository.flush();
 
         // Delete old media and save new ones
         productMediaRepository.deleteByProductId(id);
@@ -287,7 +345,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponseDto getProductById(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-        List<ProductVariant> variants = productVariantRepository.findByProductId(id);
+        List<ProductVariant> variants = productVariantRepository.findByProductIdAndIsActiveTrue(id);
         List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(id);
         List<ProductAttribute> attributes = productAttributeRepository.findByProductId(id);
         return mapToResponseDto(product, variants, media, attributes);
@@ -298,7 +356,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponseDto getProductBySlug(String slug) {
         Product product = productRepository.findBySlugFetchAll(slug)
                 .orElseThrow(() -> new RuntimeException("Product not found with slug: " + slug));
-        List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
+        List<ProductVariant> variants = productVariantRepository.findByProductIdAndIsActiveTrue(product.getId());
         List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
         List<ProductAttribute> attributes = productAttributeRepository.findByProductId(product.getId());
         return mapToResponseDto(product, variants, media, attributes);
@@ -326,7 +384,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> getProducts(Specification<Product> spec, Pageable pageable) {
         return productRepository.findAll(spec, pageable).map(product -> {
-            List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
+            List<ProductVariant> variants = productVariantRepository.findByProductIdAndIsActiveTrue(product.getId());
             List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
             List<ProductAttribute> attributes = productAttributeRepository.findByProductId(product.getId());
             return mapToResponseDto(product, variants, media, attributes);
@@ -357,7 +415,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private ProductDocument mapToDocument(Product product) {
-        List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
+        List<ProductVariant> variants = productVariantRepository.findByProductIdAndIsActiveTrue(product.getId());
         List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
 
         String thumbnail = media.stream()
@@ -625,7 +683,7 @@ public class ProductServiceImpl implements ProductService {
 
         List<ProductResponseDto> dtos = contentProducts.stream()
                 .map(product -> {
-                    List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
+                    List<ProductVariant> variants = productVariantRepository.findByProductIdAndIsActiveTrue(product.getId());
                     List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
                     List<ProductAttribute> attributes = productAttributeRepository.findByProductId(product.getId());
                     return mapToResponseDto(product, variants, media, attributes);

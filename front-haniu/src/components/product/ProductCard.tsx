@@ -75,18 +75,18 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
       </div>
 
       {/* Product Thumbnail Container with hover switching & overlay */}
-      <div className="block overflow-hidden relative aspect-square bg-slate-50 dark:bg-zinc-950">
+      <div className="block overflow-hidden relative aspect-square bg-slate-50 dark:bg-zinc-950 rounded-t-2xl sm:rounded-t-[28px]">
         <Link href={`/products/${product.slug}`} className="block w-full h-full">
           <img
             src={getFullImageUrl(thumbnail)}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out"
+            className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out rounded-t-2xl sm:rounded-t-[28px]"
           />
           {secondaryImage && (
             <img
               src={getFullImageUrl(secondaryImage)}
               alt={`${product.name} alternate`}
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-105"
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-105 rounded-t-2xl sm:rounded-t-[28px]"
             />
           )}
         </Link>

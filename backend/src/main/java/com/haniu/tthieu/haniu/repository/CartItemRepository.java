@@ -11,4 +11,8 @@ import java.util.UUID;
 public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
     List<CartItem> findByCartId(UUID cartId);
     void deleteByCartId(UUID cartId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM CartItem ci WHERE ci.variant.id = :variantId")
+    void deleteByVariantId(UUID variantId);
 }
