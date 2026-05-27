@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Icon from '@/components/common/Icons';
 
 interface Attribute {
   id: string;
@@ -52,13 +53,15 @@ export default function ProductSpecifications({
     <div className="space-y-6">
       {/* Specifications Box */}
       {hasSpecs && (
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 space-y-4 shadow-sm">
-          <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400">Thông số kỹ thuật</h3>
+        <div className="bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/60 rounded-3xl p-6 space-y-4 shadow-sm hover:shadow-md transition-all duration-300">
+          <h3 className="font-extrabold text-xs tracking-wider uppercase text-slate-455 dark:text-zinc-400 flex items-center gap-2">
+            <Icon name="settings" size={14} className="text-rose-500" /> Thông số kỹ thuật
+          </h3>
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             {Object.entries(combinedSpecs).map(([key, val]) => (
-              <div key={key} className="border-b border-slate-50 dark:border-zinc-800 pb-2 text-xs">
-                <dt className="text-slate-400 font-medium">{key}</dt>
-                <dd className="text-sm font-semibold text-slate-700 dark:text-zinc-200 mt-0.5">{val}</dd>
+              <div key={key} className="border-b border-slate-100 dark:border-zinc-800/80 pb-2 text-xs">
+                <dt className="text-slate-450 font-semibold">{key}</dt>
+                <dd className="text-sm font-extrabold text-slate-700 dark:text-zinc-200 mt-0.5">{val}</dd>
               </div>
             ))}
           </dl>
@@ -67,15 +70,15 @@ export default function ProductSpecifications({
 
       {/* Included Items Box */}
       {Object.keys(includedItems).length > 0 && (
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 space-y-4 shadow-sm">
-          <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400 flex items-center gap-2">
-            🎁 Chi tiết bộ quà tặng gồm
+        <div className="bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/60 rounded-3xl p-6 space-y-4 shadow-sm hover:shadow-md transition-all duration-300">
+          <h3 className="font-extrabold text-xs tracking-wider uppercase text-slate-455 dark:text-zinc-400 flex items-center gap-2">
+            <Icon name="gift" size={14} className="text-rose-500" /> Chi tiết bộ quà tặng gồm
           </h3>
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             {Object.entries(includedItems).map(([item, detail]) => (
-              <div key={item} className="border-b border-slate-50 dark:border-zinc-800 pb-2 text-xs">
-                <dt className="text-slate-400 font-medium">{item}</dt>
-                <dd className="text-sm font-semibold text-slate-700 dark:text-zinc-200 mt-0.5">{detail}</dd>
+              <div key={item} className="border-b border-slate-100 dark:border-zinc-800/80 pb-2 text-xs">
+                <dt className="text-slate-450 font-semibold">{item}</dt>
+                <dd className="text-sm font-extrabold text-slate-700 dark:text-zinc-200 mt-0.5">{detail}</dd>
               </div>
             ))}
           </dl>
@@ -84,3 +87,4 @@ export default function ProductSpecifications({
     </div>
   );
 }
+

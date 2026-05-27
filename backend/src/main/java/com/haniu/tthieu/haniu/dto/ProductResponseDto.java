@@ -45,6 +45,11 @@ public class ProductResponseDto {
     private String seoDescription;
     private String seoKeywords;
     
+    private java.math.BigDecimal averageRating;
+    private int totalReviews;
+    private int totalSold;
+    private int totalViews;
+    
     private List<OccasionInfo> occasions;
     private List<RecipientInfo> recipients;
     private List<VariantResponseDto> variants;

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import MediaGallery from '@/components/product/MediaGallery';
 import PersonalizationForm from '@/components/product/PersonalizationForm';
 import { useProductStore } from '@/store/product';
+import { productService } from '@/services/product.service';
 import { useCartStore } from '@/store/cart';
 import Icon from '@/components/common/Icons';
 
@@ -16,6 +17,16 @@ import RealtimePreview from '@/components/product/RealtimePreview';
 import ProductReviews from '@/components/product/ProductReviews';
 import ProductPolicies from '@/components/product/ProductPolicies';
 import StickyBuyBar from '@/components/product/StickyBuyBar';
+
+// New detail components
+import ProductPromotions from '@/components/product/ProductPromotions';
+import ProductWhyChooseUs from '@/components/product/ProductWhyChooseUs';
+import ProductDeliveryPolicy from '@/components/product/ProductDeliveryPolicy';
+import ProductTrustBadges from '@/components/product/ProductTrustBadges';
+import ProductBrandCommitment from '@/components/product/ProductBrandCommitment';
+import ProductSeoDescription from '@/components/product/ProductSeoDescription';
+import RelatedProducts from '@/components/product/RelatedProducts';
+
 
 interface Variant {
   id: string;
@@ -130,25 +141,29 @@ const MOCK_PRODUCTS: Record<string, Product> = {
   }
 };
 
+
+
+
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const router = useRouter();
-  
+
   const { loading, fetchProductBySlug } = useProductStore();
   const product = useProductStore(state => state.currentProduct) as unknown as Product | null;
   const { addToCart } = useCartStore();
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
-  
+
   // Customization fields state
   const [engravingText, setEngravingText] = useState('');
   const [cardMessage, setCardMessage] = useState('');
   const [giftWrap, setGiftWrap] = useState('Red Ribbon');
-  
+
   const [successMsg, setSuccessMsg] = useState('');
 
   // Rating and review counters synchronized dynamically with reviews list
   const [avgRating, setAvgRating] = useState(4.8);
   const [totalReviews, setTotalReviews] = useState(128);
+  const [activeDetailTab, setActiveDetailTab] = useState('description');
 
   const handleReviewsUpdated = (newAvg: number, newCount: number) => {
     setAvgRating(newAvg);
@@ -158,7 +173,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   useEffect(() => {
     async function loadProduct() {
       const data = await fetchProductBySlug(slug);
-      
+
       if (data) {
         // Adapt backend price, boolean, and media thumbnail fields
         const adapted: Product = {
@@ -173,7 +188,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           })) || []
         } as unknown as Product;
         useProductStore.setState({ currentProduct: adapted as any });
-        
+
         if (adapted.variants && adapted.variants.length > 0) {
           setSelectedVariant(adapted.variants[0] as unknown as Variant);
         }
@@ -201,7 +216,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   useEffect(() => {
     if (product) {
       document.title = product.seoTitle || `${product.name} | Haniu Gift Shop`;
-      
+
       // Set description meta tag
       let metaDesc = document.querySelector('meta[name="description"]');
       if (!metaDesc) {
@@ -224,7 +239,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
   const handleAddToCart = async () => {
     if (!product) return;
-    
+
     const payload = {
       productId: product.id,
       variantId: selectedVariant?.id || undefined,
@@ -249,7 +264,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
   const handleBuyNow = async () => {
     if (!product) return;
-    
+
     const payload = {
       productId: product.id,
       variantId: selectedVariant?.id || undefined,
@@ -322,16 +337,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         <Icon name="arrow-left" size={14} /> Trở lại danh sách sản phẩm
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* Left Column: Media gallery & specifications */}
-        <div className="lg:col-span-7 space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        {/* Left Column: Media gallery (Sticky) */}
+        <div className="lg:col-span-7 lg:sticky lg:top-28">
           <MediaGallery mediaList={product.media} name={product.name} />
-
-          <ProductSpecifications
-            specificationsString={product.specifications}
-            includedItemsString={product.includedItems}
-            attributes={product.attributes}
-          />
         </div>
 
         {/* Right Column: Buy options, Personalization Form & Live Mockup */}
@@ -342,6 +351,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             setSelectedVariant={setSelectedVariant}
             averageRating={avgRating}
             totalReviews={totalReviews}
+            onReviewsClick={() => {
+              setActiveDetailTab('reviews');
+              document.getElementById('detail-tabs')?.scrollIntoView({ behavior: 'smooth' });
+            }}
           />
 
           {/* Personalization Inputs */}
@@ -369,7 +382,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             <div className="bg-sky-500/5 border border-sky-500/10 p-4 rounded-2xl flex items-center justify-between animate-fade-in text-xs">
               <div>
                 <h4 className="font-bold text-sky-700 dark:text-sky-400 flex items-center gap-1.5">
-                  💬 Tư vấn thiết kế trực tiếp
+                  <Icon name="phone" size={14} className="text-sky-500" /> Tư vấn thiết kế trực tiếp
                 </h4>
                 <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-1">Trực tiếp thảo luận các yêu cầu đặc biệt với Haniu Admin.</p>
               </div>
@@ -383,8 +396,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             <div className="space-y-2.5 animate-fade-in text-xs font-semibold">
               <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Tải ảnh thiết kế của bạn (Tùy chọn)</label>
               <div className="border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl p-4 text-center hover:border-rose-500 dark:hover:border-rose-450 transition-colors cursor-pointer">
-                <span className="inline-block p-2 bg-slate-100 dark:bg-zinc-800 rounded-full text-slate-600 dark:text-zinc-400 mb-2">
-                  📷
+                <span className="inline-block p-2 bg-slate-100 dark:bg-zinc-800 rounded-full text-slate-650 dark:text-zinc-400 mb-2">
+                  <Icon name="camera" size={20} />
                 </span>
                 <p className="text-slate-500 font-semibold">Nhập để tải ảnh lên hoặc kéo thả vào đây</p>
                 <p className="text-[9px] text-slate-400 mt-0.5 font-normal">Định dạng hỗ trợ: JPG, PNG (tối đa 5MB)</p>
@@ -394,8 +407,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
           {/* Success messages & CTAs */}
           {successMsg && (
-            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl font-medium animate-fade-in">
-              {successMsg}
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl font-medium animate-fade-in flex items-center gap-2">
+              <Icon name="check" size={14} className="text-emerald-500" />
+              <span>{successMsg}</span>
             </div>
           )}
 
@@ -404,26 +418,99 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               onClick={handleAddToCart}
               className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:text-zinc-950 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-md active:scale-95 text-sm flex items-center justify-center gap-2"
             >
-              🛍️ Thêm Vào Giỏ Hàng
+              <Icon name="bag" size={16} /> Thêm Vào Giỏ Hàng
             </button>
             <button
               onClick={handleBuyNow}
-              className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-sm cursor-pointer"
+              className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-sm cursor-pointer flex items-center justify-center gap-2"
             >
-              Mua Ngay
+              <Icon name="zap" size={16} /> Mua Ngay
             </button>
           </div>
         </div>
       </div>
 
-      {/* Tabs Layout: Return & Warranty Policies, FAQs */}
-      <ProductPolicies />
+      {/* Trust Badges (Horizontal safety bar) */}
+      <ProductTrustBadges />
 
-      {/* Product Reviews from database */}
-      <ProductReviews
-        productId={product.id}
-        onReviewsUpdated={handleReviewsUpdated}
-      />
+      {/* Detailed Information & Reviews Split Section */}
+      <div id="detail-tabs" className="grid grid-cols-1 lg:grid-cols-12 gap-12 pt-12 border-t border-slate-200 dark:border-zinc-800/80 items-start">
+        {/* Left Column: Tabbed Content (Description, Specs, Reviews) */}
+        <div className="lg:col-span-8 space-y-8">
+          {/* Tab buttons header */}
+          <div className="flex gap-1 bg-slate-100/80 dark:bg-zinc-900/60 p-1.5 rounded-2xl border border-slate-200/50 dark:border-zinc-800/60 overflow-x-auto scrollbar-none w-full">
+            {[
+              { id: 'description', label: 'Mô tả & Câu chuyện', icon: 'gift' },
+              { id: 'specifications', label: 'Thông số kỹ thuật', icon: 'settings' },
+              { id: 'policies', label: 'Chính sách & Hướng dẫn', icon: 'shield' },
+              { id: 'reviews', label: `Đánh giá (${totalReviews})`, icon: 'star' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveDetailTab(tab.id)}
+                className={`flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer text-xs font-bold ${
+                  activeDetailTab === tab.id
+                    ? 'bg-white dark:bg-zinc-800 text-rose-500 dark:text-rose-400 shadow-md shadow-slate-200/50 dark:shadow-none'
+                    : 'text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200'
+                }`}
+              >
+                <Icon name={tab.icon} size={14} className={activeDetailTab === tab.id ? 'text-rose-500' : 'text-slate-400'} />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab contents */}
+          <div className="transition-all duration-300">
+            {activeDetailTab === 'description' && (
+              <div className="animate-fade-in">
+                <ProductSeoDescription product={product} />
+              </div>
+            )}
+            {activeDetailTab === 'specifications' && (
+              <div className="animate-fade-in">
+                <ProductSpecifications
+                  specificationsString={product.specifications}
+                  includedItemsString={product.includedItems}
+                  attributes={product.attributes}
+                />
+              </div>
+            )}
+            {activeDetailTab === 'policies' && (
+              <div className="animate-fade-in">
+                <ProductPolicies product={product} />
+              </div>
+            )}
+            {activeDetailTab === 'reviews' && (
+              <div className="animate-fade-in">
+                <ProductReviews
+                  productId={product.id}
+                  onReviewsUpdated={handleReviewsUpdated}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Assurances & Trust Widgets */}
+        <div className="lg:col-span-4 space-y-6">
+          {/* Promotions */}
+          <ProductPromotions product={product} />
+
+          {/* Why Choose Us */}
+          <ProductWhyChooseUs product={product} />
+
+          {/* Delivery Policy */}
+          <ProductDeliveryPolicy product={product} />
+
+          {/* Brand Commitment */}
+          <ProductBrandCommitment product={product} />
+        </div>
+      </div>
+
+      {/* Related Products */}
+      <RelatedProducts currentProduct={product} />
 
       {/* Floating Sticky Buy Bar on scroll */}
       <StickyBuyBar
@@ -435,3 +522,4 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     </div>
   );
 }
+

@@ -85,13 +85,13 @@ export default function LiveConfigPanel() {
   return (
     <>
       {/* Floating Gear Button */}
-      <button
+      {/* <button
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-50 flex h-14 w-14 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 border border-slate-700/30 cursor-pointer text-xs font-bold font-sans sm:px-5"
       >
         <Icon name="⚙️" size={18} />
         <span className="hidden sm:inline">Cấu hình giao diện</span>
-      </button>
+      </button> */}
 
       {/* Slide-over Drawer Panel */}
       {isOpen && (
@@ -123,21 +123,19 @@ export default function LiveConfigPanel() {
             <div className="grid grid-cols-2 text-center text-xs font-bold border-b border-zinc-800 bg-zinc-950/40">
               <button
                 onClick={() => setActiveTab('visibility')}
-                className={`py-3.5 border-b-2 cursor-pointer ${
-                  activeTab === 'visibility'
-                    ? 'border-rose-500 text-rose-450 bg-zinc-900/10'
-                    : 'border-transparent text-zinc-400 hover:text-zinc-200'
-                }`}
+                className={`py-3.5 border-b-2 cursor-pointer ${activeTab === 'visibility'
+                  ? 'border-rose-500 text-rose-450 bg-zinc-900/10'
+                  : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                  }`}
               >
                 Bật/Tắt Các Phần
               </button>
               <button
                 onClick={() => setActiveTab('text')}
-                className={`py-3.5 border-b-2 cursor-pointer ${
-                  activeTab === 'text'
-                    ? 'border-rose-500 text-rose-450 bg-zinc-900/10'
-                    : 'border-transparent text-zinc-400 hover:text-zinc-200'
-                }`}
+                className={`py-3.5 border-b-2 cursor-pointer ${activeTab === 'text'
+                  ? 'border-rose-500 text-rose-450 bg-zinc-900/10'
+                  : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                  }`}
               >
                 Sửa Nội Dung (Live)
               </button>
@@ -298,7 +296,7 @@ export default function LiveConfigPanel() {
                     {hero.layoutType === 'split-grid' && (
                       <div className="space-y-3 bg-zinc-900/40 p-3 rounded-xl border border-zinc-800/40 my-2">
                         <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider block border-b border-zinc-800/50 pb-1.5">Cấu hình Chia Lưới</span>
-                        
+
                         <div className="space-y-1">
                           <label className="text-[10px] text-zinc-500 uppercase font-semibold">Slide chính bên trái</label>
                           <select
@@ -396,7 +394,7 @@ export default function LiveConfigPanel() {
 
                       {hero.slides?.find(s => s.id === (editingSlideId || hero.slides?.[0]?.id)) && (() => {
                         const currentEditingSlide = hero.slides.find(s => s.id === (editingSlideId || hero.slides?.[0]?.id))!;
-                        
+
                         return (
                           <div className="space-y-3 border-t border-zinc-800/40 pt-3">
                             {/* Background Image */}
@@ -551,7 +549,7 @@ export default function LiveConfigPanel() {
                       <span className="text-[9px] font-bold text-rose-450 uppercase tracking-wider block border-b border-zinc-800/60 pb-1.5 mb-1">
                         Tùy chỉnh 3 Card tiện ích (Grid)
                       </span>
-                      
+
                       <div className="flex gap-2">
                         <select
                           value={editingCardId}

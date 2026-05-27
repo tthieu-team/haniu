@@ -42,6 +42,7 @@ interface ProductInfoProps {
   averageRating: number;
   totalReviews: number;
   soldCount?: number;
+  onReviewsClick?: () => void;
 }
 
 export default function ProductInfo({
@@ -50,7 +51,8 @@ export default function ProductInfo({
   setSelectedVariant,
   averageRating,
   totalReviews,
-  soldCount = 1240
+  soldCount = 1240,
+  onReviewsClick
 }: ProductInfoProps) {
   const { toggleWishlist, isInWishlist } = useWishlistStore();
   const isFavorite = isInWishlist(product.id);
@@ -106,22 +108,22 @@ export default function ProductInfo({
       {/* Category, Brand, Collection Tags */}
       <div className="flex flex-wrap gap-2 items-center">
         {product.category && (
-          <span className="bg-rose-100 text-rose-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+          <span className="bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-100/50 dark:border-rose-950/30 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
             {product.category.name}
           </span>
         )}
         {product.brand && (
-          <span className="bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+          <span className="bg-slate-100 dark:bg-zinc-900/80 text-slate-600 dark:text-zinc-300 border border-slate-200/50 dark:border-zinc-800/80 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
             Hãng: {product.brand.name}
           </span>
         )}
         {product.collection && (
-          <span className="bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-amber-100 dark:border-amber-900/30">
+          <span className="bg-slate-100 dark:bg-zinc-900/80 text-slate-600 dark:text-zinc-300 border border-slate-200/50 dark:border-zinc-800/80 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
             {product.collection.name}
           </span>
         )}
         {product.isFeatured && (
-          <span className="bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+          <span className="bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-100/50 dark:border-rose-950/30 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
             Nổi bật
           </span>
         )}
@@ -138,51 +140,55 @@ export default function ProductInfo({
             className={`p-2.5 rounded-full border transition-all ${
               isFavorite
                 ? 'bg-rose-500 border-rose-500 text-white shadow-sm'
-                : 'bg-white border-slate-200 text-slate-400 hover:text-rose-500 dark:bg-zinc-900 dark:border-zinc-800'
+                : 'bg-white border-slate-200 text-slate-450 hover:text-rose-500 dark:bg-zinc-900 dark:border-zinc-800'
             }`}
             title="Thêm yêu thích"
           >
-            <span className="text-base">❤️</span>
+            <Icon name="heart" size={16} className={isFavorite ? 'fill-current text-white' : 'text-slate-400'} />
           </button>
           <button
             onClick={handleShare}
-            className="p-2.5 rounded-full border border-slate-200 text-slate-400 hover:text-slate-600 bg-white dark:bg-zinc-900 dark:border-zinc-800 transition-all"
+            className="p-2.5 rounded-full border border-slate-200 text-slate-400 hover:text-slate-650 bg-white dark:bg-zinc-900 dark:border-zinc-800 transition-all"
             title="Chia sẻ sản phẩm"
           >
-            <span className="text-base">📤</span>
+            <Icon name="arrow-right" size={16} className="text-slate-400 rotate-[-45deg]" />
           </button>
         </div>
       </div>
 
       {/* Ratings & Sold Count */}
       <div className="flex items-center gap-4 text-xs font-semibold">
-        <div className="flex items-center gap-1 text-amber-500">
-          <span className="text-sm">⭐</span>
+        <button
+          onClick={onReviewsClick}
+          className="flex items-center gap-1 hover:text-rose-500 transition-colors cursor-pointer focus:outline-none"
+        >
+          <Icon name="star" size={14} className="text-amber-500 fill-current" />
           <span className="text-slate-700 dark:text-zinc-200">{averageRating.toFixed(1)}/5</span>
-          <span className="text-slate-400 font-medium font-normal">({totalReviews} đánh giá)</span>
-        </div>
+          <span className="text-slate-450 font-normal">({totalReviews} đánh giá)</span>
+        </button>
         <div className="w-1 h-1 rounded-full bg-slate-300"></div>
         <div className="text-slate-500 dark:text-zinc-400">
-          Đã bán <span className="text-slate-800 dark:text-zinc-200 font-bold">{soldCount}+</span>
+          Đã bán <span className="text-slate-850 dark:text-zinc-200 font-extrabold">{soldCount}+</span>
         </div>
       </div>
 
       {/* Scarcity Widget */}
-      <div className="p-3.5 bg-rose-500/5 border border-rose-500/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+      <div className="p-3.5 bg-rose-500/5 border border-rose-500/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-semibold">
         <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
-          <span className="animate-pulse">🔥</span>
+          <Icon name="zap" size={14} className="text-rose-500 animate-pulse" />
           <span>Chỉ còn <strong>{stockCount} sản phẩm</strong> trong kho!</span>
         </div>
-        <div className="flex items-center gap-2 text-slate-500 dark:text-zinc-450">
-          <span>👥 {viewersCount} người đang xem sản phẩm này</span>
+        <div className="flex items-center gap-2 text-slate-500 dark:text-zinc-400">
+          <Icon name="users" size={14} className="text-slate-400" />
+          <span>{viewersCount} người đang xem sản phẩm này</span>
         </div>
       </div>
 
       {/* Countdown Widget */}
       {discountPercent > 0 && (
         <div className="p-3.5 bg-gradient-to-r from-amber-500/10 to-rose-500/10 border border-amber-500/15 rounded-2xl flex items-center justify-between text-xs">
-          <span className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-            ⚡ FLASH SALE ĐANG DIỄN RA
+          <span className="font-extrabold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+            <Icon name="zap" size={14} className="text-amber-500 animate-bounce" /> FLASH SALE ĐANG DIỄN RA
           </span>
           <div className="flex items-center gap-1">
             <span className="bg-slate-850 dark:bg-zinc-800 text-slate-800 dark:text-white px-2 py-1 rounded font-mono font-bold text-[10px]">
@@ -201,7 +207,7 @@ export default function ProductInfo({
       )}
 
       {/* Price Container */}
-      <div className="bg-slate-50 dark:bg-zinc-900/40 p-4 rounded-2xl flex items-center gap-4 flex-wrap border border-slate-100 dark:border-zinc-800/80">
+      <div className="bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md p-4 rounded-2xl flex items-center gap-4 flex-wrap border border-slate-200/80 dark:border-zinc-800/60 shadow-sm">
         <span className="text-3xl font-black text-rose-500">
           {currentPrice.toLocaleString('vi-VN')}đ
         </span>
@@ -224,25 +230,29 @@ export default function ProductInfo({
 
       {/* Occasions & Recipients Tags */}
       {((product.occasions && product.occasions.length > 0) || (product.recipients && product.recipients.length > 0)) && (
-        <div className="bg-slate-50 dark:bg-zinc-900/30 p-4 rounded-2xl space-y-3 border border-slate-100 dark:border-zinc-800/50">
+        <div className="bg-white/50 dark:bg-zinc-900/30 p-4 rounded-2xl space-y-3.5 border border-slate-200/60 dark:border-zinc-800/50">
           {product.occasions && product.occasions.length > 0 && (
-            <div className="flex flex-wrap gap-2 items-center text-xs">
-              <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Dịp tặng:</span>
-              {product.occasions.map(o => (
-                <span key={o.id} className="bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded-lg text-xs font-semibold">
-                  {o.name}
-                </span>
-              ))}
+            <div className="flex items-center text-xs">
+              <span className="text-slate-450 dark:text-zinc-450 font-extrabold uppercase tracking-wider text-[10px] w-20 shrink-0">Dịp tặng:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {product.occasions.map(o => (
+                  <span key={o.id} className="bg-slate-100 dark:bg-zinc-800 text-slate-650 dark:text-zinc-300 border border-slate-200/60 dark:border-zinc-800/80 px-2.5 py-1 rounded-lg text-xs font-semibold">
+                    {o.name}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
           {product.recipients && product.recipients.length > 0 && (
-            <div className="flex flex-wrap gap-2 items-center text-xs">
-              <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Đối tượng:</span>
-              {product.recipients.map(r => (
-                <span key={r.id} className="bg-sky-50 dark:bg-sky-950/20 text-sky-600 dark:text-sky-400 px-2.5 py-1 rounded-lg text-xs font-semibold">
-                  {r.name}
-                </span>
-              ))}
+            <div className="flex items-center text-xs">
+              <span className="text-slate-450 dark:text-zinc-450 font-extrabold uppercase tracking-wider text-[10px] w-20 shrink-0">Đối tượng:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {product.recipients.map(r => (
+                  <span key={r.id} className="bg-slate-100 dark:bg-zinc-800 text-slate-655 dark:text-zinc-300 border border-slate-200/60 dark:border-zinc-800/80 px-2.5 py-1 rounded-lg text-xs font-semibold">
+                    {r.name}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>
