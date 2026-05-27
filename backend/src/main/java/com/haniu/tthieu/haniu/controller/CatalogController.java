@@ -62,9 +62,24 @@ public class CatalogController {
         return ResponseEntity.ok(catalogService.getAllCollections());
     }
 
+    @GetMapping("/collections/{id}")
+    public ResponseEntity<Collection> getCollectionById(@PathVariable UUID id) {
+        return ResponseEntity.ok(catalogService.getCollectionById(id));
+    }
+
+    @GetMapping("/collections/slug/{slug}")
+    public ResponseEntity<Collection> getCollectionBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(catalogService.getCollectionBySlug(slug));
+    }
+
     @PostMapping("/collections")
     public ResponseEntity<Collection> createCollection(@RequestBody Collection collection) {
         return ResponseEntity.ok(catalogService.createCollection(collection));
+    }
+
+    @PutMapping("/collections/{id}")
+    public ResponseEntity<Collection> updateCollection(@PathVariable UUID id, @RequestBody Collection collection) {
+        return ResponseEntity.ok(catalogService.updateCollection(id, collection));
     }
 
     @DeleteMapping("/collections/{id}")

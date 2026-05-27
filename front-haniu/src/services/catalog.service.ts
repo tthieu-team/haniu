@@ -57,6 +57,7 @@ export interface Collection {
   slug: string;
   description?: string;
   imageUrl?: string;
+  bannerUrl?: string;
   isActive: boolean;
 }
 
@@ -135,9 +136,21 @@ export const catalogService = {
   getAllCollections: async (): Promise<Collection[]> => {
     return fetchApi('/api/v1/catalog/collections');
   },
+  getCollectionById: async (id: string): Promise<Collection> => {
+    return fetchApi(`/api/v1/catalog/collections/${id}`);
+  },
+  getCollectionBySlug: async (slug: string): Promise<Collection> => {
+    return fetchApi(`/api/v1/catalog/collections/slug/${slug}`);
+  },
   createCollection: async (payload: Collection): Promise<Collection> => {
     return fetchApi('/api/v1/catalog/collections', {
       method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+  updateCollection: async (id: string, payload: Collection): Promise<Collection> => {
+    return fetchApi(`/api/v1/catalog/collections/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(payload),
     });
   },

@@ -150,7 +150,7 @@ export default function AdminProductsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/60">
                 {products.map(product => {
-                  const thumbnail = product.media?.find(m => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://via.placeholder.com/60';
+                  const thumbnail = product.media?.find(m => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://placehold.co/60';
 
                   return (
                     <tr key={product.id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/20 transition-all">

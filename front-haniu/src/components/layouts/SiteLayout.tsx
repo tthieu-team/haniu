@@ -21,6 +21,7 @@ export default function SiteLayout({
   const ptClass = isSticky
     ? (isAnnouncementBar ? 'pt-28 sm:pt-32 md:pt-36' : 'pt-20 sm:pt-24 md:pt-28')
     : 'pt-0';
+  const isFullWidth = isHome || pathname?.startsWith('/collections');
   const isAuth = pathname?.startsWith('/auth');
   const isAdmin = pathname?.startsWith('/admin');
 
@@ -39,8 +40,8 @@ export default function SiteLayout({
       <Suspense fallback={<div className="h-20 bg-white dark:bg-zinc-950" />} >
         <Header />
       </Suspense>
-      {isHome ? (
-        <main className="flex-1 w-full">
+      {isFullWidth ? (
+        <main className={`flex-1 w-full ${ptClass}`}>
           {children}
         </main>
       ) : (

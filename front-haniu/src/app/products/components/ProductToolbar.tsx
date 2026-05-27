@@ -22,7 +22,7 @@ export default function ProductToolbar({
   totalCount,
 }: ProductToolbarProps) {
   return (
-    <div className="sticky top-16 z-30 flex items-center justify-between bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md py-4 border-b border-slate-100 dark:border-zinc-800/80 gap-3 w-full">
+    <div className="sticky top-20 z-30 flex items-center justify-between bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md px-6 py-3 border border-slate-100 dark:border-zinc-850 rounded-3xl gap-3 w-full shadow-xs">
       {/* Left side: Filter toggle (mobile) & Product Count Display */}
       <div className="flex items-center gap-3">
         <button

@@ -495,7 +495,7 @@ function ProductsContent() {
                   >
                     <div className="w-full sm:w-44 aspect-square bg-slate-50 dark:bg-zinc-900 rounded-2xl overflow-hidden shrink-0 relative">
                       <img
-                        src={product.media?.[0]?.url || product.thumbnailUrl || 'https://via.placeholder.com/300'}
+                        src={product.media?.[0]?.url || product.thumbnailUrl || 'https://placehold.co/300'}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out"
                       />

@@ -24,6 +24,9 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
 
     Optional<Product> findBySlug(String slug);
 
+    @Query(value = "SELECT EXISTS(SELECT 1 FROM products WHERE sku = :sku)", nativeQuery = true)
+    boolean existsBySkuIncludingDeleted(@Param("sku") String sku);
+
     @Query("SELECT p FROM Product p " +
            "WHERE p.status = :status AND (" +
            "lower(p.name) LIKE lower(concat('%', :keyword, '%')) OR " +

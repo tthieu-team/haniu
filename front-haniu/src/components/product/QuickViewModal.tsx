@@ -48,7 +48,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
   // Reset state on open/close or product change
   useEffect(() => {
     if (product) {
-      const thumb = product.media?.find(m => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://via.placeholder.com/300';
+      const thumb = product.media?.find(m => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://placehold.co/300';
       setActiveImage(thumb);
       setQuantity(1);
       setEngravingText('');

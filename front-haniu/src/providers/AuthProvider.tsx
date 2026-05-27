@@ -10,6 +10,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useAuthStore.getState().initializeAuth();
     useThemeStore.getState().initializeTheme();
     useHomeLayoutStore.getState().fetchConfigFromServer();
+
+    // Check and refresh token silently every 60 seconds
+    const interval = setInterval(() => {
+      useAuthStore.getState().checkAndRefreshToken();
+    }, 60000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return <>{children}</>;

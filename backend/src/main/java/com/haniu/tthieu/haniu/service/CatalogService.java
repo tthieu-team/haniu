@@ -17,6 +17,9 @@ public interface CatalogService {
 
     List<Collection> getAllCollections();
     Collection createCollection(Collection collection);
+    Collection getCollectionById(UUID id);
+    Collection getCollectionBySlug(String slug);
+    Collection updateCollection(UUID id, Collection collection);
     void deleteCollection(UUID id);
 
     List<Occasion> getAllOccasions();

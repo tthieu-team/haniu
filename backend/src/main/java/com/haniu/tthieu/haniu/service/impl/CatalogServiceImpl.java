@@ -99,7 +99,36 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Collection getCollectionById(UUID id) {
+        return collectionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Collection not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Collection getCollectionBySlug(String slug) {
+        return collectionRepository.findBySlug(slug)
+                .orElseThrow(() -> new RuntimeException("Collection not found with slug: " + slug));
+    }
+
+    @Override
     public Collection createCollection(Collection collection) {
+        return collectionRepository.save(collection);
+    }
+
+    @Override
+    public Collection updateCollection(UUID id, Collection collectionDetails) {
+        Collection collection = collectionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Collection not found"));
+        
+        collection.setName(collectionDetails.getName());
+        collection.setSlug(collectionDetails.getSlug());
+        collection.setDescription(collectionDetails.getDescription());
+        collection.setImageUrl(collectionDetails.getImageUrl());
+        collection.setBannerUrl(collectionDetails.getBannerUrl());
+        collection.setActive(collectionDetails.isActive());
+        
         return collectionRepository.save(collection);
     }
 

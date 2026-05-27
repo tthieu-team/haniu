@@ -1,13 +1,41 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useHomeLayoutStore } from '@/store/homeLayout';
+import { catalogService, Collection } from '@/services/catalog.service';
 import Icon from '@/components/common/Icons';
+import { getFullImageUrl } from '@/lib/api';
 
 export default function CollectionsSection() {
-  const collections = useHomeLayoutStore((state) => state.collections);
+  const layoutCollections = useHomeLayoutStore((state) => state.collections);
   const isVisible = useHomeLayoutStore((state) => state.visibility.collections);
+  const [dbCollections, setDbCollections] = useState<Collection[]>([]);
+
+  useEffect(() => {
+    const loadCollections = async () => {
+      try {
+        const data = await catalogService.getAllCollections();
+        const active = (data || []).filter(c => c.isActive || (c as any).active);
+        setDbCollections(active);
+      } catch (err) {
+        console.error('Failed to load collections for home page:', err);
+      }
+    };
+    loadCollections();
+  }, []);
 
   if (!isVisible) return null;
+
+  const hasDbCollections = dbCollections.length > 0;
+  const displayItems = hasDbCollections
+    ? dbCollections.map(c => ({
+        title: c.name,
+        subtitle: c.description || 'Dòng sản phẩm được thiết kế độc quyền và chế tác tinh xảo bởi Haniu.',
+        image: getFullImageUrl(c.imageUrl) || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80',
+        href: `/collections/${c.slug}`
+      }))
+    : layoutCollections.items;
 
   return (
     <section id="collections" className="py-16 space-y-12 scroll-mt-20">
@@ -23,16 +51,17 @@ export default function CollectionsSection() {
           </span>
         </h2>
         <p className="text-xs md:text-sm text-slate-500 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed font-light">
-          {collections.subtitle}
+          {layoutCollections.subtitle}
         </p>
       </div>
 
       {/* Magazine layout / grid cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {collections.items.map((item, idx) => (
-          <div
+        {displayItems.map((item, idx) => (
+          <Link
             key={idx}
-            className="group relative overflow-hidden rounded-[32px] border border-slate-200 dark:border-zinc-800 shadow-lg hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 bg-zinc-950 aspect-[4/5] flex flex-col justify-end p-8"
+            href={item.href}
+            className="group relative overflow-hidden rounded-[32px] border border-slate-200 dark:border-zinc-800/80 shadow-lg hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 bg-card-bg aspect-[4/5] flex flex-col justify-end p-8"
           >
             {/* Limited Edition tag */}
             <span className="absolute top-5 right-5 z-20 bg-amber-500/90 backdrop-blur-xs text-white text-[8px] font-black tracking-widest px-3 py-1.5 rounded-lg shadow-lg uppercase border border-amber-400/20 animate-pulse">
@@ -44,36 +73,35 @@ export default function CollectionsSection() {
               <img
                 src={item.image}
                 alt={item.title}
-                className="w-full h-full object-cover opacity-75 group-hover:opacity-55 group-hover:scale-110 transition-all duration-700 ease-out"
+                className="w-full h-full object-cover opacity-80 dark:opacity-75 group-hover:opacity-60 dark:group-hover:opacity-55 group-hover:scale-110 transition-all duration-700 ease-out"
               />
             </div>
 
-            {/* Visual gradient overlays for high readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-zinc-900/10 opacity-90 transition-opacity duration-300 group-hover:opacity-95" />
+            {/* Visual gradient overlays for high readability in both light & dark themes */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent opacity-95 transition-opacity duration-300 group-hover:opacity-100" />
 
             {/* Info details */}
-            <div className="relative z-10 space-y-4">
-              <span className="text-[9px] font-black uppercase tracking-widest text-rose-400 bg-rose-950/50 px-2 py-0.5 rounded-md border border-rose-900/30 inline-block">
+            <div className="relative z-10 space-y-4 text-left">
+              <span className="text-[9px] font-black uppercase tracking-widest text-primary-color bg-primary-color/5 dark:bg-primary-color/10 px-2 py-0.5 rounded-md border border-primary-color/20 inline-block">
                 Haniu Select
               </span>
               <div className="space-y-2">
-                <h3 className="text-xl font-black text-white group-hover:text-rose-300 transition-colors tracking-wide leading-snug">
+                <h3 className="text-xl font-black text-foreground group-hover:text-primary-color transition-colors tracking-wide leading-snug">
                   {item.title}
                 </h3>
-                <p className="text-xs text-zinc-300 leading-relaxed font-light">
+                <p className="text-xs text-muted-color leading-relaxed font-light line-clamp-2">
                   {item.subtitle}
                 </p>
               </div>
               <div className="pt-2">
-                <a
-                  href={item.href}
-                  className="inline-flex items-center text-xs font-bold text-white hover:text-rose-300 transition-all duration-300 group-hover:gap-2 gap-1"
+                <div
+                  className="inline-flex items-center text-xs font-bold text-foreground group-hover:text-primary-color transition-all duration-300 group-hover:gap-2 gap-1"
                 >
                   Mua Ngay <Icon name="→" size={14} className="group-hover:translate-x-1.5 transition-transform duration-300" />
-                </a>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>

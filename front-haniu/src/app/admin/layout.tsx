@@ -57,6 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Dashboard', href: '/admin', icon: 'grid' },
     { name: 'Sản phẩm', href: '/admin/products', icon: 'gift' },
     { name: 'Danh mục', href: '/admin/categories', icon: 'list' },
+    { name: 'Bộ sưu tập', href: '/admin/collections', icon: 'sparkles' },
     { name: 'Dịp lễ', href: '/admin/occasions', icon: 'cake' },
     { name: 'Người nhận', href: '/admin/recipients', icon: 'users' },
     { name: 'Đơn hàng', href: '/admin/orders', icon: 'bag' },

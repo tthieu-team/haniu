@@ -28,7 +28,7 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
   const { toggleWishlist, isInWishlist } = useWishlistStore();
   const isLiked = isInWishlist(product.id);
 
-  const thumbnail = product.media?.find(m => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://via.placeholder.com/300';
+  const thumbnail = product.media?.find(m => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://placehold.co/300';
   const secondaryImage = product.media?.find(m => !m.isThumbnail)?.url || product.media?.[1]?.url;
   
   const priceVal = product.salePrice || product.basePrice || product.price || 0;
