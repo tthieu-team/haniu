@@ -22,6 +22,7 @@ public class CatalogServiceImpl implements CatalogService {
     private final OccasionRepository occasionRepository;
     private final RecipientRepository recipientRepository;
     private final AttributeDefinitionRepository attributeDefinitionRepository;
+    private final ProductRepository productRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -140,11 +141,39 @@ public class CatalogServiceImpl implements CatalogService {
     @Override
     @Transactional(readOnly = true)
     public List<Occasion> getAllOccasions() {
-        return occasionRepository.findAll();
+        List<Occasion> occasions = occasionRepository.findAll();
+        try {
+            List<Object[]> counts = productRepository.countProductsByOccasion();
+            java.util.Map<UUID, Long> countMap = counts.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                    arr -> (UUID) arr[0],
+                    arr -> (Long) arr[1]
+                ));
+            occasions.forEach(o -> o.setProductCount(countMap.getOrDefault(o.getId(), 0L)));
+        } catch (Exception e) {
+            occasions.forEach(o -> o.setProductCount(0L));
+        }
+        return occasions;
     }
 
     @Override
     public Occasion createOccasion(Occasion occasion) {
+        return occasionRepository.save(occasion);
+    }
+
+    @Override
+    public Occasion updateOccasion(UUID id, Occasion occasionDetails) {
+        Occasion occasion = occasionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Occasion not found"));
+        
+        occasion.setName(occasionDetails.getName());
+        occasion.setSlug(occasionDetails.getSlug());
+        occasion.setDescription(occasionDetails.getDescription());
+        occasion.setImageUrl(occasionDetails.getImageUrl());
+        occasion.setStartDate(occasionDetails.getStartDate());
+        occasion.setEndDate(occasionDetails.getEndDate());
+        occasion.setActive(occasionDetails.isActive());
+        
         return occasionRepository.save(occasion);
     }
 

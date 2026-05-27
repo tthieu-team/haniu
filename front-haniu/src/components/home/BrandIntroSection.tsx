@@ -37,13 +37,13 @@ export default function BrandIntroSection() {
             <div className="pt-2 flex flex-wrap gap-4">
               <a
                 href="/#products"
-                className="inline-flex items-center justify-center rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 px-6 py-3.5 text-xs font-bold shadow-md hover:scale-[1.02] active:scale-95 transition-all duration-300 border border-transparent dark:border-zinc-200 w-full sm:w-44"
+                className="inline-flex items-center justify-center rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 hover:bg-rose-600 dark:hover:bg-rose-500 hover:text-white dark:hover:text-white px-6 py-3.5 text-xs font-extrabold shadow-md hover:shadow-lg hover:shadow-rose-500/25 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 border border-transparent w-full sm:w-44"
               >
                 Khám phá câu chuyện
               </a>
               <a
                 href="/#collections"
-                className="inline-flex items-center justify-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-350 px-6 py-3.5 text-xs font-bold shadow-xs hover:bg-slate-50 dark:hover:bg-zinc-850 hover:scale-[1.02] active:scale-95 transition-all duration-300 w-full sm:w-44"
+                className="inline-flex items-center justify-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-900/50 hover:bg-rose-50/20 dark:hover:bg-rose-950/10 px-6 py-3.5 text-xs font-extrabold shadow-xs hover:shadow-md hover:-translate-y-0.5 active:scale-95 transition-all duration-300 w-full sm:w-44"
               >
                 Các bộ sưu tập
               </a>
@@ -56,12 +56,16 @@ export default function BrandIntroSection() {
               {brandIntro.stats.map((stat, idx) => (
                 <div
                   key={idx}
-                  className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/30 backdrop-blur-md shadow-lg shadow-slate-100/50 dark:shadow-none hover:border-rose-500/30 dark:hover:border-rose-500/20 hover:scale-[1.03] hover:shadow-xl hover:shadow-rose-500/5 transition-all duration-500 group"
+                  className="relative overflow-hidden p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-900/30 backdrop-blur-md hover:border-rose-200 dark:hover:border-rose-900/50 hover:-translate-y-2 hover:shadow-2xl hover:shadow-rose-500/5 transition-all duration-500 ease-out group"
                 >
+                  {/* Ambient Background Glow on Hover */}
+                  <div className="absolute inset-0 -z-10 bg-gradient-to-br from-rose-500/0 to-amber-500/0 group-hover:from-rose-500/[0.02] group-hover:to-amber-500/[0.02] transition-all duration-700" />
+                  <div className="absolute -right-6 -bottom-6 w-20 h-20 rounded-full bg-rose-500/0 blur-2xl group-hover:bg-rose-500/5 group-hover:scale-150 transition-all duration-700 ease-out" />
+
                   <span className="block text-2xl sm:text-4xl font-extrabold text-transparent bg-gradient-to-br from-rose-500 to-amber-500 bg-clip-text group-hover:scale-105 transition-transform duration-500 origin-left">
                     {stat.value}
                   </span>
-                  <span className="block mt-1 sm:mt-2 text-[10px] sm:text-xs font-bold tracking-wider uppercase text-slate-500 dark:text-zinc-400">
+                  <span className="block mt-1 sm:mt-2 text-[10px] sm:text-xs font-bold tracking-wider uppercase text-slate-500 dark:text-zinc-400 group-hover:text-rose-500 dark:group-hover:text-rose-400 transition-colors duration-300">
                     {stat.label}
                   </span>
                 </div>

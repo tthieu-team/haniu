@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { productService } from '@/services/product.service';
+import { catalogService } from '@/services/catalog.service';
 import {
   HeroSection,
   BrandIntroSection,
@@ -140,13 +141,36 @@ function HomeContent() {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasNextPage, setHasNextPage] = useState(false);
 
-  const occasions = [
+  const [dbOccasions, setDbOccasions] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadDbOccasions = async () => {
+      try {
+        const data = await catalogService.getAllOccasions();
+        const active = (data || []).filter(o => {
+          const val = o.isActive !== undefined ? o.isActive : (o as any).active;
+          return val !== false;
+        });
+        setDbOccasions([
+          { name: "Tất cả dịp", slug: "" },
+          ...active
+        ]);
+      } catch (err) {
+        console.error('Failed to load occasions for filters:', err);
+      }
+    };
+    loadDbOccasions();
+  }, []);
+
+  const fallbackOccasions = [
     { name: "Tất cả dịp", slug: "" },
     { name: "Sinh Nhật", slug: "sinh-nhat" },
     { name: "Lễ Tình Nhân", slug: "valentine" },
     { name: "Ngày Nhà Giáo 20-11", slug: "20-11" },
     { name: "Quốc Khánh 2-9", slug: "quoc-khanh" }
   ];
+
+  const occasionsList = dbOccasions.length > 1 ? dbOccasions : fallbackOccasions;
 
   const recipients = [
     { name: "Tất cả đối tượng", slug: "" },
@@ -177,6 +201,8 @@ function HomeContent() {
       } else {
         resData = await productService.getProductsCursor({
           cursor: cursorVal || undefined,
+          occasionSlug: selectedOccasion || undefined,
+          recipientSlug: selectedRecipient || undefined,
           size
         });
       }
@@ -188,7 +214,9 @@ function HomeContent() {
       if (list && list.length > 0) {
         const adapted = list.map((p: any) => ({
           ...p,
-          basePrice: p.price || p.basePrice
+          basePrice: p.price || p.basePrice,
+          category: p.category || (p.categoryName ? { name: p.categoryName } : undefined),
+          media: p.media || p.medias || (p.thumbnailUrl ? [{ url: p.thumbnailUrl, isThumbnail: true }] : [])
         }));
 
         if (append) {
@@ -291,7 +319,7 @@ function HomeContent() {
             setSelectedOccasion={setSelectedOccasion}
             selectedRecipient={selectedRecipient}
             setSelectedRecipient={setSelectedRecipient}
-            occasions={occasions}
+            occasions={occasionsList}
             recipients={recipients}
             hasNextPage={hasNextPage}
             handleLoadMore={handleLoadMore}

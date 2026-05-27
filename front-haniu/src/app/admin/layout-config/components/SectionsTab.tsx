@@ -3,6 +3,7 @@
 import React from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import { FileUploadInput } from './FileUploadInput';
+import Icon from '@/components/common/Icons';
 
 export function SectionsTab() {
   const {
@@ -16,6 +17,10 @@ export function SectionsTab() {
     updateVideoBanner,
     collections,
     updateCollections,
+    story,
+    updateStory,
+    socialProof,
+    updateSocialProof,
     footer,
     updateFooter,
   } = useHomeLayoutStore();
@@ -229,8 +234,235 @@ export function SectionsTab() {
         </div>
       </div>
 
+      {/* Story (Câu chuyện chế tác) */}
+      <div className="py-6 space-y-4">
+        <h4 className="text-xs font-bold text-rose-500 uppercase tracking-widest">
+          Câu chuyện thương hiệu & Chế tác (Story Section)
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Tiêu đề lớn</label>
+              <input
+                type="text"
+                value={story.title}
+                onChange={(e) => updateStory({ title: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Tiêu đề phụ</label>
+              <input
+                type="text"
+                value={story.subtitle}
+                onChange={(e) => updateStory({ subtitle: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Tiêu đề nút xem video</label>
+              <input
+                type="text"
+                value={story.videoTitle}
+                onChange={(e) => updateStory({ videoTitle: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Nội dung câu chuyện</label>
+              <textarea
+                rows={3}
+                value={story.content}
+                onChange={(e) => updateStory({ content: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
+            <div>
+              <FileUploadInput
+                label="Ảnh bìa Video chế tác"
+                value={story.videoPlaceholderUrl}
+                onChange={(url) => updateStory({ videoPlaceholderUrl: url })}
+                accept="image/*"
+                type="image"
+                placeholder="Tải lên tệp ảnh hoặc điền link ảnh..."
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Social Proof (Đánh giá khách hàng) */}
+      <div className="py-6 space-y-6">
+        <h4 className="text-xs font-bold text-rose-500 uppercase tracking-widest">
+          Đánh giá từ khách hàng (Social Proof / Testimonials)
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-1">
+            <label className="text-[10px] text-slate-500 font-bold uppercase">Tiêu đề chính</label>
+            <input
+              type="text"
+              value={socialProof.title}
+              onChange={(e) => updateSocialProof({ title: e.target.value })}
+              className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] text-slate-500 font-bold uppercase">Điểm đánh giá trung bình</label>
+            <input
+              type="text"
+              value={socialProof.ratingScore}
+              onChange={(e) => updateSocialProof({ ratingScore: e.target.value })}
+              className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] text-slate-500 font-bold uppercase">Số lượng lượt đánh giá hiển thị</label>
+            <input
+              type="text"
+              value={socialProof.reviewsCount}
+              onChange={(e) => updateSocialProof({ reviewsCount: e.target.value })}
+              className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+            />
+          </div>
+        </div>
+
+        {/* Testimonials List Manager */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-2">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              Danh sách ý kiến phản hồi (Reviews)
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                const newReview = {
+                  id: 'rev-' + Date.now(),
+                  name: 'Khách Hàng Mới',
+                  role: 'Khách mua sản phẩm',
+                  content: 'Nhập nội dung đánh giá ở đây...',
+                  rating: 5,
+                  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+                };
+                updateSocialProof({ reviews: [...(socialProof.reviews || []), newReview] });
+              }}
+              className="px-3 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-bold flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+            >
+              <Icon name="plus" size={10} />
+              <span>Thêm đánh giá</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            {(socialProof.reviews || []).map((rev, idx) => (
+              <div
+                key={rev.id || idx}
+                className="p-4 rounded-2xl border border-slate-150 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-850/30 space-y-3 relative group"
+              >
+                <div className="absolute top-4 right-4 flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updatedReviews = socialProof.reviews.filter((_, i) => i !== idx);
+                      updateSocialProof({ reviews: updatedReviews });
+                    }}
+                    className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all cursor-pointer"
+                    title="Xóa đánh giá này"
+                  >
+                    <Icon name="trash" size={12} />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-slate-400 font-bold uppercase">Họ và tên</label>
+                      <input
+                        type="text"
+                        value={rev.name}
+                        onChange={(e) => {
+                          const updatedReviews = [...socialProof.reviews];
+                          updatedReviews[idx] = { ...updatedReviews[idx], name: e.target.value };
+                          updateSocialProof({ reviews: updatedReviews });
+                        }}
+                        className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-slate-400 font-bold uppercase">Vai trò / Mô tả</label>
+                      <input
+                        type="text"
+                        value={rev.role}
+                        onChange={(e) => {
+                          const updatedReviews = [...socialProof.reviews];
+                          updatedReviews[idx] = { ...updatedReviews[idx], role: e.target.value };
+                          updateSocialProof({ reviews: updatedReviews });
+                        }}
+                        className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-slate-400 font-bold uppercase">Số sao đánh giá (1-5)</label>
+                      <select
+                        value={rev.rating}
+                        onChange={(e) => {
+                          const updatedReviews = [...socialProof.reviews];
+                          updatedReviews[idx] = { ...updatedReviews[idx], rating: Number(e.target.value) };
+                          updateSocialProof({ reviews: updatedReviews });
+                        }}
+                        className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                      >
+                        <option value={1}>1 Sao ★</option>
+                        <option value={2}>2 Sao ★★</option>
+                        <option value={3}>3 Sao ★★★</option>
+                        <option value={4}>4 Sao ★★★★</option>
+                        <option value={5}>5 Sao ★★★★★</option>
+                      </select>
+                    </div>
+                    <div>
+                      <FileUploadInput
+                        label="Ảnh đại diện (Avatar)"
+                        value={rev.avatar}
+                        onChange={(url) => {
+                          const updatedReviews = [...socialProof.reviews];
+                          updatedReviews[idx] = { ...updatedReviews[idx], avatar: url };
+                          updateSocialProof({ reviews: updatedReviews });
+                        }}
+                        accept="image/*"
+                        type="image"
+                        placeholder="Avatar url..."
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[9px] text-slate-400 font-bold uppercase">Nội dung đánh giá</label>
+                  <textarea
+                    rows={2}
+                    value={rev.content}
+                    onChange={(e) => {
+                      const updatedReviews = [...socialProof.reviews];
+                      updatedReviews[idx] = { ...updatedReviews[idx], content: e.target.value };
+                      updateSocialProof({ reviews: updatedReviews });
+                    }}
+                    className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Footer details */}
       <div className="py-6 space-y-4">
+
         <h4 className="text-xs font-bold text-rose-500 uppercase tracking-widest">
           Thông tin Chân trang (Footer Configurations)
         </h4>

@@ -12,6 +12,7 @@ import java.util.UUID;
 @Repository
 public interface ProductAttributeRepository extends JpaRepository<ProductAttribute, UUID> {
     List<ProductAttribute> findByProductId(UUID productId);
+    List<ProductAttribute> findByProductIdIn(List<UUID> productIds);
 
     @Modifying
     @Query("DELETE FROM ProductAttribute pa WHERE pa.product.id = :productId")

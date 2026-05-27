@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface ProductVariantRepository extends JpaRepository<ProductVariant, UUID> {
     List<ProductVariant> findByProductId(UUID productId);
     List<ProductVariant> findByProductIdAndIsActiveTrue(UUID productId);
+    List<ProductVariant> findByProductIdInAndIsActiveTrue(List<UUID> productIds);
 
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.data.jpa.repository.Query("DELETE FROM ProductVariant pv WHERE pv.product.id = :productId")

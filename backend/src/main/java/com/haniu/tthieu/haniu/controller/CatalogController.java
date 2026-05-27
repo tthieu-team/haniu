@@ -99,6 +99,11 @@ public class CatalogController {
         return ResponseEntity.ok(catalogService.createOccasion(occasion));
     }
 
+    @PutMapping("/occasions/{id}")
+    public ResponseEntity<Occasion> updateOccasion(@PathVariable UUID id, @RequestBody Occasion occasion) {
+        return ResponseEntity.ok(catalogService.updateOccasion(id, occasion));
+    }
+
     @DeleteMapping("/occasions/{id}")
     public ResponseEntity<Void> deleteOccasion(@PathVariable UUID id) {
         catalogService.deleteOccasion(id);

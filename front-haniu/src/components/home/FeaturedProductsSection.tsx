@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProductCard from '@/components/product/ProductCard';
 import QuickViewModal from '@/components/product/QuickViewModal';
 import { useHomeLayoutStore } from '@/store/homeLayout';
@@ -90,6 +90,20 @@ export default function FeaturedProductsSection({
 }: FeaturedProductsSectionProps) {
   const isVisible = useHomeLayoutStore((state) => state.visibility.featuredProducts);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [localSearch, setLocalSearch] = useState(searchTerm);
+
+  useEffect(() => {
+    setLocalSearch(searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localSearch !== searchTerm) {
+        setSearchTerm(localSearch);
+      }
+    }, 600); // 600ms debounce
+    return () => clearTimeout(timer);
+  }, [localSearch, searchTerm, setSearchTerm]);
 
   if (!isVisible) return null;
 
@@ -97,7 +111,7 @@ export default function FeaturedProductsSection({
     <section id="products" className="py-10 sm:py-16 space-y-8 sm:space-y-12 scroll-mt-20 font-sans">
       {/* Title */}
       <div className="text-center space-y-3 sm:space-y-5 max-w-3xl mx-auto px-3 sm:px-4">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-4.5 sm:py-1.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
+        <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
           <Icon name="✨" size={10} className="animate-pulse" /> BỘ SƯU TẬP ĐỘC QUYỀN
         </span>
         <h2 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
@@ -119,16 +133,19 @@ export default function FeaturedProductsSection({
             <input
               type="text"
               placeholder="Tìm quà tặng (VD: ly sứ khắc tên...)"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
               className="w-full pl-10 pr-9 py-3 sm:pl-12 sm:pr-10 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/80 focus:outline-none focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500 dark:border-zinc-800 dark:bg-zinc-950/40 dark:focus:ring-rose-500/5 dark:focus:border-rose-500 text-[11px] sm:text-xs md:text-sm shadow-xs transition-all duration-300 text-slate-800 dark:text-zinc-100"
             />
             <span className="absolute left-3.5 top-[13px] sm:left-4.5 sm:top-[17px] text-slate-400 dark:text-zinc-500 transition-colors group-focus-within:text-rose-500">
               <Icon name="Search" size={16} />
             </span>
-            {searchTerm && (
+            {localSearch && (
               <button 
-                onClick={() => setSearchTerm('')}
+                onClick={() => {
+                  setLocalSearch('');
+                  setSearchTerm('');
+                }}
                 className="absolute right-2.5 top-2.5 sm:right-3.5 sm:top-3.5 text-slate-400 hover:text-slate-650 dark:hover:text-zinc-300 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center cursor-pointer transition-colors"
               >
                 <Icon name="close" size={10} />
@@ -138,9 +155,10 @@ export default function FeaturedProductsSection({
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 self-stretch sm:self-start lg:self-center">
             {/* Quick Clear Filter */}
-            {(searchTerm || selectedOccasion || selectedRecipient) && (
+            {(localSearch || selectedOccasion || selectedRecipient) && (
               <button
                 onClick={() => {
+                  setLocalSearch('');
                   setSearchTerm('');
                   setSelectedOccasion('');
                   setSelectedRecipient('');
@@ -183,7 +201,7 @@ export default function FeaturedProductsSection({
                   <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-[14px] sm:rounded-2xl flex items-center justify-center transition-all duration-300 border relative ${
                     isSelected
                       ? 'bg-gradient-to-br from-rose-500 to-pink-500 text-white border-rose-500 shadow-lg shadow-rose-500/25 scale-105 ring-4 ring-rose-500/10'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-350 hover:scale-105 dark:bg-zinc-850 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-800'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-rose-50/50 hover:text-rose-600 hover:border-rose-300/80 hover:scale-105 hover:shadow-md hover:shadow-rose-500/5 dark:bg-zinc-850 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-rose-950/20 dark:hover:text-rose-450 dark:hover:border-rose-900/40'
                   }`}>
                     <Icon name={getOccasionIcon(occ.slug)} size={16} className="w-4 h-4 sm:w-5 sm:h-5" />
                     {isSelected && (
@@ -194,7 +212,7 @@ export default function FeaturedProductsSection({
                   </div>
                   {/* Text Label */}
                   <span className={`text-[9px] sm:text-[10px] font-bold tracking-wide transition-colors text-center leading-tight line-clamp-2 ${
-                    isSelected ? 'text-rose-500' : 'text-slate-500 dark:text-zinc-400 group-hover:text-slate-800 dark:group-hover:text-zinc-200'
+                    isSelected ? 'text-rose-500' : 'text-slate-500 dark:text-zinc-400 group-hover:text-rose-600 dark:group-hover:text-rose-400'
                   }`}>
                     {occ.name === 'Tất cả dịp' || occ.name === 'Tất cả' ? 'Tất cả' : occ.name}
                   </span>
@@ -226,7 +244,7 @@ export default function FeaturedProductsSection({
                   <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-[14px] sm:rounded-2xl flex items-center justify-center transition-all duration-300 border relative ${
                     isSelected
                       ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white border-amber-500 shadow-lg shadow-amber-500/25 scale-105 ring-4 ring-amber-500/10'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-350 hover:scale-105 dark:bg-zinc-850 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-800'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50/50 hover:text-amber-600 hover:border-amber-300/80 hover:scale-105 hover:shadow-md hover:shadow-amber-500/5 dark:bg-zinc-850 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-amber-950/20 dark:hover:text-amber-450 dark:hover:border-amber-900/40'
                   }`}>
                     <Icon name={getRecipientIcon(rec.slug)} size={16} className="w-4 h-4 sm:w-5 sm:h-5" />
                     {isSelected && (
@@ -237,7 +255,7 @@ export default function FeaturedProductsSection({
                   </div>
                   {/* Text Label */}
                   <span className={`text-[9px] sm:text-[10px] font-bold tracking-wide transition-colors text-center leading-tight line-clamp-2 ${
-                    isSelected ? 'text-amber-600 dark:text-amber-500' : 'text-slate-500 dark:text-zinc-400 group-hover:text-slate-800 dark:group-hover:text-zinc-200'
+                    isSelected ? 'text-amber-600 dark:text-amber-500' : 'text-slate-500 dark:text-zinc-400 group-hover:text-amber-650 dark:group-hover:text-amber-500'
                   }`}>
                     {rec.name === 'Tất cả đối tượng' || rec.name === 'Tất cả' ? 'Tất cả' : rec.name}
                   </span>

@@ -1,13 +1,25 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
+import { useTestimonialStore } from '@/store/testimonial';
 import Icon from '@/components/common/Icons';
 
 export default function SocialProofSection() {
   const proof = useHomeLayoutStore((state) => state.socialProof);
   const isVisible = useHomeLayoutStore((state) => state.visibility.socialProof);
+  const { activeTestimonials, fetchActiveTestimonials } = useTestimonialStore();
+
+  useEffect(() => {
+    if (isVisible) {
+      fetchActiveTestimonials();
+    }
+  }, [isVisible, fetchActiveTestimonials]);
 
   if (!isVisible) return null;
+
+  // Fallback to layout configs if database testimonials table is empty
+  const displayReviews = activeTestimonials.length > 0 ? activeTestimonials : proof.reviews;
 
   return (
     <section className="py-16 space-y-12">
@@ -50,7 +62,7 @@ export default function SocialProofSection() {
 
       {/* Review cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {proof.reviews.map((rev) => (
+        {displayReviews.map((rev) => (
           <div
             key={rev.id}
             className="group bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200 dark:border-zinc-800/60 p-8 rounded-[32px] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col justify-between relative overflow-hidden"

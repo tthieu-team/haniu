@@ -3,6 +3,11 @@ package com.haniu.tthieu.haniu.config;
 import com.haniu.tthieu.haniu.entity.enums.ProductStatus;
 import com.haniu.tthieu.haniu.entity.product.*;
 import com.haniu.tthieu.haniu.repository.*;
+import com.haniu.tthieu.haniu.entity.system.SystemConfig;
+import com.haniu.tthieu.haniu.entity.marketing.Post;
+import com.haniu.tthieu.haniu.entity.marketing.Story;
+import com.haniu.tthieu.haniu.entity.marketing.Testimonial;
+import com.haniu.tthieu.haniu.entity.marketing.UgcItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -36,10 +41,20 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final AttributeDefinitionRepository attributeDefinitionRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SystemConfigRepository systemConfigRepository;
+    private final PostRepository postRepository;
+    private final StoryRepository storyRepository;
+    private final TestimonialRepository testimonialRepository;
+    private final UgcItemRepository ugcItemRepository;
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        seedSystemConfigs();
+        seedPosts();
+        seedStories();
+        seedTestimonials();
+        seedUgcItems();
         seedUsers();
 
         if (categoryRepository.count() > 0) {
@@ -622,4 +637,419 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         log.info("Accessory products checked and seeded successfully!");
     }
+
+    private void seedSystemConfigs() {
+        if (systemConfigRepository.findByConfigKey("HOME_LAYOUT").isEmpty()) {
+            log.info("Seeding default HOME_LAYOUT configuration...");
+            String defaultConfig = """
+            {
+              "visibility": {
+                "hero": true,
+                "trustBar": true,
+                "brandIntro": true,
+                "categories": true,
+                "featuredProducts": true,
+                "collections": true,
+                "benefits": true,
+                "videoBanner": true,
+                "socialProof": true,
+                "howItWorks": true,
+                "ugcFeed": true,
+                "blog": true,
+                "story": true,
+                "cta": true,
+                "faq": true
+              },
+              "header": {
+                "logoText": "HANIU",
+                "logoSubtitle": "",
+                "menuLinks": [
+                  { "name": "Trang chủ", "href": "/" },
+                  { "name": "Sản phẩm", "href": "/products" },
+                  { "name": "Bộ sưu tập", "href": "/#collections" },
+                  { "name": "Câu chuyện", "href": "/#story" },
+                  { "name": "Yêu thích", "href": "/wishlist" }
+                ],
+                "isSticky": true
+              },
+              "announcementBar": {
+                "text": "🚚 Miễn phí vận chuyển toàn quốc cho tất cả đơn hàng từ 499k",
+                "linkText": "Mua ngay",
+                "linkHref": "/#products",
+                "isEnabled": true
+              },
+              "hero": {
+                "layoutType": "slider",
+                "slides": [
+                  {
+                    "id": "slide-1",
+                    "backgroundImage": "/7329c11d-7fcf-45e3-a4d3-08c9f6764741.jfif",
+                    "scriptTitle": "Quà theo",
+                    "boldTitle": "Ý MUỐN",
+                    "badgeText": "Quà ý nghĩa, trao gửi yêu thương",
+                    "subtitle": "Mỗi món quà là một thông điệp yêu thương, được chuẩn bị bằng cả tấm lòng.",
+                    "ctaText": "KHÁM PHÁ NGAY",
+                    "ctaHref": "/#products",
+                    "textLayout": "right",
+                    "circleBadgeText": "HANDMADE • WITH LOVE • HANDMADE • WITH LOVE •",
+                    "cardTitle": "From Love",
+                    "cardSubtitle": ""
+                  },
+                  {
+                    "id": "slide-2",
+                    "backgroundImage": "/8c23c072-f852-4eb2-bf6b-c133fdb03a46.jfif",
+                    "scriptTitle": "",
+                    "boldTitle": "QUÀ THEO Ý MUỐN",
+                    "badgeText": "",
+                    "subtitle": "Chọn quà theo sở thích, theo dịp, theo cách riêng của bạn.",
+                    "ctaText": "XEM NGAY",
+                    "ctaHref": "/#products",
+                    "textLayout": "left",
+                    "circleBadgeText": "",
+                    "cardTitle": "",
+                    "cardSubtitle": ""
+                  }
+                ],
+                "autoplay": true,
+                "autoplaySpeed": 5000,
+                "gridMainSlideId": "slide-1",
+                "gridSubSlideId": "slide-2",
+                "gridFeatures": [
+                  {
+                    "id": "feat-1",
+                    "icon": "heart",
+                    "title": "QUÀ Ý NGHĨA",
+                    "desc": "Gửi gắm thông điệp yêu thương đến người nhận.",
+                    "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=200&auto=format&fit=crop&q=80",
+                    "tagText": ""
+                  },
+                  {
+                    "id": "feat-2",
+                    "icon": "sparkles",
+                    "title": "HANDMADE",
+                    "desc": "Sản phẩm được làm thủ công tỉ mỉ và chỉn chu.",
+                    "image": "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=200&auto=format&fit=crop&q=80",
+                    "tagText": "From haniu with love"
+                  },
+                  {
+                    "id": "feat-3",
+                    "icon": "gift",
+                    "title": "TẶNG GÌ CŨNG ĐÚNG",
+                    "desc": "Đa dạng mẫu mã, phù hợp với mọi dịp đặc biệt.",
+                    "image": "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&auto=format&fit=crop&q=80",
+                    "tagText": "For you"
+                  }
+                ]
+              },
+              "trustBar": {
+                "items": [
+                  { "icon": "★", "text": "50.000+ Khách hàng tin dùng", "title": "50.000+", "desc": "Khách hàng tin chọn" },
+                  { "icon": "🚚", "text": "Giao hỏa tốc 2 giờ nội thành", "title": "Giao Hỏa Tốc", "desc": "Trong 2 giờ nội thành" },
+                  { "icon": "🔄", "text": "Đổi trả dễ dàng trong 30 ngày", "title": "Đổi Trả Dễ Dàng", "desc": "Miễn phí trong 30 ngày" },
+                  { "icon": "🛡️", "text": "Bảo mật thanh toán 100%", "title": "Bảo Mật 100%", "desc": "Thanh toán tuyệt đối an toàn" }
+                ]
+              },
+              "brandIntro": {
+                "title": "Kiến Tạo Những Kỷ Niệm Vô Giá",
+                "subtitle": "VỀ HANIU",
+                "description": "Được thành lập từ năm 2020, Haniu mang sứ mệnh biến những món quà bình thường thành những kỷ vật vô giá. Chúng tôi tin rằng mỗi món quà trao đi là một thông điệp yêu thương được gửi gắm trọn vẹn, được chế tác thủ công tinh xảo bởi những nghệ nhân lành nghề cùng công nghệ cá nhân hóa laser hiện đại.",
+                "stats": [
+                  { "value": "2020", "label": "Năm thành lập" },
+                  { "value": "50.000+", "label": "Khách hàng tin chọn" },
+                  { "value": "100%", "label": "Chế tác thủ công" },
+                  { "value": "24/7", "label": "Tư vấn thiết kế" }
+                ]
+              },
+              "categories": {
+                "title": "Bộ Sưu Tập Quà Tặng Theo Dịp",
+                "subtitle": "Lựa chọn món quà hoàn hảo nhất cho những cột mốc ý nghĩa trong cuộc sống",
+                "items": [
+                  { "name": "Quà Sinh Nhật", "slug": "sinh-nhat", "image": "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=500&auto=format&fit=crop&q=80", "count": "24+ set quà" },
+                  { "name": "Quà Tốt Nghiệp", "slug": "tot-nghiep", "image": "https://images.unsplash.com/photo-1627556704302-624286467c65?w=600&auto=format&fit=crop&q=80", "count": "12+ set quà" },
+                  { "name": "Quà Cặp Đôi", "slug": "cap-doi", "image": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500&auto=format&fit=crop&q=80", "count": "18+ set quà" },
+                  { "name": "Quà Doanh Nghiệp", "slug": "doanh-nghiep", "image": "https://images.unsplash.com/photo-1512909006721-3d6018887383?w=500&auto=format&fit=crop&q=80", "count": "30+ set quà" }
+                ]
+              },
+              "benefits": {
+                "title": "Trải Nghiệm Dịch Vụ Khác Biệt Tại Haniu",
+                "items": [
+                  { "icon": "✨", "title": "Cá Nhân Hóa Riêng", "desc": "Hỗ trợ khắc tên, thông điệp laser lên gỗ, da, gốm sứ theo yêu cầu riêng." },
+                  { "icon": "🎨", "title": "Thiết Kế Độc Quyền", "desc": "Hộp quà, thiệp và cách sắp xếp đều do Haniu tự tay lên ý tưởng, không trùng lặp." },
+                  { "icon": "🚀", "title": "Giao Hàng Hỏa Tốc", "desc": "Nhận hàng nhanh chóng trong 2 giờ tại khu vực nội thành, hỗ trợ giao toàn quốc." },
+                  { "icon": "💎", "title": "Chất Liệu Premium", "desc": "Tất cả sản phẩm đều làm từ gỗ tự nhiên, da bò thật và gốm sứ men cao cấp." }
+                ]
+              },
+              "videoBanner": {
+                "title": "Nghệ Thuật Chế Tác Độc Bản",
+                "subtitle": "Khám phá quy trình tỉ mỉ để tạo ra một tác phẩm quà tặng được khắc laser cá nhân hóa bởi Haniu.",
+                "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-wrapping-a-gift-box-with-ribbon-39922-large.mp4",
+                "placeholderImage": "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=1200&auto=format&fit=crop&q=80",
+                "buttonText": "Xem Thêm Câu Chuyện",
+                "buttonHref": "/#story"
+              },
+              "collections": {
+                "title": "Bộ Sưu Tập Độc Quyền",
+                "subtitle": "Dòng sản phẩm được thiết kế theo mùa và xu hướng nghệ thuật đương đại",
+                "items": [
+                  {
+                    "title": "Summer Breeze Collection",
+                    "subtitle": "Tông xanh bạc hà mát lạnh, ly sứ kèm thìa mạ vàng tinh tế",
+                    "image": "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80",
+                    "href": "/?category=combo-qua-tang"
+                  },
+                  {
+                    "title": "Valentine Sweet Love",
+                    "subtitle": "Hộp gỗ thông khắc hình chân dung, nến thơm hoa hồng Pháp quyến rũ",
+                    "image": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500&auto=format&fit=crop&q=80",
+                    "href": "/?occasion=valentine"
+                  },
+                  {
+                    "title": "Graduation Hope Edition",
+                    "subtitle": "Sổ tay da bò nguyên tấm khắc tên và năm tốt nghiệp kỷ niệm đáng nhớ",
+                    "image": "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=80",
+                    "href": "/?occasion=tot-nghiep"
+                  }
+                ]
+              },
+              "socialProof": {
+                "title": "Cảm Nhận Từ Khách Hàng",
+                "ratingScore": "4.9",
+                "reviewsCount": "1.250+",
+                "reviews": [
+                  { "id": "r1", "name": "Nguyễn Thu Trang", "role": "Khách mua Quà Sinh Nhật", "content": "Mình rất bất ngờ về chất lượng khắc tên trên ly sứ. Rất sắc nét và tinh tế! Bạn gái mình nhận quà thích lắm, khóc luôn vì xúc động.", "rating": 5, "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80" },
+                  { "id": "r2", "name": "Trần Anh Tuấn", "role": "Giám đốc nhân sự TechCorp", "content": "Đặt 200 set quà doanh nghiệp khắc logo công ty cho đối tác dịp lễ, Haniu làm siêu nhanh, đóng gói sang trọng, đối tác ai cũng khen chu đáo.", "rating": 5, "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&auto=format&fit=crop&q=80" },
+                  { "id": "r3", "name": "Lê Minh Thảo", "role": "Khách mua Quà Kỷ Niệm", "content": "Sổ tay da thật sờ rất sướng tay, thơm mùi da tự nhiên. Dịch vụ khắc laser miễn phí rất chuyên nghiệp. Hộp quà đóng gói siêu đẹp và chắc chắn.", "rating": 5, "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" }
+                ]
+              },
+              "howItWorks": {
+                "title": "Quy Trình Tạo Nên Món Quà Độc Bản",
+                "subtitle": "Chỉ với 4 bước đơn giản để tạo ra hộp quà chứa đựng tâm ý của riêng bạn",
+                "steps": [
+                  { "number": "01", "title": "Chọn Mẫu Quà", "desc": "Lựa chọn giữa hàng chục set combo quà tặng sẵn có hoặc sản phẩm lẻ của Haniu." },
+                  { "number": "02", "title": "Cá Nhân Hóa", "desc": "Nhập tên, ngày kỷ niệm hoặc lời nhắn gửi để chúng tôi thiết kế bản khắc laser." },
+                  { "number": "03", "title": "Xác Nhận Preview", "desc": "Đội ngũ thiết kế gửi bản vẽ mô phỏng cho bạn duyệt trước khi tiến hành chế tác." },
+                  { "number": "04", "title": "Nhận Quà Hoàn Mỹ", "desc": "Quà được gói hộp sang trọng kèm nơ lụa và thiệp viết tay, giao hỏa tốc đến người nhận." }
+                ]
+              },
+              "ugcFeed": {
+                "title": "Khoảnh Khắc Của Haniu",
+                "hashtag": "#mygiftmoment",
+                "items": [
+                  { "id": "u1", "imageUrl": "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=400&auto=format&fit=crop&q=80", "link": "https://instagram.com" },
+                  { "id": "u2", "imageUrl": "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&auto=format&fit=crop&q=80", "link": "https://instagram.com" },
+                  { "id": "u3", "imageUrl": "https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&auto=format&fit=crop&q=80", "link": "https://instagram.com" },
+                  { "id": "u4", "imageUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&auto=format&fit=crop&q=80", "link": "https://instagram.com" },
+                  { "id": "u5", "imageUrl": "https://images.unsplash.com/photo-1512909006721-3d6018887383?w=400&auto=format&fit=crop&q=80", "link": "https://instagram.com" },
+                  { "id": "u6", "imageUrl": "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&auto=format&fit=crop&q=80", "link": "https://instagram.com" }
+                ]
+              },
+              "blog": {
+                "title": "Góc Chia Sẻ Kinh Nghiệm",
+                "subtitle": "Những lời khuyên bổ ích giúp bạn lựa chọn và trao gửi những lời nhắn nhủ tuyệt vời nhất",
+                "items": [
+                  {
+                    "id": "b1",
+                    "title": "Top 10 món quà tốt nghiệp ý nghĩa lưu giữ kỷ niệm tuổi học trò",
+                    "summary": "Ngày tốt nghiệp là bước ngoặt lớn của cuộc đời. Cùng Haniu điểm qua những set quà lưu niệm độc bản tinh tế thích hợp tặng bạn bè, thầy cô.",
+                    "image": "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=500&auto=format&fit=crop&q=80",
+                    "date": "22 Tháng 5, 2026",
+                    "href": "/#blog"
+                  },
+                  {
+                    "id": "b2",
+                    "title": "Nghệ thuật tặng quà cho đối tác doanh nghiệp nâng tầm thương hiệu",
+                    "summary": "Quà tặng doanh nghiệp không chỉ là phép lịch sự, mà là đại diện cho uy tín. Cách chọn chất liệu hộp gỗ cao cấp và lời chúc tinh tế.",
+                    "image": "https://images.unsplash.com/photo-1512909006721-3d6018887383?w=500&auto=format&fit=crop&q=80",
+                    "date": "15 Tháng 5, 2026",
+                    "href": "/#blog"
+                  },
+                  {
+                    "id": "b3",
+                    "title": "Cách ghi lời chúc khắc laser cá nhân hóa đầy cảm xúc cho người thương",
+                    "summary": "Ý tưởng chọn câu trích dẫn, ngày kỷ niệm hay lời nhắn ngọt ngào để khắc lên sổ tay da và bình giữ nhiệt gỗ tre tặng người yêu.",
+                    "image": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500&auto=format&fit=crop&q=80",
+                    "date": "10 Tháng 5, 2026",
+                    "href": "/#blog"
+                  },
+                  {
+                    "id": "b4",
+                    "title": "5 set quà tặng kỷ niệm ngày cưới ngọt ngào và lãng mạn nhất",
+                    "summary": "Gợi ý những set quà tặng kỷ niệm ngày cưới thiết kế tinh tế hỗ trợ khắc tên, ngày cưới kỷ niệm ý nghĩa của hai vợ chồng.",
+                    "image": "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80",
+                    "date": "05 Tháng 5, 2026",
+                    "href": "/#blog"
+                  }
+                ]
+              },
+              "story": {
+                "title": "Nghệ Thuật Từ Những Bàn Tay Thủ Công",
+                "subtitle": "Hành trình chăm chút tỉ mỉ cho từng góc cạnh hộp quà",
+                "content": "Tại xưởng chế tác của Haniu, mỗi chi tiết nhỏ đều được chúng tôi trân quý. Từ khâu tuyển chọn những tấm da bò nguyên tấm, mài giũa các góc cạnh của gỗ, cho đến kỹ thuật nung men gốm sứ hỏa biến độc bản. Chúng tôi không sản xuất công nghiệp hàng loạt. Mỗi món quà bạn cầm trên tay đều mang hơi ấm và tâm huyết của những người thợ thủ công Việt Nam.",
+                "videoPlaceholderUrl": "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=1200&auto=format&fit=crop&q=80",
+                "videoTitle": "Xem video Behind the Scenes"
+              },
+              "cta": {
+                "title": "Tạo Nên Món Quà Mang Dấu Ấn Riêng Của Bạn",
+                "subtitle": "Chỉ mất 2 phút để cá nhân hóa một món quà đầy ý nghĩa dành tặng người thương.",
+                "buttonText": "Bắt đầu thiết kế ngay",
+                "buttonHref": "/#products"
+              },
+              "faq": {
+                "title": "Những Câu Hỏi Thường Gặp",
+                "items": [
+                  { "question": "Thời gian khắc laser cá nhân hóa mất bao lâu?", "answer": "Haniu sử dụng máy khắc laser công nghệ cao thế hệ mới, quy trình khắc tên thông thường chỉ mất từ 15-30 phút. Do đó, đơn hàng hỏa tốc 2 giờ vẫn được đảm bảo giao đúng hẹn." },
+                  { "question": "Tôi có thể xem trước thiết kế khắc laser trước khi thực hiện không?", "answer": "Có, sau khi bạn đặt hàng, bộ phận thiết kế của Haniu sẽ thiết kế layout chữ/hình ảnh và gửi ảnh phác thảo (mockup) qua Zalo/Email để bạn duyệt. Haniu chỉ tiến hành khắc khi bạn đã hoàn toàn đồng ý." },
+                  { "question": "Haniu có chính sách đổi trả như thế nào đối với quà cá nhân hóa?", "answer": "Đối với sản phẩm có khắc tên/cá nhân hóa, Haniu cam kết 1 đổi 1 miễn phí nếu có lỗi từ phía sản xuất (sai chính tả so với bản duyệt, trầy xước, nứt vỡ do vận chuyển). Với các sản phẩm không cá nhân hóa, bạn được đổi trả trong vòng 7 ngày." },
+                  { "question": "Hộp quà của Haniu đã bao gồm những gì?", "answer": "Tất cả các set combo quà tặng tại Haniu đều được đóng gói tiêu chuẩn bao gồm: Hộp cứng cao cấp lót rơm giấy, ruy băng lụa thắt nơ nghệ thuật, thiệp viết tay theo yêu cầu và túi giấy sang trọng đi kèm để bạn tiện đem tặng." }
+                ]
+              },
+              "footer": {
+                "description": "Haniu - Thương hiệu quà tặng thiết kế thủ công và cá nhân hóa hàng đầu Việt Nam. Nơi biến những món quà bình thường thành kỷ vật vô giá.",
+                "address": "Số 12, Ngõ 192 Kim Mã, Ba Đình, Hà Nội",
+                "phone": "0987.654.321",
+                "email": "contact@haniu.vn",
+                "facebookUrl": "https://facebook.com/haniu",
+                "instagramUrl": "https://instagram.com/haniu",
+                "tiktokUrl": "https://tiktok.com/@haniu"
+              },
+              "welcomeScreen": {
+                "isEnabled": true,
+                "welcomeText": "HANIU GIFT SHOP",
+                "welcomeSubtitle": "Thiết kế độc bản - Trọn vẹn yêu thương",
+                "durationMs": 2500
+              }
+            }
+            """;
+            SystemConfig config = SystemConfig.builder()
+                    .configKey("HOME_LAYOUT")
+                    .configValue(defaultConfig)
+                    .build();
+            systemConfigRepository.save(config);
+            log.info("Default HOME_LAYOUT configuration seeded!");
+        }
+    }
+
+    private void seedPosts() {
+        if (postRepository.count() == 0) {
+            log.info("Seeding initial blog posts...");
+            
+            Post post1 = Post.builder()
+                    .title("Top 10 món quà tốt nghiệp ý nghĩa lưu giữ kỷ niệm tuổi học trò")
+                    .slug("top-10-mon-qua-tot-nghiep-y-nghia")
+                    .summary("Ngày tốt nghiệp là bước ngoặt lớn của cuộc đời. Cùng Haniu điểm qua những set quà lưu niệm độc bản tinh tế thích hợp tặng bạn bè, thầy cô.")
+                    .content("<p>Ngày tốt nghiệp đánh dấu một cột mốc quan trọng, khép lại những năm tháng học trò mơ mộng để mở ra cánh cổng tương lai tươi sáng. Nhằm lưu giữ những kỷ niệm đẹp đẽ ấy, Haniu xin gợi ý cho bạn 10 món quà tốt nghiệp vô cùng ý nghĩa và có thể cá nhân hóa khắc tên riêng.</p><p>Sổ tay gỗ tự nhiên khắc hình chân dung và lời nhắn gửi chúc mừng là một lựa chọn vô cùng trang trọng.</p>")
+                    .imageUrl("https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=500&auto=format&fit=crop&q=80")
+                    .active(true)
+                    .publishedAt(LocalDateTime.now())
+                    .build();
+            postRepository.save(post1);
+
+            Post post2 = Post.builder()
+                    .title("Nghệ thuật tặng quà cho đối tác doanh nghiệp nâng tầm thương hiệu")
+                    .slug("nghe-thuat-tang-qua-doi-tac-doanh-nghiep")
+                    .summary("Quà tặng doanh nghiệp không chỉ là phép lịch sự, mà là đại diện cho uy tín. Cách chọn chất liệu hộp gỗ cao cấp và lời chúc tinh tế.")
+                    .content("<p>Trong kinh doanh, mối quan hệ đối tác luôn là yếu tố sống còn. Một món quà tinh tế, chỉn chu được khắc logo thương hiệu không chỉ thể hiện tấm lòng tri ân sâu sắc, mà còn là công cụ Marketing tinh tế giúp ghi dấu ấn đậm nét trong tâm trí đối tác.</p>")
+                    .imageUrl("https://images.unsplash.com/photo-1512909006721-3d6018887383?w=500&auto=format&fit=crop&q=80")
+                    .active(true)
+                    .publishedAt(LocalDateTime.now())
+                    .build();
+            postRepository.save(post2);
+
+            Post post3 = Post.builder()
+                    .title("Cách ghi lời chúc khắc laser cá nhân hóa đầy cảm xúc cho người thương")
+                    .slug("cach-ghi-loi-chuc-khac-laser-ca-nhan-hoa")
+                    .summary("Ý tưởng chọn câu trích dẫn, ngày kỷ niệm hay lời nhắn ngọt ngào để khắc lên sổ tay da và bình giữ nhiệt gỗ tre tặng người yêu.")
+                    .content("<p>Cá nhân hóa quà tặng bằng công nghệ khắc laser là xu hướng được ưa chuộng nhất hiện nay. Haniu sẽ giúp bạn tuyển tập những lời chúc, câu trích dẫn ngắn và cách ghi ngày kỷ niệm lãng mạn nhất để gửi gắm tình yêu ngọt ngào.</p>")
+                    .imageUrl("https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500&auto=format&fit=crop&q=80")
+                    .active(true)
+                    .publishedAt(LocalDateTime.now())
+                    .build();
+            postRepository.save(post3);
+
+            log.info("Initial blog posts seeded successfully!");
+        }
+    }
+
+    private void seedStories() {
+        if (storyRepository.count() == 0) {
+            log.info("Seeding initial brand story...");
+            Story story = Story.builder()
+                    .title("Nghệ Thuật Từ Những Bàn Tay Thủ Công")
+                    .subtitle("CÂU CHUYỆN THƯƠNG HIỆU")
+                    .content("Tại xưởng chế tác của Haniu, mỗi chi tiết nhỏ đều được chúng tôi trân quý. Từ khâu tuyển chọn những tấm da bò nguyên tấm, mài giũa các góc cạnh của gỗ, cho đến kỹ thuật nung men gốm sứ hỏa biến độc bản. Chúng tôi không sản xuất công nghiệp hàng loạt. Mỗi món quà bạn cầm trên tay đều mang hơi ấm và tâm huyết của những người thợ thủ công Việt Nam.")
+                    .videoPlaceholderUrl("https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=1200&auto=format&fit=crop&q=80")
+                    .videoTitle("Xem video Behind the Scenes")
+                    .build();
+            storyRepository.save(story);
+            log.info("Initial brand story seeded!");
+        }
+    }
+
+    private void seedTestimonials() {
+        if (testimonialRepository.count() == 0) {
+            log.info("Seeding initial testimonials...");
+            
+            Testimonial t1 = Testimonial.builder()
+                    .name("Nguyễn Thu Trang")
+                    .role("Khách mua Quà Sinh Nhật")
+                    .content("Mình rất bất ngờ về chất lượng khắc tên trên ly sứ. Rất sắc nét và tinh tế! Bạn gái mình nhận quà thích lắm, khóc luôn vì xúc động.")
+                    .rating(5)
+                    .avatar("https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80")
+                    .active(true)
+                    .build();
+            testimonialRepository.save(t1);
+
+            Testimonial t2 = Testimonial.builder()
+                    .name("Trần Anh Tuấn")
+                    .role("Giám đốc nhân sự TechCorp")
+                    .content("Đặt 200 set quà doanh nghiệp khắc logo công ty cho đối tác dịp lễ, Haniu làm siêu nhanh, đóng gói sang trọng, đối tác ai cũng khen chu đáo.")
+                    .rating(5)
+                    .avatar("https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&auto=format&fit=crop&q=80")
+                    .active(true)
+                    .build();
+            testimonialRepository.save(t2);
+
+            Testimonial t3 = Testimonial.builder()
+                    .name("Lê Minh Thảo")
+                    .role("Khách mua Quà Kỷ Niệm")
+                    .content("Sổ tay da thật sờ rất sướng tay, thơm mùi da tự nhiên. Dịch vụ khắc laser miễn phí rất chuyên nghiệp. Hộp quà đóng gói siêu đẹp và chắc chắn.")
+                    .rating(5)
+                    .avatar("https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80")
+                    .active(true)
+                    .build();
+            testimonialRepository.save(t3);
+
+            log.info("Initial testimonials seeded successfully!");
+        }
+    }
+
+    private void seedUgcItems() {
+        if (ugcItemRepository.count() == 0) {
+            log.info("Seeding initial UGC items...");
+            
+            UgcItem u1 = UgcItem.builder().imageUrl("https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=400&auto=format&fit=crop&q=80").link("https://instagram.com").active(true).build();
+            ugcItemRepository.save(u1);
+            
+            UgcItem u2 = UgcItem.builder().imageUrl("https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&auto=format&fit=crop&q=80").link("https://instagram.com").active(true).build();
+            ugcItemRepository.save(u2);
+            
+            UgcItem u3 = UgcItem.builder().imageUrl("https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&auto=format&fit=crop&q=80").link("https://instagram.com").active(true).build();
+            ugcItemRepository.save(u3);
+            
+            UgcItem u4 = UgcItem.builder().imageUrl("https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&auto=format&fit=crop&q=80").link("https://instagram.com").active(true).build();
+            ugcItemRepository.save(u4);
+            
+            UgcItem u5 = UgcItem.builder().imageUrl("https://images.unsplash.com/photo-1512909006721-3d6018887383?w=400&auto=format&fit=crop&q=80").link("https://instagram.com").active(true).build();
+            ugcItemRepository.save(u5);
+            
+            UgcItem u6 = UgcItem.builder().imageUrl("https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&auto=format&fit=crop&q=80").link("https://instagram.com").active(true).build();
+            ugcItemRepository.save(u6);
+            
+            log.info("Initial UGC items seeded successfully!");
+        }
+    }
 }
+
+
+
+

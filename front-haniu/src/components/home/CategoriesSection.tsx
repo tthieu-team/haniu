@@ -1,6 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
+import { catalogService, Occasion } from '@/services/catalog.service';
+import { getFullImageUrl } from '@/lib/api';
 import Icon from '@/components/common/Icons';
 
 interface CategoriesSectionProps {
@@ -9,10 +12,39 @@ interface CategoriesSectionProps {
 }
 
 export default function CategoriesSection({ onOccasionSelect, selectedOccasion }: CategoriesSectionProps) {
-  const categories = useHomeLayoutStore((state) => state.categories);
+  const layoutCategories = useHomeLayoutStore((state) => state.categories);
   const isVisible = useHomeLayoutStore((state) => state.visibility.categories);
+  const [dbOccasions, setDbOccasions] = useState<Occasion[]>([]);
+
+  useEffect(() => {
+    const loadOccasions = async () => {
+      try {
+        const data = await catalogService.getAllOccasions();
+        const active = (data || []).filter(o => {
+          const val = o.isActive !== undefined ? o.isActive : (o as any).active;
+          return val !== false;
+        });
+        setDbOccasions(active);
+      } catch (err) {
+        console.error('Failed to load occasions for home page:', err);
+      }
+    };
+    loadOccasions();
+  }, []);
 
   if (!isVisible) return null;
+
+  const hasDbOccasions = dbOccasions.length > 0;
+  const displayItems = hasDbOccasions
+    ? dbOccasions.map(o => ({
+        name: o.name,
+        slug: o.slug,
+        image: getFullImageUrl(o.imageUrl) || 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=500&auto=format&fit=crop&q=80',
+        count: (o as any).productCount !== undefined && (o as any).productCount > 0
+          ? `${(o as any).productCount}+ set quà`
+          : '24+ set quà'
+      }))
+    : layoutCategories.items;
 
   return (
     <section id="categories" className="py-10 sm:py-16 space-y-8 sm:space-y-12">
@@ -28,55 +60,81 @@ export default function CategoriesSection({ onOccasionSelect, selectedOccasion }
           </span>
         </h2>
         <p className="text-[11px] sm:text-xs md:text-sm text-slate-500 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed font-light">
-          {categories.subtitle}
+          {layoutCategories.subtitle}
         </p>
       </div>
 
       {/* Grid of categories */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-        {categories.items.map((item, idx) => {
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
+        {displayItems.map((item, idx) => {
           const isActive = selectedOccasion === item.slug;
+          const formattedName = item.name.toLowerCase().startsWith('quà')
+            ? item.name
+            : `Quà ${item.name}`;
+
+          // Premium symbol based on slug
+          const getSymbol = (slug: string) => {
+            if (slug.includes('sinh-nhat')) return '🎂';
+            if (slug.includes('tinh-nhan') || slug.includes('valentine')) return '❤️';
+            if (slug.includes('nha-giao') || slug.includes('20-11')) return '👨‍🏫';
+            if (slug.includes('quoc-khanh') || slug.includes('2-9')) return '🇻🇳';
+            return '✨';
+          };
+
           return (
             <div
               key={idx}
               onClick={() => onOccasionSelect?.(item.slug)}
-              className={`group overflow-hidden rounded-2xl md:rounded-[28px] border bg-white/80 dark:bg-zinc-900/30 backdrop-blur-md transition-all duration-300 cursor-pointer flex flex-col ${
+              className={`group relative overflow-hidden rounded-[28px] cursor-pointer aspect-[3/4] flex flex-col justify-end p-4 sm:p-6 transition-all duration-500 bg-slate-100/50 dark:bg-zinc-900/30 border ${
                 isActive
-                  ? 'border-rose-500 ring-4 ring-rose-500/10 shadow-lg scale-[1.02]'
-                  : 'border-slate-200/80 dark:border-zinc-800/60 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-rose-300 dark:hover:border-rose-900/50'
+                  ? 'border-rose-500 ring-4 ring-rose-500/20 shadow-xl shadow-rose-500/10 scale-[1.03] -translate-y-1.5'
+                  : 'border-slate-200/80 dark:border-zinc-800/40 shadow-md hover:shadow-2xl hover:shadow-rose-500/5 hover:-translate-y-2 hover:border-rose-300 dark:hover:border-rose-900/30'
               }`}
             >
-              {/* Category Image */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-zinc-950">
+              {/* Background Image */}
+              <div className="absolute inset-0 z-0">
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ease-out"
                 />
-                {isActive && (
-                  <span className="absolute top-2.5 left-2.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow">
-                    Đang Chọn
-                  </span>
-                )}
               </div>
 
+              {/* Gradient Overlay for high readability in both light & dark themes */}
+              <div className={`absolute inset-0 z-10 transition-all duration-300 ${
+                isActive
+                  ? 'bg-gradient-to-t from-rose-500/10 via-background/80 to-transparent dark:from-rose-950/40 dark:via-background/85'
+                  : 'bg-gradient-to-t from-background/95 via-background/50 to-transparent dark:from-background/95 dark:via-background/45'
+              }`} />
+
+              {/* Status Badge */}
+              {isActive && (
+                <span className="absolute top-4 left-4 z-20 bg-rose-500 text-white text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-lg border border-rose-400/20 animate-pulse">
+                  Đang Chọn
+                </span>
+              )}
+
+              {/* Category Occasion Badge */}
+              <span className="absolute top-4 right-4 z-20 bg-slate-500/10 dark:bg-white/10 text-slate-800 dark:text-white backdrop-blur-md text-[9px] font-black tracking-widest px-2 py-1.5 rounded-lg border border-slate-500/20 dark:border-white/10 uppercase">
+                {getSymbol(item.slug)} Series
+              </span>
+
               {/* Info details */}
-              <div className="p-3 sm:p-5 flex flex-col justify-between flex-grow space-y-2 md:space-y-3">
-                <div className="space-y-0.5 md:space-y-1">
-                  <h3 className="font-extrabold text-xs sm:text-sm md:text-base text-slate-800 dark:text-zinc-100 group-hover:text-rose-500 dark:group-hover:text-rose-400 transition-colors tracking-wide leading-snug">
-                    {item.name}
-                  </h3>
-                  <p className="text-[9px] sm:text-xs text-slate-400 dark:text-zinc-500 font-light">
-                    Dành cho dịp đặc biệt
-                  </p>
-                </div>
+              <div className="relative z-20 space-y-2 text-left">
+                <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400">
+                  Dành cho dịp đặc biệt
+                </span>
                 
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-zinc-800/60">
-                  <span className="font-bold text-[8px] sm:text-[10px] text-rose-500 dark:text-rose-400 bg-rose-500/5 dark:bg-rose-500/10 px-1.5 sm:px-2.5 py-0.5 rounded-md border border-rose-500/10">
+                <h3 className="text-sm sm:text-base md:text-lg font-black text-foreground group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors tracking-wide leading-tight line-clamp-1">
+                  {formattedName}
+                </h3>
+                
+                <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-zinc-800/80">
+                  <span className="font-bold text-[8px] sm:text-[9px] text-rose-600 dark:text-rose-300 bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/10 dark:border-rose-400/10">
                     {item.count}
                   </span>
-                  <span className="text-[9px] sm:text-[11px] font-extrabold text-slate-600 dark:text-zinc-300 group-hover:text-rose-500 dark:group-hover:text-rose-400 flex items-center gap-1 transition-colors">
-                    Khám phá <Icon name="→" size={10} className="w-2.5 h-2.5 sm:w-3 sm:h-3 group-hover:translate-x-1 transition-transform" />
+                  <span className="text-[9px] sm:text-[10px] font-extrabold text-foreground/90 group-hover:text-rose-600 dark:group-hover:text-rose-400 flex items-center gap-1 transition-colors">
+                    Khám phá <Icon name="→" size={10} className="w-2.5 h-2.5 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </div>
               </div>

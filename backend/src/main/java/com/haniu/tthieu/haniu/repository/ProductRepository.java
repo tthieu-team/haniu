@@ -36,4 +36,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
             @Param("keyword") String keyword,
             @Param("status") com.haniu.tthieu.haniu.entity.enums.ProductStatus status,
             org.springframework.data.domain.Pageable pageable);
+
+    @Query("SELECT o.id, COUNT(p) FROM Product p JOIN p.occasions o WHERE p.deletedAt IS NULL GROUP BY o.id")
+    java.util.List<Object[]> countProductsByOccasion();
 }

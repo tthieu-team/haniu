@@ -40,12 +40,19 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
 
   return (
     <section
-      className="relative overflow-hidden w-full bg-[#FAF5F2] h-[550px] sm:h-[680px] lg:h-screen group"
+      className="relative overflow-hidden w-full bg-[#FAF5F2] group flex flex-col"
+      style={{
+        height: isSticky
+          ? isAnnouncementBar
+            ? 'calc(100vh - 9rem)'
+            : 'calc(100vh - 7rem)'
+          : '100vh',
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Slides Container */}
-      <div className="relative w-full h-full">
+      <div className="relative w-full flex-1">
         {slides.map((slide, idx) => {
           const isActive = idx === currentIndex;
 
@@ -81,11 +88,7 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
               </div>
 
               {/* Foreground content grid */}
-              <div className={`relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center ${
-                isSticky
-                  ? (isAnnouncementBar ? 'pt-28 sm:pt-32 md:pt-36' : 'pt-20 sm:pt-24 md:pt-28')
-                  : 'pt-0'
-              }`}>
+              <div className="relative z-10 h-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 2xl:px-24 w-full flex items-center">
                 <div className={`w-full flex justify-center ${
                   slide.textLayout === 'left'
                     ? 'sm:justify-start'
@@ -173,7 +176,7 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
                     }`}>
                       <a
                         href={slide.ctaHref}
-                        className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#E07A7C] to-[#C67B71] px-7 py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#C67B71]/25 hover:shadow-[#C67B71]/45 hover:scale-[1.02] active:scale-95 transition-all duration-300 cursor-pointer"
+                        className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#E07A7C] to-[#C67B71] px-7 py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#C67B71]/25 hover:shadow-xl hover:shadow-[#C67B71]/40 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 transition-all duration-300 cursor-pointer"
                       >
                         <Icon name="gift" size={13} className="text-white" />
                         <span>{slide.ctaText}</span>

@@ -30,6 +30,8 @@ public interface ProductService {
             UUID collectionId,
             Boolean isFeatured,
             Boolean isNew,
+            String occasionSlug,
+            String recipientSlug,
             String cursor,
             int size);
 

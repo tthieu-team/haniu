@@ -32,6 +32,8 @@ export const productService = {
     collectionId?: string;
     isFeatured?: boolean;
     isNew?: boolean;
+    occasionSlug?: string;
+    recipientSlug?: string;
     status?: string;
     page?: number;
     size?: number;
@@ -44,6 +46,8 @@ export const productService = {
     if (filters.collectionId) params.append('collectionId', filters.collectionId);
     if (filters.isFeatured !== undefined) params.append('isFeatured', String(filters.isFeatured));
     if (filters.isNew !== undefined) params.append('isNew', String(filters.isNew));
+    if (filters.occasionSlug) params.append('occasionSlug', filters.occasionSlug);
+    if (filters.recipientSlug) params.append('recipientSlug', filters.recipientSlug);
     if (filters.status) params.append('status', filters.status);
     if (filters.page !== undefined) params.append('page', String(filters.page));
     if (filters.size !== undefined) params.append('size', String(filters.size));
@@ -60,6 +64,8 @@ export const productService = {
     collectionId?: string;
     isFeatured?: boolean;
     isNew?: boolean;
+    occasionSlug?: string;
+    recipientSlug?: string;
     cursor?: string;
     size?: number;
   } = {}) => {
@@ -69,6 +75,8 @@ export const productService = {
     if (filters.collectionId) params.append('collectionId', filters.collectionId);
     if (filters.isFeatured !== undefined) params.append('isFeatured', String(filters.isFeatured));
     if (filters.isNew !== undefined) params.append('isNew', String(filters.isNew));
+    if (filters.occasionSlug) params.append('occasionSlug', filters.occasionSlug);
+    if (filters.recipientSlug) params.append('recipientSlug', filters.recipientSlug);
     if (filters.cursor) params.append('cursor', filters.cursor);
     if (filters.size !== undefined) params.append('size', String(filters.size));
 

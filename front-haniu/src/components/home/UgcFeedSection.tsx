@@ -1,11 +1,22 @@
+import { useEffect } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
+import { useUgcStore } from '@/store/ugc';
 import Icon from '@/components/common/Icons';
 
 export default function UgcFeedSection() {
   const ugc = useHomeLayoutStore((state) => state.ugcFeed);
   const isVisible = useHomeLayoutStore((state) => state.visibility.ugcFeed);
+  const { activeUgcItems, fetchActiveUgcItems } = useUgcStore();
+
+  useEffect(() => {
+    if (isVisible) {
+      fetchActiveUgcItems();
+    }
+  }, [isVisible, fetchActiveUgcItems]);
 
   if (!isVisible) return null;
+
+  const displayItems = activeUgcItems.length > 0 ? activeUgcItems : ugc.items;
 
   return (
     <section className="py-16 bg-white dark:bg-zinc-950">
@@ -29,7 +40,7 @@ export default function UgcFeedSection() {
 
         {/* UGC Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {ugc.items.map((item, idx) => {
+          {displayItems.map((item, idx) => {
             // Mock social stats for high fidelity
             const likes = [142, 389, 215, 512, 188, 304];
             const comments = [12, 45, 18, 62, 14, 29];

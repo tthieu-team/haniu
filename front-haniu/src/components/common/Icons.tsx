@@ -46,7 +46,8 @@ import {
   Moon,
   Filter,
   LayoutGrid,
-  List
+  List,
+  BookOpen
 } from 'lucide-react';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -254,6 +255,9 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
     case 'list':
     case 'List':
       return <List size={size} className={className} {...props} />;
+    case 'book':
+    case 'Book':
+      return <BookOpen size={size} className={className} {...props} />;
     default:
       // Fallback if no matching Lucide icon is found
       return <span className={`inline-block font-sans ${className}`}>{name}</span>;

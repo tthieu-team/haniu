@@ -50,7 +50,7 @@ export default function BannerCard({ slide, isMain }: BannerCardProps) {
             <div className="pt-2">
               <a
                 href={slide.ctaHref}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#E07A7C] to-[#C67B71] px-5 py-2.5 text-xs font-bold text-white shadow-md hover:scale-[1.02] transition-transform duration-300"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#E07A7C] to-[#C67B71] px-5 py-2.5 text-xs font-bold text-white shadow-md hover:shadow-lg hover:shadow-[#C67B71]/30 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 transition-all duration-300 cursor-pointer"
               >
                 <span>{slide.ctaText}</span>
                 <Icon name="arrow-right" size={12} />
@@ -114,7 +114,7 @@ export default function BannerCard({ slide, isMain }: BannerCardProps) {
             <div className="pt-1">
               <a
                 href={slide.ctaHref}
-                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#E07A7C] to-[#C67B71] px-4.5 py-2 text-[10px] sm:text-xs font-bold text-white shadow-xs hover:scale-[1.02] active:scale-95 transition-transform cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#E07A7C] to-[#C67B71] px-4.5 py-2 text-[10px] sm:text-xs font-bold text-white shadow-xs hover:shadow-md hover:shadow-[#C67B71]/20 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 transition-all duration-300 cursor-pointer"
               >
                 <span>{slide.ctaText}</span>
                 <Icon name="arrow-right" size={10} />

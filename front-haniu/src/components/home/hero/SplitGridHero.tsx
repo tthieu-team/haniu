@@ -24,8 +24,8 @@ export default function SplitGridHero({ hero, isSticky, isAnnouncementBar }: Spl
           : 'pt-6'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:h-[600px] xl:h-[650px]">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 2xl:px-24 w-full">
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:h-[600px] xl:h-[700px] 2xl:h-[780px]">
           {/* Left Block (Main Banner) */}
           <div className="lg:col-span-7 xl:col-span-8 h-[400px] sm:h-[500px] lg:h-full">
             <BannerCard slide={mainSlide} isMain={true} />

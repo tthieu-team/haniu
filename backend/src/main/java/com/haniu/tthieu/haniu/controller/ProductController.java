@@ -61,6 +61,8 @@ public class ProductController {
             @RequestParam(required = false) UUID collectionId,
             @RequestParam(required = false) Boolean isFeatured,
             @RequestParam(required = false) Boolean isNew,
+            @RequestParam(required = false) String occasionSlug,
+            @RequestParam(required = false) String recipientSlug,
             @RequestParam(required = false) ProductStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -90,6 +92,12 @@ public class ProductController {
         if (status != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
         }
+        if (occasionSlug != null && !occasionSlug.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.join("occasions").get("slug"), occasionSlug));
+        }
+        if (recipientSlug != null && !recipientSlug.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.join("recipients").get("slug"), recipientSlug));
+        }
 
         return ResponseEntity.ok(productService.getProducts(spec, pageable));
     }
@@ -110,9 +118,11 @@ public class ProductController {
             @RequestParam(required = false) UUID collectionId,
             @RequestParam(required = false) Boolean isFeatured,
             @RequestParam(required = false) Boolean isNew,
+            @RequestParam(required = false) String occasionSlug,
+            @RequestParam(required = false) String recipientSlug,
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(productService.getProductsCursor(
-                categoryId, brandId, collectionId, isFeatured, isNew, cursor, size));
+                categoryId, brandId, collectionId, isFeatured, isNew, occasionSlug, recipientSlug, cursor, size));
     }
 }

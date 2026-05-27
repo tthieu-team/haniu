@@ -52,7 +52,12 @@ export const useOccasionStore = create<OccasionState>((set) => ({
     set({ loading: true, error: null });
     try {
       const body = preparePayload(payload);
-      const data = await catalogService.createOccasion(body);
+      let data;
+      if (payload.id) {
+        data = await catalogService.updateOccasion(payload.id, body);
+      } else {
+        data = await catalogService.createOccasion(body);
+      }
       const normalized = normalizeOccasion(data);
       set((state) => {
         const exists = state.occasions.some((o) => o.id === normalized.id);

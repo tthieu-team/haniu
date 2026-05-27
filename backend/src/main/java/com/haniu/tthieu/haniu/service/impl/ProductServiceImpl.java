@@ -619,6 +619,8 @@ public class ProductServiceImpl implements ProductService {
             UUID collectionId,
             Boolean isFeatured,
             Boolean isNew,
+            String occasionSlug,
+            String recipientSlug,
             String cursor,
             int size) {
 
@@ -638,6 +640,12 @@ public class ProductServiceImpl implements ProductService {
         }
         if (isNew != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("isNew"), isNew));
+        }
+        if (occasionSlug != null && !occasionSlug.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.join("occasions").get("slug"), occasionSlug));
+        }
+        if (recipientSlug != null && !recipientSlug.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.join("recipients").get("slug"), recipientSlug));
         }
 
         if (cursor != null && !cursor.trim().isEmpty()) {
@@ -681,11 +689,33 @@ public class ProductServiceImpl implements ProductService {
             nextCursor = java.util.Base64.getEncoder().encodeToString(rawCursor.getBytes());
         }
 
+        // Optimize: Batch fetch child entities to prevent N+1 query issue
+        List<UUID> productIds = contentProducts.stream().map(Product::getId).collect(Collectors.toList());
+
+        Map<UUID, List<ProductVariant>> variantsMap = new HashMap<>();
+        Map<UUID, List<ProductMedia>> mediaMap = new HashMap<>();
+        Map<UUID, List<ProductAttribute>> attributesMap = new HashMap<>();
+
+        if (!productIds.isEmpty()) {
+            List<ProductVariant> allVariants = productVariantRepository.findByProductIdInAndIsActiveTrue(productIds);
+            variantsMap = allVariants.stream().collect(Collectors.groupingBy(v -> v.getProduct().getId()));
+
+            List<ProductMedia> allMedia = productMediaRepository.findByProductIdInOrderBySortOrderAsc(productIds);
+            mediaMap = allMedia.stream().collect(Collectors.groupingBy(m -> m.getProduct().getId()));
+
+            List<ProductAttribute> allAttributes = productAttributeRepository.findByProductIdIn(productIds);
+            attributesMap = allAttributes.stream().collect(Collectors.groupingBy(a -> a.getProduct().getId()));
+        }
+
+        Map<UUID, List<ProductVariant>> finalVariantsMap = variantsMap;
+        Map<UUID, List<ProductMedia>> finalMediaMap = mediaMap;
+        Map<UUID, List<ProductAttribute>> finalAttributesMap = attributesMap;
+
         List<ProductResponseDto> dtos = contentProducts.stream()
                 .map(product -> {
-                    List<ProductVariant> variants = productVariantRepository.findByProductIdAndIsActiveTrue(product.getId());
-                    List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
-                    List<ProductAttribute> attributes = productAttributeRepository.findByProductId(product.getId());
+                    List<ProductVariant> variants = finalVariantsMap.getOrDefault(product.getId(), Collections.emptyList());
+                    List<ProductMedia> media = finalMediaMap.getOrDefault(product.getId(), Collections.emptyList());
+                    List<ProductAttribute> attributes = finalAttributesMap.getOrDefault(product.getId(), Collections.emptyList());
                     return mapToResponseDto(product, variants, media, attributes);
                 })
                 .collect(Collectors.toList());

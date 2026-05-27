@@ -62,6 +62,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Người nhận', href: '/admin/recipients', icon: 'users' },
     { name: 'Đơn hàng', href: '/admin/orders', icon: 'bag' },
     { name: 'Mã giảm giá', href: '/admin/coupons', icon: 'star' },
+    { name: 'Bài viết', href: '/admin/posts', icon: 'edit' },
+    { name: 'Câu chuyện', href: '/admin/story', icon: 'book' },
+    { name: 'Đánh giá KH', href: '/admin/testimonials', icon: 'star' },
+    { name: 'Instagram Feed', href: '/admin/ugc', icon: 'camera' },
     { name: 'Cấu hình giao diện', href: '/admin/layout-config', icon: 'palette' },
   ];
 

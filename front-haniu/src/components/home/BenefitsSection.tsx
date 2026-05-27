@@ -29,26 +29,62 @@ export default function BenefitsSection() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {benefits.items.map((item, idx) => {
           const styles = [
-            { bg: 'bg-rose-50 dark:bg-rose-950/20 text-rose-500 border-rose-100 dark:border-rose-900/30', hoverBorder: 'hover:border-rose-400 dark:hover:border-rose-800' },
-            { bg: 'bg-violet-50 dark:bg-violet-950/20 text-violet-500 border-violet-100 dark:border-violet-900/30', hoverBorder: 'hover:border-violet-400 dark:hover:border-violet-800' },
-            { bg: 'bg-amber-500/10 dark:bg-amber-950/20 text-amber-600 dark:text-amber-500 border-amber-100 dark:border-amber-900/30', hoverBorder: 'hover:border-amber-400 dark:hover:border-amber-800' },
-            { bg: 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 border-emerald-100 dark:border-emerald-900/30', hoverBorder: 'hover:border-emerald-400 dark:hover:border-emerald-800' },
+            { 
+              bg: 'bg-rose-50 dark:bg-rose-950/20 text-rose-500 border-rose-100 dark:border-rose-900/30', 
+              hoverCardBorder: 'hover:border-rose-200 dark:hover:border-rose-900/50',
+              hoverTitle: 'group-hover:text-rose-600 dark:group-hover:text-rose-400',
+              glowFrom: 'group-hover:from-rose-500/[0.03]',
+              glowTo: 'group-hover:to-rose-500/[0.01]',
+              bubbleBg: 'group-hover:bg-rose-500/10',
+              shadowGlow: 'hover:shadow-rose-500/5'
+            },
+            { 
+              bg: 'bg-violet-50 dark:bg-violet-950/20 text-violet-500 border-violet-100 dark:border-violet-900/30', 
+              hoverCardBorder: 'hover:border-violet-200 dark:hover:border-violet-900/50',
+              hoverTitle: 'group-hover:text-violet-600 dark:group-hover:text-violet-400',
+              glowFrom: 'group-hover:from-violet-500/[0.03]',
+              glowTo: 'group-hover:to-violet-500/[0.01]',
+              bubbleBg: 'group-hover:bg-violet-500/10',
+              shadowGlow: 'hover:shadow-violet-500/5'
+            },
+            { 
+              bg: 'bg-amber-500/10 dark:bg-amber-950/20 text-amber-600 dark:text-amber-500 border-amber-100 dark:border-amber-900/30', 
+              hoverCardBorder: 'hover:border-amber-200 dark:hover:border-amber-900/50',
+              hoverTitle: 'group-hover:text-amber-600 dark:group-hover:text-amber-400',
+              glowFrom: 'group-hover:from-amber-500/[0.03]',
+              glowTo: 'group-hover:to-amber-500/[0.01]',
+              bubbleBg: 'group-hover:bg-amber-500/10',
+              shadowGlow: 'hover:shadow-amber-500/5'
+            },
+            { 
+              bg: 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 border-emerald-100 dark:border-emerald-900/30', 
+              hoverCardBorder: 'hover:border-emerald-200 dark:hover:border-emerald-900/50',
+              hoverTitle: 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400',
+              glowFrom: 'group-hover:from-emerald-500/[0.03]',
+              glowTo: 'group-hover:to-emerald-500/[0.01]',
+              bubbleBg: 'group-hover:bg-emerald-500/10',
+              shadowGlow: 'hover:shadow-emerald-500/5'
+            },
           ];
           const currentStyle = styles[idx % styles.length];
 
           return (
             <div
               key={idx}
-              className={`group bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/60 p-5 md:p-7 rounded-2xl md:rounded-[28px] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col space-y-4 md:space-y-5 cursor-pointer ${currentStyle.hoverBorder}`}
+              className={`group relative z-10 overflow-hidden bg-white/60 dark:bg-zinc-900/30 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/80 p-5 md:p-7 rounded-2xl md:rounded-[28px] hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out cursor-pointer flex flex-col space-y-4 md:space-y-5 ${currentStyle.hoverCardBorder} ${currentStyle.shadowGlow}`}
             >
-              <span className={`w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center border transition-transform duration-300 group-hover:scale-110 ${currentStyle.bg}`}>
+              {/* Ambient Background Glow on Hover */}
+              <div className={`absolute inset-0 -z-10 bg-gradient-to-br from-transparent to-transparent ${currentStyle.glowFrom} ${currentStyle.glowTo} transition-all duration-700`} />
+              <div className={`absolute -right-8 -bottom-8 w-24 h-24 rounded-full bg-transparent blur-2xl ${currentStyle.bubbleBg} group-hover:scale-150 transition-all duration-700 ease-out`} />
+
+              <span className={`w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center border transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 ${currentStyle.bg}`}>
                 <Icon name={item.icon} size={22} className="w-[22px] h-[22px] md:w-[26px] md:h-[26px]" />
               </span>
               <div className="space-y-1.5 md:space-y-2">
-                <h3 className="font-extrabold text-xs md:text-sm text-slate-800 dark:text-zinc-100 tracking-wide">
+                <h3 className={`font-extrabold text-xs md:text-sm text-slate-800 dark:text-zinc-100 tracking-wide transition-colors duration-300 ${currentStyle.hoverTitle}`}>
                   {item.title}
                 </h3>
-                <p className="text-[11px] md:text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-light">
+                <p className="text-[11px] md:text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-light group-hover:text-slate-600 dark:group-hover:text-zinc-300 transition-colors duration-300">
                   {item.desc}
                 </p>
               </div>

@@ -24,6 +24,7 @@ public interface CatalogService {
 
     List<Occasion> getAllOccasions();
     Occasion createOccasion(Occasion occasion);
+    Occasion updateOccasion(UUID id, Occasion occasion);
     void deleteOccasion(UUID id);
 
     List<Recipient> getAllRecipients();

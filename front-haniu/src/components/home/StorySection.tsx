@@ -1,13 +1,24 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
+import { useStoryStore } from '@/store/story';
 import Icon from '@/components/common/Icons';
 
 export default function StorySection() {
-  const story = useHomeLayoutStore((state) => state.story);
+  const mockStory = useHomeLayoutStore((state) => state.story);
   const isVisible = useHomeLayoutStore((state) => state.visibility.story);
+  const { story, fetchStory } = useStoryStore();
+
+  useEffect(() => {
+    if (isVisible) {
+      fetchStory();
+    }
+  }, [isVisible, fetchStory]);
 
   if (!isVisible) return null;
+
+  const displayStory = story || mockStory;
 
   return (
     <section id="story" className="py-20 border-t border-slate-200 dark:border-zinc-800/80 scroll-mt-20">
@@ -27,7 +38,7 @@ export default function StorySection() {
             </h2>
           </div>
           <p className="text-xs md:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed font-light whitespace-pre-line tracking-wide">
-            {story.content}
+            {displayStory.content}
           </p>
         </div>
 
@@ -35,7 +46,7 @@ export default function StorySection() {
         <div className="lg:col-span-7">
           <div className="relative group overflow-hidden rounded-[36px] border border-slate-200 dark:border-zinc-850 shadow-2xl aspect-video bg-zinc-950 ring-4 ring-slate-100/50 dark:ring-zinc-900/40">
             <img
-              src={story.videoPlaceholderUrl}
+              src={displayStory.videoPlaceholderUrl}
               alt="Crafts behind Haniu"
               className="w-full h-full object-cover opacity-75 group-hover:scale-105 group-hover:opacity-60 transition-all duration-1000 ease-out"
             />
@@ -45,7 +56,7 @@ export default function StorySection() {
                 <Icon name="play" size={22} className="text-white ml-1" />
               </span>
               <span className="text-[10px] font-extrabold tracking-widest text-white uppercase bg-black/60 backdrop-blur-md px-4.5 py-2.5 rounded-2xl border border-white/10 shadow-lg">
-                {story.videoTitle}
+                {displayStory.videoTitle}
               </span>
             </div>
           </div>

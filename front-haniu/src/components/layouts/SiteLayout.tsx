@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Suspense } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import WelcomeSplash from '@/components/common/WelcomeSplash';
+import ScrollToTop from '@/components/common/ScrollToTop';
 
 export default function SiteLayout({
   children,
@@ -28,6 +29,7 @@ export default function SiteLayout({
   if (isAuth || isAdmin) {
     return (
       <>
+        <ScrollToTop />
         {isAuth && <WelcomeSplash />}
         {children}
       </>
@@ -36,6 +38,7 @@ export default function SiteLayout({
 
   return (
     <div className="flex flex-col min-h-screen">
+      <ScrollToTop />
       <WelcomeSplash />
       <Suspense fallback={<div className="h-20 bg-white dark:bg-zinc-950" />} >
         <Header />

@@ -77,6 +77,31 @@ export default function BasicInfoForm({
   allowPhotobooth,
   setAllowPhotobooth,
 }: BasicInfoFormProps) {
+  const toSlug = (str: string) => {
+    if (!str) return '';
+    str = str.toLowerCase();
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+    str = str.replace(/đ/g, "d");
+    str = str.replace(/[^a-z0-9 -]/g, ""); 
+    str = str.replace(/\s+/g, "-"); 
+    str = str.replace(/-+/g, "-"); 
+    return str.trim();
+  };
+
+  const generateSku = (nameStr: string) => {
+    if (!nameStr) return `HNU-GEN-${Math.floor(1000 + Math.random() * 9000)}`;
+    const clean = toSlug(nameStr);
+    const words = clean.split('-').filter(Boolean);
+    const initials = words.map(w => w[0]).join('').toUpperCase().substring(0, 6);
+    const rand = Math.floor(1000 + Math.random() * 9000);
+    return `HNU-${initials || 'GIFT'}-${rand}`;
+  };
+
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6 text-xs font-semibold">
       <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400 border-b border-slate-50 dark:border-zinc-800 pb-2">
@@ -91,31 +116,50 @@ export default function BasicInfoForm({
             required
             placeholder="VD: Ly sứ vẽ vàng khắc tên"
             value={name || ''}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setName(val);
+              setSlug(toSlug(val));
+              // Auto-set SKU if currently empty
+              if (!sku) {
+                setSku(generateSku(val));
+              }
+            }}
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
           />
         </div>
         
         <div className="space-y-2">
           <label className="block text-slate-500">Mã SKU định danh *</label>
-          <input
-            type="text"
-            required
-            placeholder="VD: HANIU-MUG-01"
-            value={sku || ''}
-            onChange={(e) => setSku(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
-          />
+          <div className="flex gap-2">
+            <input
+              type="text"
+              required
+              placeholder="VD: HANIU-MUG-01"
+              value={sku || ''}
+              onChange={(e) => setSku(e.target.value)}
+              className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
+            />
+            <button
+              type="button"
+              onClick={() => setSku(generateSku(name))}
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-bold rounded-xl border border-slate-200 dark:border-zinc-800 transition-all cursor-pointer text-[10px] flex items-center justify-center shrink-0 active:scale-95"
+              title="Tự động sinh mã SKU"
+            >
+              🔄 Tự sinh
+            </button>
+          </div>
         </div>
  
         <div className="space-y-2">
-          <label className="block text-slate-500">Đường dẫn Slug (Tùy chọn)</label>
+          <label className="block text-slate-500">Đường dẫn Slug (Tự động sinh)</label>
           <input
             type="text"
             placeholder="VD: ly-su-khac-ten"
             value={slug || ''}
-            onChange={(e) => setSlug(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
+            onChange={(e) => setSlug(toSlug(e.target.value))}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium bg-slate-50 dark:bg-zinc-950 cursor-not-allowed"
+            readOnly
           />
         </div>
  

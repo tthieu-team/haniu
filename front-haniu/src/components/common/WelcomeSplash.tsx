@@ -15,9 +15,11 @@ export default function WelcomeSplash() {
   useEffect(() => {
     if (!isEnabled) return;
 
-    // Check session storage to only show once per session if desired, 
-    // but the user specified "when reloading the page" (reload là nó sẽ xuất hiện).
-    // So showing it on every mount (which happens on page reload) is correct!
+    // Chỉ hiện 1 lần mỗi session - không hiện lại khi chuyển trang
+    const alreadyShown = sessionStorage.getItem('haniu_splash_shown');
+    if (alreadyShown) return;
+
+    sessionStorage.setItem('haniu_splash_shown', '1');
     setShow(true);
 
     // Fade out slightly before the end of the duration

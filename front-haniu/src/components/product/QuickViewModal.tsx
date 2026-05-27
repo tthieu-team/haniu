@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useCartStore } from '@/store/cart';
 import PersonalizationForm from './PersonalizationForm';
 import Icon from '@/components/common/Icons';
@@ -61,6 +62,23 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
   // Handle closing with animation
   const [isRendered, setIsRendered] = useState(false);
   const [isAnimated, setIsAnimated] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -74,7 +92,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
     }
   }, [isOpen]);
 
-  if (!isRendered || !product) return null;
+  if (!mounted || !isRendered || !product) return null;
 
   const currentPrice = product.salePrice || product.basePrice || product.price || 0;
   const originalPrice = product.salePrice ? (product.basePrice || product.price) : undefined;
@@ -119,7 +137,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
     }
   };
 
-  return (
+  return createPortal(
     <div 
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 transition-all duration-300 font-sans ${
         isAnimated ? 'opacity-100' : 'opacity-0'
@@ -315,5 +333,5 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
         </div>
       </div>
     </div>
-  );
+  , document.body);
 }

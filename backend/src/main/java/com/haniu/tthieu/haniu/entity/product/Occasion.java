@@ -53,4 +53,7 @@ public class Occasion {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Transient
+    private Long productCount;
 }

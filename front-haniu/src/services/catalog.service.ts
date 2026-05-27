@@ -72,6 +72,12 @@ export const catalogService = {
       body: JSON.stringify(payload),
     });
   },
+  updateOccasion: async (id: string, payload: Occasion): Promise<Occasion> => {
+    return fetchApi(`/api/v1/catalog/occasions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
   deleteOccasion: async (id: string): Promise<void> => {
     return fetchApi(`/api/v1/catalog/occasions/${id}`, {
       method: 'DELETE',

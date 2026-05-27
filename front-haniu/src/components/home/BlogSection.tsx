@@ -1,13 +1,34 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
+import { usePostStore } from '@/store/post';
 import Icon from '@/components/common/Icons';
 
 export default function BlogSection() {
   const blog = useHomeLayoutStore((state) => state.blog);
   const isVisible = useHomeLayoutStore((state) => state.visibility.blog);
+  const { activePosts, fetchActivePosts } = usePostStore();
+
+  useEffect(() => {
+    if (isVisible) {
+      fetchActivePosts();
+    }
+  }, [isVisible, fetchActivePosts]);
 
   if (!isVisible) return null;
+
+  // Prefer backend database articles, fallback to config mock items if empty
+  const displayPosts = activePosts.length > 0
+    ? activePosts.map((p) => ({
+        id: p.id || '',
+        title: p.title,
+        summary: p.summary || '',
+        image: p.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80',
+        date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('vi-VN') : '---',
+        href: `/blog/${p.slug}`
+      }))
+    : blog.items;
 
   return (
     <section id="blog" className="py-10 sm:py-16 bg-slate-50/50 dark:bg-zinc-900/10 border-y border-slate-200 dark:border-zinc-800/80 scroll-mt-20">
@@ -30,7 +51,7 @@ export default function BlogSection() {
 
         {/* Blog items grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 md:gap-8">
-          {blog.items.slice(0, 4).map((post, idx) => (
+          {displayPosts.slice(0, 4).map((post, idx) => (
             <article
               key={post.id}
               className={`group bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200 dark:border-zinc-800 rounded-2xl sm:rounded-[32px] overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 flex-col h-full ${
