@@ -129,19 +129,35 @@ const MOCK_PRODUCTS: Product[] = [
 function HomeContent() {
   const searchParams = useSearchParams();
   const searchParamVal = searchParams.get('search') || '';
+  const occasionParamVal = searchParams.get('occasion') || '';
+  const recipientParamVal = searchParams.get('recipient') || '';
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedOccasion, setSelectedOccasion] = useState('');
-  const [selectedRecipient, setSelectedRecipient] = useState('');
+  const [selectedOccasion, setSelectedOccasion] = useState(occasionParamVal);
+  const [selectedRecipient, setSelectedRecipient] = useState(recipientParamVal);
   
   // Cursor states
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasNextPage, setHasNextPage] = useState(false);
 
   const [dbOccasions, setDbOccasions] = useState<any[]>([]);
+  const [dbRecipients, setDbRecipients] = useState<any[]>([]);
+
+  // Sync filters from URL params (khi navigate từ Navbar)
+  useEffect(() => {
+    if (occasionParamVal !== selectedOccasion) {
+      setSelectedOccasion(occasionParamVal);
+    }
+  }, [occasionParamVal]); // eslint-disable-line
+
+  useEffect(() => {
+    if (recipientParamVal !== selectedRecipient) {
+      setSelectedRecipient(recipientParamVal);
+    }
+  }, [recipientParamVal]); // eslint-disable-line
 
   useEffect(() => {
     const loadDbOccasions = async () => {
@@ -162,6 +178,25 @@ function HomeContent() {
     loadDbOccasions();
   }, []);
 
+  useEffect(() => {
+    const loadDbRecipients = async () => {
+      try {
+        const data = await catalogService.getAllRecipients();
+        const active = (data || []).filter((r: any) => {
+          const val = r.isActive !== undefined ? r.isActive : r.active;
+          return val !== false;
+        });
+        setDbRecipients([
+          { name: "Tất cả đối tượng", slug: "" },
+          ...active
+        ]);
+      } catch (err) {
+        console.error('Failed to load recipients for filters:', err);
+      }
+    };
+    loadDbRecipients();
+  }, []);
+
   const fallbackOccasions = [
     { name: "Tất cả dịp", slug: "" },
     { name: "Sinh Nhật", slug: "sinh-nhat" },
@@ -170,15 +205,16 @@ function HomeContent() {
     { name: "Quốc Khánh 2-9", slug: "quoc-khanh" }
   ];
 
-  const occasionsList = dbOccasions.length > 1 ? dbOccasions : fallbackOccasions;
-
-  const recipients = [
+  const fallbackRecipients = [
     { name: "Tất cả đối tượng", slug: "" },
     { name: "Bạn Gái", slug: "ban-gai" },
     { name: "Bạn Trai", slug: "ban-trai" },
     { name: "Thầy Cô", slug: "thay-co" },
     { name: "Đối Tác", slug: "doi-tac" }
   ];
+
+  const occasionsList = dbOccasions.length > 1 ? dbOccasions : fallbackOccasions;
+  const recipients = dbRecipients.length > 1 ? dbRecipients : fallbackRecipients;
 
   // Sync Search term from Header query parameters
   useEffect(() => {

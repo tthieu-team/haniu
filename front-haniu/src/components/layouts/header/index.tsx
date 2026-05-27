@@ -67,7 +67,7 @@ export default function Header() {
 
   const menuLinks = header?.menuLinks?.length ? header.menuLinks : [
     { name: 'Trang chủ', href: '/' },
-    { name: 'Sản phẩm', href: '/#products' },
+    { name: 'Sản phẩm', href: '/products' },
     { name: 'Bộ sưu tập', href: '/#collections' },
     { name: 'Câu chuyện', href: '/#story' },
   ];
@@ -138,16 +138,18 @@ export default function Header() {
               )}
             </form>
 
-            {/* Wishlist Link (Desktop Only) */}
+            {/* Wishlist Link (Desktop Only) - chỉ hiện khi có item */}
             <Link
               href="/wishlist"
               className="hidden md:flex p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors items-center relative cursor-pointer"
               title="Danh sách yêu thích"
             >
               <Icon name="heart" size={16} className="text-rose-500" />
-              <span className="absolute -top-1.5 -right-1 bg-rose-500 text-white text-[8px] font-black rounded-full h-4 w-4 flex items-center justify-center border border-white dark:border-zinc-950 shadow-sm">
-                {wishlistItems.length}
-              </span>
+              {mounted && wishlistItems.length > 0 && (
+                <span className="absolute -top-1.5 -right-1 bg-rose-500 text-white text-[8px] font-black rounded-full h-4 w-4 flex items-center justify-center border border-white dark:border-zinc-950 shadow-sm">
+                  {wishlistItems.length}
+                </span>
+              )}
             </Link>
 
             {/* Cart Link (Always Show) */}
