@@ -26,6 +26,8 @@ public interface ProductService {
 
     CursorPageResponse<ProductResponseDto> getProductsCursor(
             UUID categoryId,
+            String categorySlug,
+            Boolean isAccessory,
             UUID brandId,
             UUID collectionId,
             Boolean isFeatured,

@@ -59,6 +59,10 @@ public class Category {
     @Builder.Default
     private boolean isFeatured = false;
 
+    @Column(name = "is_accessory", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean isAccessory = false;
+
     @Column(name = "seo_title")
     private String seoTitle;
 

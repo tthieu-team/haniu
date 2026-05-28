@@ -45,23 +45,13 @@ export default function CartPage() {
 
   const loadAccessories = async () => {
     setLoadingAccessories(true);
-    const slugs = [
-      'thiep-chuc-mung-thiet-ke-rieng',
-      'tui-qua-haniu-cao-cap',
-      'dich-vu-khac-laser-premium',
-      'hop-qua-go-thong-tu-nhien'
-    ];
     try {
-      const fetched = await Promise.all(
-        slugs.map(async (slug) => {
-          try {
-            return await productService.getProductBySlug(slug);
-          } catch {
-            return null;
-          }
-        })
-      );
-      setAccessories(fetched.filter(Boolean));
+      const res = await productService.getProducts({
+        isAccessory: true,
+        status: 'PUBLISHED',
+        size: 10
+      });
+      setAccessories(res?.content || []);
     } catch (err) {
       console.error('Failed to load accessories:', err);
     } finally {

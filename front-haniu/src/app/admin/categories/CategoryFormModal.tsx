@@ -28,6 +28,7 @@ export default function CategoryFormModal({
   const [sortOrder, setSortOrder] = useState(0);
   const [isActive, setIsActive] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
+  const [isAccessory, setIsAccessory] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
 
@@ -53,6 +54,7 @@ export default function CategoryFormModal({
         setSortOrder(editingCategory.sortOrder ?? 0);
         setIsActive(editingCategory.isActive ?? true);
         setIsFeatured(editingCategory.isFeatured ?? false);
+        setIsAccessory(editingCategory.isAccessory ?? false);
         setImageUrl(editingCategory.imageUrl || '');
         setBannerUrl(editingCategory.bannerUrl || '');
         setSeoTitle(editingCategory.seoTitle || '');
@@ -66,6 +68,7 @@ export default function CategoryFormModal({
         setSortOrder(0);
         setIsActive(true);
         setIsFeatured(false);
+        setIsAccessory(false);
         setImageUrl('');
         setBannerUrl('');
         setSeoTitle('');
@@ -143,6 +146,7 @@ export default function CategoryFormModal({
       sortOrder,
       isActive,
       isFeatured,
+      isAccessory,
       imageUrl: imageUrl.trim() || undefined,
       bannerUrl: bannerUrl.trim() || undefined,
       seoTitle: seoTitle.trim() || undefined,
@@ -393,7 +397,20 @@ export default function CategoryFormModal({
                 className="rounded border-slate-300 text-rose-500 focus:ring-rose-500 w-4 h-4 cursor-pointer"
               />
               <label htmlFor="catIsFeatured" className="text-slate-700 dark:text-zinc-300 font-bold cursor-pointer select-none">
-                Đánh dấu nổi bật (Featured)
+                Đánh dấu nổi bật
+              </label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="catIsAccessory"
+                checked={isAccessory}
+                onChange={(e) => setIsAccessory(e.target.checked)}
+                className="rounded border-slate-300 text-rose-500 focus:ring-rose-500 w-4 h-4 cursor-pointer"
+              />
+              <label htmlFor="catIsAccessory" className="text-slate-700 dark:text-zinc-300 font-bold cursor-pointer select-none">
+                Danh mục phụ kiện
               </label>
             </div>
           </div>

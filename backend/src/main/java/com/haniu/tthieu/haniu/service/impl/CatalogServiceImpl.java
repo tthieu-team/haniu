@@ -48,6 +48,7 @@ public class CatalogServiceImpl implements CatalogService {
         category.setSortOrder(categoryDetails.getSortOrder());
         category.setActive(categoryDetails.isActive());
         category.setFeatured(categoryDetails.isFeatured());
+        category.setAccessory(categoryDetails.isAccessory());
         category.setSeoTitle(categoryDetails.getSeoTitle());
         category.setSeoDescription(categoryDetails.getSeoDescription());
         category.setSeoKeywords(categoryDetails.getSeoKeywords());

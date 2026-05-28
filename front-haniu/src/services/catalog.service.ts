@@ -34,6 +34,7 @@ export interface Category {
   sortOrder?: number;
   isActive: boolean;
   isFeatured?: boolean;
+  isAccessory?: boolean;
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string;

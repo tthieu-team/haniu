@@ -47,6 +47,7 @@ export default function CategoryTable({
             <th className="p-4 text-center">Thứ tự</th>
             <th className="p-4">Trạng thái</th>
             <th className="p-4">Nổi bật</th>
+            <th className="p-4">Phụ kiện</th>
             <th className="p-4 text-center w-36">Thao tác</th>
           </tr>
         </thead>
@@ -112,6 +113,17 @@ export default function CategoryTable({
                   }`}
                 >
                   {item.isFeatured ? 'Nổi bật ★' : 'Thường'}
+                </span>
+              </td>
+              <td className="p-4">
+                <span
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border ${
+                    item.isAccessory
+                      ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/10'
+                      : 'bg-slate-100 dark:bg-zinc-800 text-slate-400 border-slate-200 dark:border-zinc-750'
+                  }`}
+                >
+                  {item.isAccessory ? 'Phụ kiện 🎁' : 'Không'}
                 </span>
               </td>
               <td className="p-4 text-center space-x-2">

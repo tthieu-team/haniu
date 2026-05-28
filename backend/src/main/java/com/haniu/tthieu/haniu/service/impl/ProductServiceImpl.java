@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.haniu.tthieu.haniu.exception.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -344,7 +345,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public ProductResponseDto getProductById(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         List<ProductVariant> variants = productVariantRepository.findByProductIdAndIsActiveTrue(id);
         List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(id);
         List<ProductAttribute> attributes = productAttributeRepository.findByProductId(id);
@@ -355,7 +356,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public ProductResponseDto getProductBySlug(String slug) {
         Product product = productRepository.findBySlugFetchAll(slug)
-                .orElseThrow(() -> new RuntimeException("Product not found with slug: " + slug));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with slug: " + slug));
         List<ProductVariant> variants = productVariantRepository.findByProductIdAndIsActiveTrue(product.getId());
         List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(product.getId());
         List<ProductAttribute> attributes = productAttributeRepository.findByProductId(product.getId());
@@ -615,6 +616,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public CursorPageResponse<ProductResponseDto> getProductsCursor(
             UUID categoryId,
+            String categorySlug,
+            Boolean isAccessory,
             UUID brandId,
             UUID collectionId,
             Boolean isFeatured,
@@ -628,6 +631,12 @@ public class ProductServiceImpl implements ProductService {
 
         if (categoryId != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("category").get("id"), categoryId));
+        }
+        if (categorySlug != null && !categorySlug.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("category").get("slug"), categorySlug));
+        }
+        if (isAccessory != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("category").get("isAccessory"), isAccessory));
         }
         if (brandId != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("brand").get("id"), brandId));

@@ -28,6 +28,8 @@ export interface ProductRequestPayload {
 export const productService = {
   getProducts: async (filters: {
     categoryId?: string;
+    categorySlug?: string;
+    isAccessory?: boolean;
     brandId?: string;
     collectionId?: string;
     isFeatured?: boolean;
@@ -42,6 +44,8 @@ export const productService = {
   } = {}) => {
     const params = new URLSearchParams();
     if (filters.categoryId) params.append('categoryId', filters.categoryId);
+    if (filters.categorySlug) params.append('categorySlug', filters.categorySlug);
+    if (filters.isAccessory !== undefined) params.append('isAccessory', String(filters.isAccessory));
     if (filters.brandId) params.append('brandId', filters.brandId);
     if (filters.collectionId) params.append('collectionId', filters.collectionId);
     if (filters.isFeatured !== undefined) params.append('isFeatured', String(filters.isFeatured));
@@ -60,6 +64,8 @@ export const productService = {
 
   getProductsCursor: async (filters: {
     categoryId?: string;
+    categorySlug?: string;
+    isAccessory?: boolean;
     brandId?: string;
     collectionId?: string;
     isFeatured?: boolean;
@@ -71,6 +77,8 @@ export const productService = {
   } = {}) => {
     const params = new URLSearchParams();
     if (filters.categoryId) params.append('categoryId', filters.categoryId);
+    if (filters.categorySlug) params.append('categorySlug', filters.categorySlug);
+    if (filters.isAccessory !== undefined) params.append('isAccessory', String(filters.isAccessory));
     if (filters.brandId) params.append('brandId', filters.brandId);
     if (filters.collectionId) params.append('collectionId', filters.collectionId);
     if (filters.isFeatured !== undefined) params.append('isFeatured', String(filters.isFeatured));

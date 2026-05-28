@@ -57,6 +57,8 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<Page<ProductResponseDto>> getProducts(
             @RequestParam(required = false) UUID categoryId,
+            @RequestParam(required = false) String categorySlug,
+            @RequestParam(required = false) Boolean isAccessory,
             @RequestParam(required = false) UUID brandId,
             @RequestParam(required = false) UUID collectionId,
             @RequestParam(required = false) Boolean isFeatured,
@@ -76,6 +78,12 @@ public class ProductController {
 
         if (categoryId != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("category").get("id"), categoryId));
+        }
+        if (categorySlug != null && !categorySlug.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("category").get("slug"), categorySlug));
+        }
+        if (isAccessory != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("category").get("isAccessory"), isAccessory));
         }
         if (brandId != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("brand").get("id"), brandId));
@@ -114,6 +122,8 @@ public class ProductController {
     @GetMapping("/cursor")
     public ResponseEntity<CursorPageResponse<ProductResponseDto>> getProductsCursor(
             @RequestParam(required = false) UUID categoryId,
+            @RequestParam(required = false) String categorySlug,
+            @RequestParam(required = false) Boolean isAccessory,
             @RequestParam(required = false) UUID brandId,
             @RequestParam(required = false) UUID collectionId,
             @RequestParam(required = false) Boolean isFeatured,
@@ -123,6 +133,6 @@ public class ProductController {
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(productService.getProductsCursor(
-                categoryId, brandId, collectionId, isFeatured, isNew, occasionSlug, recipientSlug, cursor, size));
+                categoryId, categorySlug, isAccessory, brandId, collectionId, isFeatured, isNew, occasionSlug, recipientSlug, cursor, size));
     }
 }

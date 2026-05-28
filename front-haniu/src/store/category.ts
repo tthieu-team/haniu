@@ -16,12 +16,15 @@ const normalizeCategory = (c: any): Category => {
   if (!c) return c;
   const activeVal = c.active !== undefined ? c.active : (c.isActive !== undefined ? c.isActive : true);
   const featuredVal = c.featured !== undefined ? c.featured : (c.isFeatured !== undefined ? c.isFeatured : false);
+  const accessoryVal = c.accessory !== undefined ? c.accessory : (c.isAccessory !== undefined ? c.isAccessory : false);
   return {
     ...c,
     active: activeVal,
     isActive: activeVal,
     featured: featuredVal,
     isFeatured: featuredVal,
+    accessory: accessoryVal,
+    isAccessory: accessoryVal,
     parent: c.parent ? normalizeCategory(c.parent) : null,
   };
 };
@@ -29,12 +32,15 @@ const normalizeCategory = (c: any): Category => {
 const preparePayload = (payload: Category): any => {
   const activeVal = payload.isActive !== undefined ? payload.isActive : ((payload as any).active !== undefined ? (payload as any).active : true);
   const featuredVal = payload.isFeatured !== undefined ? payload.isFeatured : ((payload as any).featured !== undefined ? (payload as any).featured : false);
+  const accessoryVal = payload.isAccessory !== undefined ? payload.isAccessory : ((payload as any).accessory !== undefined ? (payload as any).accessory : false);
   return {
     ...payload,
     active: activeVal,
     isActive: activeVal,
     featured: featuredVal,
     isFeatured: featuredVal,
+    accessory: accessoryVal,
+    isAccessory: accessoryVal,
     parent: payload.parent ? preparePayload(payload.parent) : null,
   };
 };

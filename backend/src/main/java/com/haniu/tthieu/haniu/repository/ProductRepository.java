@@ -3,6 +3,7 @@ package com.haniu.tthieu.haniu.repository;
 import com.haniu.tthieu.haniu.entity.product.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,10 @@ import java.util.UUID;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
+
+    @Modifying
+    @Query(value = "UPDATE products SET deleted_at = NULL, slug = :slug, status = :status WHERE sku = :sku", nativeQuery = true)
+    void restoreProductBySku(@Param("sku") String sku, @Param("slug") String slug, @Param("status") String status);
 
     @Query("SELECT p FROM Product p " +
            "LEFT JOIN FETCH p.category " +
@@ -23,6 +28,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     Optional<Product> findBySlugFetchAll(@Param("slug") String slug);
 
     Optional<Product> findBySlug(String slug);
+
+    Optional<Product> findBySku(String sku);
 
     @Query(value = "SELECT EXISTS(SELECT 1 FROM products WHERE sku = :sku)", nativeQuery = true)
     boolean existsBySkuIncludingDeleted(@Param("sku") String sku);
