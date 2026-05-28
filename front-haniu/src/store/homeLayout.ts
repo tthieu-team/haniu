@@ -216,6 +216,38 @@ export interface WelcomeScreenConfig {
   durationMs: number;
 }
 
+export interface TrustBadgesConfig {
+  showGenuine: boolean;
+  showReturns: boolean;
+  showShipping: boolean;
+  showPayment: boolean;
+  showSupport: boolean;
+}
+
+export interface WhyChooseUsItem {
+  icon: string;
+  text: string;
+}
+
+export interface DeliveryPolicyLine {
+  label: string;
+  value: string;
+}
+
+export interface ProductDetailsSectionConfig {
+  showPromotions: boolean;
+  promotions: string[];
+  showWhyChooseUs: boolean;
+  whyChooseUs: WhyChooseUsItem[];
+  showDeliveryPolicy: boolean;
+  deliveryPolicy: {
+    lines: DeliveryPolicyLine[];
+    bulletPoints: string[];
+  };
+  showBrandCommitment: boolean;
+  brandCommitment: string[];
+}
+
 export interface HomeLayoutState {
   // Visibility toggles for the 10 main page body blocks
   visibility: {
@@ -255,6 +287,8 @@ export interface HomeLayoutState {
   faq: FaqConfig;
   footer: FooterConfig;
   welcomeScreen: WelcomeScreenConfig;
+  trustBadges: TrustBadgesConfig;
+  productDetails: ProductDetailsSectionConfig;
 
   // Actions
   toggleVisibility: (section: keyof HomeLayoutState['visibility']) => void;
@@ -280,6 +314,8 @@ export interface HomeLayoutState {
   updateFaq: (config: Partial<FaqConfig>) => void;
   updateFooter: (config: Partial<FooterConfig>) => void;
   updateWelcomeScreen: (config: Partial<WelcomeScreenConfig>) => void;
+  updateTrustBadges: (config: Partial<TrustBadgesConfig>) => void;
+  updateProductDetails: (config: Partial<ProductDetailsSectionConfig>) => void;
   resetAll: () => void;
   isLoading: boolean;
   isSaving: boolean;
@@ -563,6 +599,47 @@ const DEFAULT_STATE = {
     welcomeSubtitle: "Thiết kế độc bản - Trọn vẹn yêu thương",
     durationMs: 2500,
   },
+  trustBadges: {
+    showGenuine: true,
+    showReturns: true,
+    showShipping: true,
+    showPayment: true,
+    showSupport: true,
+  },
+  productDetails: {
+    showPromotions: true,
+    promotions: [
+      "Miễn phí ship cho đơn từ 499k",
+      "Giảm 10% khi mua 2 hộp quà",
+      "Tặng thiệp viết tay miễn phí",
+      "Freeship nội thành Hà Nội"
+    ],
+    showWhyChooseUs: true,
+    whyChooseUs: [
+      { icon: "🌹", text: "Hoa sáp thơm giữ màu tới 3 năm" },
+      { icon: "🎁", text: "Tặng kèm hộp quà cao cấp" },
+      { icon: "✨", text: "Có thể cá nhân hóa khắc tên" },
+      { icon: "🚚", text: "Giao nhanh toàn quốc" },
+      { icon: "💝", text: "Phù hợp mọi dịp đặc biệt" }
+    ],
+    showDeliveryPolicy: true,
+    deliveryPolicy: {
+      lines: [
+        { label: "Nội thành Hà Nội", value: "2 - 4h (Hỏa tốc)" },
+        { label: "Toàn quốc", value: "2 - 5 ngày" }
+      ],
+      bulletPoints: [
+        "Kiểm tra hàng trước khi thanh toán (Đồng kiểm)",
+        "Đóng gói kín đáo, bảo mật thông tin quà tặng"
+      ]
+    },
+    showBrandCommitment: true,
+    brandCommitment: [
+      "Hình ảnh sản phẩm thật 100% tự chụp",
+      "Đóng gói cẩn thận, chống va đập, bảo vệ tối đa",
+      "Hoàn tiền hoặc đổi mới ngay lập tức nếu sản phẩm không giống mô tả"
+    ]
+  }
 };
 
 export const useHomeLayoutStore = create<HomeLayoutState>()(
@@ -706,6 +783,16 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
           welcomeScreen: { ...state.welcomeScreen, ...config },
         })),
 
+      updateTrustBadges: (config) =>
+        set((state) => ({
+          trustBadges: { ...state.trustBadges, ...config },
+        })),
+
+      updateProductDetails: (config) =>
+        set((state) => ({
+          productDetails: { ...state.productDetails, ...config },
+        })),
+
       resetAll: () => set(DEFAULT_STATE),
 
       fetchConfigFromServer: async () => {
@@ -752,6 +839,8 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
             faq: state.faq,
             footer: state.footer,
             welcomeScreen: state.welcomeScreen,
+            trustBadges: state.trustBadges,
+            productDetails: state.productDetails,
           };
           await systemConfigService.updateConfig('HOME_LAYOUT', dataToSave);
           set({ isSaving: false });

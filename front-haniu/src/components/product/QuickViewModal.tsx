@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { useCartStore } from '@/store/cart';
 import PersonalizationForm from './PersonalizationForm';
 import Icon from '@/components/common/Icons';
+import { getFullImageUrl } from '@/lib/api';
 
 interface Media {
   url: string;
@@ -26,6 +27,7 @@ interface Product {
   isCustomizable: boolean;
   category?: { name: string; slug: string };
   media?: Media[];
+  thumbnailUrl?: string;
 }
 
 interface QuickViewModalProps {
@@ -49,7 +51,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
   // Reset state on open/close or product change
   useEffect(() => {
     if (product) {
-      const thumb = product.media?.find(m => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://placehold.co/300';
+      const thumb = product.thumbnailUrl || (product as any).thumbnail_url || product.media?.find(m => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://placehold.co/300';
       setActiveImage(thumb);
       setQuantity(1);
       setEngravingText('');
@@ -169,7 +171,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
             {/* Active Display */}
             <div className="aspect-square bg-slate-50 dark:bg-zinc-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-zinc-800 relative group">
               <img 
-                src={activeImage} 
+                src={getFullImageUrl(activeImage)} 
                 alt={product.name} 
                 className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
               />
@@ -203,7 +205,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                         : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
-                    <img src={med.url} alt={`sub-${idx}`} className="w-full h-full object-cover" />
+                    <img src={getFullImageUrl(med.url)} alt={`sub-${idx}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

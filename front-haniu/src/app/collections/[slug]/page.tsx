@@ -101,7 +101,7 @@ function CollectionContent({ params }: CollectionPageProps) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-background text-foreground px-4 py-20 text-center">
         <div className="w-16 h-16 rounded-full bg-primary-color/10 text-primary-color flex items-center justify-center text-2xl mb-4">
-          ⚠️
+          <Icon name="alert-triangle" size={28} />
         </div>
         <h2 className="text-xl font-black text-foreground mb-2">Không tìm thấy Bộ sưu tập</h2>
         <p className="text-xs text-muted-color max-w-sm mb-6 leading-relaxed">
@@ -212,7 +212,7 @@ function CollectionContent({ params }: CollectionPageProps) {
         {filteredProducts.length === 0 ? (
           <div className="bg-card-bg border border-border-color rounded-[32px] p-16 text-center space-y-4 shadow-xs">
             <div className="w-16 h-16 rounded-full bg-background border border-border-color flex items-center justify-center text-2xl mx-auto">
-              🎁
+              <Icon name="gift" size={28} />
             </div>
             <h3 className="text-base font-extrabold text-foreground">Không có sản phẩm nào</h3>
             <p className="text-xs text-muted-color max-w-sm mx-auto leading-relaxed">

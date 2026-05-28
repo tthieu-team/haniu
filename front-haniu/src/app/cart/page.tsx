@@ -5,6 +5,7 @@ import { useCartStore } from '@/store/cart';
 import { useCouponStore } from '@/store/coupon';
 import { useProductStore } from '@/store/product';
 import { productService } from '@/services/product.service';
+import { getFullImageUrl } from '@/lib/api';
 import Link from 'next/link';
 import Icon from '@/components/common/Icons';
 
@@ -204,15 +205,15 @@ export default function CartPage() {
     .slice(0, 4);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12 space-y-12">
+    <div className="w-full space-y-12">
       {/* Title block */}
       <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-100 dark:border-zinc-800 pb-5">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/20 text-rose-500 font-bold text-[10px] uppercase tracking-wider">
             <Icon name="sparkles" size={10} /> Haniu E-Commerce
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Giỏ hàng của bạn</h1>
-          <p className="text-slate-500 dark:text-zinc-400 text-xs">Quản lý các món quà ý nghĩa bạn đã chọn cho người thương</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Giỏ hàng của bạn</h1>
+          <p className="text-slate-500 dark:text-zinc-400 text-sm">Quản lý các món quà ý nghĩa bạn đã chọn cho người thương</p>
         </div>
         {cart && cart.items.length > 0 && (
           <span className="text-xs text-slate-400 dark:text-zinc-500 mt-2 md:mt-0 font-medium">
@@ -271,7 +272,7 @@ export default function CartPage() {
               {accessories.length > 0 && (
                 <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-6 rounded-3xl space-y-5 shadow-sm">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">🎁</span>
+                    <Icon name="gift" size={18} className="text-rose-500" />
                     <h3 className="text-sm font-extrabold text-slate-800 dark:text-zinc-200 uppercase tracking-wider">Khách hàng thường mua kèm</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -280,7 +281,7 @@ export default function CartPage() {
                       return (
                         <div key={acc.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800/80 transition-all">
                           <img
-                            src={acc.thumbnailUrl || "https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?w=100"}
+                            src={getFullImageUrl(getProductThumbnail(acc))}
                             alt={acc.name}
                             className="w-12 h-12 rounded-xl object-cover bg-slate-150"
                           />
@@ -327,7 +328,7 @@ export default function CartPage() {
                           : 'border-slate-200 dark:border-zinc-800 text-slate-500'
                       }`}
                     >
-                      <span className="text-sm">🚚</span>
+                      <Icon name="truck" size={16} />
                       <span className="text-[10px] font-bold block">Tiêu chuẩn</span>
                       <span className="text-[9px] opacity-80">30k / Free &gt;300k</span>
                     </button>
@@ -340,7 +341,7 @@ export default function CartPage() {
                           : 'border-slate-200 dark:border-zinc-800 text-slate-500'
                       }`}
                     >
-                      <span className="text-sm">⚡</span>
+                      <Icon name="zap" size={16} />
                       <span className="text-[10px] font-bold block">Giao nhanh</span>
                       <span className="text-[9px] opacity-80">50k / Free &gt;500k</span>
                     </button>
@@ -353,13 +354,13 @@ export default function CartPage() {
                           : 'border-slate-200 dark:border-zinc-800 text-slate-500'
                       }`}
                     >
-                      <span className="text-sm">🛵</span>
+                      <Icon name="zap" size={16} />
                       <span className="text-[10px] font-bold block">Hỏa tốc 2h</span>
                       <span className="text-[9px] opacity-80">100k / Free &gt;1M</span>
                     </button>
                   </div>
                   <div className="text-[10px] text-slate-400 font-medium italic mt-1.5 flex items-center gap-1">
-                    <span>📅</span> {getDeliveryEstimation()}
+                    <Icon name="calendar" size={12} /> {getDeliveryEstimation()}
                   </div>
                 </div>
 
@@ -382,7 +383,7 @@ export default function CartPage() {
                             : 'border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-350'
                         }`}
                       >
-                        <span className="text-lg shrink-0">{pm.icon}</span>
+                        <Icon name={pm.icon} size={18} className="shrink-0" />
                         <div className="min-w-0">
                           <span className="font-bold text-xs block">{pm.code}</span>
                           <span className="text-[10px] text-slate-400 block truncate">{pm.name}</span>
@@ -566,32 +567,32 @@ export default function CartPage() {
 
               {/* Fast Purchasing Trust Policies */}
               <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-5 rounded-3xl space-y-3.5 shadow-sm text-xs">
-                <h4 className="font-extrabold text-slate-800 dark:text-zinc-200 uppercase tracking-wider text-[10px] pb-2 border-b border-slate-50 dark:border-zinc-800">
-                  🛡️ Cam kết mua sắm tại Haniu
+                <h4 className="font-extrabold text-slate-800 dark:text-zinc-200 uppercase tracking-wider text-[10px] pb-2 border-b border-slate-50 dark:border-zinc-800 flex items-center gap-1.5">
+                  <Icon name="shield" size={12} className="text-rose-500" /> Cam kết mua sắm tại Haniu
                 </h4>
                 <div className="flex items-start gap-2.5">
-                  <span className="text-base leading-none">🚚</span>
+                  <span className="text-base leading-none text-rose-500"><Icon name="truck" size={16} /></span>
                   <div className="space-y-0.5">
                     <span className="font-bold text-slate-800 dark:text-zinc-300 block">Miễn phí vận chuyển</span>
                     <span className="text-slate-400 text-[10px] block leading-normal">Mọi đơn hàng từ 300k, giao siêu nhanh toàn quốc.</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="text-base leading-none">🔒</span>
+                  <span className="text-base leading-none text-rose-500"><Icon name="lock" size={16} /></span>
                   <div className="space-y-0.5">
                     <span className="font-bold text-slate-800 dark:text-zinc-300 block">Thanh toán an toàn</span>
                     <span className="text-slate-400 text-[10px] block leading-normal">Bảo mật thông tin ngân hàng và thẻ 100%.</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="text-base leading-none">🎁</span>
+                  <span className="text-base leading-none text-rose-500"><Icon name="gift" size={16} /></span>
                   <div className="space-y-0.5">
                     <span className="font-bold text-slate-800 dark:text-zinc-300 block">Đổi trả 7 ngày</span>
                     <span className="text-slate-400 text-[10px] block leading-normal">Đổi mới hoàn toàn nếu sản phẩm có lỗi sản xuất.</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="text-base leading-none">✅</span>
+                  <span className="text-base leading-none text-rose-500"><Icon name="check" size={16} /></span>
                   <div className="space-y-0.5">
                     <span className="font-bold text-slate-800 dark:text-zinc-300 block">Đồng kiểm hàng trước</span>
                     <span className="text-slate-400 text-[10px] block leading-normal">Nhận hàng, kiểm tra chất lượng rồi mới thanh toán.</span>

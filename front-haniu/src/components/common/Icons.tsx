@@ -47,7 +47,12 @@ import {
   Filter,
   LayoutGrid,
   List,
-  BookOpen
+  BookOpen,
+  Lock,
+  CreditCard,
+  Wallet,
+  Calendar,
+  AlertTriangle
 } from 'lucide-react';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -258,6 +263,30 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
     case 'book':
     case 'Book':
       return <BookOpen size={size} className={className} {...props} />;
+    case 'lock':
+    case 'Lock':
+    case '🔒':
+      return <Lock size={size} className={className} {...props} />;
+    case 'credit-card':
+    case 'CreditCard':
+    case '💳':
+    case '🏦':
+    case '🌸':
+      return <CreditCard size={size} className={className} {...props} />;
+    case 'wallet':
+    case 'Wallet':
+    case '💵':
+      return <Wallet size={size} className={className} {...props} />;
+    case 'calendar':
+    case 'Calendar':
+    case '📅':
+      return <Calendar size={size} className={className} {...props} />;
+    case 'alert':
+    case 'Alert':
+    case 'alert-triangle':
+    case 'AlertTriangle':
+    case '⚠️':
+      return <AlertTriangle size={size} className={className} {...props} />;
     default:
       // Fallback if no matching Lucide icon is found
       return <span className={`inline-block font-sans ${className}`}>{name}</span>;

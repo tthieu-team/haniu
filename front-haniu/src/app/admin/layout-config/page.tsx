@@ -6,8 +6,9 @@ import Icon from '@/components/common/Icons';
 import { HeroTab } from './components/HeroTab';
 import { VisibilityTab } from './components/VisibilityTab';
 import { SectionsTab } from './components/SectionsTab';
+import { ProductDetailsTab } from './components/ProductDetailsTab';
 
-type TabType = 'hero' | 'visibility' | 'sections';
+type TabType = 'hero' | 'visibility' | 'sections' | 'product-details';
 
 export default function AdminLayoutConfigPage() {
   const {
@@ -134,6 +135,17 @@ export default function AdminLayoutConfigPage() {
           <Icon name="palette" size={14} />
           <span>Cấu hình chi tiết các khối</span>
         </button>
+        <button
+          onClick={() => setActiveTab('product-details')}
+          className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+            activeTab === 'product-details'
+              ? 'border-rose-500 text-rose-500'
+              : 'border-transparent text-slate-400 dark:text-zinc-500 hover:text-slate-650 dark:hover:text-zinc-300'
+          }`}
+        >
+          <Icon name="gift" size={14} />
+          <span>Chi tiết sản phẩm</span>
+        </button>
       </div>
 
       {/* 4. Tab contents */}
@@ -141,6 +153,7 @@ export default function AdminLayoutConfigPage() {
         {activeTab === 'hero' && <HeroTab />}
         {activeTab === 'visibility' && <VisibilityTab />}
         {activeTab === 'sections' && <SectionsTab />}
+        {activeTab === 'product-details' && <ProductDetailsTab />}
       </div>
     </div>
   );

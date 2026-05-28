@@ -579,6 +579,8 @@ public class ProductServiceImpl implements ProductService {
                 .slug(product.getSlug())
                 .sku(product.getSku())
                 .description(product.getDescription())
+                .shortDescription(product.getShortDescription())
+                .thumbnailUrl(product.getThumbnailUrl())
                 .category(catInfo)
                 .brand(brandInfo)
                 .collection(collInfo)

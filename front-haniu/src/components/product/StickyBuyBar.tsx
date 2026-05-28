@@ -55,7 +55,7 @@ export default function StickyBuyBar({
     : 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=100');
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-slate-200/60 dark:border-zinc-800/80 shadow-2xl py-3 px-4 transition-all duration-300 animate-slide-up">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-slate-200/60 dark:border-zinc-800/80 shadow-2xl pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] px-4 transition-all duration-300 animate-slide-up">
       <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Product Info */}
         <div className="flex items-center gap-3 min-w-0">

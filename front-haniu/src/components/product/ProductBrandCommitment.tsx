@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Icon from '@/components/common/Icons';
+import { useHomeLayoutStore } from '@/store/homeLayout';
 
 interface ProductBrandCommitmentProps {
   product: {
@@ -10,23 +11,37 @@ interface ProductBrandCommitmentProps {
 }
 
 export default function ProductBrandCommitment({ product }: ProductBrandCommitmentProps) {
-  let config: any = {};
-  try {
-    if (product.layoutConfig) {
-      config = typeof product.layoutConfig === 'string' ? JSON.parse(product.layoutConfig) : product.layoutConfig;
+  const globalProductDetails = useHomeLayoutStore((state) => state.productDetails);
+
+  const globalConfig = globalProductDetails || {
+    showBrandCommitment: true,
+    brandCommitment: [
+      "Hình ảnh sản phẩm thật 100% tự chụp",
+      "Đóng gói cẩn thận, chống va đập, bảo vệ tối đa",
+      "Hoàn tiền hoặc đổi mới ngay lập tức nếu sản phẩm không giống mô tả"
+    ]
+  };
+
+  let finalConfig = {
+    show: globalConfig.showBrandCommitment,
+    list: globalConfig.brandCommitment
+  };
+
+  if (product?.layoutConfig) {
+    try {
+      const parsed = typeof product.layoutConfig === 'string' ? JSON.parse(product.layoutConfig) : product.layoutConfig;
+      if (parsed.brandCommitmentConfig && parsed.brandCommitmentConfig.useGlobalConfig === false) {
+        finalConfig = {
+          show: parsed.brandCommitmentConfig.show !== false,
+          list: parsed.brandCommitmentConfig.list || []
+        };
+      }
+    } catch (e) {
+      console.error('Failed to parse layoutConfig in ProductBrandCommitment', e);
     }
-  } catch (e) {
-    console.error('Failed to parse layoutConfig in ProductBrandCommitment', e);
   }
 
-  const show = config.showBrandCommitment !== false;
-  if (!show) return null;
-
-  const list: string[] = config.brandCommitment || [
-    "Hình ảnh sản phẩm thật 100% tự chụp",
-    "Đóng gói cẩn thận, chống va đập, bảo vệ tối đa",
-    "Hoàn tiền hoặc đổi mới ngay lập tức nếu sản phẩm không giống mô tả"
-  ];
+  if (!finalConfig.show) return null;
 
   return (
     <div className="bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/60 rounded-3xl p-6 space-y-4 shadow-sm hover:shadow-md transition-all duration-300">
@@ -34,7 +49,7 @@ export default function ProductBrandCommitment({ product }: ProductBrandCommitme
         <Icon name="🤝" size={14} className="text-rose-500" /> Haniu cam kết:
       </h3>
       <div className="space-y-3 pl-1">
-        {list.map((item, idx) => (
+        {finalConfig.list.map((item, idx) => (
           <div key={idx} className="flex items-start gap-2.5 text-xs font-semibold text-slate-650 dark:text-zinc-300">
             <Icon name="check" size={14} className="text-rose-500 shrink-0 mt-0.5" />
             <span className="leading-relaxed">{item}</span>
@@ -44,4 +59,5 @@ export default function ProductBrandCommitment({ product }: ProductBrandCommitme
     </div>
   );
 }
+
 

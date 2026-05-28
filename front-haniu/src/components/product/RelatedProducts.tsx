@@ -145,38 +145,79 @@ interface Product {
 export default function RelatedProducts({ currentProduct }: { currentProduct: Product }) {
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [loadingRelated, setLoadingRelated] = useState(true);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // Reset states when current product changes
+  useEffect(() => {
+    setRelatedProducts([]);
+    setPage(0);
+    setHasMore(true);
+    setLoadingRelated(true);
+  }, [currentProduct.id]);
 
   useEffect(() => {
     async function loadRelated() {
+      if (page > 0) setLoadingMore(true);
       try {
-        const res = await productService.getProducts();
+        const pageSize = 8;
+        const filters: any = {
+          page: page,
+          size: pageSize
+        };
+        if (currentProduct.category?.slug) {
+          filters.categorySlug = currentProduct.category.slug;
+        }
+
+        const res = await productService.getProducts(filters);
         const items = res?.content || (Array.isArray(res) ? res : []);
-        setRelatedProducts(items);
+        
+        let filteredItems = items.filter((p: any) => p.id !== currentProduct.id);
+        
+        // Fallback to featured products if not enough related products found in the same category on page 0
+        if (page === 0 && filteredItems.length < 4) {
+          const fallbackRes = await productService.getProducts({ page: 0, size: pageSize, isFeatured: true });
+          const fallbackItems = fallbackRes?.content || (Array.isArray(fallbackRes) ? fallbackRes : []);
+          
+          const merged = [...filteredItems];
+          for (const item of fallbackItems) {
+            if (item.id !== currentProduct.id && !merged.some((m) => m.id === item.id)) {
+              merged.push(item);
+            }
+          }
+          filteredItems = merged;
+        }
+
+        if (items.length < pageSize) {
+          setHasMore(false);
+        } else {
+          setHasMore(true);
+        }
+
+        setRelatedProducts((prev) => {
+          if (page === 0) return filteredItems;
+          const merged = [...prev];
+          for (const item of filteredItems) {
+            if (!merged.some((m) => m.id === item.id)) {
+              merged.push(item);
+            }
+          }
+          return merged;
+        });
       } catch (err) {
         console.error("Failed to load related products", err);
       } finally {
         setLoadingRelated(false);
+        setLoadingMore(false);
       }
     }
     loadRelated();
-  }, []);
+  }, [currentProduct.id, currentProduct.category?.slug, page]);
 
-  const allProducts = relatedProducts.length > 0 ? relatedProducts : MOCK_CATALOG_PRODUCTS;
+  const allProducts = relatedProducts.length > 0 ? relatedProducts : (page === 0 ? MOCK_CATALOG_PRODUCTS : []);
 
-  const filtered = allProducts
-    .filter((p) => p.id !== currentProduct.id)
-    .filter((p) => {
-      const sameCategory = p.category && currentProduct.category && (
-        p.category.name === currentProduct.category.name ||
-        (p.category as any).slug === currentProduct.category.slug
-      );
-      const sameCollection = p.collection && currentProduct.collection && (
-        p.collection.name === currentProduct.collection.name ||
-        (p.collection as any).slug === currentProduct.collection.slug
-      );
-      return sameCategory || sameCollection || p.isFeatured;
-    })
-    .slice(0, 4);
+  const filtered = allProducts.filter((p) => p.id !== currentProduct.id);
 
   if (loadingRelated && relatedProducts.length === 0) return null;
   if (filtered.length === 0) return null;
@@ -191,6 +232,24 @@ export default function RelatedProducts({ currentProduct }: { currentProduct: Pr
           <ProductCard key={item.id} product={item} />
         ))}
       </div>
+
+      {hasMore && (
+        <div className="flex justify-center pt-6">
+          <button
+            type="button"
+            disabled={loadingMore}
+            onClick={() => setPage((prev) => prev + 1)}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-bold text-xs hover:bg-rose-500 hover:text-white dark:hover:bg-rose-500 dark:hover:text-white transition-all shadow-xs cursor-pointer disabled:opacity-50"
+          >
+            {loadingMore ? (
+              <span className="inline-block animate-spin rounded-full h-3 w-3 border-2 border-current border-t-transparent" />
+            ) : (
+              <Icon name="plus" size={12} />
+            )}
+            {loadingMore ? 'Đang tải...' : 'Xem thêm sản phẩm'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

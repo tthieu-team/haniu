@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Logo from './Logo';
@@ -12,6 +12,8 @@ import { useCartStore } from '@/store/cart';
 import { useThemeStore } from '@/store/theme';
 import { useWishlistStore } from '@/store/wishlist';
 import { authService } from '@/services/auth.service';
+import { productService } from '@/services/product.service';
+import { getFullImageUrl } from '@/lib/api';
 
 export default function Header() {
   const router = useRouter();
@@ -27,6 +29,13 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchVal, setSearchVal] = useState('');
   const [showSearchInput, setShowSearchInput] = useState(false);
+
+  // Suggestions state
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const searchRef = useRef<HTMLFormElement>(null);
+  const searchCache = useRef<{ [key: string]: any[] }>({});
 
   useEffect(() => {
     setMounted(true);
@@ -56,21 +65,67 @@ export default function Header() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const trimmedVal = searchVal.trim();
+    if (!trimmedVal) {
+      setSuggestions([]);
+      return;
+    }
+
+    // Check client-side memory cache for instantaneous retrieval (0ms network request)
+    if (searchCache.current[trimmedVal]) {
+      setSuggestions(searchCache.current[trimmedVal]);
+      return;
+    }
+
+    const delayDebounce = setTimeout(async () => {
+      setLoadingSuggestions(true);
+      try {
+        const res = await productService.searchProducts(trimmedVal, 0, 5);
+        if (res && res.content) {
+          searchCache.current[trimmedVal] = res.content;
+          setSuggestions(res.content);
+        } else {
+          setSuggestions([]);
+        }
+      } catch (err) {
+        console.error(err);
+        setSuggestions([]);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    }, 300);
+    return () => clearTimeout(delayDebounce);
+  }, [searchVal]);
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchVal.trim()) {
-      router.push(`/?search=${encodeURIComponent(searchVal.trim())}#products`);
+      router.push(`/products?search=${encodeURIComponent(searchVal.trim())}`);
+      setShowDropdown(false);
     } else {
-      router.push('/');
+      router.push('/products');
+      setShowDropdown(false);
     }
   };
 
-  const menuLinks = header?.menuLinks?.length ? header.menuLinks : [
+  const rawMenuLinks = header?.menuLinks?.length ? header.menuLinks : [
     { name: 'Trang chủ', href: '/' },
     { name: 'Sản phẩm', href: '/products' },
     { name: 'Bộ sưu tập', href: '/#collections' },
     { name: 'Câu chuyện', href: '/#story' },
   ];
+  const menuLinks = rawMenuLinks.filter(link => link.href !== '/wishlist' && link.name !== 'Yêu thích');
 
   return (
     <div className={`w-full z-50 transition-all duration-300 ${
@@ -113,6 +168,7 @@ export default function Header() {
           <div className="flex items-center gap-2 md:gap-4 lg:gap-6">
             {/* Search Bar Form (Desktop Only) */}
             <form
+              ref={searchRef}
               onSubmit={handleSearchSubmit}
               className="hidden md:flex relative items-center"
             >
@@ -120,7 +176,11 @@ export default function Header() {
                 type="text"
                 placeholder="Tìm kiếm set quà..."
                 value={searchVal}
-                onChange={(e) => setSearchVal(e.target.value)}
+                onChange={(e) => {
+                  setSearchVal(e.target.value);
+                  setShowDropdown(true);
+                }}
+                onFocus={() => setShowDropdown(true)}
                 className={`text-xs px-4 py-2 rounded-full border bg-white/10 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all duration-300 w-40 lg:w-48 ${
                   isScrolled
                     ? 'border-slate-200 text-slate-800 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100'
@@ -130,11 +190,112 @@ export default function Header() {
               {searchVal && (
                 <button
                   type="button"
-                  onClick={() => setSearchVal('')}
+                  onClick={() => {
+                    setSearchVal('');
+                    setSuggestions([]);
+                  }}
                   className="absolute right-3 text-slate-400 dark:text-zinc-500 hover:text-rose-500 text-[10px] cursor-pointer"
                 >
                   ✕
                 </button>
+              )}
+
+              {/* Suggestions Dropdown */}
+              {showDropdown && searchVal.trim().length > 0 && (
+                <div className="absolute top-full right-0 mt-2 w-72 sm:w-80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-100 dark:border-zinc-800/85 rounded-2xl shadow-xl z-50 p-2 overflow-hidden animate-scale-up">
+                  {loadingSuggestions ? (
+                    <div className="flex items-center justify-center p-6 text-xs text-slate-400 dark:text-zinc-500 gap-2">
+                      <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-rose-500" />
+                      <span>Đang tìm kiếm...</span>
+                    </div>
+                  ) : suggestions.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-slate-400 dark:text-zinc-500">
+                      Không tìm thấy kết quả phù hợp
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <div className="text-[9px] font-extrabold text-slate-400 dark:text-zinc-500 px-3 py-1 uppercase tracking-wider">
+                        Gợi ý sản phẩm ({suggestions.length})
+                      </div>
+                      <div className="max-h-80 overflow-y-auto pr-1 scrollbar-thin">
+                        {suggestions.map((product) => {
+                          const priceVal = product.salePrice || product.basePrice || product.price || 0;
+                          const originalPriceVal = product.salePrice ? (product.basePrice || product.price) : undefined;
+                          const discountPercent = originalPriceVal ? Math.round(((originalPriceVal - priceVal) / originalPriceVal) * 100) : 0;
+                          const isOutOfStock = product.stock === 0;
+                          const isLowStock = product.stock > 0 && product.stock <= 5;
+
+                          return (
+                            <Link
+                              key={product.id}
+                              href={`/products/${product.slug}`}
+                              onClick={() => setShowDropdown(false)}
+                              className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors group"
+                            >
+                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-50 dark:bg-zinc-950 shrink-0 border border-slate-100 dark:border-zinc-850 relative">
+                                <img
+                                  src={getFullImageUrl(product.thumbnailUrl || product.media?.find((m: any) => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://placehold.co/100')}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover"
+                                />
+                                {isOutOfStock && (
+                                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[7px] text-white font-bold uppercase">
+                                    Hết hàng
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0 space-y-0.5">
+                                <div className="flex items-center gap-1.5 justify-between">
+                                  <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-200 group-hover:text-rose-500 transition-colors truncate flex-1">
+                                    {product.name}
+                                  </h4>
+                                </div>
+                                
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-[9px] text-slate-400 dark:text-zinc-550 font-bold bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 rounded-sm">
+                                    {product.sku}
+                                  </span>
+                                  {product.isCustomizable && (
+                                    <span className="text-[8px] text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/20 px-1 py-0.5 rounded-sm font-bold flex items-center gap-0.5 shrink-0">
+                                      🎨 Khắc tên
+                                    </span>
+                                  )}
+                                  {isLowStock && (
+                                    <span className="text-[8px] text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/20 px-1 py-0.5 rounded-sm font-black shrink-0">
+                                      Sắp hết
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="flex items-baseline gap-1.5 pt-0.5">
+                                  <span className="text-xs font-black text-rose-500">
+                                    {priceVal.toLocaleString('vi-VN')}đ
+                                  </span>
+                                  {originalPriceVal && (
+                                    <>
+                                      <span className="text-[9px] text-slate-400 line-through">
+                                        {originalPriceVal.toLocaleString('vi-VN')}đ
+                                      </span>
+                                      <span className="text-[8px] font-bold text-rose-500">
+                                        -{discountPercent}%
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                      <button
+                        type="submit"
+                        className="w-full text-center block text-[10px] font-bold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 py-2 border-t border-slate-100/80 dark:border-zinc-800/80 mt-1 cursor-pointer transition-colors"
+                      >
+                        Xem tất cả kết quả cho "{searchVal}"
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </form>
 

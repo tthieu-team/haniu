@@ -390,7 +390,7 @@ function ProductsContent() {
   };
 
   return (
-    <div className="w-full py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden font-sans min-h-screen bg-slate-50/30 dark:bg-zinc-950">
+    <div className="space-y-8 pb-16 font-sans">
 
       {/* Breadcrumbs Navigation */}
       <nav className="text-xs text-slate-400 dark:text-zinc-500 mb-6 flex items-center gap-1.5 font-medium max-w-7xl mx-auto">
@@ -419,7 +419,7 @@ function ProductsContent() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
 
         {/* Horizontal scrollable category pill bar on top for quick selector */}
         <CategoryPillsBar
@@ -477,7 +477,7 @@ function ProductsContent() {
 
             {/* Content loading state */}
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <SkeletonCard key={i} />
                 ))}
@@ -552,7 +552,7 @@ function ProductsContent() {
               </div>
             ) : (
               /* Grid Mode layout */
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
                 {filteredProducts.map((product: any) => (
                   <ProductCard
                     key={product.id}

@@ -255,10 +255,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       await addToCart(payload);
       setSuccessMsg("🎉 Đã thêm giỏ hàng thành công! Thông tin quà tặng của bạn đã được ghi nhận.");
       setTimeout(() => setSuccessMsg(''), 5000);
-    } catch (err) {
-      console.log("Cart Payload created (Fallback):", payload);
-      setSuccessMsg("🎉 Đã thêm giỏ hàng thành công! Thông tin quà tặng của bạn đã được ghi nhận.");
-      setTimeout(() => setSuccessMsg(''), 5000);
+    } catch (err: any) {
+      console.error("Add to cart failed:", err);
+      setSuccessMsg(`❌ Lỗi: ${err.message || 'Không thể thêm vào giỏ hàng. Vui lòng thử lại!'}`);
+      setTimeout(() => setSuccessMsg(''), 6000);
     }
   };
 
@@ -431,7 +431,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       </div>
 
       {/* Trust Badges (Horizontal safety bar) */}
-      <ProductTrustBadges />
+      <ProductTrustBadges product={product} />
 
       {/* Detailed Information & Reviews Split Section */}
       <div id="detail-tabs" className="grid grid-cols-1 lg:grid-cols-12 gap-12 pt-12 border-t border-slate-200 dark:border-zinc-800/80 items-start">

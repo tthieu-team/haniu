@@ -20,6 +20,8 @@ public class ProductResponseDto {
     private String slug;
     private String sku;
     private String description;
+    private String shortDescription;
+    private String thumbnailUrl;
     
     private CategoryInfo category;
     private BrandInfo brand;

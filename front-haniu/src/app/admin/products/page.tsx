@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useProductStore } from '@/store/product';
+import { productService } from '@/services/product.service';
 import Icon from '@/components/common/Icons';
 
 interface Product {
@@ -62,23 +63,37 @@ const getIncludedItemsCount = (jsonStr?: string) => {
 };
 
 export default function AdminProductsPage() {
-  const { products, loading, fetchProducts, deleteProduct } = useProductStore();
+  const { products, loading, deleteProduct } = useProductStore();
   const [successMsg, setSuccessMsg] = useState('');
 
-  const loadProducts = async () => {
+  // Cursor-based pagination states
+  const [cursorHistory, setCursorHistory] = useState<string[]>(['']);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasNext, setHasNext] = useState(false);
+
+  const loadProducts = async (cursorVal: string = '') => {
+    useProductStore.setState({ loading: true });
     try {
-      const data = await fetchProducts({ size: 50 });
-      if (data && data.content && data.content.length > 0) {
+      const data = await productService.getProductsCursor({ cursor: cursorVal, size: 10 });
+      if (data && data.content) {
         const list = data.content.map((p: any) => ({
           ...p,
           basePrice: p.price || p.basePrice
         }));
-        useProductStore.setState({ products: list });
+        useProductStore.setState({ products: list, loading: false });
+        setNextCursor(data.nextCursor || null);
+        setHasNext(data.hasNext);
       } else {
-        useProductStore.setState({ products: MOCK_PRODUCTS as any });
+        useProductStore.setState({ products: [], loading: false });
+        setHasNext(false);
+        setNextCursor(null);
       }
     } catch (err) {
-      useProductStore.setState({ products: MOCK_PRODUCTS as any });
+      console.error(err);
+      useProductStore.setState({ products: MOCK_PRODUCTS as any, loading: false });
+      setHasNext(false);
+      setNextCursor(null);
     }
   };
 
@@ -94,6 +109,7 @@ export default function AdminProductsPage() {
     try {
       await deleteProduct(id);
       setSuccessMsg('🎉 Đã xóa sản phẩm thành công khỏi hệ thống!');
+      await loadProducts(cursorHistory[currentPageIndex] || '');
     } catch (err) {
       setSuccessMsg('🎉 Đã xóa sản phẩm thành công (Simulated)!');
       useProductStore.setState({
@@ -214,6 +230,44 @@ export default function AdminProductsPage() {
                 })}
               </tbody>
             </table>
+          </div>
+          
+          {/* Pagination Controls */}
+          <div className="flex items-center justify-between bg-slate-50/50 dark:bg-zinc-800/20 px-6 py-4 border-t border-slate-100 dark:border-zinc-800">
+            <span className="text-[11px] font-semibold text-slate-500">
+              Trang {currentPageIndex + 1}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={currentPageIndex === 0 || loading}
+                onClick={async () => {
+                  const prevIndex = currentPageIndex - 1;
+                  const prevCursor = cursorHistory[prevIndex] || '';
+                  setCurrentPageIndex(prevIndex);
+                  await loadProducts(prevCursor);
+                }}
+                className="inline-flex items-center gap-1 bg-white hover:bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700 font-bold px-3 py-1.5 rounded-xl text-[10px] transition-all disabled:opacity-40 cursor-pointer"
+              >
+                <Icon name="arrow-left" size={10} /> Trang trước
+              </button>
+              <button
+                type="button"
+                disabled={!hasNext || !nextCursor || loading}
+                onClick={async () => {
+                  if (!nextCursor) return;
+                  const nextIndex = currentPageIndex + 1;
+                  const newHistory = [...cursorHistory];
+                  newHistory[nextIndex] = nextCursor;
+                  setCursorHistory(newHistory);
+                  setCurrentPageIndex(nextIndex);
+                  await loadProducts(nextCursor);
+                }}
+                className="inline-flex items-center gap-1 bg-white hover:bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700 font-bold px-3 py-1.5 rounded-xl text-[10px] transition-all disabled:opacity-40 cursor-pointer"
+              >
+                Trang sau <Icon name="arrow-right" size={10} />
+              </button>
+            </div>
           </div>
         </div>
       )}

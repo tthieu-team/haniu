@@ -6,6 +6,7 @@ import { useOrderStore } from '@/store/order';
 import { useCartStore } from '@/store/cart';
 import { useCouponStore } from '@/store/coupon';
 import { useAuthStore } from '@/store/auth';
+import Icon from '@/components/common/Icons';
 
 function CheckoutForm() {
   const router = useRouter();
@@ -129,10 +130,10 @@ function CheckoutForm() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 space-y-8">
+    <div className="w-full space-y-10">
       <div>
-        <h1 className="text-3xl font-extrabold text-slate-800 dark:text-white">Thông tin đặt hàng</h1>
-        <p className="text-slate-400 text-xs mt-1">Vui lòng điền địa chỉ giao hàng và thông tin liên hệ để hoàn tất đơn quà tặng</p>
+        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Thông tin đặt hàng</h1>
+        <p className="text-slate-500 dark:text-zinc-400 text-sm mt-1.5">Vui lòng điền địa chỉ giao hàng và thông tin liên hệ để hoàn tất đơn quà tặng</p>
       </div>
 
       {error && (
@@ -141,9 +142,9 @@ function CheckoutForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Customer Information & Shipping address */}
-        <div className="md:col-span-2 space-y-6 bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800">
+        <div className="lg:col-span-2 space-y-6 bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800">
           <h2 className="font-bold text-slate-800 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-zinc-800">Thông tin giao hàng</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -154,7 +155,7 @@ function CheckoutForm() {
                 required
                 value={formData.customerName}
                 onChange={e => setFormData({ ...formData, customerName: e.target.value })}
-                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
               />
             </div>
             <div>
@@ -164,7 +165,7 @@ function CheckoutForm() {
                 required
                 value={formData.customerPhone}
                 onChange={e => setFormData({ ...formData, customerPhone: e.target.value })}
-                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
               />
             </div>
             <div className="sm:col-span-2">
@@ -174,7 +175,7 @@ function CheckoutForm() {
                 required
                 value={formData.customerEmail}
                 onChange={e => setFormData({ ...formData, customerEmail: e.target.value })}
-                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
               />
             </div>
             <div>
@@ -184,7 +185,7 @@ function CheckoutForm() {
                 required
                 value={formData.shippingProvince}
                 onChange={e => setFormData({ ...formData, shippingProvince: e.target.value })}
-                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
               />
             </div>
             <div>
@@ -194,7 +195,7 @@ function CheckoutForm() {
                 required
                 value={formData.shippingDistrict}
                 onChange={e => setFormData({ ...formData, shippingDistrict: e.target.value })}
-                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
               />
             </div>
             <div>
@@ -204,7 +205,7 @@ function CheckoutForm() {
                 required
                 value={formData.shippingWard}
                 onChange={e => setFormData({ ...formData, shippingWard: e.target.value })}
-                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
               />
             </div>
             <div>
@@ -214,7 +215,7 @@ function CheckoutForm() {
                 required
                 value={formData.shippingAddressLine}
                 onChange={e => setFormData({ ...formData, shippingAddressLine: e.target.value })}
-                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
+                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
               />
             </div>
             <div className="sm:col-span-2">
@@ -222,7 +223,7 @@ function CheckoutForm() {
               <textarea
                 value={formData.note}
                 onChange={e => setFormData({ ...formData, note: e.target.value })}
-                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white h-20"
+                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white h-20"
               />
             </div>
           </div>
@@ -353,7 +354,7 @@ function CheckoutForm() {
                     onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
                     className="text-rose-500 focus:ring-rose-500"
                   />
-                  <span className="text-lg shrink-0">{pm.icon}</span>
+                  <Icon name={pm.icon} size={18} className="shrink-0" />
                   <div className="text-xs min-w-0">
                     <span className="font-bold block text-slate-850 dark:text-zinc-200">{pm.label}</span>
                     <span className="text-slate-400 text-[10px] block truncate">{pm.desc}</span>
@@ -364,8 +365,8 @@ function CheckoutForm() {
           </div>
 
           <div className="bg-slate-50 dark:bg-zinc-900/40 p-4 rounded-2xl border border-slate-200/30 text-[10px] text-slate-450 dark:text-zinc-400 space-y-1">
-            <div className="flex items-center gap-1 font-bold text-slate-700 dark:text-zinc-300">
-              <span>📅</span> {getDeliveryEstimation()}
+            <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-zinc-300">
+              <Icon name="calendar" size={12} /> {getDeliveryEstimation()}
             </div>
             <p>Cam kết giao đúng hẹn. Bạn được quyền kiểm tra sản phẩm trước khi thanh toán.</p>
           </div>

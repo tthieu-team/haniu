@@ -5,7 +5,7 @@ import { useHomeLayoutStore } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
 
 export function VisibilityTab() {
-  const { visibility, welcomeScreen, toggleVisibility, updateWelcomeScreen } = useHomeLayoutStore();
+  const { visibility, welcomeScreen, trustBadges, toggleVisibility, updateWelcomeScreen, updateTrustBadges } = useHomeLayoutStore();
 
   return (
     <div className="space-y-6">
@@ -128,6 +128,49 @@ export function VisibilityTab() {
             </div>
           );
         })}
+      </div>
+
+      <div className="pt-6 border-t border-slate-100 dark:border-zinc-800">
+        <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">
+          Cấu hình Huy hiệu Tin cậy sản phẩm (Áp dụng toàn cục)
+        </h3>
+        <p className="text-[10px] text-slate-400 mb-4">
+          Bật/Tắt hiển thị các huy hiệu tin cậy ở phần thông tin chi tiết của tất cả sản phẩm.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {[
+            { id: 'showGenuine', label: 'Chính hãng', desc: 'Huy hiệu cam kết sản phẩm chính hãng' },
+            { id: 'showReturns', label: 'Đổi trả 7 ngày', desc: 'Cam kết đổi trả trong vòng 7 ngày' },
+            { id: 'showShipping', label: 'Giao hàng toàn quốc', desc: 'Hỗ trợ giao hàng trên toàn lãnh thổ' },
+            { id: 'showPayment', label: 'Thanh toán an toàn', desc: 'Bảo mật thông tin giao dịch' },
+            { id: 'showSupport', label: 'Hỗ trợ 24/7', desc: 'Đội ngũ CSKH trực tuyến 24/7' },
+          ].map((item) => {
+            const isChecked = trustBadges?.[item.id as keyof typeof trustBadges] ?? true;
+            return (
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-4 rounded-2xl border border-slate-150 dark:border-zinc-800 bg-slate-50/40 dark:bg-zinc-850/50 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-slate-700 dark:text-zinc-200">
+                    {item.label}
+                  </span>
+                  <p className="text-[9px] text-slate-400">{item.desc}</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={(e) => updateTrustBadges({ [item.id]: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-slate-350 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
+                </label>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

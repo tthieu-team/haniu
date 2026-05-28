@@ -799,6 +799,47 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "welcomeText": "HANIU GIFT SHOP",
                 "welcomeSubtitle": "Thiết kế độc bản - Trọn vẹn yêu thương",
                 "durationMs": 2500
+              },
+              "trustBadges": {
+                "showGenuine": true,
+                "showReturns": true,
+                "showShipping": true,
+                "showPayment": true,
+                "showSupport": true
+              },
+              "productDetails": {
+                "showPromotions": true,
+                "promotions": [
+                  "Miễn phí ship cho đơn từ 499k",
+                  "Giảm 10% khi mua 2 hộp quà",
+                  "Tặng thiệp viết tay miễn phí",
+                  "Freeship nội thành Hà Nội"
+                ],
+                "showWhyChooseUs": true,
+                "whyChooseUs": [
+                  { "icon": "🌹", "text": "Hoa sáp thơm giữ màu tới 3 năm" },
+                  { "icon": "🎁", "text": "Tặng kèm hộp quà cao cấp" },
+                  { "icon": "✨", "text": "Có thể cá nhân hóa khắc tên" },
+                  { "icon": "🚚", "text": "Giao nhanh toàn quốc" },
+                  { "icon": "💝", "text": "Phù hợp mọi dịp đặc biệt" }
+                ],
+                "showDeliveryPolicy": true,
+                "deliveryPolicy": {
+                  "lines": [
+                    { "label": "Nội thành Hà Nội", "value": "2 - 4h (Hỏa tốc)" },
+                    { "label": "Toàn quốc", "value": "2 - 5 ngày" }
+                  ],
+                  "bulletPoints": [
+                    "Kiểm tra hàng trước khi thanh toán (Đồng kiểm)",
+                    "Đóng gói kín đáo, bảo mật thông tin quà tặng"
+                  ]
+                },
+                "showBrandCommitment": true,
+                "brandCommitment": [
+                  "Hình ảnh sản phẩm thật 100% tự chụp",
+                  "Đóng gói cẩn thận, chống va đập, bảo vệ tối đa",
+                  "Hoàn tiền hoặc đổi mới ngay lập tức nếu sản phẩm không giống mô tả"
+                ]
               }
             }
             """;

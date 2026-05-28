@@ -20,6 +20,7 @@ interface ProductCardProps {
     isCustomizable: boolean;
     category?: { name: string };
     media?: Array<{ url: string; isThumbnail: boolean }>;
+    thumbnailUrl?: string;
   };
   onQuickView?: (product: any) => void;
 }
@@ -28,12 +29,18 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
   const { toggleWishlist, isInWishlist } = useWishlistStore();
   const isLiked = isInWishlist(product.id);
 
-  const thumbnail = product.media?.find(m => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://placehold.co/300';
+  const thumbnail = (product.media && product.media.length > 0)
+    ? (product.media.find(m => m.isThumbnail)?.url || product.media[0]?.url)
+    : (product.thumbnailUrl || (product as any).thumbnail_url || 'https://placehold.co/300');
   const secondaryImage = product.media?.find(m => !m.isThumbnail)?.url || product.media?.[1]?.url;
   
-  const priceVal = product.salePrice || product.basePrice || product.price || 0;
-  const originalPriceVal = product.salePrice ? (product.basePrice || product.price) : undefined;
+  const priceVal = product.salePrice || (product as any).sale_price || product.basePrice || product.price || 0;
+  const originalPriceVal = (product.salePrice || (product as any).sale_price) ? (product.basePrice || product.price) : undefined;
   const discountPercent = originalPriceVal ? Math.round(((originalPriceVal - priceVal) / originalPriceVal) * 100) : 0;
+
+  const isFeatured = product.isFeatured || (product as any).is_featured;
+  const isNew = product.isNew || (product as any).is_new;
+  const isCustomizable = product.isCustomizable || (product as any).is_customizable;
 
   return (
     <div className="group bg-white dark:bg-zinc-900 rounded-2xl sm:rounded-[28px] border border-slate-100 dark:border-zinc-800/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden relative">
@@ -57,17 +64,17 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
       {/* Badges */}
 
       <div className="absolute left-2 top-2 sm:left-3 sm:top-3 z-20 flex flex-col gap-1 sm:gap-1.5 pointer-events-none">
-        {product.isFeatured && (
+        {isFeatured && (
           <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[8px] sm:text-[9px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-full shadow-sm">
             NỔI BẬT
           </span>
         )}
-        {product.isNew && (
+        {isNew && (
           <span className="bg-gradient-to-r from-rose-500 to-rose-600 text-white text-[8px] sm:text-[9px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-full shadow-sm">
             MỚI
           </span>
         )}
-        {product.isCustomizable && (
+        {isCustomizable && (
           <span className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white text-[8px] sm:text-[9px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-full shadow-sm">
             CÁ NHÂN HÓA
           </span>
@@ -93,7 +100,7 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
 
         {/* Quick View slide-up overlay */}
         {onQuickView && (
-          <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10 flex justify-center">
+          <div className="hidden md:flex absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10 justify-center">
             <button
               onClick={(e) => {
                 e.preventDefault();
