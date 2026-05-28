@@ -8,6 +8,7 @@ import { useCouponStore } from '@/store/coupon';
 import { useAuthStore } from '@/store/auth';
 import Icon from '@/components/common/Icons';
 import { fetchApi } from '@/lib/api';
+import AddressPicker from '@/components/common/AddressPicker';
 
 interface PaymentMethodConfig {
   code: string;
@@ -179,7 +180,7 @@ function CheckoutForm() {
         {/* Customer Information & Shipping address */}
         <div className="lg:col-span-2 space-y-6 bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800">
           <h2 className="font-bold text-slate-800 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-zinc-800">Thông tin giao hàng</h2>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs text-slate-400 block mb-1">Họ tên người nhận</label>
@@ -211,46 +212,19 @@ function CheckoutForm() {
                 className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
               />
             </div>
-            <div>
-              <label className="text-xs text-slate-400 block mb-1">Tỉnh / Thành phố</label>
-              <input
-                type="text"
-                required
-                value={formData.shippingProvince}
-                onChange={e => setFormData({ ...formData, shippingProvince: e.target.value })}
-                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-slate-400 block mb-1">Quận / Huyện</label>
-              <input
-                type="text"
-                required
-                value={formData.shippingDistrict}
-                onChange={e => setFormData({ ...formData, shippingDistrict: e.target.value })}
-                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-slate-400 block mb-1">Phường / Xã</label>
-              <input
-                type="text"
-                required
-                value={formData.shippingWard}
-                onChange={e => setFormData({ ...formData, shippingWard: e.target.value })}
-                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-slate-400 block mb-1">Địa chỉ chi tiết (Số nhà, Tên đường...)</label>
-              <input
-                type="text"
-                required
-                value={formData.shippingAddressLine}
-                onChange={e => setFormData({ ...formData, shippingAddressLine: e.target.value })}
-                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
-              />
-            </div>
+            <AddressPicker
+              province={formData.shippingProvince}
+              district={formData.shippingDistrict}
+              ward={formData.shippingWard}
+              addressLine={formData.shippingAddressLine}
+              onChange={(fields) => setFormData((prev) => ({
+                ...prev,
+                ...(fields.province !== undefined && { shippingProvince: fields.province }),
+                ...(fields.district !== undefined && { shippingDistrict: fields.district }),
+                ...(fields.ward !== undefined && { shippingWard: fields.ward }),
+                ...(fields.addressLine !== undefined && { shippingAddressLine: fields.addressLine }),
+              }))}
+            />
             <div className="sm:col-span-2">
               <label className="text-xs text-slate-400 block mb-1">Ghi chú giao hàng (Không bắt buộc)</label>
               <textarea
@@ -274,11 +248,10 @@ function CheckoutForm() {
                   key={sm.code}
                   type="button"
                   onClick={() => setShippingMethod(sm.code)}
-                  className={`p-3 text-left rounded-xl border text-xs font-semibold transition-all flex flex-col justify-between h-20 ${
-                    shippingMethod === sm.code
+                  className={`p-3 text-left rounded-xl border text-xs font-semibold transition-all flex flex-col justify-between h-20 ${shippingMethod === sm.code
                       ? 'border-rose-500 bg-rose-50/10 text-rose-600 dark:border-rose-400 dark:text-rose-400'
                       : 'border-slate-250 bg-white hover:bg-slate-50 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-350 dark:hover:bg-zinc-850'
-                  }`}
+                    }`}
                 >
                   <div className="flex justify-between items-center w-full">
                     <span>{sm.name}</span>
@@ -304,7 +277,7 @@ function CheckoutForm() {
                   {cart.totalItems} sản phẩm
                 </span>
               </div>
-              
+
               {/* Item List */}
               <div className="space-y-3 max-h-[200px] overflow-y-auto pr-1">
                 {cart.items.map(item => (
@@ -371,7 +344,7 @@ function CheckoutForm() {
 
           <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 space-y-4 shadow-sm">
             <h2 className="font-bold text-slate-800 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-zinc-800">Phương thức thanh toán</h2>
-            
+
             <div className="space-y-3">
               {paymentMethods.map(pm => (
                 <label key={pm.code} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/50 dark:border-zinc-700/50 rounded-xl cursor-pointer hover:bg-slate-100/50">
