@@ -7,6 +7,22 @@ import { useCartStore } from '@/store/cart';
 import { useCouponStore } from '@/store/coupon';
 import { useAuthStore } from '@/store/auth';
 import Icon from '@/components/common/Icons';
+import { fetchApi } from '@/lib/api';
+
+interface PaymentMethodConfig {
+  code: string;
+  label: string;
+  desc: string;
+  icon: string;
+  enabled: boolean;
+  sortOrder: number;
+}
+
+const ALL_PAYMENT_METHODS: PaymentMethodConfig[] = [
+  { code: 'COD', label: 'Thanh toán COD', desc: 'Nhận hàng rồi mới trả tiền', icon: '💵', enabled: true, sortOrder: 0 },
+  { code: 'VNPAY', label: 'Thẻ ATM / Mobile Banking', desc: 'Thanh toán qua cổng VNPAY', icon: '🏦', enabled: true, sortOrder: 1 },
+  { code: 'MOMO', label: 'Thanh toán ví MoMo', desc: 'Nhanh chóng, an toàn tuyệt đối', icon: '🌸', enabled: true, sortOrder: 2 },
+];
 
 function CheckoutForm() {
   const router = useRouter();
@@ -37,6 +53,7 @@ function CheckoutForm() {
 
   const { createOrder, createPaymentLink, loading } = useOrderStore();
   const [error, setError] = useState('');
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodConfig[]>(ALL_PAYMENT_METHODS);
 
   const subtotal = cart?.totalPrice || 0;
 
@@ -70,6 +87,22 @@ function CheckoutForm() {
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
+
+  useEffect(() => {
+    // Fetch enabled payment methods from system config
+    fetchApi('/api/v1/system-configs/payment_methods')
+      .then((data) => {
+        if (data?.configValue) {
+          const parsed: PaymentMethodConfig[] = JSON.parse(data.configValue);
+          const enabled = parsed.filter((m) => m.enabled).sort((a, b) => a.sortOrder - b.sortOrder);
+          if (enabled.length > 0) setPaymentMethods(enabled);
+        }
+      })
+      .catch(() => {
+        // Fallback to all methods if config not found
+        setPaymentMethods(ALL_PAYMENT_METHODS);
+      });
+  }, []);
 
   useEffect(() => {
     if (initialCoupon && subtotal > 0) {
@@ -340,11 +373,7 @@ function CheckoutForm() {
             <h2 className="font-bold text-slate-800 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-zinc-800">Phương thức thanh toán</h2>
             
             <div className="space-y-3">
-              {[
-                { code: 'COD', label: 'Thanh toán COD', desc: 'Nhận hàng rồi mới trả tiền', icon: '💵' },
-                { code: 'VNPAY', label: 'Thẻ ATM / Mobile Banking', desc: 'Thanh toán qua cổng VNPAY', icon: '🏦' },
-                { code: 'MOMO', label: 'Thanh toán ví MoMo', desc: 'Nhanh chóng, an toàn tuyệt đối', icon: '🌸' }
-              ].map(pm => (
+              {paymentMethods.map(pm => (
                 <label key={pm.code} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/50 dark:border-zinc-700/50 rounded-xl cursor-pointer hover:bg-slate-100/50">
                   <input
                     type="radio"

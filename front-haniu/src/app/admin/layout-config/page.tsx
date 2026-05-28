@@ -7,8 +7,9 @@ import { HeroTab } from './components/HeroTab';
 import { VisibilityTab } from './components/VisibilityTab';
 import { SectionsTab } from './components/SectionsTab';
 import { ProductDetailsTab } from './components/ProductDetailsTab';
+import { PaymentMethodsTab } from './components/PaymentMethodsTab';
 
-type TabType = 'hero' | 'visibility' | 'sections' | 'product-details';
+type TabType = 'hero' | 'visibility' | 'sections' | 'product-details' | 'payment-methods';
 
 export default function AdminLayoutConfigPage() {
   const {
@@ -146,6 +147,17 @@ export default function AdminLayoutConfigPage() {
           <Icon name="gift" size={14} />
           <span>Chi tiết sản phẩm</span>
         </button>
+        <button
+          onClick={() => setActiveTab('payment-methods')}
+          className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+            activeTab === 'payment-methods'
+              ? 'border-rose-500 text-rose-500'
+              : 'border-transparent text-slate-400 dark:text-zinc-500 hover:text-slate-650 dark:hover:text-zinc-300'
+          }`}
+        >
+          <Icon name="💳" size={14} />
+          <span>Phương thức thanh toán</span>
+        </button>
       </div>
 
       {/* 4. Tab contents */}
@@ -154,6 +166,7 @@ export default function AdminLayoutConfigPage() {
         {activeTab === 'visibility' && <VisibilityTab />}
         {activeTab === 'sections' && <SectionsTab />}
         {activeTab === 'product-details' && <ProductDetailsTab />}
+        {activeTab === 'payment-methods' && <PaymentMethodsTab />}
       </div>
     </div>
   );

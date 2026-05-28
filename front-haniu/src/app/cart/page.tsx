@@ -5,13 +5,27 @@ import { useCartStore } from '@/store/cart';
 import { useCouponStore } from '@/store/coupon';
 import { useProductStore } from '@/store/product';
 import { productService } from '@/services/product.service';
-import { getFullImageUrl } from '@/lib/api';
+import { getFullImageUrl, fetchApi } from '@/lib/api';
 import Link from 'next/link';
 import Icon from '@/components/common/Icons';
 
 // Import subcomponents
 import CartItemCard from './components/CartItemCard';
 import ShippingProgressBar from './components/ShippingProgressBar';
+
+interface PaymentMethodConfig {
+  code: string;
+  name: string;
+  icon: string;
+  enabled: boolean;
+  sortOrder: number;
+}
+
+const ALL_PAYMENT_METHODS: PaymentMethodConfig[] = [
+  { code: 'COD', name: 'Thanh toán COD (Khi nhận hàng)', icon: '💵', enabled: true, sortOrder: 0 },
+  { code: 'VNPAY', name: 'Cổng thanh toán VNPAY (ATM/Banking)', icon: '🏦', enabled: true, sortOrder: 1 },
+  { code: 'MOMO', name: 'Thanh toán ví điện tử MoMo', icon: '🌸', enabled: true, sortOrder: 2 },
+];
 
 export default function CartPage() {
   const { cart, loading, fetchCart, updateQuantity, removeItem, addToCart } = useCartStore();
@@ -35,6 +49,7 @@ export default function CartPage() {
   // New features state
   const [shippingMethod, setShippingMethod] = useState('STANDARD');
   const [paymentMethod, setPaymentMethod] = useState('COD');
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodConfig[]>(ALL_PAYMENT_METHODS);
   const [accessories, setAccessories] = useState<any[]>([]);
   const [loadingAccessories, setLoadingAccessories] = useState(false);
 
@@ -69,6 +84,24 @@ export default function CartPage() {
     if (savedCoupon) {
       setCouponCode(savedCoupon);
     }
+    // Fetch enabled payment methods from system config
+    fetchApi('/api/v1/system-configs/payment_methods')
+      .then((data) => {
+        if (data?.configValue) {
+          const parsed = JSON.parse(data.configValue) as PaymentMethodConfig[];
+          const enabled = parsed
+            .filter((m) => m.enabled)
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .map((m) => ({ ...m, name: ALL_PAYMENT_METHODS.find(d => d.code === m.code)?.name || m.code }));
+          if (enabled.length > 0) {
+            setPaymentMethods(enabled);
+            setPaymentMethod(enabled[0].code); // default to first enabled
+          }
+        }
+      })
+      .catch(() => {
+        // Fallback: keep all methods
+      });
   }, []);
 
   const subtotal = cart?.totalPrice || 0;
@@ -80,14 +113,26 @@ export default function CartPage() {
 
   const productDiscount = originalSubtotal - subtotal;
 
+  const [couponWarning, setCouponWarning] = useState('');
+
   // Re-evaluate coupon if subtotal changes to prevent outdated discount values
   useEffect(() => {
-    if (appliedCoupon && subtotal > 0) {
-      applyCoupon(appliedCoupon.code, subtotal);
-    } else if (subtotal === 0 && appliedCoupon) {
+    if (!appliedCoupon) return;
+    if (subtotal === 0) {
       clearAppliedCoupon();
+      return;
     }
-  }, [subtotal, appliedCoupon?.code]);
+    // Check if current subtotal still meets minOrderValue
+    if (appliedCoupon.minOrderValue && subtotal < appliedCoupon.minOrderValue) {
+      clearAppliedCoupon();
+      setCouponCode('');
+      setCouponWarning(`Mã "${appliedCoupon.code}" đã bị hủy vì đơn hàng chưa đạt ${appliedCoupon.minOrderValue.toLocaleString()}đ tối thiểu.`);
+      setTimeout(() => setCouponWarning(''), 5000);
+    } else {
+      // Re-calculate discount with new subtotal
+      applyCoupon(appliedCoupon.code, subtotal);
+    }
+  }, [subtotal]);
 
   const handleUpdateQuantity = async (itemId: string, newQty: number) => {
     if (newQty < 1) {
@@ -105,7 +150,6 @@ export default function CartPage() {
   };
 
   const handleRemoveItem = async (itemId: string) => {
-    if (!confirm('Xóa sản phẩm này khỏi giỏ hàng?')) return;
     setUpdatingItemId(itemId);
     try {
       await removeItem(itemId);
@@ -368,11 +412,7 @@ export default function CartPage() {
                 <div className="space-y-2.5 pb-4 border-b border-slate-100 dark:border-zinc-800">
                   <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Phương thức thanh toán</label>
                   <div className="space-y-2">
-                    {[
-                      { code: 'COD', name: 'Thanh toán COD (Khi nhận hàng)', icon: '💵' },
-                      { code: 'VNPAY', name: 'Cổng thanh toán VNPAY (ATM/Banking)', icon: '🏦' },
-                      { code: 'MOMO', name: 'Thanh toán ví điện tử MoMo', icon: '🌸' }
-                    ].map(pm => (
+                    {paymentMethods.map(pm => (
                       <button
                         key={pm.code}
                         type="button"
@@ -396,6 +436,12 @@ export default function CartPage() {
                 {/* Coupon Form */}
                 <form onSubmit={handleApplyCoupon} className="space-y-2 pb-4 border-b border-slate-100 dark:border-zinc-800">
                   <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Mã giảm giá</label>
+                  {couponWarning && (
+                    <div className="flex items-start gap-2 p-2.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-300/50 dark:border-amber-700/40 rounded-xl text-[10px] text-amber-700 dark:text-amber-400 font-semibold animate-fade-in">
+                      <span className="shrink-0 mt-0.5">⚠️</span>
+                      <span>{couponWarning}</span>
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <input
                       type="text"

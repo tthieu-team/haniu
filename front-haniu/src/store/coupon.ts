@@ -83,7 +83,13 @@ export const useCouponStore = create<CouponState>((set, get) => ({
         set({
           error: `Đơn hàng tối thiểu ${normalized.minOrderValue.toLocaleString()}đ để dùng mã`,
           loading: false,
+          // Reset discount since order no longer qualifies
+          appliedCoupon: null,
+          discountAmount: 0,
         });
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('haniu_active_coupon');
+        }
         return null;
       }
 
