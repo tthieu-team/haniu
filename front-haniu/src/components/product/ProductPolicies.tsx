@@ -89,22 +89,39 @@ export default function ProductPolicies({ product }: ProductPoliciesProps) {
   );
 
   const faqTitle = config.policies?.faq?.title || "💬 Các câu hỏi thường gặp";
-  const faqContent = config.policies?.faq?.content || (
+  
+  const defaultFaqContent = (
     <div className="space-y-3">
       <div className="space-y-1">
-        <p className="font-bold text-slate-700 dark:text-zinc-305">Q: Tôi có được xem bản vẽ demo trước khi khắc thật không?</p>
+        <p className="font-bold text-slate-700 dark:text-zinc-300">Q: Tôi có được xem bản vẽ demo trước khi khắc thật không?</p>
         <p className="text-slate-500 dark:text-zinc-400 pl-4">A: Có! Sau khi đặt hàng, nhân viên kỹ thuật Haniu sẽ liên hệ gửi bản vẽ demo mockup 2D thiết kế qua Zalo/Email để bạn duyệt trước khi bấm máy khắc laser.</p>
       </div>
       <div className="space-y-1">
-        <p className="font-bold text-slate-700 dark:text-zinc-305">Q: Thời gian giao hàng khắc tên mất bao lâu?</p>
+        <p className="font-bold text-slate-700 dark:text-zinc-300">Q: Thời gian giao hàng khắc tên mất bao lâu?</p>
         <p className="text-slate-500 dark:text-zinc-400 pl-4">A: Mặc dù là hàng cá nhân hóa, Haniu có quy trình xử lý tối ưu nên thời gian giao hàng cực nhanh: Nội thành Hà Nội giao trong ngày (hỏa tốc 2h), các tỉnh thành khác chỉ từ 2 - 4 ngày làm việc.</p>
       </div>
       <div className="space-y-1">
-        <p className="font-bold text-slate-700 dark:text-zinc-305">Q: Haniu có cung cấp hóa đơn đỏ VAT cho khách hàng doanh nghiệp không?</p>
+        <p className="font-bold text-slate-700 dark:text-zinc-300">Q: Haniu có cung cấp hóa đơn đỏ VAT cho khách hàng doanh nghiệp không?</p>
         <p className="text-slate-500 dark:text-zinc-400 pl-4">A: Có, Haniu có đầy đủ tư cách pháp nhân để xuất hóa đơn tài chính VAT 8-10% và cung cấp hồ sơ năng lực báo giá cạnh tranh cho các đơn hàng quà tặng doanh nghiệp số lượng lớn.</p>
       </div>
     </div>
   );
+
+  const customFaqContent = config.policies?.faq?.content;
+  const faqContent = customFaqContent ? (
+    Array.isArray(customFaqContent) ? (
+      <div className="space-y-3">
+        {customFaqContent.map((item: any, index: number) => (
+          <div key={index} className="space-y-1">
+            <p className="font-bold text-slate-700 dark:text-zinc-300">Q: {item.question || item.q}</p>
+            <p className="text-slate-500 dark:text-zinc-400 pl-4">A: {item.answer || item.a}</p>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p className="whitespace-pre-line">{String(customFaqContent)}</p>
+    )
+  ) : defaultFaqContent;
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-sm">
@@ -131,35 +148,35 @@ export default function ProductPolicies({ product }: ProductPoliciesProps) {
         {activeTab === 'returns' && (
           <div className="space-y-2">
             <h4 className="font-extrabold text-sm text-slate-800 dark:text-zinc-200">{returnsTitle}</h4>
-            {typeof returnsContent === 'string' ? <p>{returnsContent}</p> : returnsContent}
+            {typeof returnsContent === 'string' ? <p className="whitespace-pre-line">{returnsContent}</p> : returnsContent}
           </div>
         )}
 
         {activeTab === 'warranty' && (
           <div className="space-y-2">
             <h4 className="font-extrabold text-sm text-slate-800 dark:text-zinc-200">{warrantyTitle}</h4>
-            {typeof warrantyContent === 'string' ? <p>{warrantyContent}</p> : warrantyContent}
+            {typeof warrantyContent === 'string' ? <p className="whitespace-pre-line">{warrantyContent}</p> : warrantyContent}
           </div>
         )}
 
         {activeTab === 'care' && (
           <div className="space-y-2">
             <h4 className="font-extrabold text-sm text-slate-800 dark:text-zinc-200">{careTitle}</h4>
-            {typeof careContent === 'string' ? <p>{careContent}</p> : careContent}
+            {typeof careContent === 'string' ? <p className="whitespace-pre-line">{careContent}</p> : careContent}
           </div>
         )}
 
         {activeTab === 'engraving' && (
           <div className="space-y-2">
             <h4 className="font-extrabold text-sm text-slate-800 dark:text-zinc-200">{engravingTitle}</h4>
-            {typeof engravingContent === 'string' ? <p>{engravingContent}</p> : engravingContent}
+            {typeof engravingContent === 'string' ? <p className="whitespace-pre-line">{engravingContent}</p> : engravingContent}
           </div>
         )}
 
         {activeTab === 'faq' && (
           <div className="space-y-2">
             <h4 className="font-extrabold text-sm text-slate-800 dark:text-zinc-200">{faqTitle}</h4>
-            {typeof faqContent === 'string' ? <p>{faqContent}</p> : faqContent}
+            {typeof faqContent === 'string' ? <p className="whitespace-pre-line">{faqContent}</p> : faqContent}
           </div>
         )}
       </div>

@@ -76,7 +76,7 @@ export default function ProductSeoDescription({ product }: ProductSeoDescription
             <h3 className="font-extrabold text-slate-800 dark:text-zinc-200 flex items-center gap-2">
               <span className="select-none">{section.icon}</span> {section.title}
             </h3>
-            <p className="pl-6 text-xs text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">
+            <p className="pl-6 text-xs text-slate-500 dark:text-zinc-400 font-medium leading-relaxed whitespace-pre-line">
               {section.content}
             </p>
           </div>

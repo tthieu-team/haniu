@@ -30,12 +30,44 @@ public class ReviewController {
 
         Integer rating = (Integer) body.get("rating");
         String comment = (String) body.get("comment");
+        String orderItemIdStr = (String) body.get("orderItemId");
+        @SuppressWarnings("unchecked")
+        List<String> images = (List<String>) body.get("images");
+        @SuppressWarnings("unchecked")
+        List<String> videos = (List<String>) body.get("videos");
 
-        if (rating == null) {
+        if (rating == null || orderItemIdStr == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        return ResponseEntity.ok(reviewService.createReview(principal.getName(), productId, rating, comment));
+        UUID orderItemId = UUID.fromString(orderItemIdStr);
+
+        return ResponseEntity.ok(reviewService.createReview(
+                principal.getName(),
+                productId,
+                orderItemId,
+                rating,
+                comment,
+                images,
+                videos
+        ));
+    }
+
+    @GetMapping("/product/{productId}/check-eligible")
+    public ResponseEntity<Map<String, Object>> checkEligibility(
+            Principal principal,
+            @PathVariable UUID productId) {
+        if (principal == null) {
+            return ResponseEntity.ok(Map.of("eligible", false));
+        }
+        UUID pendingId = reviewService.getPendingOrderItemId(principal.getName(), productId);
+        if (pendingId != null) {
+            return ResponseEntity.ok(Map.of(
+                "eligible", true,
+                "pendingOrderItemId", pendingId.toString()
+            ));
+        }
+        return ResponseEntity.ok(Map.of("eligible", false));
     }
 
     @GetMapping("/product/{productId}")

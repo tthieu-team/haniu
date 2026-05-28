@@ -16,6 +16,8 @@ import ImageUploadForm from '@/components/admin/product/ImageUploadForm';
 import CategoryAttributesForm from '@/components/admin/product/CategoryAttributesForm';
 import ProductPreviewPanel from '@/components/admin/product/ProductPreviewPanel';
 import { ProductPreviewModal } from '@/components/admin/product/ProductPreviewModal';
+import LayoutConfigEditor from '@/components/admin/product/LayoutConfigEditor';
+import SeoConfigForm from '@/components/admin/product/SeoConfigForm';
 
 const DEFAULT_CATEGORIES = [
   { id: "8bc6cdbb-b6cb-4b71-b0db-3cdb4b7c7b12", name: "Combo Quà Tặng" },
@@ -78,6 +80,11 @@ export default function NewProductPage() {
 
   const [layoutTemplate, setLayoutTemplate] = useState('DEFAULT');
   const [layoutConfig, setLayoutConfig] = useState('{}');
+
+  // SEO Fields
+  const [seoTitle, setSeoTitle] = useState('');
+  const [seoDescription, setSeoDescription] = useState('');
+  const [seoKeywords, setSeoKeywords] = useState('');
 
   // Occasions and Recipients
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
@@ -157,8 +164,11 @@ export default function NewProductPage() {
       salePrice: salePrice ? parseFloat(salePrice) : null,
       stock,
       isFeatured,
+      featured: isFeatured,
       isNew,
+      new: isNew,
       isCustomizable,
+      customizable: isCustomizable,
       allowAdminChat,
       allowPhotoUpload,
       allowPhotobooth,
@@ -167,6 +177,9 @@ export default function NewProductPage() {
       layoutConfig,
       specifications: JSON.stringify(specsMap),
       includedItems: JSON.stringify(includedItemsMap),
+      seoTitle: seoTitle || null,
+      seoDescription: seoDescription || null,
+      seoKeywords: seoKeywords || null,
       occasions: selectedOccasions,
       recipients: selectedRecipients,
       variants: variantsList,
@@ -316,6 +329,26 @@ export default function NewProductPage() {
 
           {/* Dynamic Included Items */}
           <IncludedItemsManager items={includedItems} setItems={setIncludedItems} />
+
+          {/* SEO & Layout Configuration */}
+          <SeoConfigForm
+            seoTitle={seoTitle}
+            setSeoTitle={setSeoTitle}
+            seoKeywords={seoKeywords}
+            setSeoKeywords={setSeoKeywords}
+            seoDescription={seoDescription}
+            setSeoDescription={setSeoDescription}
+            layoutTemplate={layoutTemplate}
+            setLayoutTemplate={setLayoutTemplate}
+          />
+
+          {/* Detailed Layout Custom Sections */}
+          <LayoutConfigEditor
+            value={layoutConfig}
+            onChange={setLayoutConfig}
+            productName={name}
+            categoryName={categories.find(c => c.id === categoryId)?.name}
+          />
 
           {/* Product Media Manager */}
           <ImageUploadForm

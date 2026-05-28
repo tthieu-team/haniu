@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth';
-import { fetchApi } from '@/lib/api';
+import { fetchApi, API_BASE_URL } from '@/lib/api';
+import { productService } from '@/services/product.service';
 
 interface Review {
   id: string;
@@ -11,6 +12,8 @@ interface Review {
   comment: string;
   isApproved: boolean;
   createdAt: string;
+  images?: string[];
+  videos?: string[];
   user?: {
     fullName: string;
     email: string;
@@ -27,22 +30,27 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Eligibility states
+  const [isEligible, setIsEligible] = useState(false);
+  const [pendingOrderItemId, setPendingOrderItemId] = useState<string | null>(null);
+
   // Form states
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [comment, setComment] = useState('');
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadedVideos, setUploadedVideos] = useState<string[]>([]);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [msg, setMsg] = useState({ text: '', type: '' });
 
   const loadReviews = async () => {
     setLoading(true);
     try {
-      // Fetch approved reviews first
       const data = await fetchApi(`/api/v1/reviews/product/${productId}`);
       if (Array.isArray(data)) {
         setReviews(data);
         
-        // Calculate average and trigger callback
         if (data.length > 0) {
           const sum = data.reduce((acc, curr) => acc + curr.rating, 0);
           const avg = sum / data.length;
@@ -58,15 +66,70 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
     }
   };
 
+  const checkEligibility = async () => {
+    if (!isAuthenticated) {
+      setIsEligible(false);
+      setPendingOrderItemId(null);
+      return;
+    }
+    try {
+      const data = await fetchApi(`/api/v1/reviews/product/${productId}/check-eligible`);
+      if (data && data.eligible) {
+        setIsEligible(true);
+        setPendingOrderItemId(data.pendingOrderItemId);
+      } else {
+        setIsEligible(false);
+        setPendingOrderItemId(null);
+      }
+    } catch (err) {
+      console.error('Failed to check eligibility:', err);
+      setIsEligible(false);
+      setPendingOrderItemId(null);
+    }
+  };
+
   useEffect(() => {
     if (productId) {
       loadReviews();
+      checkEligibility();
     }
-  }, [productId]);
+  }, [productId, isAuthenticated]);
+
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingMedia(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const res = await productService.uploadImage(file);
+        if (res && res.url) {
+          if (type === 'image') {
+            setUploadedImages(prev => [...prev, res.url]);
+          } else {
+            setUploadedVideos(prev => [...prev, res.url]);
+          }
+        }
+      }
+    } catch (err: any) {
+      alert(err.message || 'Lỗi tải tệp lên');
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeVideo = (index: number) => {
+    setUploadedVideos(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!comment.trim()) return;
+    if (!comment.trim() || !pendingOrderItemId) return;
 
     setSubmitting(true);
     setMsg({ text: '', type: '' });
@@ -74,7 +137,13 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
     try {
       const res = await fetchApi(`/api/v1/reviews/product/${productId}`, {
         method: 'POST',
-        body: JSON.stringify({ rating, comment })
+        body: JSON.stringify({
+          rating,
+          comment,
+          orderItemId: pendingOrderItemId,
+          images: uploadedImages,
+          videos: uploadedVideos
+        })
       });
 
       if (res) {
@@ -84,7 +153,9 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
         });
         setComment('');
         setRating(5);
-        // Reload reviews to reflect updates if any approved or wait for admin
+        setUploadedImages([]);
+        setUploadedVideos([]);
+        checkEligibility(); // Re-verify eligibility (in case user has another purchased order item)
         loadReviews();
       }
     } catch (err: any) {
@@ -97,7 +168,12 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
     }
   };
 
-  // Stats calculation
+  const getFullUrl = (url: string) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `${API_BASE_URL}${url}`;
+  };
+
   const totalCount = reviews.length;
   const averageRating = totalCount > 0 
     ? reviews.reduce((acc, r) => acc + r.rating, 0) / totalCount 
@@ -157,7 +233,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
         ) : (
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 divide-y divide-slate-50 dark:divide-zinc-850">
             {reviews.map(review => (
-              <div key={review.id} className="pt-4 first:pt-0 space-y-1.5 text-xs">
+              <div key={review.id} className="pt-4 first:pt-0 space-y-2 text-xs">
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-slate-700 dark:text-zinc-200">
                     {review.user?.fullName || 'Khách hàng Haniu'}
@@ -172,6 +248,22 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
                   ))}
                 </div>
                 <p className="text-slate-600 dark:text-zinc-350 leading-relaxed font-normal">{review.comment}</p>
+                
+                {/* Media rendering */}
+                {(review.images && review.images.length > 0 || review.videos && review.videos.length > 0) && (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {review.images?.map((img, i) => (
+                      <a key={i} href={getFullUrl(img)} target="_blank" rel="noopener noreferrer" className="relative group overflow-hidden rounded-lg w-20 h-20 border border-slate-100 dark:border-zinc-800">
+                        <img src={getFullUrl(img)} alt="Review Attachment" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                      </a>
+                    ))}
+                    {review.videos?.map((vid, i) => (
+                      <div key={i} className="relative rounded-lg w-32 h-20 overflow-hidden border border-slate-100 dark:border-zinc-800 bg-black">
+                        <video src={getFullUrl(vid)} controls className="w-full h-full object-contain" />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -182,7 +274,21 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
       <div className="border-t border-slate-50 dark:border-zinc-850 pt-8 space-y-4">
         <h4 className="font-bold text-slate-800 dark:text-zinc-200 text-sm">Viết đánh giá của bạn</h4>
         
-        {isAuthenticated ? (
+        {!isAuthenticated ? (
+          <div className="bg-slate-50 dark:bg-zinc-800/40 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800 text-center text-xs space-y-2">
+            <p className="text-slate-500 dark:text-zinc-400">Bạn cần đăng nhập tài khoản để có thể đánh giá sản phẩm này.</p>
+            <Link
+              href="/login"
+              className="inline-block px-4 py-2 bg-rose-500 text-white font-bold rounded-lg hover:bg-rose-600 shadow-sm transition-all"
+            >
+              Đăng nhập ngay
+            </Link>
+          </div>
+        ) : !isEligible ? (
+          <div className="bg-slate-50 dark:bg-zinc-850 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800 text-center text-xs text-slate-500 dark:text-zinc-400 italic">
+            Chỉ khách hàng đã mua sản phẩm này và đã giao hàng thành công mới có thể gửi đánh giá. Mỗi lượt mua hàng cho phép gửi 1 đánh giá.
+          </div>
+        ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center gap-3">
               <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">Chọn số sao:</span>
@@ -214,6 +320,40 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
               />
             </div>
 
+            {/* Media Upload Fields */}
+            <div className="space-y-2 text-xs">
+              <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold block">Tải ảnh hoặc video đánh giá:</span>
+              <div className="flex flex-wrap gap-4 items-center">
+                <label className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 border border-slate-200 dark:border-zinc-700 rounded-xl cursor-pointer font-semibold transition-colors">
+                  <span>📸 Thêm ảnh</span>
+                  <input type="file" accept="image/*" multiple onChange={e => handleMediaUpload(e, 'image')} className="hidden" />
+                </label>
+                <label className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 border border-slate-200 dark:border-zinc-700 rounded-xl cursor-pointer font-semibold transition-colors">
+                  <span>🎥 Thêm video</span>
+                  <input type="file" accept="video/*" multiple onChange={e => handleMediaUpload(e, 'video')} className="hidden" />
+                </label>
+                {uploadingMedia && <span className="text-rose-500 animate-pulse">Đang tải tệp lên...</span>}
+              </div>
+
+              {/* Upload Previews */}
+              {(uploadedImages.length > 0 || uploadedVideos.length > 0) && (
+                <div className="flex flex-wrap gap-3 pt-2">
+                  {uploadedImages.map((img, i) => (
+                    <div key={i} className="relative w-16 h-16 border border-slate-200 dark:border-zinc-700 rounded-lg overflow-hidden group bg-slate-50">
+                      <img src={getFullUrl(img)} alt="Preview" className="w-full h-full object-cover" />
+                      <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-md hover:bg-rose-700 opacity-90 transition-opacity">×</button>
+                    </div>
+                  ))}
+                  {uploadedVideos.map((vid, i) => (
+                    <div key={i} className="relative w-28 h-16 border border-slate-200 dark:border-zinc-700 rounded-lg overflow-hidden group bg-black flex items-center">
+                      <video src={getFullUrl(vid)} className="w-full h-full object-contain" />
+                      <button type="button" onClick={() => removeVideo(i)} className="absolute top-1 right-1 w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-md hover:bg-rose-700 opacity-90 transition-opacity">×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {msg.text && (
               <div className={`p-3 rounded-xl text-xs font-semibold ${
                 msg.type === 'success' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-650'
@@ -224,22 +364,12 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
 
             <button
               type="submit"
-              disabled={submitting || !comment.trim()}
-              className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-zinc-100 dark:text-zinc-950 font-bold text-xs rounded-xl shadow transition-all disabled:opacity-50 cursor-pointer"
+              disabled={submitting || !comment.trim() || uploadingMedia}
+              className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-zinc-100 dark:text-zinc-950 font-bold text-xs rounded-xl shadow transition-all disabled:opacity-50 cursor-pointer animate-fade-in"
             >
               {submitting ? 'Đang gửi...' : 'Gửi nhận xét'}
             </button>
           </form>
-        ) : (
-          <div className="bg-slate-50 dark:bg-zinc-800/40 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800 text-center text-xs space-y-2">
-            <p className="text-slate-500 dark:text-zinc-400">Bạn cần đăng nhập tài khoản để có thể đánh giá sản phẩm này.</p>
-            <Link
-              href="/login"
-              className="inline-block px-4 py-2 bg-rose-500 text-white font-bold rounded-lg hover:bg-rose-600 shadow-sm transition-all"
-            >
-              Đăng nhập ngay
-            </Link>
-          </div>
         )}
       </div>
     </div>

@@ -224,7 +224,7 @@ export default function ProductInfo({
       </div>
 
       {/* Short Description */}
-      <p className="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
+      <p className="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed whitespace-pre-line">
         {product.description}
       </p>
 

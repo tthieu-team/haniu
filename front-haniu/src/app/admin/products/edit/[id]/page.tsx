@@ -16,6 +16,8 @@ import ImageUploadForm from '@/components/admin/product/ImageUploadForm';
 import CategoryAttributesForm from '@/components/admin/product/CategoryAttributesForm';
 import ProductPreviewPanel from '@/components/admin/product/ProductPreviewPanel';
 import { ProductPreviewModal } from '@/components/admin/product/ProductPreviewModal';
+import LayoutConfigEditor from '@/components/admin/product/LayoutConfigEditor';
+import SeoConfigForm from '@/components/admin/product/SeoConfigForm';
 
 const DEFAULT_CATEGORIES = [
   { id: "8bc6cdbb-b6cb-4b71-b0db-3cdb4b7c7b12", name: "Combo Quà Tặng" },
@@ -487,70 +489,24 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           <IncludedItemsManager items={includedItems} setItems={setIncludedItems} />
 
           {/* SEO & Layout Configuration */}
-          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6 text-xs font-semibold">
-            <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400 border-b border-slate-50 dark:border-zinc-800 pb-2 flex items-center gap-1.5">
-              <Icon name="search" size={14} /> Cấu hình SEO & Layout
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-slate-500">Tiêu đề SEO (Seo Title)</label>
-                <input
-                  type="text"
-                  placeholder="Tiêu đề hiển thị trên thẻ tab trình duyệt"
-                  value={seoTitle}
-                  onChange={(e) => setSeoTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
-                />
-              </div>
+          <SeoConfigForm
+            seoTitle={seoTitle}
+            setSeoTitle={setSeoTitle}
+            seoKeywords={seoKeywords}
+            setSeoKeywords={setSeoKeywords}
+            seoDescription={seoDescription}
+            setSeoDescription={setSeoDescription}
+            layoutTemplate={layoutTemplate}
+            setLayoutTemplate={setLayoutTemplate}
+          />
 
-              <div className="space-y-2">
-                <label className="block text-slate-500">Từ khóa SEO (Seo Keywords)</label>
-                <input
-                  type="text"
-                  placeholder="VD: quà tặng quốc khánh, bình giữ nhiệt vỏ tre"
-                  value={seoKeywords}
-                  onChange={(e) => setSeoKeywords(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <label className="block text-slate-500">Mô tả SEO (Seo Description)</label>
-                <textarea
-                  rows={3}
-                  placeholder="Mô tả tóm tắt của sản phẩm khi tìm kiếm trên Google..."
-                  value={seoDescription}
-                  onChange={(e) => setSeoDescription(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-slate-500">Giao diện mẫu (Layout Template)</label>
-                <select
-                  value={layoutTemplate}
-                  onChange={(e) => setLayoutTemplate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
-                >
-                  <option value="DEFAULT">DEFAULT (Mặc định)</option>
-                  <option value="PREMIUM">PREMIUM (Cao cấp)</option>
-                  <option value="MINIMAL">MINIMAL (Tối giản)</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-slate-500">Cấu hình Giao diện (Layout Config - JSON)</label>
-                <input
-                  type="text"
-                  placeholder="{}"
-                  value={layoutConfig}
-                  onChange={(e) => setLayoutConfig(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-mono font-medium"
-                />
-              </div>
-            </div>
-          </div>
+          {/* Detailed Layout Custom Sections */}
+          <LayoutConfigEditor
+            value={layoutConfig}
+            onChange={setLayoutConfig}
+            productName={name}
+            categoryName={categories.find(c => c.id === categoryId)?.name}
+          />
 
           {/* Product Media Manager */}
           <ImageUploadForm

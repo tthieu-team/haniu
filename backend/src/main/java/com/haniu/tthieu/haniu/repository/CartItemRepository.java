@@ -15,4 +15,9 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.data.jpa.repository.Query("DELETE FROM CartItem ci WHERE ci.variant.id = :variantId")
     void deleteByVariantId(UUID variantId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query(value = "DELETE FROM cart_items WHERE cart_id = :cartId AND product_id NOT IN (SELECT id FROM products WHERE deleted_at IS NULL)", nativeQuery = true)
+    int deleteInvalidCartItems(@org.springframework.data.repository.query.Param("cartId") UUID cartId);
 }
+

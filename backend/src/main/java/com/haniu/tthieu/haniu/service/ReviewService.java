@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ReviewService {
-    Review createReview(String email, UUID productId, int rating, String comment);
+    Review createReview(String email, UUID productId, UUID orderItemId, int rating, String comment, List<String> images, List<String> videos);
+    UUID getPendingOrderItemId(String email, UUID productId);
     List<Review> getApprovedReviewsByProduct(UUID productId);
     List<Review> getAllReviewsByProduct(UUID productId);
     Review approveReview(UUID reviewId);

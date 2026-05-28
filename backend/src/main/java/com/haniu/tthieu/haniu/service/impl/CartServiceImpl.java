@@ -173,30 +173,39 @@ public class CartServiceImpl implements CartService {
     }
 
     private Cart getOrCreateCart(String email, String sessionId) {
+        Cart cart;
         if (email != null && !email.trim().isEmpty()) {
-            return cartRepository.findByUserEmail(email)
+            cart = cartRepository.findByUserEmail(email)
                     .orElseGet(() -> {
                         User user = userRepository.findByEmail(email)
                                 .orElseThrow(() -> new RuntimeException("User not found"));
-                        Cart cart = Cart.builder()
+                        Cart newCart = Cart.builder()
                                 .user(user)
                                 .totalItems(0)
                                 .totalPrice(BigDecimal.ZERO)
                                 .build();
-                        return cartRepository.save(cart);
+                        return cartRepository.save(newCart);
                     });
         } else if (sessionId != null && !sessionId.trim().isEmpty()) {
-            return cartRepository.findBySessionId(sessionId)
+            cart = cartRepository.findBySessionId(sessionId)
                     .orElseGet(() -> {
-                        Cart cart = Cart.builder()
+                        Cart newCart = Cart.builder()
                                 .sessionId(sessionId)
                                 .totalItems(0)
                                 .totalPrice(BigDecimal.ZERO)
                                 .build();
-                        return cartRepository.save(cart);
+                        return cartRepository.save(newCart);
                     });
+        } else {
+            throw new IllegalArgumentException("Either email or sessionId must be provided");
         }
-        throw new IllegalArgumentException("Either email or sessionId must be provided");
+
+        int deletedCount = cartItemRepository.deleteInvalidCartItems(cart.getId());
+        if (deletedCount > 0) {
+            updateCartTotals(cart);
+        }
+
+        return cart;
     }
 
     private void updateCartTotals(Cart cart) {
