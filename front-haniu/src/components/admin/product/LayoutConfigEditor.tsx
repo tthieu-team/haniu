@@ -64,6 +64,20 @@ interface LayoutConfig {
     bulletPoints: string[];
   }>;
   brandCommitmentConfig?: ProductDetailsItemConfig<string[]>;
+  customizationConfig?: {
+    showEngraving?: boolean;
+    showEngravingMockup?: boolean;
+    engravingLabel?: string;
+    engravingPlaceholder?: string;
+    engravingMaxLength?: number;
+    showCardMessage?: boolean;
+    showCardMessageMockup?: boolean;
+    cardMessageLabel?: string;
+    cardMessagePlaceholder?: string;
+    showGiftWrap?: boolean;
+    giftWrapLabel?: string;
+    giftWrapOptions?: string[];
+  };
 }
 
 interface LayoutConfigEditorProps {
@@ -75,9 +89,8 @@ interface LayoutConfigEditorProps {
 
 export default function LayoutConfigEditor({ value, onChange, productName = 'Sản phẩm', categoryName = 'Quà tặng' }: LayoutConfigEditorProps) {
   const [config, setConfig] = useState<LayoutConfig>({});
-  const [activeTab, setActiveTab] = useState<'seo' | 'returns' | 'warranty' | 'care' | 'engraving' | 'faq' | 'badges' | 'promotions' | 'whyChooseUs' | 'delivery' | 'commitment'>('seo');
+  const [activeTab, setActiveTab] = useState<'seo' | 'returns' | 'warranty' | 'care' | 'engraving' | 'faq' | 'badges' | 'promotions' | 'whyChooseUs' | 'delivery' | 'commitment' | 'customization'>('seo');
 
-  // Input states for new item additions
   const [newPromo, setNewPromo] = useState('');
   const [newCommitment, setNewCommitment] = useState('');
   const [newWhyIcon, setNewWhyIcon] = useState('🌹');
@@ -85,6 +98,7 @@ export default function LayoutConfigEditor({ value, onChange, productName = 'S�
   const [newDelivLabel, setNewDelivLabel] = useState('');
   const [newDelivVal, setNewDelivVal] = useState('');
   const [newDelivBullet, setNewDelivBullet] = useState('');
+  const [newGiftOption, setNewGiftOption] = useState('');
 
   // Load configuration and set defaults if missing
   useEffect(() => {
@@ -171,13 +185,13 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
         showFaq: parsed.policies?.showFaq ?? true,
         faq: {
           title: parsed.policies?.faq?.title || "💬 Các câu hỏi thường gặp",
-          content: Array.isArray(parsed.policies?.faq?.content) 
-            ? parsed.policies.faq.content 
+          content: Array.isArray(parsed.policies?.faq?.content)
+            ? parsed.policies.faq.content
             : [
-                { question: "Tôi có được xem bản vẽ demo trước khi khắc thật không?", answer: "Có! Sau khi đặt hàng, nhân viên kỹ thuật Haniu sẽ liên hệ gửi bản vẽ demo mockup 2D thiết kế qua Zalo/Email để bạn duyệt trước khi bấm máy khắc laser." },
-                { question: "Thời gian giao hàng khắc tên mất bao lâu?", answer: "Mặc dù là hàng cá nhân hóa, Haniu có quy trình xử lý tối ưu nên thời gian giao hàng cực nhanh: Nội thành Hà Nội giao trong ngày (hỏa tốc 2h), các tỉnh thành khác chỉ từ 2 - 4 ngày làm việc." },
-                { question: "Haniu có cung cấp hóa đơn đỏ VAT cho khách hàng doanh nghiệp không?", answer: "Có, Haniu có đầy đủ tư cách pháp nhân để xuất hóa đơn tài chính VAT 8-10% và cung cấp hồ sơ năng lực báo giá cạnh tranh cho các đơn hàng quà tặng doanh nghiệp số lượng lớn." }
-              ]
+              { question: "Tôi có được xem bản vẽ demo trước khi khắc thật không?", answer: "Có! Sau khi đặt hàng, nhân viên kỹ thuật Haniu sẽ liên hệ gửi bản vẽ demo mockup 2D thiết kế qua Zalo/Email để bạn duyệt trước khi bấm máy khắc laser." },
+              { question: "Thời gian giao hàng khắc tên mất bao lâu?", answer: "Mặc dù là hàng cá nhân hóa, Haniu có quy trình xử lý tối ưu nên thời gian giao hàng cực nhanh: Nội thành Hà Nội giao trong ngày (hỏa tốc 2h), các tỉnh thành khác chỉ từ 2 - 4 ngày làm việc." },
+              { question: "Haniu có cung cấp hóa đơn đỏ VAT cho khách hàng doanh nghiệp không?", answer: "Có, Haniu có đầy đủ tư cách pháp nhân để xuất hóa đơn tài chính VAT 8-10% và cung cấp hồ sơ năng lực báo giá cạnh tranh cho các đơn hàng quà tặng doanh nghiệp số lượng lớn." }
+            ]
         }
       },
       trustBadges: {
@@ -230,6 +244,24 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
           "Hình ảnh sản phẩm thật 100% tự chụp",
           "Đóng gói cẩn thận, chống va đập, bảo vệ tối đa",
           "Hoàn tiền hoặc đổi mới ngay lập tức nếu sản phẩm không giống mô tả"
+        ]
+      },
+      customizationConfig: {
+        showEngraving: parsed.customizationConfig?.showEngraving ?? true,
+        showEngravingMockup: parsed.customizationConfig?.showEngravingMockup ?? true,
+        engravingLabel: parsed.customizationConfig?.engravingLabel || "Khắc chữ / Tên theo yêu cầu (Miễn phí)",
+        engravingPlaceholder: parsed.customizationConfig?.engravingPlaceholder || "Nhập tên hoặc lời chúc muốn khắc (tối đa 50 ký tự)",
+        engravingMaxLength: parsed.customizationConfig?.engravingMaxLength ?? 50,
+        showCardMessage: parsed.customizationConfig?.showCardMessage ?? true,
+        showCardMessageMockup: parsed.customizationConfig?.showCardMessageMockup ?? true,
+        cardMessageLabel: parsed.customizationConfig?.cardMessageLabel || "Lời nhắn trên thiệp chúc mừng",
+        cardMessagePlaceholder: parsed.customizationConfig?.cardMessagePlaceholder || "Nhập nội dung thư chúc mừng gửi tới người nhận...",
+        showGiftWrap: parsed.customizationConfig?.showGiftWrap ?? true,
+        giftWrapLabel: parsed.customizationConfig?.giftWrapLabel || "Chọn ruy băng nơ / hộp gói",
+        giftWrapOptions: parsed.customizationConfig?.giftWrapOptions || [
+          "Ruy băng Đỏ Lãng Mạn",
+          "Ruy băng Vàng Hoàng Gia",
+          "Gói bọc giấy Kraft Hoài Cổ"
         ]
       }
     };
@@ -403,10 +435,53 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
     });
   };
 
+  const handleCustomizationChange = (field: string, val: any) => {
+    const currentCustom = config.customizationConfig || {
+      showEngraving: true,
+      showEngravingMockup: true,
+      engravingLabel: "Khắc chữ / Tên theo yêu cầu (Miễn phí)",
+      engravingPlaceholder: "Nhập tên hoặc lời chúc muốn khắc (tối đa 50 ký tự)",
+      engravingMaxLength: 50,
+      showCardMessage: true,
+      showCardMessageMockup: true,
+      cardMessageLabel: "Lời nhắn trên thiệp chúc mừng",
+      cardMessagePlaceholder: "Nhập nội dung thư chúc mừng gửi tới người nhận...",
+      showGiftWrap: true,
+      giftWrapLabel: "Chọn ruy băng nơ / hộp gói",
+      giftWrapOptions: [
+        "Ruy băng Đỏ Lãng Mạn",
+        "Ruy băng Vàng Hoàng Gia",
+        "Gói bọc giấy Kraft Hoài Cổ"
+      ]
+    };
+    updateParent({
+      ...config,
+      customizationConfig: { ...currentCustom, [field]: val }
+    });
+  };
+
   const promotionsConfig = config.promotionsConfig;
   const whyChooseUsConfig = config.whyChooseUsConfig;
   const deliveryPolicyConfig = config.deliveryPolicyConfig;
   const brandCommitmentConfig = config.brandCommitmentConfig;
+  const customizationConfig = config.customizationConfig || {
+    showEngraving: true,
+    showEngravingMockup: true,
+    engravingLabel: "Khắc chữ / Tên theo yêu cầu (Miễn phí)",
+    engravingPlaceholder: "Nhập tên hoặc lời chúc muốn khắc (tối đa 50 ký tự)",
+    engravingMaxLength: 50,
+    showCardMessage: true,
+    showCardMessageMockup: true,
+    cardMessageLabel: "Lời nhắn trên thiệp chúc mừng",
+    cardMessagePlaceholder: "Nhập nội dung thư chúc mừng gửi tới người nhận...",
+    showGiftWrap: true,
+    giftWrapLabel: "Chọn ruy băng nơ / hộp gói",
+    giftWrapOptions: [
+      "Ruy băng Đỏ Lãng Mạn",
+      "Ruy băng Vàng Hoàng Gia",
+      "Gói bọc giấy Kraft Hoài Cổ"
+    ]
+  };
 
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6">
@@ -423,6 +498,7 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
           { id: 'whyChooseUs', label: 'Lý do chọn Haniu', icon: 'heart' },
           { id: 'delivery', label: 'Chính sách Giao hàng', icon: 'truck' },
           { id: 'commitment', label: 'Haniu cam kết', icon: 'shield' },
+          { id: 'customization', label: 'Cá nhân hóa', icon: 'edit' },
           { id: 'returns', label: 'Chính sách Đổi trả', icon: 'refresh' },
           { id: 'warranty', label: 'Bảo hành', icon: 'shield' },
           { id: 'care', label: 'Bảo quản', icon: 'heart' },
@@ -433,11 +509,10 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === tab.id
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap cursor-pointer ${activeTab === tab.id
                 ? 'bg-white dark:bg-zinc-700 text-rose-500 shadow-sm'
                 : 'text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200'
-            }`}
+              }`}
           >
             {tab.label}
           </button>
@@ -455,13 +530,11 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
               <button
                 type="button"
                 onClick={toggleSeoDescription}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                  config.showSeoDescription ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                }`}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${config.showSeoDescription ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
+                  }`}
               >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  config.showSeoDescription ? 'translate-x-5' : 'translate-x-0'
-                }`} />
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${config.showSeoDescription ? 'translate-x-5' : 'translate-x-0'
+                  }`} />
               </button>
             </div>
 
@@ -479,7 +552,7 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
 
                 <div className="space-y-3">
                   <label className="block text-slate-400 font-bold uppercase tracking-wider text-[10px]">Các mục câu chuyện</label>
-                  
+
                   {config.seoDescription.sections.map((section, idx) => (
                     <div key={idx} className="bg-slate-50/50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-3 relative">
                       <button
@@ -537,6 +610,165 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
           </div>
         )}
 
+        {activeTab === 'customization' && customizationConfig && (
+          <div className="space-y-6">
+            <div className="border-l-4 border-amber-500 pl-4 space-y-1">
+              <h4 className="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                Cấu hình Bật/Tắt tab Mô phỏng Cá nhân hóa
+              </h4>
+              <p className="text-[10px] text-slate-400">
+                Lựa chọn các chế độ cá nhân hóa hiển thị ngoài trang chi tiết sản phẩm.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Toggle Laser Engraving */}
+              <div className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/30">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 block">✍️ Cho phép khắc Laser</span>
+                  <span className="text-[9px] text-slate-450 dark:text-zinc-550 block">Hiển thị tab "Xem khắc Laser"</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCustomizationChange('showEngraving', !customizationConfig.showEngraving)}
+                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${customizationConfig.showEngraving ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'}`}
+                >
+                  <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${customizationConfig.showEngraving ? 'translate-x-4' : 'translate-x-0'}`} />
+                </button>
+              </div>
+
+              {/* Toggle Greeting Card */}
+              <div className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/30">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 block">✉️ Viết thiệp tay</span>
+                  <span className="text-[9px] text-slate-450 dark:text-zinc-550 block">Hiển thị tab "Xem thiệp viết tay"</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCustomizationChange('showCardMessage', !customizationConfig.showCardMessage)}
+                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${customizationConfig.showCardMessage ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'}`}
+                >
+                  <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${customizationConfig.showCardMessage ? 'translate-x-4' : 'translate-x-0'}`} />
+                </button>
+              </div>
+
+              {/* Toggle Gift Wrap */}
+              <div className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/30">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 block">🎁 Chọn mẫu hộp/ruy băng</span>
+                  <span className="text-[9px] text-slate-450 dark:text-zinc-550 block">Hiển thị dropdown chọn gói quà</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCustomizationChange('showGiftWrap', !customizationConfig.showGiftWrap)}
+                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${customizationConfig.showGiftWrap ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'}`}
+                >
+                  <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${customizationConfig.showGiftWrap ? 'translate-x-4' : 'translate-x-0'}`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Custom Detail Labels / Options */}
+            {customizationConfig.showEngraving && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-zinc-800">
+                <div className="space-y-2">
+                  <label className="block text-slate-500">Nhãn hiển thị khắc Laser (Label)</label>
+                  <input
+                    type="text"
+                    value={customizationConfig.engravingLabel}
+                    onChange={(e) => handleCustomizationChange('engravingLabel', e.target.value)}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-800 shadow-xs"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-slate-500">Gợi ý nhập liệu khắc (Placeholder)</label>
+                  <input
+                    type="text"
+                    value={customizationConfig.engravingPlaceholder}
+                    onChange={(e) => handleCustomizationChange('engravingPlaceholder', e.target.value)}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-800 shadow-xs"
+                  />
+                </div>
+              </div>
+            )}
+
+            {customizationConfig.showCardMessage && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-zinc-800">
+                <div className="space-y-2">
+                  <label className="block text-slate-500">Nhãn hiển thị Thiệp viết tay</label>
+                  <input
+                    type="text"
+                    value={customizationConfig.cardMessageLabel}
+                    onChange={(e) => handleCustomizationChange('cardMessageLabel', e.target.value)}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-800 shadow-xs"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-slate-500">Gợi ý nhập lời chúc</label>
+                  <input
+                    type="text"
+                    value={customizationConfig.cardMessagePlaceholder}
+                    onChange={(e) => handleCustomizationChange('cardMessagePlaceholder', e.target.value)}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-800 shadow-xs"
+                  />
+                </div>
+              </div>
+            )}
+
+            {customizationConfig.showGiftWrap && (
+              <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-zinc-800">
+                <label className="block text-slate-500 font-bold">Danh sách mẫu ruy băng / hộp quà</label>
+                <div className="space-y-2">
+                  {customizationConfig.giftWrapOptions?.map((opt: string, idx: number) => (
+                    <div key={idx} className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        value={opt}
+                        onChange={(e) => {
+                          const list = [...(customizationConfig.giftWrapOptions || [])];
+                          list[idx] = e.target.value;
+                          handleCustomizationChange('giftWrapOptions', list);
+                        }}
+                        className="flex-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const list = (customizationConfig.giftWrapOptions || []).filter((_: string, i: number) => i !== idx);
+                          handleCustomizationChange('giftWrapOptions', list);
+                        }}
+                        className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all cursor-pointer"
+                      >
+                        <Icon name="trash" size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newGiftOption}
+                    onChange={(e) => setNewGiftOption(e.target.value)}
+                    placeholder="Thêm tùy chọn ruy băng/hộp quà mới..."
+                    className="flex-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newGiftOption.trim()) return;
+                      handleCustomizationChange('giftWrapOptions', [...(customizationConfig.giftWrapOptions || []), newGiftOption.trim()]);
+                      setNewGiftOption('');
+                    }}
+                    className="px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold cursor-pointer text-xs"
+                  >
+                    Thêm
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Policies standard tabs (returns, warranty, care, engraving) */}
         {['returns', 'warranty', 'care', 'engraving'].includes(activeTab) && config.policies && (
           <div className="space-y-4">
@@ -544,10 +776,10 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
               const tab = activeTab as 'returns' | 'warranty' | 'care' | 'engraving';
               const showKey = `show${tab.charAt(0).toUpperCase() + tab.slice(1)}` as 'showReturns' | 'showWarranty' | 'showCare' | 'showEngraving';
               const data = config.policies[tab] || { title: '', content: '' };
-              const labelName = 
+              const labelName =
                 tab === 'returns' ? 'Đổi trả & Hoàn tiền' :
-                tab === 'warranty' ? 'Chính sách Bảo hành' :
-                tab === 'care' ? 'Hướng dẫn bảo quản' : 'Hướng dẫn khắc tên';
+                  tab === 'warranty' ? 'Chính sách Bảo hành' :
+                    tab === 'care' ? 'Hướng dẫn bảo quản' : 'Hướng dẫn khắc tên';
 
               return (
                 <div className="space-y-4">
@@ -558,13 +790,11 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
                     <button
                       type="button"
                       onClick={() => togglePolicyTab(showKey)}
-                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                        config.policies?.[showKey] ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                      }`}
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${config.policies?.[showKey] ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
+                        }`}
                     >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                        config.policies?.[showKey] ? 'translate-x-5' : 'translate-x-0'
-                      }`} />
+                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${config.policies?.[showKey] ? 'translate-x-5' : 'translate-x-0'
+                        }`} />
                     </button>
                   </div>
 
@@ -607,13 +837,11 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
               <button
                 type="button"
                 onClick={() => togglePolicyTab('showFaq')}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                  config.policies.showFaq ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                }`}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${config.policies.showFaq ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
+                  }`}
               >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  config.policies.showFaq ? 'translate-x-5' : 'translate-x-0'
-                }`} />
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${config.policies.showFaq ? 'translate-x-5' : 'translate-x-0'
+                  }`} />
               </button>
             </div>
 
@@ -631,7 +859,7 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
 
                 <div className="space-y-3">
                   <label className="block text-slate-400 font-bold uppercase tracking-wider text-[10px]">Danh sách câu hỏi & trả lời</label>
-                  
+
                   {config.policies.faq.content.map((item, idx) => (
                     <div key={idx} className="bg-slate-50/50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-3 relative">
                       <button
@@ -687,13 +915,11 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
               <button
                 type="button"
                 onClick={() => handleTrustBadgeChange('useGlobalConfig', !config.trustBadges?.useGlobalConfig)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                  config.trustBadges.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                }`}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${config.trustBadges.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
+                  }`}
               >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  config.trustBadges.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
-                }`} />
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${config.trustBadges.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
+                  }`} />
               </button>
             </div>
 
@@ -715,13 +941,11 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
                       <button
                         type="button"
                         onClick={() => handleTrustBadgeChange(badge.id, !config.trustBadges?.[badge.id as keyof typeof config.trustBadges])}
-                        className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                          config.trustBadges?.[badge.id as keyof typeof config.trustBadges] ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
-                        }`}
+                        className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${config.trustBadges?.[badge.id as keyof typeof config.trustBadges] ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+                          }`}
                       >
-                        <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          config.trustBadges?.[badge.id as keyof typeof config.trustBadges] ? 'translate-x-4' : 'translate-x-0'
-                        }`} />
+                        <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${config.trustBadges?.[badge.id as keyof typeof config.trustBadges] ? 'translate-x-4' : 'translate-x-0'
+                          }`} />
                       </button>
                     </div>
                   ))}
@@ -739,13 +963,11 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
               <button
                 type="button"
                 onClick={() => handlePromotionsChange('useGlobalConfig', !promotionsConfig?.useGlobalConfig)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                  promotionsConfig.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                }`}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${promotionsConfig.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
+                  }`}
               >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  promotionsConfig.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
-                }`} />
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${promotionsConfig.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
+                  }`} />
               </button>
             </div>
 
@@ -756,13 +978,11 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
                   <button
                     type="button"
                     onClick={() => handlePromotionsChange('show', !promotionsConfig?.show)}
-                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                      promotionsConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
-                    }`}
+                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${promotionsConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+                      }`}
                   >
-                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                      promotionsConfig.show ? 'translate-x-4' : 'translate-x-0'
-                    }`} />
+                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${promotionsConfig.show ? 'translate-x-4' : 'translate-x-0'
+                      }`} />
                   </button>
                 </div>
 
@@ -830,13 +1050,11 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
               <button
                 type="button"
                 onClick={() => handleWhyChooseUsChange('useGlobalConfig', !whyChooseUsConfig?.useGlobalConfig)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                  whyChooseUsConfig.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                }`}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${whyChooseUsConfig.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
+                  }`}
               >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  whyChooseUsConfig.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
-                }`} />
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${whyChooseUsConfig.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
+                  }`} />
               </button>
             </div>
 
@@ -847,13 +1065,11 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
                   <button
                     type="button"
                     onClick={() => handleWhyChooseUsChange('show', !whyChooseUsConfig?.show)}
-                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                      whyChooseUsConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
-                    }`}
+                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${whyChooseUsConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+                      }`}
                   >
-                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                      whyChooseUsConfig.show ? 'translate-x-4' : 'translate-x-0'
-                    }`} />
+                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${whyChooseUsConfig.show ? 'translate-x-4' : 'translate-x-0'
+                      }`} />
                   </button>
                 </div>
 
@@ -938,13 +1154,11 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
               <button
                 type="button"
                 onClick={() => handleDeliveryPolicyChange('useGlobalConfig', !deliveryPolicyConfig?.useGlobalConfig)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                  deliveryPolicyConfig.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                }`}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${deliveryPolicyConfig.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
+                  }`}
               >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  deliveryPolicyConfig.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
-                }`} />
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${deliveryPolicyConfig.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
+                  }`} />
               </button>
             </div>
 
@@ -955,13 +1169,11 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
                   <button
                     type="button"
                     onClick={() => handleDeliveryPolicyChange('show', !deliveryPolicyConfig?.show)}
-                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                      deliveryPolicyConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
-                    }`}
+                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${deliveryPolicyConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+                      }`}
                   >
-                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                      deliveryPolicyConfig.show ? 'translate-x-4' : 'translate-x-0'
-                    }`} />
+                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${deliveryPolicyConfig.show ? 'translate-x-4' : 'translate-x-0'
+                      }`} />
                   </button>
                 </div>
 
@@ -970,7 +1182,7 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
                     {/* Lines */}
                     <div className="space-y-3">
                       <span className="text-[10px] font-bold text-slate-450 block border-b pb-1">Thời gian vận chuyển riêng</span>
-                      
+
                       <div className="space-y-2">
                         {deliveryPolicyConfig.list.lines.map((line, idx) => (
                           <div key={idx} className="flex gap-2 items-center">
@@ -1044,7 +1256,7 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
                     {/* Bullet Points */}
                     <div className="space-y-3">
                       <span className="text-[10px] font-bold text-slate-450 block border-b pb-1">Các lưu ý riêng</span>
-                      
+
                       <div className="space-y-2">
                         {deliveryPolicyConfig.list.bulletPoints.map((point, idx) => (
                           <div key={idx} className="flex gap-2 items-center">
@@ -1110,14 +1322,12 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
               <label className="text-slate-500 font-semibold">Sử dụng Cam kết toàn cục</label>
               <button
                 type="button"
-                onClick={() => handleBrandCommitmentChange('useGlobalConfig', !brandCommitmentConfig?.useGlobalConfig)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                  brandCommitmentConfig.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                }`}
+                onClick={() => handleBrandCommitmentChange('useGlobalConfig', !brandCommitmentConfig.useGlobalConfig)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${brandCommitmentConfig.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
+                  }`}
               >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  brandCommitmentConfig.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
-                }`} />
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${brandCommitmentConfig.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
+                  }`} />
               </button>
             </div>
 
@@ -1127,18 +1337,16 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
                   <label className="text-slate-500 font-semibold">Hiển thị khối Cam kết Haniu</label>
                   <button
                     type="button"
-                    onClick={() => handleBrandCommitmentChange('show', !brandCommitmentConfig?.show)}
-                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                      brandCommitmentConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
-                    }`}
+                    onClick={() => handleBrandCommitmentChange('show', !brandCommitmentConfig.show)}
+                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${brandCommitmentConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+                      }`}
                   >
-                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                      brandCommitmentConfig.show ? 'translate-x-4' : 'translate-x-0'
-                    }`} />
+                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${brandCommitmentConfig.show ? 'translate-x-4' : 'translate-x-0'
+                      }`} />
                   </button>
                 </div>
 
-                {brandCommitmentConfig.show && (
+                 {brandCommitmentConfig.show && (
                   <div className="space-y-3">
                     <div className="space-y-2">
                       {brandCommitmentConfig.list.map((comm, idx) => (

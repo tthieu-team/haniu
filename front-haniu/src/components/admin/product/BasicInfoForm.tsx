@@ -1,6 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import Icon from '@/components/common/Icons';
+import PersonalizationConfigForm from './PersonalizationConfigForm';
 
 interface BasicInfoFormProps {
   name: string;
@@ -38,6 +40,8 @@ interface BasicInfoFormProps {
   setAllowPhotoUpload: (v: boolean) => void;
   allowPhotobooth: boolean;
   setAllowPhotobooth: (v: boolean) => void;
+  layoutConfig?: string;
+  setLayoutConfig?: (v: string) => void;
 }
 
 export default function BasicInfoForm({
@@ -76,6 +80,8 @@ export default function BasicInfoForm({
   setAllowPhotoUpload,
   allowPhotobooth,
   setAllowPhotobooth,
+  layoutConfig,
+  setLayoutConfig,
 }: BasicInfoFormProps) {
   const toSlug = (str: string) => {
     if (!str) return '';
@@ -143,7 +149,7 @@ export default function BasicInfoForm({
             <button
               type="button"
               onClick={() => setSku(generateSku(name))}
-              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-bold rounded-xl border border-slate-200 dark:border-zinc-800 transition-all cursor-pointer text-[10px] flex items-center justify-center shrink-0 active:scale-95"
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-855 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-bold rounded-xl border border-slate-200 dark:border-zinc-800 transition-all cursor-pointer text-[10px] flex items-center justify-center shrink-0 active:scale-95"
               title="Tự động sinh mã SKU"
             >
               🔄 Tự sinh
@@ -176,7 +182,7 @@ export default function BasicInfoForm({
             ))}
           </select>
         </div>
-
+ 
         <div className="space-y-2">
           <label className="block text-slate-500">Thương hiệu (Brand)</label>
           <select
@@ -190,7 +196,7 @@ export default function BasicInfoForm({
             ))}
           </select>
         </div>
-
+ 
         <div className="space-y-2 md:col-span-3">
           <label className="block text-slate-500">Bộ sưu tập (Collection)</label>
           <select
@@ -205,7 +211,7 @@ export default function BasicInfoForm({
           </select>
         </div>
       </div>
-
+ 
       <div className="space-y-2">
         <label className="block text-slate-500">Mô tả quà tặng</label>
         <textarea
@@ -216,7 +222,7 @@ export default function BasicInfoForm({
           className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-medium"
         />
       </div>
-
+ 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-slate-50 dark:border-zinc-800">
         <div className="space-y-2">
           <label className="block text-slate-500">Giá bán lẻ (đ) *</label>
@@ -228,7 +234,7 @@ export default function BasicInfoForm({
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-semibold"
           />
         </div>
-
+ 
         <div className="space-y-2">
           <label className="block text-slate-500">Giá khuyến mại (Tùy chọn)</label>
           <input
@@ -239,7 +245,7 @@ export default function BasicInfoForm({
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-sm font-semibold text-rose-500"
           />
         </div>
-
+ 
         <div className="space-y-2">
           <label className="block text-slate-500">Tồn kho ban đầu *</label>
           <input
@@ -251,7 +257,7 @@ export default function BasicInfoForm({
           />
         </div>
       </div>
-
+ 
       <div className="flex flex-wrap gap-6 pt-4 border-t border-slate-50 dark:border-zinc-800">
         <label className="flex items-center gap-2 cursor-pointer">
           <input
@@ -264,7 +270,7 @@ export default function BasicInfoForm({
             <Icon name="⚙️" size={14} className="text-rose-500" /> Cho phép Khắc tên / Cá nhân hóa quà
           </span>
         </label>
-
+ 
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
@@ -276,7 +282,7 @@ export default function BasicInfoForm({
             💬 Có thể chat với Admin
           </span>
         </label>
-
+ 
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
@@ -288,7 +294,7 @@ export default function BasicInfoForm({
             📷 Có thể tải lên ảnh thiết kế
           </span>
         </label>
-
+ 
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
@@ -300,7 +306,7 @@ export default function BasicInfoForm({
             🖼️ Có thể tải Photobooth bằng ứng dụng
           </span>
         </label>
-
+ 
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
@@ -310,7 +316,7 @@ export default function BasicInfoForm({
           />
           <span className="text-slate-600 dark:text-zinc-300">Sản phẩm Nổi bật (Featured)</span>
         </label>
-
+ 
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
@@ -321,6 +327,14 @@ export default function BasicInfoForm({
           <span className="text-slate-600 dark:text-zinc-300">Sản phẩm mới (New)</span>
         </label>
       </div>
+
+      {/* Cấu hình cá nhân hóa chi tiết */}
+      {isCustomizable && (
+        <PersonalizationConfigForm
+          layoutConfig={layoutConfig}
+          setLayoutConfig={setLayoutConfig}
+        />
+      )}
     </div>
   );
 }

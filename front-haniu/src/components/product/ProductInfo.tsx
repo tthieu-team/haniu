@@ -260,24 +260,63 @@ export default function ProductInfo({
 
       {/* Variants Selector */}
       {((product as any).variants && (product as any).variants.length > 0) && (
-        <div className="space-y-2">
-          <label className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-450">Chọn mẫu hộp quà / màu sắc</label>
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            {(product as any).variants.map((v: Variant) => (
-              <button
-                key={v.id}
-                type="button"
-                onClick={() => setSelectedVariant(v)}
-                className={`p-2.5 sm:p-3 text-left rounded-xl border text-[11px] sm:text-xs font-semibold transition-all ${
-                  selectedVariant?.id === v.id
-                    ? 'border-rose-500 bg-rose-50/10 text-rose-600 dark:border-rose-450 dark:text-rose-450 shadow-sm'
-                    : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-                }`}
-              >
-                <div className="truncate">{v.name}</div>
-                <div className="text-[9px] sm:text-[10px] text-slate-400 font-mono mt-0.5">Kho: {v.stock} chiếc</div>
-              </button>
-            ))}
+        <div className="space-y-2.5 mt-6">
+          <label className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-450 block mb-3">Chọn mẫu hộp quà / màu sắc</label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {(product as any).variants.map((v: Variant) => {
+              const isSelected = selectedVariant?.id === v.id;
+              const isLowStock = v.stock > 0 && v.stock <= 10;
+              const isOutOfStock = v.stock === 0;
+
+              return (
+                <button
+                  key={v.id}
+                  type="button"
+                  disabled={isOutOfStock}
+                  onClick={() => setSelectedVariant(v)}
+                  className={`relative p-2.5 rounded-xl border text-[11px] font-bold transition-all duration-300 w-full flex flex-col justify-between gap-2 text-left select-none outline-none group cursor-pointer min-h-[72px] ${
+                    isSelected
+                      ? 'border-rose-500 bg-gradient-to-br from-rose-500/5 to-rose-600/5 text-rose-600 dark:border-rose-450 dark:text-rose-400 dark:from-rose-500/10 dark:to-rose-600/10 shadow-[0_2px_8px_rgba(244,63,94,0.06)]'
+                      : isOutOfStock
+                        ? 'border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed dark:border-zinc-850 dark:bg-zinc-900/50 dark:text-zinc-650'
+                        : 'border-slate-100 bg-white hover:border-rose-250 dark:border-zinc-800 dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:shadow-xs dark:hover:bg-zinc-850/50'
+                  }`}
+                >
+                  {/* Selected checkmark indicator (Top right absolute) */}
+                  {isSelected && (
+                    <span className="absolute top-1 right-1 p-0.5 rounded-full bg-rose-500 text-white dark:bg-rose-600 shadow-xs animate-scale-up z-10">
+                      <Icon name="check" size={8} />
+                    </span>
+                  )}
+
+                  {/* Name */}
+                  <div className={`leading-tight break-words line-clamp-2 pr-2 transition-colors ${isSelected ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-zinc-200'}`}>
+                    {v.name}
+                  </div>
+                  
+                  {/* Stock & Status info */}
+                  <div className="flex items-center justify-between w-full mt-auto pt-1.5 border-t border-slate-50/50 dark:border-zinc-850/50 text-[9px] text-slate-400 dark:text-zinc-500 font-medium">
+                    <span className={`text-[8px] font-bold uppercase ${
+                      isOutOfStock 
+                        ? 'text-slate-400 dark:text-zinc-550' 
+                        : isLowStock 
+                          ? 'text-amber-600 dark:text-amber-400 animate-pulse' 
+                          : 'text-slate-400 dark:text-zinc-550'
+                    }`}>
+                      {isOutOfStock 
+                        ? 'Hết' 
+                        : isLowStock 
+                          ? 'Sắp hết' 
+                          : 'Sẵn có'
+                      }
+                    </span>
+                    <span className="font-mono shrink-0">
+                      {v.stock > 999 ? '999+' : `${v.stock} c`}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

@@ -42,6 +42,7 @@ interface PreviewProduct {
   attributes: Record<string, string>; // parsed category/global attributes
   media: Media[];
   variants: Variant[];
+  layoutConfig?: string;
 }
 
 interface ProductPreviewPanelProps {
@@ -153,18 +154,33 @@ export default function ProductPreviewPanel({ product }: ProductPreviewPanelProp
       )}
 
       {/* Personalization Section */}
-      {product.isCustomizable && (
-        <div className="pointer-events-none opacity-80">
-          <PersonalizationForm
-            engravingText={engravingText}
-            setEngravingText={setEngravingText}
-            cardMessage={cardMessage}
-            setCardMessage={setCardMessage}
-            giftWrap={giftWrap}
-            setGiftWrap={setGiftWrap}
-          />
-        </div>
-      )}
+      {(() => {
+        let customizationConfig = undefined;
+        if (product.layoutConfig) {
+          try {
+            const parsedLayout = typeof product.layoutConfig === 'string'
+              ? JSON.parse(product.layoutConfig)
+              : product.layoutConfig;
+            customizationConfig = parsedLayout?.customizationConfig;
+          } catch (e) {
+            console.error('Failed to parse layoutConfig in ProductPreviewPanel', e);
+          }
+        }
+
+        return product.isCustomizable && (
+          <div className="pointer-events-none opacity-80">
+            <PersonalizationForm
+              engravingText={engravingText}
+              setEngravingText={setEngravingText}
+              cardMessage={cardMessage}
+              setCardMessage={setCardMessage}
+              giftWrap={giftWrap}
+              setGiftWrap={setGiftWrap}
+              config={customizationConfig}
+            />
+          </div>
+        );
+      })()}
 
       {/* Specifications combined */}
       {Object.keys(combinedSpecs).length > 0 && (

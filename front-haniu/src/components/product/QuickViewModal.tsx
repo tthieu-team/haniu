@@ -28,6 +28,7 @@ interface Product {
   category?: { name: string; slug: string };
   media?: Media[];
   thumbnailUrl?: string;
+  layoutConfig?: string;
 }
 
 interface QuickViewModalProps {
@@ -266,18 +267,33 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
             </div>
 
             {/* Personalization if enabled */}
-            {product.isCustomizable && (
-              <div className="space-y-2">
-                <PersonalizationForm 
-                  engravingText={engravingText}
-                  setEngravingText={setEngravingText}
-                  cardMessage={cardMessage}
-                  setCardMessage={setCardMessage}
-                  giftWrap={giftWrap}
-                  setGiftWrap={setGiftWrap}
-                />
-              </div>
-            )}
+            {(() => {
+              let customizationConfig = undefined;
+              if (product.layoutConfig) {
+                try {
+                  const parsedLayout = typeof product.layoutConfig === 'string'
+                    ? JSON.parse(product.layoutConfig)
+                    : product.layoutConfig;
+                  customizationConfig = parsedLayout?.customizationConfig;
+                } catch (e) {
+                  console.error('Failed to parse layoutConfig in QuickViewModal', e);
+                }
+              }
+
+              return product.isCustomizable && (
+                <div className="space-y-2">
+                  <PersonalizationForm 
+                    engravingText={engravingText}
+                    setEngravingText={setEngravingText}
+                    cardMessage={cardMessage}
+                    setCardMessage={setCardMessage}
+                    giftWrap={giftWrap}
+                    setGiftWrap={setGiftWrap}
+                    config={customizationConfig}
+                  />
+                </div>
+              );
+            })()}
           </div>
 
           {/* Action section */}

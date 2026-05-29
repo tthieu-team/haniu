@@ -14,7 +14,8 @@ import Icon from '@/components/common/Icons';
 // Upgraded subcomponents
 import ProductInfo from '@/components/product/ProductInfo';
 import ProductSpecifications from '@/components/product/ProductSpecifications';
-import RealtimePreview from '@/components/product/RealtimePreview';
+import dynamic from 'next/dynamic';
+const RealtimePreview = dynamic(() => import('@/components/product/RealtimePreview'), { ssr: false });
 import ProductReviews from '@/components/product/ProductReviews';
 import ProductPolicies from '@/components/product/ProductPolicies';
 import StickyBuyBar from '@/components/product/StickyBuyBar';
@@ -335,6 +336,41 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     }
   };
 
+  let customizationConfig = {
+    showEngraving: true,
+    showEngravingMockup: true,
+    engravingLabel: "Khắc chữ / Tên theo yêu cầu (Miễn phí)",
+    engravingPlaceholder: "Nhập tên hoặc lời chúc muốn khắc (tối đa 50 ký tự)",
+    engravingMaxLength: 50,
+    showCardMessage: true,
+    showCardMessageMockup: true,
+    cardMessageLabel: "Lời nhắn trên thiệp chúc mừng",
+    cardMessagePlaceholder: "Nhập nội dung thư chúc mừng gửi tới người nhận...",
+    showGiftWrap: true,
+    giftWrapLabel: "Chọn ruy băng nơ / hộp gói",
+    giftWrapOptions: [
+      "Ruy băng Đỏ Lãng Mạn",
+      "Ruy băng Vàng Hoàng Gia",
+      "Gói bọc giấy Kraft Hoài Cổ"
+    ]
+  };
+
+  if (product && product.layoutConfig) {
+    try {
+      const parsedLayout = typeof product.layoutConfig === 'string'
+        ? JSON.parse(product.layoutConfig)
+        : product.layoutConfig;
+      if (parsedLayout?.customizationConfig) {
+        customizationConfig = {
+          ...customizationConfig,
+          ...parsedLayout.customizationConfig
+        };
+      }
+    } catch (e) {
+      console.error('Failed to parse layoutConfig in ProductDetailPage', e);
+    }
+  }
+
   return (
     <div className="space-y-6 md:space-y-12">
       {/* Schema JSON LD */}
@@ -377,6 +413,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               setCardMessage={setCardMessage}
               giftWrap={giftWrap}
               setGiftWrap={setGiftWrap}
+              config={customizationConfig}
             />
           )}
 
@@ -386,6 +423,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             cardMessage={cardMessage}
             giftWrap={giftWrap}
             isCustomizable={product.isCustomizable}
+            config={customizationConfig}
           />
 
           {/* Service options trigger block */}

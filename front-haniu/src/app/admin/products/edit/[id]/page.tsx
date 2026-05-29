@@ -14,7 +14,6 @@ import BasicInfoForm from '@/components/admin/product/BasicInfoForm';
 import CategorizationForm from '@/components/admin/product/CategorizationForm';
 import ImageUploadForm from '@/components/admin/product/ImageUploadForm';
 import CategoryAttributesForm from '@/components/admin/product/CategoryAttributesForm';
-import ProductPreviewPanel from '@/components/admin/product/ProductPreviewPanel';
 import { ProductPreviewModal } from '@/components/admin/product/ProductPreviewModal';
 import LayoutConfigEditor from '@/components/admin/product/LayoutConfigEditor';
 import SeoConfigForm from '@/components/admin/product/SeoConfigForm';
@@ -399,10 +398,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     attributes: attributes,
     media: mediaList,
     variants: variantsList,
+    layoutConfig: layoutConfig,
   };
 
   return (
-    <div className="space-y-8 max-w-[1600px] mx-auto px-4">
+    <div className="space-y-8 max-w-[1600px] mx-auto px-4 pb-20">
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800 pb-5">
         <div>
           <Link href="/admin/products" className="text-xs text-slate-400 hover:text-rose-500 font-semibold flex items-center gap-1 mb-1">
@@ -424,10 +424,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Form */}
-        <form onSubmit={handleSave} className="xl:col-span-7 space-y-8 text-xs font-medium">
-          
+      <div className="w-full">
+        <form onSubmit={handleSave} className="space-y-8 text-xs font-medium">
+
           {/* Basic Info */}
           <BasicInfoForm
             name={name}
@@ -465,6 +464,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             setAllowPhotoUpload={setAllowPhotoUpload}
             allowPhotobooth={allowPhotobooth}
             setAllowPhotobooth={setAllowPhotobooth}
+            layoutConfig={layoutConfig}
+            setLayoutConfig={setLayoutConfig}
           />
 
           {/* Category dynamic attributes */}
@@ -521,51 +522,42 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           {/* Variations */}
           <VariantManager variantsList={variantsList} setVariantsList={setVariantsList} basePrice={basePrice} />
 
-          {/* Submit */}
-          <div className="flex gap-4 justify-end pt-4">
-            <Link
-              href="/admin/products"
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
-            >
-              Hủy bỏ
-            </Link>
-            <button
-              type="submit"
-              disabled={saveLoading}
-              className="bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs flex items-center justify-center gap-1.5"
-            >
-              {saveLoading ? (
-                <>
-                  <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
-                  Đang cập nhật...
-                </>
-              ) : (
-                <>
-                  <Icon name="💾" size={14} /> Cập nhật sản phẩm
-                </>
-              )}
-            </button>
-          </div>
-
-        </form>
-
-        {/* Right Column: Live Preview */}
-        <div className="xl:col-span-5 hidden xl:block sticky top-8 max-h-[calc(100vh-6rem)] overflow-y-auto space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400 flex items-center gap-2">
-              <span className="inline-block w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-              Trực quan chi tiết (Live Preview)
-            </h3>
+          {/* Submit & Preview Bar (Sticky bottom) */}
+          <div className="sticky bottom-4 z-35 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-slate-200 dark:border-zinc-800 p-4 rounded-2xl flex items-center justify-between shadow-lg gap-4 mt-8">
             <button
               type="button"
               onClick={() => setIsPreviewModalOpen(true)}
-              className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800/50 text-slate-600 dark:text-zinc-400 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-3 text-xs font-bold rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800/50 text-slate-700 dark:text-zinc-200 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer font-semibold shadow-xs"
             >
-              <Icon name="eye" size={12} /> Xem kích thước chuẩn
+              <Icon name="eye" size={13} /> Xem kích thước chuẩn
             </button>
+            <div className="flex gap-4">
+              <Link
+                href="/admin/products"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+              >
+                Hủy bỏ
+              </Link>
+              <button
+                type="submit"
+                disabled={saveLoading}
+                className="bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs flex items-center justify-center gap-1.5"
+              >
+                {saveLoading ? (
+                  <>
+                    <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
+                    Đang cập nhật...
+                  </>
+                ) : (
+                  <>
+                    <Icon name="💾" size={14} /> Cập nhật sản phẩm
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-          <ProductPreviewPanel product={previewProductData} />
-        </div>
+
+        </form>
       </div>
 
       <ProductPreviewModal

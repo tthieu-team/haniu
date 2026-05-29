@@ -97,11 +97,11 @@ export const productService = {
   },
 
   getProductById: async (id: string) => {
-    return fetchApi(`/api/v1/products/${id}`);
+    return fetchApi(`/api/v1/products/${id}`, { cache: 'no-store' });
   },
 
   getProductBySlug: async (slug: string) => {
-    return fetchApi(`/api/v1/products/slug/${slug}`);
+    return fetchApi(`/api/v1/products/slug/${slug}`, { cache: 'no-store' });
   },
 
   createProduct: async (payload: ProductRequestPayload) => {

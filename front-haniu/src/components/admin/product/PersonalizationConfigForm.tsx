@@ -1,0 +1,299 @@
+'use client';
+
+import { useState } from 'react';
+import Icon from '@/components/common/Icons';
+
+interface PersonalizationConfigFormProps {
+  layoutConfig?: string;
+  setLayoutConfig?: (v: string) => void;
+}
+
+export default function PersonalizationConfigForm({
+  layoutConfig = '{}',
+  setLayoutConfig
+}: PersonalizationConfigFormProps) {
+  const [newGiftOption, setNewGiftOption] = useState('');
+
+  // Parse layoutConfig safely
+  let parsedConfig: any = {};
+  try {
+    if (layoutConfig) {
+      parsedConfig = typeof layoutConfig === 'string' ? JSON.parse(layoutConfig) : layoutConfig;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+  const customizationConfig = parsedConfig.customizationConfig || {
+    showEngraving: true,
+    showEngravingMockup: true,
+    engravingLabel: "Khắc chữ / Tên theo yêu cầu (Miễn phí)",
+    engravingPlaceholder: "Nhập tên hoặc lời chúc muốn khắc (tối đa 50 ký tự)",
+    engravingMaxLength: 50,
+    showCardMessage: true,
+    showCardMessageMockup: true,
+    cardMessageLabel: "Lời nhắn trên thiệp chúc mừng",
+    cardMessagePlaceholder: "Nhập nội dung thư chúc mừng gửi tới người nhận...",
+    showGiftWrap: true,
+    giftWrapLabel: "Chọn ruy băng nơ / hộp gói",
+    giftWrapOptions: [
+      "Ruy băng Đỏ Lãng Mạn",
+      "Ruy băng Vàng Hoàng Gia",
+      "Gói bọc giấy Kraft Hoài Cổ"
+    ]
+  };
+
+  const handleCustomizationChange = (field: string, val: any) => {
+    if (!setLayoutConfig) return;
+    const updatedCustom = {
+      ...customizationConfig,
+      [field]: val
+    };
+    const newConfig = {
+      ...parsedConfig,
+      customizationConfig: updatedCustom
+    };
+    setLayoutConfig(JSON.stringify(newConfig, null, 2));
+  };
+
+  return (
+    <div className="space-y-6 pt-6 border-t border-slate-200 dark:border-zinc-800 animate-fade-in text-slate-800 dark:text-zinc-100">
+      <div className="border-l-4 border-amber-500 pl-4 space-y-1">
+        <h4 className="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+          Cấu hình các trường hiển thị Cá nhân hóa
+        </h4>
+        <p className="text-[10px] text-slate-400">
+          Thiết lập ẩn/hiện, nhãn gợi ý và giới hạn cho từng trường thông tin quà tặng của khách hàng.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
+        {/* 1. Engraving Field */}
+        <div className="bg-slate-50/50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-slate-700 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1">
+              ✍️ Trường Khắc chữ / Tên
+            </label>
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] text-slate-450 dark:text-zinc-500 font-semibold">Bật/Tắt trường:</span>
+              <button
+                type="button"
+                onClick={() => handleCustomizationChange('showEngraving', !customizationConfig.showEngraving)}
+                className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                  customizationConfig.showEngraving ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+                }`}
+              >
+                <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  customizationConfig.showEngraving ? 'translate-x-4' : 'translate-x-0'
+                }`} />
+              </button>
+            </div>
+          </div>
+
+          {customizationConfig.showEngraving && (
+            <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-zinc-800">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <div className="md:col-span-8 space-y-1">
+                  <label className="text-[10px] text-slate-400">Tiêu đề trường (Label)</label>
+                  <input
+                    type="text"
+                    value={customizationConfig.engravingLabel}
+                    onChange={(e) => handleCustomizationChange('engravingLabel', e.target.value)}
+                    className="w-full bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                  />
+                </div>
+                <div className="md:col-span-4 space-y-1">
+                  <label className="text-[10px] text-slate-400">Ký tự tối đa (Max length)</label>
+                  <input
+                    type="number"
+                    value={customizationConfig.engravingMaxLength}
+                    onChange={(e) => handleCustomizationChange('engravingMaxLength', parseInt(e.target.value) || 50)}
+                    className="w-full bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                  />
+                </div>
+                <div className="md:col-span-12 space-y-1">
+                  <label className="text-[10px] text-slate-400">Gợi ý nhập liệu (Placeholder)</label>
+                  <input
+                    type="text"
+                    value={customizationConfig.engravingPlaceholder}
+                    onChange={(e) => handleCustomizationChange('engravingPlaceholder', e.target.value)}
+                    className="w-full bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Real-time laser simulation toggle inside engraving settings */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-semibold text-slate-700 dark:text-zinc-350 block">🔥 Mô phỏng Xem khắc Laser Realtime</span>
+                  <span className="text-[9px] text-slate-450 dark:text-zinc-500 block">Hiển thị tab "Xem khắc Laser" trong khu vực mô phỏng</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCustomizationChange('showEngravingMockup', customizationConfig.showEngravingMockup !== false ? false : true)}
+                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                    customizationConfig.showEngravingMockup !== false ? 'bg-amber-500' : 'bg-slate-200 dark:bg-zinc-800'
+                  }`}
+                >
+                  <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    customizationConfig.showEngravingMockup !== false ? 'translate-x-4' : 'translate-x-0'
+                  }`} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 2. Card Message Field */}
+        <div className="bg-slate-50/50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-slate-700 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1">
+              ✉️ Trường Thiệp chúc mừng
+            </label>
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] text-slate-450 dark:text-zinc-550 font-semibold">Bật/Tắt trường:</span>
+              <button
+                type="button"
+                onClick={() => handleCustomizationChange('showCardMessage', !customizationConfig.showCardMessage)}
+                className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                  customizationConfig.showCardMessage ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+                }`}
+              >
+                <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  customizationConfig.showCardMessage ? 'translate-x-4' : 'translate-x-0'
+                }`} />
+              </button>
+            </div>
+          </div>
+
+          {customizationConfig.showCardMessage && (
+            <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-zinc-800">
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400">Tiêu đề trường (Label)</label>
+                <input
+                  type="text"
+                  value={customizationConfig.cardMessageLabel}
+                  onChange={(e) => handleCustomizationChange('cardMessageLabel', e.target.value)}
+                  className="w-full bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400">Gợi ý nhập liệu (Placeholder)</label>
+                <input
+                  type="text"
+                  value={customizationConfig.cardMessagePlaceholder}
+                  onChange={(e) => handleCustomizationChange('cardMessagePlaceholder', e.target.value)}
+                  className="w-full bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                />
+              </div>
+
+              {/* Real-time handwritten card toggle inside card message settings */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-semibold text-slate-700 dark:text-zinc-350 block">✍️ Mô phỏng Xem thiệp viết tay Realtime</span>
+                  <span className="text-[9px] text-slate-450 dark:text-zinc-500 block">Hiển thị tab "Xem thiệp viết tay" trong khu vực mô phỏng</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCustomizationChange('showCardMessageMockup', customizationConfig.showCardMessageMockup !== false ? false : true)}
+                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                    customizationConfig.showCardMessageMockup !== false ? 'bg-amber-500' : 'bg-slate-200 dark:bg-zinc-800'
+                  }`}
+                >
+                  <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    customizationConfig.showCardMessageMockup !== false ? 'translate-x-4' : 'translate-x-0'
+                  }`} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 3. Gift Wrap Dropdown Field */}
+        <div className="bg-slate-50/50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-slate-700 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1">
+              🎁 Trường Chọn gói quà / Ruy băng
+            </label>
+            <button
+              type="button"
+              onClick={() => handleCustomizationChange('showGiftWrap', !customizationConfig.showGiftWrap)}
+              className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                customizationConfig.showGiftWrap ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+              }`}
+            >
+              <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                customizationConfig.showGiftWrap ? 'translate-x-4' : 'translate-x-0'
+              }`} />
+            </button>
+          </div>
+
+          {customizationConfig.showGiftWrap && (
+            <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-zinc-800">
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400">Tiêu đề trường (Label)</label>
+                <input
+                  type="text"
+                  value={customizationConfig.giftWrapLabel}
+                  onChange={(e) => handleCustomizationChange('giftWrapLabel', e.target.value)}
+                  className="w-full bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Danh sách tùy chọn gói quà</label>
+                <div className="space-y-2">
+                  {(customizationConfig.giftWrapOptions || []).map((opt: string, idx: number) => (
+                    <div key={idx} className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        value={opt}
+                        onChange={(e) => {
+                          const list = [...(customizationConfig.giftWrapOptions || [])];
+                          list[idx] = e.target.value;
+                          handleCustomizationChange('giftWrapOptions', list);
+                        }}
+                        className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const list = (customizationConfig.giftWrapOptions || []).filter((_: string, i: number) => i !== idx);
+                          handleCustomizationChange('giftWrapOptions', list);
+                        }}
+                        className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all cursor-pointer"
+                      >
+                        <Icon name="trash" size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                  <input
+                    type="text"
+                    value={newGiftOption}
+                    onChange={(e) => setNewGiftOption(e.target.value)}
+                    placeholder="Thêm mẫu nơ / giấy gói quà mới..."
+                    className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newGiftOption.trim()) return;
+                      handleCustomizationChange('giftWrapOptions', [...(customizationConfig.giftWrapOptions || []), newGiftOption.trim()]);
+                      setNewGiftOption('');
+                    }}
+                    className="px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold cursor-pointer"
+                  >
+                    Thêm
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
