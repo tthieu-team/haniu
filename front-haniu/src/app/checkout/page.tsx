@@ -3,12 +3,13 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useOrderStore } from '@/store/order';
-import { useCartStore } from '@/store/cart';
+import { useCartStore, Cart } from '@/store/cart';
 import { useCouponStore } from '@/store/coupon';
 import { useAuthStore } from '@/store/auth';
 import Icon from '@/components/common/Icons';
 import { fetchApi } from '@/lib/api';
 import AddressPicker from '@/components/common/AddressPicker';
+import { cartService } from '@/services/cart.service';
 
 interface PaymentMethodConfig {
   code: string;
@@ -32,7 +33,11 @@ function CheckoutForm() {
   const { appliedCoupon, discountAmount, applyCoupon } = useCouponStore();
   const { user, isAuthenticated } = useAuthStore();
 
-  const cartId = searchParams.get('cartId') || cart?.id || '';
+  const paramCartId = searchParams.get('cartId');
+  const [checkoutCart, setCheckoutCart] = useState<Cart | null>(null);
+  const activeCart = checkoutCart || cart;
+
+  const cartId = paramCartId || activeCart?.id || '';
   const initialCoupon = searchParams.get('coupon') || appliedCoupon?.code || '';
   const initialShipping = searchParams.get('shippingMethod') || 'STANDARD';
   const initialPayment = searchParams.get('paymentMethod') || 'COD';
@@ -56,9 +61,9 @@ function CheckoutForm() {
   const [error, setError] = useState('');
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodConfig[]>(ALL_PAYMENT_METHODS);
 
-  const subtotal = cart?.totalPrice || 0;
+  const subtotal = activeCart?.totalPrice || 0;
 
-  const originalSubtotal = cart?.items.reduce((acc, item) => {
+  const originalSubtotal = activeCart?.items.reduce((acc, item) => {
     const orig = item.originalPrice || item.unitPrice;
     return acc + orig * item.quantity;
   }, 0) || 0;
@@ -86,8 +91,19 @@ function CheckoutForm() {
   };
 
   useEffect(() => {
-    fetchCart();
-  }, [fetchCart]);
+    if (paramCartId) {
+      cartService.getCartById(paramCartId)
+        .then((data) => {
+          setCheckoutCart(data);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch checkout cart:", err);
+          fetchCart();
+        });
+    } else {
+      fetchCart();
+    }
+  }, [paramCartId, fetchCart]);
 
   useEffect(() => {
     // Fetch enabled payment methods from system config
@@ -178,7 +194,7 @@ function CheckoutForm() {
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Customer Information & Shipping address */}
-        <div className="lg:col-span-2 space-y-6 bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800">
+        <div className="lg:col-span-2 space-y-6 bg-white dark:bg-zinc-900 p-4 sm:p-6 rounded-3xl border border-slate-100 dark:border-zinc-800">
           <h2 className="font-bold text-slate-800 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-zinc-800">Thông tin giao hàng</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -189,7 +205,7 @@ function CheckoutForm() {
                 required
                 value={formData.customerName}
                 onChange={e => setFormData({ ...formData, customerName: e.target.value })}
-                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
+                className="w-full text-base md:text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
               />
             </div>
             <div>
@@ -199,7 +215,7 @@ function CheckoutForm() {
                 required
                 value={formData.customerPhone}
                 onChange={e => setFormData({ ...formData, customerPhone: e.target.value })}
-                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
+                className="w-full text-base md:text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
               />
             </div>
             <div className="sm:col-span-2">
@@ -209,7 +225,7 @@ function CheckoutForm() {
                 required
                 value={formData.customerEmail}
                 onChange={e => setFormData({ ...formData, customerEmail: e.target.value })}
-                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
+                className="w-full text-base md:text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
               />
             </div>
             <AddressPicker
@@ -230,7 +246,7 @@ function CheckoutForm() {
               <textarea
                 value={formData.note}
                 onChange={e => setFormData({ ...formData, note: e.target.value })}
-                className="w-full text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white h-20"
+                className="w-full text-base md:text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white h-20"
               />
             </div>
           </div>
@@ -238,28 +254,28 @@ function CheckoutForm() {
           {/* Shipping Methods inside Form */}
           <div className="pt-6 border-t border-slate-100 dark:border-zinc-800 space-y-3">
             <h3 className="font-bold text-slate-800 dark:text-white text-xs uppercase tracking-wider">Phương thức vận chuyển</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {[
-                { code: 'STANDARD', name: 'Giao tiêu chuẩn', desc: 'Dự kiến 2-4 ngày', price: subtotal >= 300000 ? 0 : 30000 },
+                { code: 'STANDARD', name: 'Tiêu chuẩn', desc: 'Dự kiến 2-4 ngày', price: subtotal >= 300000 ? 0 : 30000 },
                 { code: 'FAST', name: 'Giao nhanh', desc: 'Dự kiến 1-2 ngày', price: subtotal >= 500000 ? 0 : 50000 },
-                { code: 'EXPRESS', name: 'Hỏa tốc 2h', desc: 'Giao nhận trong ngày', price: subtotal >= 1000000 ? 0 : 100000 }
+                { code: 'EXPRESS', name: 'Hỏa tốc 2h', desc: 'Giao trong ngày', price: subtotal >= 1000000 ? 0 : 100000 }
               ].map(sm => (
                 <button
                   key={sm.code}
                   type="button"
                   onClick={() => setShippingMethod(sm.code)}
-                  className={`p-3 text-left rounded-xl border text-xs font-semibold transition-all flex flex-col justify-between h-20 ${shippingMethod === sm.code
+                  className={`p-2.5 text-center rounded-xl border text-[10px] font-bold transition-all flex flex-col justify-between h-20 ${shippingMethod === sm.code
                       ? 'border-rose-500 bg-rose-50/10 text-rose-600 dark:border-rose-400 dark:text-rose-400'
-                      : 'border-slate-250 bg-white hover:bg-slate-50 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-350 dark:hover:bg-zinc-850'
+                      : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-350 dark:hover:bg-zinc-850'
                     }`}
                 >
-                  <div className="flex justify-between items-center w-full">
-                    <span>{sm.name}</span>
-                    <span className="font-mono text-[10px] font-bold">
-                      {sm.price === 0 ? 'Freeship' : `${sm.price.toLocaleString()}đ`}
+                  <div className="flex flex-col items-center w-full space-y-0.5">
+                    <span className="block truncate w-full">{sm.name}</span>
+                    <span className="font-mono text-[9px] font-black text-rose-500 dark:text-rose-400 block">
+                      {sm.price === 0 ? 'Freeship' : `${(sm.price / 1000)}k`}
                     </span>
                   </div>
-                  <span className="text-[10px] text-slate-400 font-normal">{sm.desc}</span>
+                  <span className="text-[8px] text-slate-400 dark:text-zinc-550 font-normal block w-full truncate">{sm.desc}</span>
                 </button>
               ))}
             </div>
@@ -269,18 +285,18 @@ function CheckoutForm() {
         {/* Payment Selection, Order Summary and Confirm order button */}
         <div className="space-y-6">
           {/* Order Summary box */}
-          {cart && cart.items.length > 0 && (
-            <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 space-y-4 shadow-sm">
+          {activeCart && activeCart.items.length > 0 && (
+            <div className="bg-white dark:bg-zinc-900 p-4 sm:p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 space-y-4 shadow-sm">
               <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-zinc-800">
                 <h2 className="font-bold text-slate-800 dark:text-white text-base">Tóm tắt đơn hàng</h2>
                 <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-zinc-800 px-2.5 py-1 rounded-full">
-                  {cart.totalItems} sản phẩm
+                  {activeCart.totalItems} sản phẩm
                 </span>
               </div>
 
               {/* Item List */}
               <div className="space-y-3 max-h-[200px] overflow-y-auto pr-1">
-                {cart.items.map(item => (
+                {activeCart.items.map(item => (
                   <div key={item.id} className="flex gap-3 items-center text-xs">
                     <img
                       src={item.imageUrl || "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=100&q=80"}
@@ -342,7 +358,7 @@ function CheckoutForm() {
             </div>
           )}
 
-          <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 space-y-4 shadow-sm">
+          <div className="bg-white dark:bg-zinc-900 p-4 sm:p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 space-y-4 shadow-sm">
             <h2 className="font-bold text-slate-800 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-zinc-800">Phương thức thanh toán</h2>
 
             <div className="space-y-3">

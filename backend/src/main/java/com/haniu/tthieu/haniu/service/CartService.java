@@ -12,4 +12,6 @@ public interface CartService {
     CartDto removeItem(String email, String sessionId, UUID itemId);
     void mergeCarts(String email, String sessionId);
     void clearCart(UUID cartId);
+    CartDto getCartById(UUID cartId);
+    CartDto createBuyNowCart(CartItemRequestDto request);
 }

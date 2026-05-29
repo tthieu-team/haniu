@@ -316,7 +316,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
                 value={comment}
                 onChange={e => setComment(e.target.value)}
                 placeholder="Chia sẻ trải nghiệm thực tế của bạn về chất liệu, mức độ hoàn thiện sản phẩm..."
-                className="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 text-slate-700 dark:text-white focus:outline-none focus:border-rose-500 transition-colors"
+                className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 text-slate-700 dark:text-white focus:outline-none focus:border-rose-500 transition-colors"
               />
             </div>
 

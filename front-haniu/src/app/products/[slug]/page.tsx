@@ -8,6 +8,7 @@ import PersonalizationForm from '@/components/product/PersonalizationForm';
 import { useProductStore } from '@/store/product';
 import { productService } from '@/services/product.service';
 import { useCartStore } from '@/store/cart';
+import { cartService } from '@/services/cart.service';
 import Icon from '@/components/common/Icons';
 
 // Upgraded subcomponents
@@ -277,11 +278,21 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     };
 
     try {
-      await addToCart(payload);
-      router.push('/cart');
+      const buyNowCart = await cartService.createBuyNowCart(payload);
+      if (buyNowCart && buyNowCart.id) {
+        router.push(`/checkout?cartId=${buyNowCart.id}&buyNow=true`);
+      } else {
+        await addToCart(payload);
+        router.push('/checkout');
+      }
     } catch (err) {
-      console.log("Cart Payload created (Fallback):", payload);
-      router.push('/cart');
+      console.error("Buy now failed:", err);
+      try {
+        await addToCart(payload);
+        router.push('/checkout');
+      } catch (e) {
+        router.push('/cart');
+      }
     }
   };
 
@@ -325,7 +336,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   };
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-6 md:space-y-12">
       {/* Schema JSON LD */}
       <script
         type="application/ld+json"
@@ -337,7 +348,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         <Icon name="arrow-left" size={14} /> Trở lại danh sách sản phẩm
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
         {/* Left Column: Media gallery (Sticky) */}
         <div className="lg:col-span-7 lg:sticky lg:top-28">
           <MediaGallery mediaList={product.media} name={product.name} />
@@ -413,16 +424,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             </div>
           )}
 
-          <div className="flex gap-4">
+          <div className="flex gap-3 sm:gap-4">
             <button
               onClick={handleAddToCart}
-              className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:text-zinc-950 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-md active:scale-95 text-sm flex items-center justify-center gap-2"
+              className="flex-1 bg-slate-900 hover:bg-slate-850 dark:bg-zinc-100 dark:text-zinc-950 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md active:scale-95 text-xs sm:text-sm flex items-center justify-center gap-2"
             >
               <Icon name="bag" size={16} /> Thêm Vào Giỏ Hàng
             </button>
             <button
               onClick={handleBuyNow}
-              className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-sm cursor-pointer flex items-center justify-center gap-2"
+              className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
             >
               <Icon name="zap" size={16} /> Mua Ngay
             </button>
@@ -434,7 +445,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       <ProductTrustBadges product={product} />
 
       {/* Detailed Information & Reviews Split Section */}
-      <div id="detail-tabs" className="grid grid-cols-1 lg:grid-cols-12 gap-12 pt-12 border-t border-slate-200 dark:border-zinc-800/80 items-start">
+      <div id="detail-tabs" className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 pt-6 md:pt-12 border-t border-slate-200 dark:border-zinc-800/80 items-start">
         {/* Left Column: Tabbed Content (Description, Specs, Reviews) */}
         <div className="lg:col-span-8 space-y-8">
           {/* Tab buttons header */}

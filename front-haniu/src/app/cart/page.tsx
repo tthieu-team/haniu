@@ -12,6 +12,7 @@ import Icon from '@/components/common/Icons';
 // Import subcomponents
 import CartItemCard from './components/CartItemCard';
 import ShippingProgressBar from './components/ShippingProgressBar';
+import ProductCard from '@/components/product/ProductCard';
 
 interface PaymentMethodConfig {
   code: string;
@@ -249,7 +250,7 @@ export default function CartPage() {
     .slice(0, 4);
 
   return (
-    <div className="w-full space-y-12">
+    <div className="w-full space-y-6 sm:space-y-10">
       {/* Title block */}
       <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-100 dark:border-zinc-800 pb-5">
         <div className="space-y-1">
@@ -272,7 +273,7 @@ export default function CartPage() {
           <p className="text-slate-500 dark:text-zinc-400 text-sm font-medium">Đang tải giỏ hàng của bạn...</p>
         </div>
       ) : !cart || cart.items.length === 0 ? (
-        <div className="space-y-12">
+        <div className="space-y-6 sm:space-y-10">
           {/* Empty cart notification */}
           <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-16 rounded-3xl text-center space-y-6 max-w-xl mx-auto shadow-sm">
             <div className="w-20 h-20 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-full flex items-center justify-center mx-auto">
@@ -290,7 +291,7 @@ export default function CartPage() {
           </div>
         </div>
       ) : (
-        <div className="space-y-12">
+        <div className="space-y-6 sm:space-y-10">
           {/* Grid Layout for Main Content */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {/* Left Column: Cart Cards & Free Shipping Progress */}
@@ -448,7 +449,7 @@ export default function CartPage() {
                       placeholder="Nhập mã..."
                       value={couponCode}
                       onChange={e => setCouponCode(e.target.value)}
-                      className="flex-1 text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5 uppercase font-semibold text-slate-800 dark:text-white focus:outline-none focus:border-rose-500 transition-colors"
+                      className="flex-1 text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5 uppercase font-semibold text-slate-800 dark:text-white focus:outline-none focus:border-rose-500 transition-colors"
                     />
                     <button
                       type="submit"
@@ -654,47 +655,9 @@ export default function CartPage() {
               <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
                 <Icon name="sparkles" size={16} className="text-rose-500" /> Quà tặng độc đáo nổi bật khác
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
                 {filteredRecommended.map(p => (
-                  <div key={p.id} className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group flex flex-col justify-between">
-                    <div className="relative aspect-square overflow-hidden bg-slate-50 dark:bg-zinc-850">
-                      <img
-                        src={getProductThumbnail(p)}
-                        alt={p.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                    <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
-                      <div className="space-y-1">
-                        <Link href={`/products/${p.slug}`} className="font-bold text-xs text-slate-800 dark:text-zinc-200 line-clamp-2 hover:text-rose-500 transition-colors">
-                          {p.name}
-                        </Link>
-                        {p.category && (
-                          <span className="text-[10px] text-slate-400 font-medium">{p.category.name}</span>
-                        )}
-                      </div>
-                      <div className="space-y-3">
-                        <div className="flex items-baseline gap-1.5 flex-wrap">
-                          <span className="text-xs font-bold text-rose-500">{(p.salePrice || p.basePrice).toLocaleString()}đ</span>
-                          {p.salePrice && p.salePrice < p.basePrice && (
-                            <>
-                              <span className="text-[10px] text-slate-400 line-through">{(p.basePrice).toLocaleString()}đ</span>
-                              <span className="bg-rose-500/10 text-rose-500 text-[8px] font-bold px-1.5 py-0.5 rounded">
-                                -{Math.round((1 - p.salePrice / p.basePrice) * 100)}%
-                              </span>
-                            </>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => handleAddRecommended(p.id)}
-                          disabled={updatingItemId === p.id}
-                          className="w-full py-2 bg-slate-50 dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 hover:bg-rose-500 hover:border-rose-500 hover:text-white rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1.5"
-                        >
-                          <Icon name="plus" size={10} /> Thêm vào giỏ
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <ProductCard key={p.id} product={p} />
                 ))}
               </div>
             </div>

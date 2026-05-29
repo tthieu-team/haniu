@@ -32,87 +32,90 @@ export default function CartItemCard({
 
   return (
     <div
-      className={`bg-white dark:bg-zinc-900 p-5 rounded-2xl border ${
+      className={`bg-white dark:bg-zinc-900 p-4 sm:p-5 rounded-2xl border ${
         isQtyExceeded || isOutOfStock ? 'border-red-200 dark:border-red-900/40 bg-red-50/10' : 'border-slate-100 dark:border-zinc-800/80'
-      } flex flex-col sm:flex-row gap-5 items-start sm:items-center relative shadow-sm hover:shadow-md transition-all group`}
+      } flex flex-col sm:flex-row gap-4 sm:gap-5 items-stretch sm:items-center justify-between relative shadow-sm hover:shadow-md transition-all group`}
     >
-      {/* Item Thumbnail */}
-      <div className="relative w-24 h-24 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-50 dark:bg-zinc-850 shrink-0">
-        <img
-          src={item.imageUrl || "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&q=80"}
-          alt={item.productName}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-      </div>
-
-      {/* Item Info */}
-      <div className="flex-1 space-y-2 min-w-0">
-        <div className="space-y-0.5">
-          <Link href={`/products/${item.productSlug}`} className="font-bold text-sm text-slate-800 dark:text-zinc-200 hover:text-rose-500 transition-colors line-clamp-1 block">
-            {item.productName}
-          </Link>
-          {item.variantSku && (
-            <span className="text-[10px] text-slate-400 font-mono tracking-tight block">SKU: {item.variantSku}</span>
-          )}
+      {/* Product Image and Details - Always Side by Side */}
+      <div className="flex gap-4 items-start flex-1 min-w-0">
+        {/* Item Thumbnail */}
+        <div className="relative w-20 h-20 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-50 dark:bg-zinc-850 shrink-0">
+          <img
+            src={item.imageUrl || "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&q=80"}
+            alt={item.productName}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
         </div>
 
-        {/* Variant Badges */}
-        <div className="flex flex-wrap gap-1.5">
-          {item.color && (
-            <span className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-zinc-800 text-[10px] text-slate-500 dark:text-zinc-400 px-2.5 py-0.5 rounded-full border border-slate-100 dark:border-zinc-700/60 font-medium">
-              <span className="w-2 h-2 rounded-full border border-slate-250 dark:border-zinc-650" style={{ backgroundColor: item.color }} />
-              {item.color}
-            </span>
-          )}
-          {item.size && (
-            <span className="inline-flex items-center bg-slate-50 dark:bg-zinc-800 text-[10px] text-slate-500 dark:text-zinc-400 px-2.5 py-0.5 rounded-full border border-slate-100 dark:border-zinc-700/60 font-medium">
-              Kích cỡ: {item.size}
-            </span>
-          )}
-          {item.material && (
-            <span className="inline-flex items-center bg-slate-50 dark:bg-zinc-800 text-[10px] text-slate-500 dark:text-zinc-400 px-2.5 py-0.5 rounded-full border border-slate-100 dark:border-zinc-700/60 font-medium">
-              Chất liệu: {item.material}
-            </span>
-          )}
-          {!item.color && !item.size && !item.material && item.variantName && (
-            <span className="inline-block bg-slate-50 dark:bg-zinc-800 text-[10px] text-slate-500 dark:text-zinc-400 px-2.5 py-0.5 rounded-full border border-slate-100 dark:border-zinc-700/60 font-medium">
-              Biến thể: {item.variantName}
-            </span>
-          )}
-        </div>
+        {/* Item Info */}
+        <div className="flex-1 space-y-1.5 min-w-0">
+          <div className="space-y-0.5">
+            <Link href={`/products/${item.productSlug}`} className="font-bold text-sm text-slate-800 dark:text-zinc-200 hover:text-rose-500 transition-colors line-clamp-1 block">
+              {item.productName}
+            </Link>
+            {item.variantSku && (
+              <span className="text-[10px] text-slate-400 font-mono tracking-tight block">SKU: {item.variantSku}</span>
+            )}
+          </div>
 
-        {/* Personalization Info */}
-        <CustomizationInfo info={item.customizationInfo || ''} />
+          {/* Variant Badges */}
+          <div className="flex flex-wrap gap-1.5">
+            {item.color && (
+              <span className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-zinc-800 text-[10px] text-slate-500 dark:text-zinc-400 px-2.5 py-0.5 rounded-full border border-slate-100 dark:border-zinc-700/60 font-medium">
+                <span className="w-2 h-2 rounded-full border border-slate-250 dark:border-zinc-650" style={{ backgroundColor: item.color }} />
+                {item.color}
+              </span>
+            )}
+            {item.size && (
+              <span className="inline-flex items-center bg-slate-50 dark:bg-zinc-800 text-[10px] text-slate-500 dark:text-zinc-400 px-2.5 py-0.5 rounded-full border border-slate-100 dark:border-zinc-700/60 font-medium">
+                Kích cỡ: {item.size}
+              </span>
+            )}
+            {item.material && (
+              <span className="inline-flex items-center bg-slate-50 dark:bg-zinc-800 text-[10px] text-slate-500 dark:text-zinc-400 px-2.5 py-0.5 rounded-full border border-slate-100 dark:border-zinc-700/60 font-medium">
+                Chất liệu: {item.material}
+              </span>
+            )}
+            {!item.color && !item.size && !item.material && item.variantName && (
+              <span className="inline-block bg-slate-50 dark:bg-zinc-800 text-[10px] text-slate-500 dark:text-zinc-400 px-2.5 py-0.5 rounded-full border border-slate-100 dark:border-zinc-700/60 font-medium">
+                Biến thể: {item.variantName}
+              </span>
+            )}
+          </div>
 
-        {/* Stock Warnings */}
-        <div className="flex flex-wrap gap-1.5 mt-1">
-          {isOutOfStock && (
-            <span className="inline-flex items-center gap-1 bg-red-50 text-red-500 dark:bg-red-950/20 dark:text-red-400 text-[9px] font-bold px-2 py-0.5 rounded">
-              <Icon name="close" size={10} /> Hết hàng
-            </span>
-          )}
-          {isQtyExceeded && (
-            <span className="inline-flex items-center gap-1 bg-red-50 text-red-650 dark:bg-red-950/20 dark:text-red-400 text-[9px] font-bold px-2 py-0.5 rounded">
-              Chỉ còn {item.stock} sản phẩm (Vui lòng giảm số lượng)
-            </span>
-          )}
-          {!isOutOfStock && !isQtyExceeded && isLowStock && (
-            <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400 text-[9px] font-bold px-2 py-0.5 rounded">
-              Sắp hết hàng (Chỉ còn {item.stock})
-            </span>
-          )}
-          {!isOutOfStock && !isQtyExceeded && !isLowStock && item.stock !== undefined && (
-            <span className="inline-flex items-center text-[9px] text-emerald-500 font-semibold">
-              ✓ Còn hàng
-            </span>
-          )}
+          {/* Personalization Info */}
+          <CustomizationInfo info={item.customizationInfo || ''} />
+
+          {/* Stock Warnings */}
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            {isOutOfStock && (
+              <span className="inline-flex items-center gap-1 bg-red-50 text-red-500 dark:bg-red-950/20 dark:text-red-400 text-[9px] font-bold px-2 py-0.5 rounded">
+                <Icon name="close" size={10} /> Hết hàng
+              </span>
+            )}
+            {isQtyExceeded && (
+              <span className="inline-flex items-center gap-1 bg-red-50 text-red-650 dark:bg-red-950/20 dark:text-red-400 text-[9px] font-bold px-2 py-0.5 rounded">
+                Chỉ còn {item.stock} sản phẩm (Vui lòng giảm số lượng)
+              </span>
+            )}
+            {!isOutOfStock && !isQtyExceeded && isLowStock && (
+              <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400 text-[9px] font-bold px-2 py-0.5 rounded">
+                Sắp hết hàng (Chỉ còn {item.stock})
+              </span>
+            )}
+            {!isOutOfStock && !isQtyExceeded && !isLowStock && item.stock !== undefined && (
+              <span className="inline-flex items-center text-[9px] text-emerald-500 font-semibold">
+                ✓ Còn hàng
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Price and Quantity controls */}
-      <div className="flex sm:flex-col items-end justify-between sm:justify-center gap-4 w-full sm:w-auto shrink-0 border-t sm:border-t-0 border-slate-50 dark:border-zinc-800 pt-3 sm:pt-0">
+      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-4 w-full sm:w-auto shrink-0 border-t sm:border-t-0 border-slate-100 dark:border-zinc-800 pt-3 sm:pt-0">
         <div className="text-left sm:text-right space-y-0.5">
-          <div className="flex items-center gap-1.5 justify-end">
+          <div className="flex items-center gap-1.5 justify-start sm:justify-end">
             <span className="font-extrabold text-sm text-rose-500">{(item.unitPrice).toLocaleString()}đ</span>
             {discountPercent > 0 && (
               <span className="inline-block bg-rose-500/10 text-rose-500 text-[9px] font-bold px-1.5 py-0.5 rounded">

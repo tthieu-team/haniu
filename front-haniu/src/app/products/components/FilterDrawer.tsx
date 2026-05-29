@@ -298,10 +298,10 @@ export default function FilterDrawer({
                   onChange={(e) =>
                     setPriceMin(e.target.value === '' ? '' : Number(e.target.value))
                   }
-                  className="w-full text-sm bg-slate-50 dark:bg-zinc-900 rounded-xl px-3 py-2.5 border border-slate-100 dark:border-zinc-850 text-slate-705 dark:text-zinc-200 focus:outline-none"
+                  className="w-full text-base md:text-sm bg-slate-50 dark:bg-zinc-900 rounded-xl px-3 py-2.5 border border-slate-100 dark:border-zinc-850 text-slate-705 dark:text-zinc-200 focus:outline-none"
                 />
                 {priceMin !== '' && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-450">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-455 select-none">
                     đ
                   </span>
                 )}
@@ -315,10 +315,10 @@ export default function FilterDrawer({
                   onChange={(e) =>
                     setPriceMax(e.target.value === '' ? '' : Number(e.target.value))
                   }
-                  className="w-full text-sm bg-slate-50 dark:bg-zinc-900 rounded-xl px-3 py-2.5 border border-slate-100 dark:border-zinc-850 text-slate-705 dark:text-zinc-200 focus:outline-none"
+                  className="w-full text-base md:text-sm bg-slate-50 dark:bg-zinc-900 rounded-xl px-3 py-2.5 border border-slate-100 dark:border-zinc-850 text-slate-705 dark:text-zinc-200 focus:outline-none"
                 />
                 {priceMax !== '' && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-455">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-455 select-none">
                     đ
                   </span>
                 )}

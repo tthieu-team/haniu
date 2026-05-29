@@ -36,5 +36,16 @@ export const cartService = {
     return fetchApi('/api/v1/carts/merge', {
       method: 'POST',
     });
+  },
+
+  createBuyNowCart: async (payload: CartItemRequest) => {
+    return fetchApi('/api/v1/carts/buy-now', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  getCartById: async (cartId: string) => {
+    return fetchApi(`/api/v1/carts/${cartId}`);
   }
 };

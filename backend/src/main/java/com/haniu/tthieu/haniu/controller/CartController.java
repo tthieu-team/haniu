@@ -68,4 +68,14 @@ public class CartController {
         }
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{cartId}")
+    public ResponseEntity<CartDto> getCartById(@PathVariable UUID cartId) {
+        return ResponseEntity.ok(cartService.getCartById(cartId));
+    }
+
+    @PostMapping("/buy-now")
+    public ResponseEntity<CartDto> createBuyNowCart(@RequestBody CartItemRequestDto request) {
+        return ResponseEntity.ok(cartService.createBuyNowCart(request));
+    }
 }

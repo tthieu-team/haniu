@@ -227,7 +227,7 @@ export default function RelatedProducts({ currentProduct }: { currentProduct: Pr
       <h2 className="text-lg font-black text-slate-800 dark:text-zinc-100 tracking-tight uppercase flex items-center gap-2">
         <Icon name="gift" size={18} className="text-rose-500 animate-pulse" /> Có thể bạn sẽ thích
       </h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
         {filtered.map((item: any) => (
           <ProductCard key={item.id} product={item} />
         ))}

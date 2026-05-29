@@ -172,6 +172,53 @@ public class CartServiceImpl implements CartService {
         });
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public CartDto getCartById(UUID cartId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+        return convertToDto(cart);
+    }
+
+    @Override
+    public CartDto createBuyNowCart(CartItemRequestDto request) {
+        String sessionId = "buynow-" + UUID.randomUUID().toString();
+        Cart cart = Cart.builder()
+                .sessionId(sessionId)
+                .totalItems(0)
+                .totalPrice(BigDecimal.ZERO)
+                .build();
+        cart = cartRepository.save(cart);
+
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        ProductVariant variant = null;
+        BigDecimal price = product.getPrice();
+
+        if (request.getVariantId() != null) {
+            variant = productVariantRepository.findById(request.getVariantId())
+                    .orElseThrow(() -> new RuntimeException("Variant not found"));
+            price = variant.getSalePrice() != null ? variant.getSalePrice() : variant.getPrice();
+        } else if (product.getSalePrice() != null) {
+            price = product.getSalePrice();
+        }
+
+        CartItem newItem = CartItem.builder()
+                .cart(cart)
+                .product(product)
+                .variant(variant)
+                .quantity(request.getQuantity())
+                .unitPrice(price)
+                .totalPrice(price.multiply(BigDecimal.valueOf(request.getQuantity())))
+                .customizationInfo(request.getCustomizationInfo())
+                .build();
+        cartItemRepository.save(newItem);
+
+        updateCartTotals(cart);
+        return convertToDto(cart);
+    }
+
     private Cart getOrCreateCart(String email, String sessionId) {
         Cart cart;
         if (email != null && !email.trim().isEmpty()) {
