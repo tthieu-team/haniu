@@ -108,7 +108,7 @@ export default function FeaturedProductsSection({
   if (!isVisible) return null;
 
   return (
-    <section id="products" className="py-10 sm:py-16 space-y-8 sm:space-y-12 scroll-mt-20 font-sans">
+    <section id="products" className="py-6 sm:py-10 space-y-8 sm:space-y-12 scroll-mt-20 font-sans">
       {/* Title */}
       <div className="text-center space-y-3 sm:space-y-5 max-w-3xl mx-auto px-3 sm:px-4">
         <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">

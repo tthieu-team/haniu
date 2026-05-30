@@ -29,8 +29,52 @@ const cormorantGaramond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Haniu - Cửa Hàng Quà Tặng Cao Cấp",
-  description: "Trải nghiệm quà tặng cá nhân hóa cao cấp - Hộp quà lãng mạn, đồ lưu niệm độc bản",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://haniu.vercel.app'),
+  title: {
+    default: "Haniu - Cửa Hàng Quà Tặng Cá Nhân Hóa Cao Cấp",
+    template: "%s | Haniu Gift Shop"
+  },
+  description: "Haniu mang đến các giải pháp quà tặng cá nhân hóa độc đáo, hộp quà lãng mạn, sổ tay da thật khắc tên và đồ lưu niệm tinh tế được thiết kế riêng theo yêu cầu.",
+  keywords: ["quà tặng cá nhân hóa", "hộp quà lãng mạn", "quà lưu niệm độc bản", "sổ tay da thật khắc tên", "haniu", "haniu gift shop", "quà tặng sinh nhật", "quà valentine"],
+  authors: [{ name: "Haniu Team" }],
+  creator: "Haniu",
+  publisher: "Haniu",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "vi_VN",
+    url: "https://haniu.vercel.app",
+    title: "Haniu - Cửa Hàng Quà Tặng Cá Nhân Hóa Cao Cấp",
+    description: "Haniu mang đến các giải pháp quà tặng cá nhân hóa độc đáo, hộp quà lãng mạn, sổ tay da thật khắc tên và đồ lưu niệm tinh tế được thiết kế riêng theo yêu cầu.",
+    siteName: "Haniu",
+    images: [
+      {
+        url: "/banner.png", // fallback or default banner
+        width: 1200,
+        height: 630,
+        alt: "Haniu - Quà Tặng Cá Nhân Hóa Cao Cấp",
+      }
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Haniu - Quà Tặng Cá Nhân Hóa Cao Cấp",
+    description: "Haniu mang đến các giải pháp quà tặng cá nhân hóa độc đáo, hộp quà lãng mạn, sổ tay da thật khắc tên và đồ lưu niệm tinh tế được thiết kế riêng theo yêu cầu.",
+    images: ["/banner.png"],
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "",
+  },
 };
 
 export default function RootLayout({

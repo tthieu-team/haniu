@@ -16,10 +16,10 @@ export default function FAQSection() {
   };
 
   return (
-    <section id="faq" className="py-16 space-y-12 scroll-mt-20">
+    <section id="faq" className="py-8 sm:py-12 space-y-12 scroll-mt-20">
       {/* Title */}
       <div className="text-center space-y-3 max-w-2xl mx-auto">
-        <h2 className="text-3xl font-extrabold tracking-tight text-slate-800 dark:text-zinc-100">
+        <h2 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-slate-800 dark:text-zinc-100">
           {faq.title}
         </h2>
         <p className="text-sm text-slate-400 dark:text-zinc-400 font-light">

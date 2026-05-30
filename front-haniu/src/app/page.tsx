@@ -320,7 +320,7 @@ function HomeContent() {
   };
 
   return (
-    <div className="space-y-16 pb-16 font-sans">
+    <div className="space-y-8 sm:space-y-12 md:space-y-16 lg:space-y-20 pb-12 sm:pb-16 md:pb-24 font-sans">
       {/* 3. HERO BANNER */}
       <HeroSection onOccasionSelect={handleOccasionClick} />
 

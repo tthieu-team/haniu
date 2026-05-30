@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { HeroConfig } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
 
@@ -67,10 +68,13 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
             >
               {/* Background Image Container */}
               <div className="absolute inset-0">
-                <img
+                <Image
                   src={slide.backgroundImage}
                   alt={slide.boldTitle || 'Banner image'}
-                  className="w-full h-full object-cover object-center"
+                  fill
+                  priority={idx === 0}
+                  className="object-cover object-center"
+                  sizes="100vw"
                 />
 
                 {/* Visual Enhancers / Aesthetic Overlays */}

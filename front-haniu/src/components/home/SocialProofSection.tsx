@@ -22,7 +22,7 @@ export default function SocialProofSection() {
   const displayReviews = activeTestimonials.length > 0 ? activeTestimonials : proof.reviews;
 
   return (
-    <section className="py-16 space-y-12">
+    <section className="py-8 sm:py-12 space-y-12">
       {/* Metrics Row */}
       <div className="flex flex-col lg:flex-row items-center justify-between gap-8 pb-8 border-b border-slate-200 dark:border-zinc-800">
         <div className="space-y-4 text-center lg:text-left max-w-lg">

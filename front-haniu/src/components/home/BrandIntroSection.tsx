@@ -10,7 +10,7 @@ export default function BrandIntroSection() {
   if (!isVisible) return null;
 
   return (
-    <section className="py-10 sm:py-20 relative overflow-hidden">
+    <section className="py-6 sm:py-12 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute top-1/2 left-0 -translate-y-1/2 w-72 h-72 rounded-full bg-rose-500/5 blur-3xl -z-10" />
       <div className="absolute top-1/3 right-10 w-96 h-96 rounded-full bg-amber-500/5 blur-3xl -z-10" />
@@ -19,11 +19,11 @@ export default function BrandIntroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Left Text Column */}
           <div className="lg:col-span-7 space-y-6">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-4 py-2 text-xs font-bold tracking-widest uppercase text-rose-500 border border-rose-500/25">
-              <Icon name="✨" size={12} /> {brandIntro.subtitle}
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-4 py-1.5 text-[9px] sm:text-[10px] font-black tracking-[0.25em] uppercase text-rose-500 border border-rose-500/25">
+              <Icon name="✨" size={10} className="animate-pulse" /> {brandIntro.subtitle}
             </span>
             
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 dark:text-zinc-100 sm:text-5xl leading-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
               {brandIntro.title.split(' ').slice(0, 3).join(' ')}{' '}
               <span className="bg-gradient-to-r from-rose-500 via-amber-500 to-rose-600 bg-clip-text text-transparent block sm:inline">
                 {brandIntro.title.split(' ').slice(3).join(' ')}

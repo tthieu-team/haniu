@@ -85,5 +85,24 @@ body {
   scrollbar-color: var(--border, #e2e8f0) transparent;
 }
 
+/* Hide sticky header on mobile when rotated to landscape and user has scrolled */
+@media (max-width: 960px) and (orientation: landscape) {
+  .mobile-landscape-hide-sticky.is-scrolled {
+    display: none !important;
+  }
+}
 
-
+/* Smooth Slide-down animation for mobile search overlay */
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.animate-slide-down {
+  animation: slide-down 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

@@ -158,9 +158,23 @@ public class OrderServiceImpl implements OrderService {
 
         order = orderRepository.save(order);
 
+        // Batch fetch product media for all cart items
+        List<UUID> productIds = cartItems.stream()
+                .map(item -> item.getProduct().getId())
+                .distinct()
+                .collect(Collectors.toList());
+
+        java.util.Map<UUID, List<ProductMedia>> mediaMap = new java.util.HashMap<>();
+        if (!productIds.isEmpty()) {
+            List<ProductMedia> allMedia = productMediaRepository.findByProductIdInOrderBySortOrderAsc(productIds);
+            mediaMap = allMedia.stream().collect(Collectors.groupingBy(m -> m.getProduct().getId()));
+        }
+
+        java.util.Map<UUID, List<ProductMedia>> finalMediaMap = mediaMap;
+
         // Save order items
         for (CartItem item : cartItems) {
-            List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(item.getProduct().getId());
+            List<ProductMedia> media = finalMediaMap.getOrDefault(item.getProduct().getId(), java.util.Collections.emptyList());
             String thumbnail = media.stream()
                     .filter(ProductMedia::isThumbnail)
                     .map(ProductMedia::getUrl)
@@ -208,16 +222,34 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderResponseDto> getOrdersByUser(String email) {
-        return orderRepository.findByUserEmailOrderByCreatedAtDesc(email).stream()
-                .map(this::convertToDto)
+        List<Order> orders = orderRepository.findByUserEmailOrderByCreatedAtDesc(email);
+        List<UUID> orderIds = orders.stream().map(Order::getId).collect(Collectors.toList());
+        java.util.Map<UUID, List<OrderItem>> itemsMap = new java.util.HashMap<>();
+        if (!orderIds.isEmpty()) {
+            List<OrderItem> allItems = orderItemRepository.findByOrderIdIn(orderIds);
+            itemsMap = allItems.stream().collect(Collectors.groupingBy(item -> item.getOrder().getId()));
+        }
+        
+        java.util.Map<UUID, List<OrderItem>> finalItemsMap = itemsMap;
+        return orders.stream()
+                .map(order -> convertToDto(order, finalItemsMap.getOrDefault(order.getId(), java.util.Collections.emptyList())))
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<OrderResponseDto> getAllOrders() {
-        return orderRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(this::convertToDto)
+        List<Order> orders = orderRepository.findAllByOrderByCreatedAtDesc();
+        List<UUID> orderIds = orders.stream().map(Order::getId).collect(Collectors.toList());
+        java.util.Map<UUID, List<OrderItem>> itemsMap = new java.util.HashMap<>();
+        if (!orderIds.isEmpty()) {
+            List<OrderItem> allItems = orderItemRepository.findByOrderIdIn(orderIds);
+            itemsMap = allItems.stream().collect(Collectors.groupingBy(item -> item.getOrder().getId()));
+        }
+        
+        java.util.Map<UUID, List<OrderItem>> finalItemsMap = itemsMap;
+        return orders.stream()
+                .map(order -> convertToDto(order, finalItemsMap.getOrDefault(order.getId(), java.util.Collections.emptyList())))
                 .collect(Collectors.toList());
     }
 
@@ -254,6 +286,10 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderResponseDto convertToDto(Order order) {
         List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
+        return convertToDto(order, items);
+    }
+
+    private OrderResponseDto convertToDto(Order order, List<OrderItem> items) {
         List<OrderResponseDto.OrderItemResponseDto> itemDtos = items.stream().map(item -> 
             OrderResponseDto.OrderItemResponseDto.builder()
                     .id(item.getId())

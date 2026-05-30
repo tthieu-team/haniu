@@ -34,7 +34,9 @@ export default function Header() {
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const searchRef = useRef<HTMLFormElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
   const searchCache = useRef<{ [key: string]: any[] }>({});
 
   useEffect(() => {
@@ -73,7 +75,16 @@ export default function Header() {
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, []);  useEffect(() => {
+    if (showMobileSearch) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showMobileSearch]);
 
   useEffect(() => {
     const trimmedVal = searchVal.trim();
@@ -113,9 +124,11 @@ export default function Header() {
     if (searchVal.trim()) {
       router.push(`/products?search=${encodeURIComponent(searchVal.trim())}`);
       setShowDropdown(false);
+      setShowMobileSearch(false);
     } else {
       router.push('/products');
       setShowDropdown(false);
+      setShowMobileSearch(false);
     }
   };
 
@@ -128,9 +141,19 @@ export default function Header() {
   const menuLinks = rawMenuLinks.filter(link => link.href !== '/wishlist' && link.name !== 'Yêu thích');
 
   return (
-    <div className={`w-full z-50 transition-all duration-300 ${
+    <div className={`w-full z-50 transition-all duration-300 mobile-landscape-hide-sticky ${
       header.isSticky ? 'fixed top-0 left-0 right-0' : 'relative'
-    }`}>
+    } ${isScrolled ? 'is-scrolled' : ''}`}>
+      {/* Mobile Search Backdrop (Click to close mobile search) */}
+      {showMobileSearch && (
+        <div
+          onClick={() => {
+            setShowMobileSearch(false);
+            setSuggestions([]);
+          }}
+          className="fixed inset-0 bg-black/40 dark:bg-black/60 z-40 backdrop-blur-xs md:hidden"
+        />
+      )}
       {/* 2. ANNOUNCEMENT BAR */}
       {announcementBar.isEnabled && (
         <div className="w-full bg-rose-600 text-white text-[10px] sm:text-[11px] py-2 sm:py-2.5 px-2 sm:px-4 text-center font-semibold tracking-wide transition-all duration-350 shadow-sm">
@@ -146,14 +169,99 @@ export default function Header() {
         </div>
       )}
 
-      {/* 1. HEADER MAIN NAVBAR */}
       <header
-        className={`w-full transition-all duration-500 ${
+        className={`w-full transition-all duration-500 relative z-50 ${
           isScrolled
             ? 'bg-white/95 dark:bg-zinc-950/95 shadow-lg backdrop-blur-md border-b border-slate-200/80 dark:border-zinc-800/80 py-4 text-slate-800 dark:text-zinc-100'
             : 'bg-transparent py-5 text-slate-800 dark:text-zinc-100 border-transparent'
         }`}
       >
+        {/* Mobile Search Overlay (Beautiful animation and search suggestions) */}
+        {showMobileSearch && (
+          <div
+            className="absolute inset-0 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-md z-[60] flex items-center px-4 animate-slide-down border-b border-slate-200 dark:border-zinc-800"
+          >
+            <form onSubmit={handleSearchSubmit} className="flex items-center gap-3 w-full relative">
+              <Icon name="search" size={16} className="text-slate-400 shrink-0" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm set quà..."
+                value={searchVal}
+                onChange={(e) => setSearchVal(e.target.value)}
+                autoFocus
+                className="flex-1 bg-transparent text-base text-slate-800 dark:text-zinc-100 placeholder-slate-400 focus:outline-none py-2"
+              />
+              {searchVal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchVal('');
+                    setSuggestions([]);
+                  }}
+                  className="text-slate-400 hover:text-slate-650 p-1 cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMobileSearch(false);
+                  setSuggestions([]);
+                }}
+                className="text-xs font-bold text-slate-500 hover:text-rose-500 dark:text-zinc-400 dark:hover:text-rose-455 px-2 py-1 shrink-0 cursor-pointer"
+              >
+                Hủy
+              </button>
+
+              {/* Suggestions Dropdown for Mobile Search Overlay */}
+              {searchVal.trim().length > 0 && (
+                <div className="absolute top-[calc(100%+1px)] left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 shadow-2xl p-3 space-y-1 z-[70] max-h-[70vh] overflow-y-auto scrollbar-thin rounded-b-2xl">
+                  {loadingSuggestions ? (
+                    <div className="flex items-center justify-center p-6 text-xs text-slate-450 dark:text-zinc-500 gap-2">
+                      <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-rose-500" />
+                      <span>Đang tìm kiếm...</span>
+                    </div>
+                  ) : suggestions.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-slate-450 dark:text-zinc-500">
+                      Không tìm thấy kết quả phù hợp
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-[9px] font-extrabold text-slate-400 dark:text-zinc-500 px-3 py-1 uppercase tracking-wider">
+                        Gợi ý sản phẩm ({suggestions.length})
+                      </div>
+                      {suggestions.map((product) => {
+                        const priceVal = product.salePrice || product.basePrice || product.price || 0;
+                        return (
+                          <Link
+                            key={product.id}
+                            href={`/products/${product.slug}`}
+                            onClick={() => {
+                              setShowMobileSearch(false);
+                              setSuggestions([]);
+                            }}
+                            className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
+                          >
+                            <img
+                              src={getFullImageUrl(product.thumbnailUrl || product.media?.find((m: any) => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://placehold.co/100')}
+                              alt={product.name}
+                              className="w-10 h-10 rounded-lg object-cover shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-200 truncate">{product.name}</h4>
+                              <span className="text-[10px] font-extrabold text-rose-500">{priceVal.toLocaleString('vi-VN')}đ</span>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </>
+                  )}
+                </div>
+              )}
+            </form>
+          </div>
+        )}
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Left: Logo */}
           <div className="flex items-center">
@@ -312,6 +420,16 @@ export default function Header() {
                 </span>
               )}
             </Link>
+
+            {/* Mobile Search Button (Visible next to cart on mobile) */}
+            <button
+              type="button"
+              onClick={() => setShowMobileSearch(true)}
+              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors flex md:hidden items-center cursor-pointer text-slate-800 dark:text-zinc-100"
+              title="Tìm kiếm"
+            >
+              <Icon name="search" size={16} />
+            </button>
 
             {/* Cart Link (Always Show) */}
             <Link

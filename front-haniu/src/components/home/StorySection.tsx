@@ -21,7 +21,7 @@ export default function StorySection() {
   const displayStory = story || mockStory;
 
   return (
-    <section id="story" className="py-20 border-t border-slate-200 dark:border-zinc-800/80 scroll-mt-20">
+    <section id="story" className="py-10 sm:py-16 border-t border-slate-200 dark:border-zinc-800/80 scroll-mt-20">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
         {/* Left text */}
         <div className="lg:col-span-5 space-y-6">

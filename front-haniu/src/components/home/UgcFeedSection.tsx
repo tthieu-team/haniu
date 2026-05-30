@@ -19,7 +19,7 @@ export default function UgcFeedSection() {
   const displayItems = activeUgcItems.length > 0 ? activeUgcItems : ugc.items;
 
   return (
-    <section className="py-16 bg-white dark:bg-zinc-950">
+    <section className="py-12 sm:py-16 bg-white dark:bg-zinc-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto px-4">

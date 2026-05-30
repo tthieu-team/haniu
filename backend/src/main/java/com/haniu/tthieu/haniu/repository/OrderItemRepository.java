@@ -11,6 +11,7 @@ import java.util.UUID;
 @Repository
 public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
     List<OrderItem> findByOrderId(UUID orderId);
+    List<OrderItem> findByOrderIdIn(List<UUID> orderIds);
     boolean existsByVariantId(UUID variantId);
 
     @Query("SELECT oi FROM OrderItem oi " +

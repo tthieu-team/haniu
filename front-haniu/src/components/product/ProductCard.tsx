@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import Icon from '@/components/common/Icons';
 import { useWishlistStore } from '@/store/wishlist';
 import { getFullImageUrl } from '@/lib/api';
@@ -83,17 +84,21 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
 
       {/* Product Thumbnail Container with hover switching & overlay */}
       <div className="block overflow-hidden relative aspect-square bg-slate-50 dark:bg-zinc-950 rounded-t-2xl sm:rounded-t-[28px]">
-        <Link href={`/products/${product.slug}`} className="block w-full h-full">
-          <img
-            src={getFullImageUrl(thumbnail)}
+        <Link href={`/products/${product.slug}`} className="block w-full h-full relative">
+          <Image
+            src={getFullImageUrl(thumbnail) || 'https://placehold.co/300'}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out rounded-t-2xl sm:rounded-t-[28px]"
+            fill
+            className="object-cover group-hover:scale-105 transition-all duration-700 ease-out rounded-t-2xl sm:rounded-t-[28px]"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
           {secondaryImage && (
-            <img
-              src={getFullImageUrl(secondaryImage)}
+            <Image
+              src={getFullImageUrl(secondaryImage) || 'https://placehold.co/300'}
               alt={`${product.name} alternate`}
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-105 rounded-t-2xl sm:rounded-t-[28px]"
+              fill
+              className="absolute inset-0 object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-105 rounded-t-2xl sm:rounded-t-[28px]"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           )}
         </Link>

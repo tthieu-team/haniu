@@ -23,12 +23,10 @@ export default function RealtimePreview({
   isCustomizable,
   config
 }: RealtimePreviewProps) {
-  if (!isCustomizable) return null;
+  const [activeTab, setActiveTab] = useState<'laser' | 'card'>('laser');
 
   const showEngraving = (config?.showEngraving ?? true) && (config?.showEngravingMockup ?? true) && isCustomizable;
   const showCardMessage = (config?.showCardMessage ?? true) && (config?.showCardMessageMockup ?? true);
-
-  const [activeTab, setActiveTab] = useState<'laser' | 'card'>('laser');
 
   // Automatically switch tab if one of them is disabled
   useEffect(() => {
@@ -37,8 +35,9 @@ export default function RealtimePreview({
     } else if (!showCardMessage && activeTab === 'card') {
       setActiveTab('laser');
     }
-  }, [showEngraving, showCardMessage]);
+  }, [showEngraving, showCardMessage, activeTab]);
 
+  if (!isCustomizable) return null;
   if (!showEngraving && !showCardMessage) return null;
 
   // Set engraving style based on gift wrap or category (wood/leather)

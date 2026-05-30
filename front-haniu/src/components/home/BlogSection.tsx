@@ -31,7 +31,7 @@ export default function BlogSection() {
     : blog.items;
 
   return (
-    <section id="blog" className="py-10 sm:py-16 bg-slate-50/50 dark:bg-zinc-900/10 border-y border-slate-200 dark:border-zinc-800/80 scroll-mt-20">
+    <section id="blog" className="py-6 sm:py-12 bg-slate-50/50 dark:bg-zinc-900/10 border-y border-slate-200 dark:border-zinc-800/80 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
         {/* Title */}
         <div className="text-center space-y-3 sm:space-y-4 max-w-3xl mx-auto px-3 sm:px-4">

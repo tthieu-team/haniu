@@ -269,8 +269,22 @@ public class CartServiceImpl implements CartService {
 
     private CartDto convertToDto(Cart cart) {
         List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
+
+        List<UUID> productIds = items.stream()
+                .map(item -> item.getProduct().getId())
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<UUID, List<ProductMedia>> mediaMap = new HashMap<>();
+        if (!productIds.isEmpty()) {
+            List<ProductMedia> allMedia = productMediaRepository.findByProductIdInOrderBySortOrderAsc(productIds);
+            mediaMap = allMedia.stream().collect(Collectors.groupingBy(m -> m.getProduct().getId()));
+        }
+
+        Map<UUID, List<ProductMedia>> finalMediaMap = mediaMap;
+
         List<CartItemDto> itemDtos = items.stream().map(item -> {
-            List<ProductMedia> media = productMediaRepository.findByProductIdOrderBySortOrderAsc(item.getProduct().getId());
+            List<ProductMedia> media = finalMediaMap.getOrDefault(item.getProduct().getId(), Collections.emptyList());
             String imageUrl = media.stream()
                     .filter(ProductMedia::isThumbnail)
                     .map(ProductMedia::getUrl)

@@ -8,11 +8,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
+
+    @Override
+    @EntityGraph(attributePaths = {"category", "brand", "collection"})
+    org.springframework.data.domain.Page<Product> findAll(
+            org.springframework.data.jpa.domain.Specification<Product> spec,
+            org.springframework.data.domain.Pageable pageable);
 
     @Modifying
     @Query(value = "UPDATE products SET deleted_at = NULL, slug = :slug, status = :status WHERE sku = :sku", nativeQuery = true)
