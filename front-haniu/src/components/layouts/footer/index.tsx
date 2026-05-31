@@ -45,13 +45,24 @@ export default function Footer() {
               Đường Dẫn Nhanh
             </h4>
             <div className="flex flex-col gap-2.5 text-xs text-slate-500 dark:text-zinc-400">
-              {header.menuLinks.map((link, idx) => (
+              {(
+                [
+                  ...(header?.menuLinks?.length ? header.menuLinks : [
+                    { name: 'Trang chủ', href: '/' },
+                    { name: 'Sản phẩm', href: '/products' },
+                    { name: 'Bộ sưu tập', href: '/#collections' },
+                    { name: 'Câu chuyện', href: '/#story' },
+                  ]).filter(link => link.href !== '/wishlist' && link.name !== 'Yêu thích'),
+                  { name: 'Tra cứu đơn hàng', href: '/orders/lookup' }
+                ]
+              ).map((link, idx) => (
                 <Link key={idx} href={link.href} className="hover:text-rose-500 transition-colors font-light">
                   {link.name}
                 </Link>
               ))}
             </div>
           </div>
+
 
           {/* Contact Col */}
           <div className="md:col-span-4 space-y-4">

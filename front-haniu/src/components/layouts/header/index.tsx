@@ -138,7 +138,11 @@ export default function Header() {
     { name: 'Bộ sưu tập', href: '/#collections' },
     { name: 'Câu chuyện', href: '/#story' },
   ];
-  const menuLinks = rawMenuLinks.filter(link => link.href !== '/wishlist' && link.name !== 'Yêu thích');
+  const menuLinks = [
+    ...rawMenuLinks.filter(link => link.href !== '/wishlist' && link.name !== 'Yêu thích'),
+    { name: 'Tra cứu đơn hàng', href: '/orders/lookup' }
+  ];
+
 
   return (
     <div className={`w-full z-50 transition-all duration-300 mobile-landscape-hide-sticky ${

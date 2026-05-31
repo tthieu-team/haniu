@@ -14,4 +14,6 @@ public interface OrderService {
     List<OrderResponseDto> getAllOrders();
     OrderResponseDto updateOrderStatus(UUID orderId, String orderStatus);
     OrderResponseDto updatePaymentStatus(UUID orderId, String paymentStatus);
+    List<OrderResponseDto> lookupOrders(String query);
 }
+

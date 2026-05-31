@@ -15,9 +15,12 @@ import com.haniu.tthieu.haniu.entity.user.User;
 import com.haniu.tthieu.haniu.repository.*;
 import com.haniu.tthieu.haniu.service.CartService;
 import com.haniu.tthieu.haniu.service.OrderService;
+import com.haniu.tthieu.haniu.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,7 +31,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class OrderServiceImpl implements OrderService {
+
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
@@ -40,6 +45,8 @@ public class OrderServiceImpl implements OrderService {
     private final ProductMediaRepository productMediaRepository;
     private final UserRepository userRepository;
     private final CartService cartService;
+    private final EmailService emailService;
+
 
     @Override
     public OrderResponseDto createOrder(String email, OrderRequestDto request) {
@@ -200,8 +207,18 @@ public class OrderServiceImpl implements OrderService {
         // Clear user/guest cart items
         cartService.clearCart(cart.getId());
 
-        return convertToDto(order);
+        OrderResponseDto responseDto = convertToDto(order);
+        try {
+            if (responseDto.getCustomerEmail() != null && !responseDto.getCustomerEmail().trim().isEmpty()) {
+                emailService.sendOrderConfirmation(responseDto.getCustomerEmail(), responseDto);
+            }
+        } catch (Exception e) {
+            log.error("Failed to send order confirmation email for order code: {}", responseDto.getOrderCode(), e);
+        }
+
+        return responseDto;
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -326,8 +343,30 @@ public class OrderServiceImpl implements OrderService {
                 .paymentStatus(order.getPaymentStatus().name())
                 .orderStatus(order.getOrderStatus().name())
                 .shippingMethod(order.getShippingMethod())
-                .orderedAt(order.getOrderedAt())
                 .items(itemDtos)
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponseDto> lookupOrders(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        String cleanQuery = query.trim();
+        List<Order> orders = orderRepository.lookupOrders(cleanQuery);
+        
+        List<UUID> orderIds = orders.stream().map(Order::getId).collect(Collectors.toList());
+        java.util.Map<UUID, List<OrderItem>> itemsMap = new java.util.HashMap<>();
+        if (!orderIds.isEmpty()) {
+            List<OrderItem> allItems = orderItemRepository.findByOrderIdIn(orderIds);
+            itemsMap = allItems.stream().collect(Collectors.groupingBy(item -> item.getOrder().getId()));
+        }
+        
+        java.util.Map<UUID, List<OrderItem>> finalItemsMap = itemsMap;
+        return orders.stream()
+                .map(order -> convertToDto(order, finalItemsMap.getOrDefault(order.getId(), java.util.Collections.emptyList())))
+                .collect(Collectors.toList());
+    }
 }
+

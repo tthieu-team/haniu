@@ -27,6 +27,11 @@ export const orderService = {
     return fetchApi(`/api/v1/orders/code/${orderCode}`);
   },
 
+  lookupOrders: async (query: string) => {
+    return fetchApi(`/api/v1/orders/lookup?query=${encodeURIComponent(query)}`);
+  },
+
+
   getOrderByTrackingToken: async (token: string) => {
     return fetchApi(`/api/v1/orders/track?token=${token}`);
   },

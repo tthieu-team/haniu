@@ -34,6 +34,12 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderByTrackingToken(token));
     }
 
+    @GetMapping("/lookup")
+    public ResponseEntity<List<OrderResponseDto>> lookupOrders(@RequestParam String query) {
+        return ResponseEntity.ok(orderService.lookupOrders(query));
+    }
+
+
     @GetMapping("/code/{orderCode}")
     public ResponseEntity<OrderResponseDto> getOrderByCode(@PathVariable String orderCode) {
         return ResponseEntity.ok(orderService.getOrderByCode(orderCode));

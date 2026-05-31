@@ -14,4 +14,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     Optional<Order> findByTrackingToken(String trackingToken);
     List<Order> findByUserEmailOrderByCreatedAtDesc(String email);
     List<Order> findAllByOrderByCreatedAtDesc();
+
+    @org.springframework.data.jpa.repository.Query("SELECT o FROM Order o WHERE LOWER(o.orderCode) = LOWER(:query) OR LOWER(o.customerPhone) = LOWER(:query) OR LOWER(o.customerEmail) = LOWER(:query) ORDER BY o.createdAt DESC")
+    List<Order> lookupOrders(@org.springframework.data.repository.query.Param("query") String query);
 }
+
+
