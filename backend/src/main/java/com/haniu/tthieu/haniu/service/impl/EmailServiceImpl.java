@@ -251,8 +251,8 @@ public class EmailServiceImpl implements EmailService {
 
     private String formatCurrency(BigDecimal amount) {
         if (amount == null) return "0 đ";
-        java.text.DecimalFormat formatter = (java.text.DecimalFormat) java.text.DecimalFormat.getInstance(new java.util.Locale("vi", "VN"));
-        formatter.applyPattern("#,###");
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols(java.util.Locale.forLanguageTag("vi-VN"));
+        java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###", symbols);
         return formatter.format(amount) + " đ";
     }
 

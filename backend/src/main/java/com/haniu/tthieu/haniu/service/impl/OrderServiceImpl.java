@@ -343,6 +343,7 @@ public class OrderServiceImpl implements OrderService {
                 .paymentStatus(order.getPaymentStatus().name())
                 .orderStatus(order.getOrderStatus().name())
                 .shippingMethod(order.getShippingMethod())
+                .orderedAt(order.getOrderedAt())
                 .items(itemDtos)
                 .build();
     }
