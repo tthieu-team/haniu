@@ -14,7 +14,7 @@ export default function BannerCard({ slide, isMain }: BannerCardProps) {
   const isCenter = slide.textLayout === 'center';
 
   return (
-    <div className="relative w-full h-full overflow-hidden rounded-[24px] bg-[#FAF5F2] border border-[#F5D0CD]/40 shadow-xs flex">
+    <div className="relative w-full h-full overflow-hidden rounded-[24px] bg-[#FAF5F2] dark:bg-zinc-900 border border-[#F5D0CD]/40 dark:border-zinc-800 shadow-xs flex">
       {isCenter ? (
         <>
           <div className="absolute inset-0">
@@ -23,16 +23,16 @@ export default function BannerCard({ slide, isMain }: BannerCardProps) {
               alt={slide.boldTitle || 'Banner'}
               className="w-full h-full object-cover object-center"
             />
-            <div className="absolute inset-0 bg-[#FAF5F2]/80 backdrop-blur-[1px]" />
+            <div className="absolute inset-0 bg-[#FAF5F2]/80 dark:bg-zinc-900/80 backdrop-blur-[1px]" />
           </div>
           <div className="relative z-10 w-full h-full flex flex-col justify-center items-center text-center p-6 sm:p-8 space-y-4">
             {slide.badgeText && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEBEA] border border-[#F5D0CD] px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#C67B71]">
-                <Icon name="heart" size={10} className="fill-[#C67B71] text-[#C67B71]" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEBEA] dark:bg-rose-950/40 border border-[#F5D0CD] dark:border-rose-900/30 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#C67B71] dark:text-rose-300">
+                <Icon name="heart" size={10} className="fill-[#C67B71] text-[#C67B71] dark:fill-rose-300 dark:text-rose-300" />
                 {slide.badgeText}
               </span>
             )}
-            <h2 className="leading-tight text-[#3A2312]">
+            <h2 className="leading-tight text-[#3A2312] dark:text-zinc-150">
               {slide.scriptTitle && (
                 <span className="block font-script text-3xl sm:text-4xl text-[#C67B71] italic font-normal tracking-wide leading-none mb-1">
                   {slide.scriptTitle}
@@ -44,7 +44,7 @@ export default function BannerCard({ slide, isMain }: BannerCardProps) {
                 </span>
               )}
             </h2>
-            <p className="text-xs text-[#5E4E43] font-light leading-relaxed max-w-md">
+            <p className="text-xs text-[#5E4E43] dark:text-zinc-400 font-light leading-relaxed max-w-md">
               {slide.subtitle}
             </p>
             <div className="pt-2">
@@ -70,29 +70,29 @@ export default function BannerCard({ slide, isMain }: BannerCardProps) {
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
 
             {slide.cardTitle && (
-              <div className="absolute bottom-4 left-4 z-10 bg-white/90 backdrop-blur-xs px-3 py-1.5 rounded-[16px] border border-dashed border-[#F5D0CD] shadow-xs flex flex-col items-center">
-                <h4 className="text-[9px] font-bold text-[#3A2312] tracking-wider uppercase leading-none">{slide.cardTitle}</h4>
+              <div className="absolute bottom-4 left-4 z-10 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xs px-3 py-1.5 rounded-[16px] border border-dashed border-[#F5D0CD] dark:border-zinc-800/80 shadow-xs flex flex-col items-center">
+                <h4 className="text-[9px] font-bold text-[#3A2312] dark:text-zinc-200 tracking-wider uppercase leading-none">{slide.cardTitle}</h4>
                 {slide.cardSubtitle && (
-                  <span className="font-script text-[11px] sm:text-xs text-[#C67B71] mt-0.5 leading-none">{slide.cardSubtitle}</span>
+                  <span className="font-script text-[11px] sm:text-xs text-[#C67B71] dark:text-rose-400 mt-0.5 leading-none">{slide.cardSubtitle}</span>
                 )}
               </div>
             )}
           </div>
 
           {/* Text Pane */}
-          <div className="w-full sm:w-1/2 p-6 sm:p-8 flex flex-col justify-center space-y-3 sm:space-y-4 bg-white/40">
+          <div className="w-full sm:w-1/2 p-6 sm:p-8 flex flex-col justify-center space-y-3 sm:space-y-4 bg-white/40 dark:bg-zinc-900/40">
             {slide.badgeText && (
               <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEBEA] border border-[#F5D0CD] px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-[#C67B71]">
-                  <Icon name="heart" size={8} className="fill-[#C67B71] text-[#C67B71]" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEBEA] dark:bg-rose-950/40 border border-[#F5D0CD] dark:border-rose-900/30 px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-[#C67B71] dark:text-rose-300">
+                  <Icon name="heart" size={8} className="fill-[#C67B71] text-[#C67B71] dark:fill-rose-300 dark:text-rose-300" />
                   {slide.badgeText}
                 </span>
               </div>
             )}
 
-            <h2 className="leading-tight text-[#3A2312]">
+            <h2 className="leading-tight text-[#3A2312] dark:text-zinc-150">
               {slide.scriptTitle && (
-                <span className="block font-script text-2xl sm:text-3xl text-[#C67B71] italic font-normal tracking-wide leading-none mb-1">
+                <span className="block font-script text-2xl sm:text-3xl text-[#C67B71] dark:text-rose-400 italic font-normal tracking-wide leading-none mb-1">
                   {slide.scriptTitle}
                 </span>
               )}
@@ -107,7 +107,7 @@ export default function BannerCard({ slide, isMain }: BannerCardProps) {
               )}
             </h2>
 
-            <p className="text-xs text-[#5E4E43] font-light leading-relaxed max-w-sm">
+            <p className="text-xs text-[#5E4E43] dark:text-zinc-400 font-light leading-relaxed max-w-sm">
               {slide.subtitle}
             </p>
 

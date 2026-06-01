@@ -207,7 +207,7 @@ export default function LoginForm() {
           }}
           className={`flex-1 text-center py-2.5 rounded-xl text-xs font-bold transition-all duration-350 ${loginMode === 'password'
               ? 'bg-white dark:bg-zinc-850 text-rose-500 shadow-sm'
-              : 'text-slate-500 dark:text-zinc-400 hover:text-rose-455'
+              : 'text-slate-500 dark:text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400'
             }`}
         >
           Bằng Mật khẩu
@@ -220,7 +220,7 @@ export default function LoginForm() {
           }}
           className={`flex-1 text-center py-2.5 rounded-xl text-xs font-bold transition-all duration-350 ${loginMode === 'otp'
               ? 'bg-white dark:bg-zinc-850 text-rose-500 shadow-sm'
-              : 'text-slate-500 dark:text-zinc-400 hover:text-rose-455'
+              : 'text-slate-500 dark:text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400'
             }`}
         >
           Nhận mã OTP

@@ -50,7 +50,7 @@ export default function Footer() {
                   ...(header?.menuLinks?.length ? header.menuLinks : [
                     { name: 'Trang chủ', href: '/' },
                     { name: 'Sản phẩm', href: '/products' },
-                    { name: 'Bộ sưu tập', href: '/#collections' },
+                    { name: 'Bộ sưu tập', href: '/collections' },
                     { name: 'Câu chuyện', href: '/#story' },
                   ]).filter(link => link.href !== '/wishlist' && link.name !== 'Yêu thích'),
                   { name: 'Tra cứu đơn hàng', href: '/orders/lookup' }

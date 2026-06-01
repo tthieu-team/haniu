@@ -32,7 +32,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
   const activeCollections = collections.filter(c => c.isActive !== false && (c as any).active !== false).slice(0, 5);
 
   return (
-    <nav className="hidden md:flex items-center gap-6 lg:gap-8 relative h-full">
+    <nav className="hidden md:flex items-center gap-4 lg:gap-5 xl:gap-7 relative h-full">
       {menuLinks.map((link, idx) => {
         const isShopMenu = link.name.toLowerCase() === 'shop' || link.name.toLowerCase() === 'sản phẩm';
         const isCollectionsMenu = link.name.toLowerCase() === 'collections' || link.name.toLowerCase() === 'bộ sưu tập';
@@ -41,7 +41,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
         return (
           <div
             key={idx}
-            className="relative py-5"
+            className="relative py-4 lg:py-4.5"
             onMouseEnter={() => {
               if (isShopMenu) setActiveDropdown('shop');
               else if (isCollectionsMenu) setActiveDropdown('collections');
@@ -50,19 +50,20 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
           >
             <Link
               href={link.href}
-              className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer text-slate-700 dark:text-zinc-300 hover:text-rose-500 dark:hover:text-rose-450 group"
+              className="relative flex items-center gap-1 text-[10px] xl:text-[11px] font-semibold uppercase tracking-widest transition-all duration-300 cursor-pointer text-slate-700 dark:text-zinc-200 hover:text-rose-500 dark:hover:text-rose-400 group"
             >
-              {link.name}
+              <span>{link.name}</span>
               {hasDropdown && (
-                <span className={`opacity-70 transition-transform duration-300 flex items-center justify-center ${activeDropdown === (isShopMenu ? 'shop' : 'collections') ? 'rotate-180' : ''}`}>
-                  <Icon name="chevron-down" size={10} />
+                <span className={`opacity-60 transition-transform duration-300 flex items-center justify-center ${activeDropdown === (isShopMenu ? 'shop' : 'collections') ? 'rotate-180' : ''}`}>
+                  <Icon name="chevron-down" size={8} />
                 </span>
               )}
+              <span className="absolute bottom-[-6px] left-0 w-full h-[1.5px] bg-rose-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" />
             </Link>
 
             {/* === Dropdown: Sản phẩm theo dịp lễ === */}
             {isShopMenu && activeDropdown === 'shop' && (
-              <div className="absolute top-[56px] left-1/2 -translate-x-1/2 z-50 w-[560px] bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 rounded-3xl p-6 shadow-2xl grid grid-cols-2 gap-6 animate-fade-in text-slate-800 dark:text-zinc-100">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 z-50 w-[560px] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl grid grid-cols-2 gap-6 animate-fade-in text-slate-800 dark:text-zinc-100 before:absolute before:-top-2 before:left-0 before:right-0 before:h-2 before:content-['']">
                 {/* Left: Occasions list */}
                 <div className="space-y-3">
                   <span className="text-[10px] font-extrabold tracking-widest text-rose-500 uppercase flex items-center gap-1">
@@ -75,9 +76,9 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                           key={occ.id || occ.slug}
                           href={`/?occasion=${occ.slug}#products`}
                           onClick={() => setActiveDropdown(null)}
-                          className="flex items-center gap-3 p-2 rounded-xl hover:bg-rose-50/60 dark:hover:bg-zinc-800 transition-colors group/item"
+                          className="flex items-center gap-3 p-2 rounded-xl hover:bg-rose-500/[0.04] dark:hover:bg-rose-500/[0.06] hover:translate-x-1 transition-all duration-250 group/item border border-transparent hover:border-rose-100/50 dark:hover:border-rose-950/30"
                         >
-                          <span className="w-8 h-8 rounded-lg overflow-hidden bg-slate-100 dark:bg-zinc-800 flex-shrink-0 flex items-center justify-center">
+                          <span className="w-8 h-8 rounded-lg overflow-hidden bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 flex-shrink-0 flex items-center justify-center transition-all duration-250 group-hover/item:bg-rose-50/60 dark:group-hover/item:bg-rose-950/30 group-hover/item:border-rose-200 dark:group-hover/item:border-rose-900">
                             {occ.imageUrl ? (
                               <img
                                 src={getFullImageUrl(occ.imageUrl) || occ.imageUrl}
@@ -85,11 +86,11 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <Icon name="gift" size={14} className="text-rose-400" />
+                              <Icon name="gift" size={14} className="text-rose-400 group-hover/item:text-rose-500" />
                             )}
                           </span>
                           <div className="min-w-0">
-                            <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-200 group-hover/item:text-rose-500 dark:group-hover/item:text-rose-450 transition-colors truncate">
+                            <h4 className="text-xs font-bold text-slate-700 dark:text-zinc-300 group-hover/item:text-rose-500 dark:group-hover/item:text-rose-400 transition-colors truncate">
                               {occ.name}
                             </h4>
                           </div>
@@ -107,7 +108,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                     <Link
                       href="/products"
                       onClick={() => setActiveDropdown(null)}
-                      className="flex items-center gap-2 p-2 text-[10px] font-bold text-rose-500 hover:text-rose-600 transition-colors mt-1"
+                      className="flex items-center gap-2 p-2 text-[10px] font-bold text-rose-500 hover:text-rose-600 hover:underline transition-all mt-1"
                     >
                       Xem tất cả sản phẩm <Icon name="→" size={12} />
                     </Link>
@@ -115,7 +116,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                 </div>
 
                 {/* Right: Promo card */}
-                <div className="bg-gradient-to-br from-rose-50 to-pink-50/50 dark:from-zinc-950 dark:to-zinc-900 p-5 rounded-2xl flex flex-col justify-between border border-rose-100/50 dark:border-zinc-800">
+                <div className="bg-gradient-to-br from-rose-50/80 to-pink-50/20 dark:from-zinc-950 dark:to-zinc-900/60 p-5 rounded-2xl flex flex-col justify-between border border-rose-100 dark:border-zinc-800/80">
                   <div className="space-y-2">
                     <span className="text-[9px] font-bold tracking-wider text-amber-500 uppercase bg-amber-500/10 px-2.5 py-1 rounded-full">
                       Set quà bán chạy
@@ -140,7 +141,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
 
             {/* === Dropdown: Bộ sưu tập === */}
             {isCollectionsMenu && activeDropdown === 'collections' && (
-              <div className="absolute top-[56px] left-1/2 -translate-x-1/2 z-50 w-[560px] bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 rounded-3xl p-6 shadow-2xl grid grid-cols-2 gap-6 animate-fade-in text-slate-800 dark:text-zinc-100">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 z-50 w-[560px] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl grid grid-cols-2 gap-6 animate-fade-in text-slate-800 dark:text-zinc-100 before:absolute before:-top-2 before:left-0 before:right-0 before:h-2 before:content-['']">
                 {/* Left: Collections list */}
                 <div className="space-y-3">
                   <span className="text-[10px] font-extrabold tracking-widest text-rose-500 uppercase flex items-center gap-1">
@@ -153,27 +154,27 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                           key={col.id || col.slug}
                           href={`/collections/${col.slug}`}
                           onClick={() => setActiveDropdown(null)}
-                          className="flex items-center gap-3 p-2 rounded-xl hover:bg-rose-50/60 dark:hover:bg-zinc-800 transition-colors group/item"
+                          className="flex items-center gap-3 p-2 rounded-xl hover:bg-rose-500/[0.04] dark:hover:bg-rose-500/[0.06] hover:translate-x-1 transition-all duration-250 group/item border border-transparent hover:border-rose-100/50 dark:hover:border-rose-950/30"
                         >
-                          <span className="w-12 h-8 rounded-lg overflow-hidden bg-slate-100 dark:bg-zinc-800 flex-shrink-0">
+                          <span className="w-12 h-8 rounded-lg overflow-hidden bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 flex-shrink-0 transition-all duration-250 group-hover/item:border-rose-200 dark:group-hover/item:border-rose-900">
                             {col.imageUrl ? (
                               <img
                                 src={getFullImageUrl(col.imageUrl) || col.imageUrl}
                                 alt={col.name}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover/item:scale-105"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <Icon name="sparkles" size={12} className="text-amber-400" />
+                                <Icon name="sparkles" size={12} className="text-amber-400 group-hover/item:scale-110 transition-transform duration-200" />
                               </div>
                             )}
                           </span>
                           <div className="min-w-0 flex-1">
-                            <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-200 group-hover/item:text-rose-500 dark:group-hover/item:text-rose-450 transition-colors truncate">
+                            <h4 className="text-xs font-bold text-slate-700 dark:text-zinc-300 group-hover/item:text-rose-500 dark:group-hover/item:text-rose-400 transition-colors truncate">
                               {col.name}
                             </h4>
                             {col.description && (
-                              <p className="text-[9px] text-slate-400 dark:text-zinc-500 font-light truncate">
+                              <p className="text-[9px] text-slate-450 dark:text-zinc-550 font-light truncate">
                                 {col.description}
                               </p>
                             )}
@@ -192,9 +193,9 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                       ))
                     )}
                     <Link
-                      href="/#collections"
+                      href="/collections"
                       onClick={() => setActiveDropdown(null)}
-                      className="flex items-center gap-2 p-2 text-[10px] font-bold text-rose-500 hover:text-rose-600 transition-colors mt-1"
+                      className="flex items-center gap-2 p-2 text-[10px] font-bold text-rose-500 hover:text-rose-600 hover:underline transition-all mt-1"
                     >
                       Xem tất cả bộ sưu tập <Icon name="→" size={12} />
                     </Link>
@@ -202,7 +203,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                 </div>
 
                 {/* Right: Promo card */}
-                <div className="bg-gradient-to-br from-amber-50 to-orange-50/40 dark:from-zinc-950 dark:to-zinc-900 p-5 rounded-2xl flex flex-col justify-between border border-amber-100/50 dark:border-zinc-800">
+                <div className="bg-gradient-to-br from-amber-50/80 to-orange-50/20 dark:from-zinc-950 dark:to-zinc-900/60 p-5 rounded-2xl flex flex-col justify-between border border-amber-100 dark:border-zinc-800/80">
                   <div className="space-y-2">
                     <span className="text-[9px] font-bold tracking-wider text-rose-500 uppercase bg-rose-500/10 px-2.5 py-1 rounded-full">
                       Ưu đãi đặc biệt
@@ -215,7 +216,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                     </p>
                   </div>
                   <Link
-                    href="/#collections"
+                    href="/collections"
                     onClick={() => setActiveDropdown(null)}
                     className="mt-4 inline-flex items-center justify-center bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-xl text-[10px] shadow-sm hover:shadow-md transition-all text-center gap-1.5"
                   >

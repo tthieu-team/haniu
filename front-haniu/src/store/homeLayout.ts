@@ -347,7 +347,7 @@ const DEFAULT_STATE = {
     menuLinks: [
       { name: "Trang chủ", href: "/" },
       { name: "Sản phẩm", href: "/products" },
-      { name: "Bộ sưu tập", href: "/#collections" },
+      { name: "Bộ sưu tập", href: "/collections" },
       { name: "Câu chuyện", href: "/#story" },
       { name: "Yêu thích", href: "/wishlist" },
     ],

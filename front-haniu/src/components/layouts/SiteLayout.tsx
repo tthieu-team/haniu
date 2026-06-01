@@ -19,12 +19,13 @@ export default function SiteLayout({
   const isSticky = useHomeLayoutStore((state) => state.header.isSticky);
   const isAnnouncementBar = useHomeLayoutStore((state) => state.announcementBar.isEnabled);
 
-  const ptClass = isSticky
-    ? (isAnnouncementBar ? 'pt-28 sm:pt-32 md:pt-36' : 'pt-20 sm:pt-24 md:pt-28')
-    : 'pt-0';
   const isFullWidth = isHome || pathname?.startsWith('/collections');
   const isAuth = pathname?.startsWith('/auth');
   const isAdmin = pathname?.startsWith('/admin');
+
+  const ptClass = isSticky && !isFullWidth
+    ? (isAnnouncementBar ? 'pt-28 sm:pt-32 md:pt-36' : 'pt-20 sm:pt-24 md:pt-28')
+    : 'pt-0';
 
   if (isAuth || isAdmin) {
     return (

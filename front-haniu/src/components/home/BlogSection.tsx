@@ -86,7 +86,7 @@ export default function BlogSection() {
                 <div className="pt-1 sm:pt-2">
                   <a
                     href={post.href}
-                    className="inline-flex items-center text-[10px] sm:text-xs font-bold text-rose-500 hover:text-rose-600 dark:text-rose-455 dark:hover:text-rose-400 transition-colors group/link"
+                    className="inline-flex items-center text-[10px] sm:text-xs font-bold text-rose-500 hover:text-rose-600 dark:text-rose-400 transition-colors group/link"
                   >
                     <span>Đọc tiếp</span>
                     <Icon

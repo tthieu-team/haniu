@@ -41,7 +41,7 @@ function LookupContent() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8 sm:py-16 px-4 sm:px-6 lg:px-8 font-sans space-y-8 sm:space-y-12">
+    <div className="max-w-4xl mx-auto pb-12 font-sans space-y-8 sm:space-y-12">
       {/* Title Header */}
       <div className="text-center space-y-3 max-w-xl mx-auto">
         <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 border border-rose-500/20">

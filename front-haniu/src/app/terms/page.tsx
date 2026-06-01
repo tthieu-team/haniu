@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 md:py-16">
+    <div className="max-w-4xl mx-auto pb-12">
       {/* Breadcrumb */}
       <nav className="mb-6 text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
         <Link href="/" className="hover:text-rose-500 transition-colors">Trang chủ</Link>

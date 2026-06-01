@@ -78,7 +78,7 @@ function SuccessContent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 font-sans space-y-8 sm:space-y-12">
+    <div className="max-w-4xl mx-auto pb-12 font-sans space-y-8 sm:space-y-12">
       {/* Success Hero Card */}
       <SuccessHero orderCode={order.orderCode} customerEmail={order.customerEmail} />
 

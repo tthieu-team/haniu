@@ -18,7 +18,7 @@ export default function SplitGridHero({ hero, isSticky, isAnnouncementBar }: Spl
 
   return (
     <section
-      className={`w-full bg-[#FAF5F2] py-6 sm:py-10 ${
+      className={`w-full bg-[#FAF5F2] dark:bg-zinc-950 py-6 sm:py-10 ${
         isSticky
           ? (isAnnouncementBar ? 'pt-24 sm:pt-28 md:pt-32' : 'pt-20 sm:pt-22 md:pt-24')
           : 'pt-6'

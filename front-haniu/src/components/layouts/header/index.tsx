@@ -135,7 +135,7 @@ export default function Header() {
   const rawMenuLinks = header?.menuLinks?.length ? header.menuLinks : [
     { name: 'Trang chủ', href: '/' },
     { name: 'Sản phẩm', href: '/products' },
-    { name: 'Bộ sưu tập', href: '/#collections' },
+    { name: 'Bộ sưu tập', href: '/collections' },
     { name: 'Câu chuyện', href: '/#story' },
   ];
   const menuLinks = [
@@ -174,16 +174,16 @@ export default function Header() {
       )}
 
       <header
-        className={`w-full transition-all duration-500 relative z-50 ${
+        className={`w-full transition-all duration-300 relative z-50 ${
           isScrolled
-            ? 'bg-white/95 dark:bg-zinc-950/95 shadow-lg backdrop-blur-md border-b border-slate-200/80 dark:border-zinc-800/80 py-4 text-slate-800 dark:text-zinc-100'
-            : 'bg-transparent py-5 text-slate-800 dark:text-zinc-100 border-transparent'
+            ? 'bg-white/90 dark:bg-zinc-950/90 shadow-sm backdrop-blur-md border-b border-slate-200/60 dark:border-zinc-900/80 py-2.5 text-slate-800 dark:text-zinc-100'
+            : 'bg-transparent py-3.5 text-slate-800 dark:text-zinc-100 border-transparent'
         }`}
       >
         {/* Mobile Search Overlay (Beautiful animation and search suggestions) */}
         {showMobileSearch && (
           <div
-            className="absolute inset-0 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-md z-[60] flex items-center px-4 animate-slide-down border-b border-slate-200 dark:border-zinc-800"
+            className="absolute inset-0 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-md z-[60] flex items-center px-4 animate-slide-down border-b border-slate-200/80 dark:border-zinc-800/80"
           >
             <form onSubmit={handleSearchSubmit} className="flex items-center gap-3 w-full relative">
               <Icon name="search" size={16} className="text-slate-400 shrink-0" />
@@ -213,14 +213,14 @@ export default function Header() {
                   setShowMobileSearch(false);
                   setSuggestions([]);
                 }}
-                className="text-xs font-bold text-slate-500 hover:text-rose-500 dark:text-zinc-400 dark:hover:text-rose-455 px-2 py-1 shrink-0 cursor-pointer"
+                className="text-xs font-bold text-slate-500 hover:text-rose-500 dark:text-zinc-400 dark:hover:text-rose-400 px-2 py-1 shrink-0 cursor-pointer"
               >
                 Hủy
               </button>
 
               {/* Suggestions Dropdown for Mobile Search Overlay */}
               {searchVal.trim().length > 0 && (
-                <div className="absolute top-[calc(100%+1px)] left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 shadow-2xl p-3 space-y-1 z-[70] max-h-[70vh] overflow-y-auto scrollbar-thin rounded-b-2xl">
+                <div className="absolute top-[calc(100%+1px)] left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/80 shadow-2xl p-3 space-y-1 z-[70] max-h-[70vh] overflow-y-auto scrollbar-thin rounded-b-2xl">
                   {loadingSuggestions ? (
                     <div className="flex items-center justify-center p-6 text-xs text-slate-450 dark:text-zinc-500 gap-2">
                       <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-rose-500" />
@@ -277,13 +277,14 @@ export default function Header() {
             <Navbar isScrolled={isScrolled} menuLinks={menuLinks} />
           </div>
           {/* Right: Search, Account, Wishlist, Cart */}
-          <div className="flex items-center gap-2 md:gap-4 lg:gap-6">
+          <div className="flex items-center gap-2 sm:gap-3.5 lg:gap-5">
             {/* Search Bar Form (Desktop Only) */}
             <form
               ref={searchRef}
               onSubmit={handleSearchSubmit}
               className="hidden md:flex relative items-center"
             >
+              <Icon name="search" size={13} className="absolute left-3 text-slate-400 dark:text-zinc-500 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Tìm kiếm set quà..."
@@ -293,11 +294,7 @@ export default function Header() {
                   setShowDropdown(true);
                 }}
                 onFocus={() => setShowDropdown(true)}
-                className={`text-xs px-4 py-2 rounded-full border bg-white/10 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all duration-300 w-40 lg:w-48 ${
-                  isScrolled
-                    ? 'border-slate-200 text-slate-800 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100'
-                    : 'border-slate-200/80 text-slate-800 placeholder-slate-500 dark:border-zinc-800/60 dark:text-zinc-200 focus:bg-white/30'
-                }`}
+                className={`text-xs pl-8 pr-8 py-1.5 rounded-full border bg-slate-50/50 dark:bg-zinc-900/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-950 transition-all duration-300 w-36 lg:w-44 xl:w-52 text-slate-750 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-550 border-slate-200/80 dark:border-zinc-800/80`}
               />
               {searchVal && (
                 <button
@@ -306,7 +303,7 @@ export default function Header() {
                     setSearchVal('');
                     setSuggestions([]);
                   }}
-                  className="absolute right-3 text-slate-400 dark:text-zinc-500 hover:text-rose-500 text-[10px] cursor-pointer"
+                  className="absolute right-3 text-slate-450 dark:text-zinc-500 hover:text-rose-500 text-[10px] cursor-pointer"
                 >
                   ✕
                 </button>
@@ -314,7 +311,7 @@ export default function Header() {
 
               {/* Suggestions Dropdown */}
               {showDropdown && searchVal.trim().length > 0 && (
-                <div className="absolute top-full right-0 mt-2 w-72 sm:w-80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-100 dark:border-zinc-800/85 rounded-2xl shadow-xl z-50 p-2 overflow-hidden animate-scale-up">
+                <div className="absolute top-full right-0 mt-2 w-72 sm:w-80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/80 rounded-2xl shadow-xl z-50 p-2 overflow-hidden animate-scale-up">
                   {loadingSuggestions ? (
                     <div className="flex items-center justify-center p-6 text-xs text-slate-400 dark:text-zinc-500 gap-2">
                       <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-rose-500" />
@@ -342,9 +339,9 @@ export default function Header() {
                               key={product.id}
                               href={`/products/${product.slug}`}
                               onClick={() => setShowDropdown(false)}
-                              className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors group"
+                              className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-rose-500/[0.04] dark:hover:bg-rose-500/[0.06] hover:translate-x-1 transition-all duration-200 group border border-transparent hover:border-rose-100/50 dark:hover:border-rose-950/20"
                             >
-                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-50 dark:bg-zinc-950 shrink-0 border border-slate-100 dark:border-zinc-850 relative">
+                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-50 dark:bg-zinc-950 shrink-0 border border-slate-200/60 dark:border-zinc-800/80 relative">
                                 <img
                                   src={getFullImageUrl(product.thumbnailUrl || product.media?.find((m: any) => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://placehold.co/100')}
                                   alt={product.name}
@@ -401,7 +398,7 @@ export default function Header() {
                       </div>
                       <button
                         type="submit"
-                        className="w-full text-center block text-[10px] font-bold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 py-2 border-t border-slate-100/80 dark:border-zinc-800/80 mt-1 cursor-pointer transition-colors"
+                        className="w-full text-center block text-[10px] font-bold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 py-2 border-t border-slate-200/80 dark:border-zinc-800/80 mt-1 cursor-pointer transition-colors"
                       >
                         Xem tất cả kết quả cho "{searchVal}"
                       </button>
@@ -459,11 +456,11 @@ export default function Header() {
             {/* User Account / Login (Desktop Only) */}
             {isAuthenticated ? (
               <div className="hidden md:block relative group py-2">
-                <button className="flex items-center gap-1.5 text-xs font-semibold hover:text-rose-500 dark:hover:text-rose-455 cursor-pointer">
+                <button className="flex items-center gap-1.5 text-xs font-semibold hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer">
                   <Icon name="user" size={16} /> <span className="hidden sm:inline">{user?.fullName.split(' ').slice(-1)[0]}</span>
                 </button>
                 <div className="absolute right-0 top-full pt-2 w-44 opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto transition-all duration-300 z-50">
-                  <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-xl p-3 flex flex-col gap-2">
+                  <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl p-3 flex flex-col gap-2">
                     <span className="text-[10px] text-slate-400 font-bold px-2 uppercase flex items-center gap-1">
                       {user?.role === 'ADMIN' ? (
                         <>
@@ -480,14 +477,14 @@ export default function Header() {
                     {user?.role === 'ADMIN' && (
                       <Link
                         href="/admin/products"
-                        className="text-xs font-semibold px-2 py-1.5 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-850 text-slate-700 dark:text-zinc-300"
+                        className="text-xs font-semibold px-2 py-1.5 rounded-xl hover:bg-rose-500/[0.04] dark:hover:bg-rose-500/[0.06] text-slate-700 dark:text-zinc-300 border border-transparent hover:border-rose-100/50 dark:hover:border-rose-950/20"
                       >
                         Quản trị Admin
                       </Link>
                     )}
                     <button
                       onClick={() => authService.logout()}
-                      className="text-left text-xs font-semibold text-rose-500 hover:text-rose-600 px-2 py-1.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/20 cursor-pointer"
+                      className="text-left text-xs font-semibold text-rose-500 hover:text-rose-600 px-2 py-1.5 rounded-xl hover:bg-rose-500/[0.06] dark:hover:bg-rose-950/30 border border-transparent hover:border-rose-100/50 dark:hover:border-rose-950/20 cursor-pointer"
                     >
                       Đăng xuất
                     </button>
@@ -518,20 +515,20 @@ export default function Header() {
 
         {/* Mobile Dropdown Drawer Menu */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 space-y-6 shadow-xl animate-fade-in text-slate-800 dark:text-zinc-100">
+          <div className="md:hidden border-t border-slate-200 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md p-6 space-y-6 shadow-xl animate-fade-in text-slate-800 dark:text-zinc-100">
             <div className="flex flex-col gap-4">
               {menuLinks.map((link, idx) => (
                 <Link
                   key={idx}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="text-xs font-bold hover:text-rose-500 px-2 py-2 border-b border-slate-50 dark:border-zinc-900/50 transition-all"
+                  className="text-xs font-bold hover:text-rose-500 px-2 py-2 border-b border-slate-100 dark:border-zinc-900/40 transition-all"
                 >
                   {link.name}
                 </Link>
               ))}
 
-              <hr className="border-slate-100 dark:border-zinc-850 my-1" />
+              <hr className="border-slate-200/80 dark:border-zinc-800/80 my-1" />
 
               {/* Mobile Search inside drawer */}
               <form onSubmit={handleSearchSubmit} className="relative w-full">
@@ -540,7 +537,7 @@ export default function Header() {
                   placeholder="Tìm kiếm set quà..."
                   value={searchVal}
                   onChange={(e) => setSearchVal(e.target.value)}
-                  className="w-full text-base px-4 py-2.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-800 dark:text-zinc-100 focus:outline-none"
+                  className="w-full text-xs px-4 py-2.5 rounded-full border border-slate-200/85 dark:border-zinc-800/80 bg-slate-50/50 dark:bg-zinc-900/50 text-slate-800 dark:text-zinc-100 focus:outline-none"
                 />
                 <button
                   type="submit"
@@ -555,7 +552,7 @@ export default function Header() {
                 {/* Theme Toggle Mobile */}
                 <button
                   onClick={toggleTheme}
-                  className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900 text-slate-700 dark:text-zinc-350 border border-slate-100 dark:border-zinc-800/80 cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 text-slate-700 dark:text-zinc-350 border border-slate-200/80 dark:border-zinc-800/80 cursor-pointer"
                 >
                   <Icon name={mounted && theme === 'dark' ? 'sun' : 'moon'} size={13} />
                   <span>{mounted && theme === 'dark' ? 'Sáng' : 'Tối'}</span>
@@ -565,7 +562,7 @@ export default function Header() {
                 <Link
                   href="/wishlist"
                   onClick={() => setMobileOpen(false)}
-                  className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900 text-rose-500 border border-slate-100 dark:border-zinc-800/80 cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 text-rose-500 border border-slate-200/80 dark:border-zinc-800/80 cursor-pointer"
                 >
                   <Icon name="heart" size={13} className="text-rose-500" />
                   <span>Yêu thích ({wishlistItems.length})</span>

@@ -42,7 +42,7 @@ export default function BrandIntroSection() {
                 Khám phá câu chuyện
               </a>
               <a
-                href="/#collections"
+                href="/collections"
                 className="inline-flex items-center justify-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-900/50 hover:bg-rose-50/20 dark:hover:bg-rose-950/10 px-6 py-3.5 text-xs font-extrabold shadow-xs hover:shadow-md hover:-translate-y-0.5 active:scale-95 transition-all duration-300 w-full sm:w-44"
               >
                 Các bộ sưu tập
