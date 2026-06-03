@@ -145,6 +145,43 @@ function CheckoutForm() {
       return;
     }
 
+    if (!formData.customerName.trim()) {
+      setError('Vui lòng điền họ tên người nhận.');
+      return;
+    }
+    if (!formData.customerPhone.trim()) {
+      setError('Vui lòng điền số điện thoại.');
+      return;
+    }
+    const phoneRegex = /^(0|84)(3|5|7|8|9)[0-9]{8}$/;
+    if (!phoneRegex.test(formData.customerPhone.trim())) {
+      setError('Số điện thoại không đúng định dạng (VD: 0912345678).');
+      return;
+    }
+    if (formData.customerEmail.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.customerEmail.trim())) {
+        setError('Địa chỉ email không đúng định dạng.');
+        return;
+      }
+    }
+    if (!formData.shippingProvince.trim()) {
+      setError('Vui lòng chọn Tỉnh/Thành phố.');
+      return;
+    }
+    if (!formData.shippingDistrict.trim()) {
+      setError('Vui lòng chọn Quận/Huyện.');
+      return;
+    }
+    if (!formData.shippingWard.trim()) {
+      setError('Vui lòng chọn Phường/Xã.');
+      return;
+    }
+    if (!formData.shippingAddressLine.trim()) {
+      setError('Vui lòng điền địa chỉ chi tiết (số nhà, tên đường...).');
+      return;
+    }
+
     try {
       setError('');
       const order = await createOrder({
@@ -219,10 +256,9 @@ function CheckoutForm() {
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="text-xs text-slate-400 block mb-1">Địa chỉ Email</label>
+              <label className="text-xs text-slate-400 block mb-1">Địa chỉ Email (Không bắt buộc)</label>
               <input
                 type="email"
-                required
                 value={formData.customerEmail}
                 onChange={e => setFormData({ ...formData, customerEmail: e.target.value })}
                 className="w-full text-base md:text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"

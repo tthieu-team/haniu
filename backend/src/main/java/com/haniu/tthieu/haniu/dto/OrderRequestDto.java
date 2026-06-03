@@ -15,7 +15,6 @@ public class OrderRequestDto {
     @NotBlank(message = "Customer phone is required")
     private String customerPhone;
 
-    @NotBlank(message = "Customer email is required")
     private String customerEmail;
 
     @NotBlank(message = "Shipping province is required")

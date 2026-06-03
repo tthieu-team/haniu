@@ -1,12 +1,22 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useHomeLayoutStore } from '@/store/homeLayout';
+import { useHomeLayoutStore, DEFAULT_STATE } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
 
 export default function Footer() {
-  const footer = useHomeLayoutStore((state) => state.footer);
-  const header = useHomeLayoutStore((state) => state.header);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const storeFooter = useHomeLayoutStore((state) => state.footer);
+  const storeHeader = useHomeLayoutStore((state) => state.header);
+
+  const footer = isMounted ? storeFooter : DEFAULT_STATE.footer;
+  const header = isMounted ? storeHeader : DEFAULT_STATE.header;
 
   return (
     <footer className="border-t border-slate-100 bg-white dark:border-zinc-900 dark:bg-zinc-950 py-16">

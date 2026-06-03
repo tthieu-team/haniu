@@ -16,6 +16,7 @@ import com.haniu.tthieu.haniu.repository.*;
 import com.haniu.tthieu.haniu.service.CartService;
 import com.haniu.tthieu.haniu.service.OrderService;
 import com.haniu.tthieu.haniu.service.EmailService;
+import com.haniu.tthieu.haniu.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponseDto createOrder(String email, OrderRequestDto request) {
         Cart cart = cartRepository.findById(request.getCartId())
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
         if (cartItems.isEmpty()) {
@@ -224,7 +225,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public OrderResponseDto getOrderByCode(String orderCode) {
         Order order = orderRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         return convertToDto(order);
     }
 
@@ -232,7 +233,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public OrderResponseDto getOrderByTrackingToken(String trackingToken) {
         Order order = orderRepository.findByTrackingToken(trackingToken)
-                .orElseThrow(() -> new RuntimeException("Order not found with tracking token"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with tracking token"));
         return convertToDto(order);
     }
 
@@ -273,7 +274,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponseDto updateOrderStatus(UUID orderId, String orderStatus) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
         order.setOrderStatus(OrderStatus.valueOf(orderStatus.toUpperCase()));
         if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
@@ -294,7 +295,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponseDto updatePaymentStatus(UUID orderId, String paymentStatus) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
         order.setPaymentStatus(PaymentStatus.valueOf(paymentStatus.toUpperCase()));
         order = orderRepository.save(order);

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Logo from './Logo';
 import Navbar from './Navbar';
 import Icon from '@/components/common/Icons';
-import { useHomeLayoutStore } from '@/store/homeLayout';
+import { useHomeLayoutStore, DEFAULT_STATE } from '@/store/homeLayout';
 import { useAuthStore } from '@/store/auth';
 import { useCartStore } from '@/store/cart';
 import { useThemeStore } from '@/store/theme';
@@ -18,13 +18,17 @@ import { getFullImageUrl } from '@/lib/api';
 export default function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { header, announcementBar } = useHomeLayoutStore();
+  
+  const [mounted, setMounted] = useState(false);
+  
+  const { header: storeHeader, announcementBar: storeAnnouncementBar } = useHomeLayoutStore();
+  const header = mounted ? storeHeader : DEFAULT_STATE.header;
+  const announcementBar = mounted ? storeAnnouncementBar : DEFAULT_STATE.announcementBar;
+  
   const { user, isAuthenticated, clearAuth } = useAuthStore();
   const { cart, fetchCart } = useCartStore();
   const { theme, toggleTheme } = useThemeStore();
   const wishlistItems = useWishlistStore((state) => state.items);
-
-  const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchVal, setSearchVal] = useState('');

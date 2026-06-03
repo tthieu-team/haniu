@@ -323,7 +323,7 @@ export interface HomeLayoutState {
   saveConfigToServer: () => Promise<void>;
 }
 
-const DEFAULT_STATE = {
+export const DEFAULT_STATE = {
   visibility: {
     hero: true,
     trustBar: true,
