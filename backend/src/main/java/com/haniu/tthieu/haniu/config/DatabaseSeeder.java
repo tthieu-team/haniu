@@ -521,7 +521,8 @@ public class DatabaseSeeder implements CommandLineRunner {
 
 
     private void seedSystemConfigs() {
-        if (systemConfigRepository.findByConfigKey("HOME_LAYOUT").isEmpty()) {
+        Optional<SystemConfig> existingOpt = systemConfigRepository.findByConfigKey("HOME_LAYOUT");
+        if (existingOpt.isEmpty()) {
             log.info("Seeding default HOME_LAYOUT configuration...");
             String defaultConfig = """
             {
@@ -664,7 +665,7 @@ public class DatabaseSeeder implements CommandLineRunner {
               "videoBanner": {
                 "title": "Nghệ Thuật Chế Tác Độc Bản",
                 "subtitle": "Khám phá quy trình tỉ mỉ để tạo ra một tác phẩm quà tặng được khắc laser cá nhân hóa bởi Haniu.",
-                "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-wrapping-a-gift-box-with-ribbon-39922-large.mp4",
+                "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
                 "placeholderImage": "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=1200&auto=format&fit=crop&q=80",
                 "buttonText": "Xem Thêm Câu Chuyện",
                 "buttonHref": "/#story"
@@ -705,12 +706,12 @@ public class DatabaseSeeder implements CommandLineRunner {
               },
               "howItWorks": {
                 "title": "Quy Trình Tạo Nên Món Quà Độc Bản",
-                "subtitle": "Chỉ với 4 bước đơn giản để tạo ra hộp quà chứa đựng tâm ý của riêng bạn",
+                "subtitle": "Từ ý tưởng đến món quà hoàn thiện, mỗi chi tiết đều được chăm chút để mang đến trải nghiệm trao tặng đầy ý nghĩa.",
                 "steps": [
-                  { "number": "01", "title": "Chọn Mẫu Quà", "desc": "Lựa chọn giữa hàng chục set combo quà tặng sẵn có hoặc sản phẩm lẻ của Haniu." },
-                  { "number": "02", "title": "Cá Nhân Hóa", "desc": "Nhập tên, ngày kỷ niệm hoặc lời nhắn gửi để chúng tôi thiết kế bản khắc laser." },
-                  { "number": "03", "title": "Xác Nhận Preview", "desc": "Đội ngũ thiết kế gửi bản vẽ mô phỏng cho bạn duyệt trước khi tiến hành chế tác." },
-                  { "number": "04", "title": "Nhận Quà Hoàn Mỹ", "desc": "Quà được gói hộp sang trọng kèm nơ lụa và thiệp viết tay, giao hỏa tốc đến người nhận." }
+                  { "number": "01", "title": "Chọn Mẫu Quà", "desc": "Khám phá bộ sưu tập quà tặng được tuyển chọn kỹ lưỡng hoặc tự do kết hợp các sản phẩm yêu thích để tạo nên set quà mang dấu ấn riêng.", "image": "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&auto=format&fit=crop&q=80" },
+                  { "number": "02", "title": "Cá Nhân Hóa", "desc": "Thêm tên, ngày kỷ niệm hoặc thông điệp đặc biệt. Công nghệ khắc laser tinh xảo giúp mỗi món quà trở nên duy nhất.", "image": "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=600&auto=format&fit=crop&q=80" },
+                  { "number": "03", "title": "Xác Nhận Thiết Kế", "desc": "Nhận bản mô phỏng trực quan từ đội ngũ thiết kế và duyệt trước khi sản phẩm được chế tác chính thức.", "image": "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=80" },
+                  { "number": "04", "title": "Nhận Quà Hoàn Mỹ", "desc": "Món quà được hoàn thiện, đóng gói sang trọng cùng thiệp viết tay và giao đến tận nơi với sự chỉn chu trong từng chi tiết.", "image": "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600&auto=format&fit=crop&q=80" }
                 ]
               },
               "ugcFeed": {
@@ -764,11 +765,14 @@ public class DatabaseSeeder implements CommandLineRunner {
                 ]
               },
               "story": {
-                "title": "Nghệ Thuật Từ Những Bàn Tay Thủ Công",
+                "title": "Nghệ Thuật Từ",
+                "titleHighlight": "Những Bàn Tay",
+                "titlePart2": "Thủ Công",
                 "subtitle": "Hành trình chăm chút tỉ mỉ cho từng góc cạnh hộp quà",
                 "content": "Tại xưởng chế tác của Haniu, mỗi chi tiết nhỏ đều được chúng tôi trân quý. Từ khâu tuyển chọn những tấm da bò nguyên tấm, mài giũa các góc cạnh của gỗ, cho đến kỹ thuật nung men gốm sứ hỏa biến độc bản. Chúng tôi không sản xuất công nghiệp hàng loạt. Mỗi món quà bạn cầm trên tay đều mang hơi ấm và tâm huyết của những người thợ thủ công Việt Nam.",
                 "videoPlaceholderUrl": "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=1200&auto=format&fit=crop&q=80",
-                "videoTitle": "Xem video Behind the Scenes"
+                "videoTitle": "Xem video Behind the Scenes",
+                "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"
               },
               "cta": {
                 "title": "Tạo Nên Món Quà Mang Dấu Ấn Riêng Của Bạn",
@@ -849,6 +853,127 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .build();
             systemConfigRepository.save(config);
             log.info("Default HOME_LAYOUT configuration seeded!");
+        } else {
+            SystemConfig config = existingOpt.get();
+            String value = config.getConfigValue();
+            if (value != null) {
+                try {
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    com.fasterxml.jackson.databind.JsonNode rootNode = mapper.readTree(value);
+                    boolean updated = false;
+
+                    if (rootNode.has("howItWorks")) {
+                        com.fasterxml.jackson.databind.node.ObjectNode howItWorksNode = (com.fasterxml.jackson.databind.node.ObjectNode) rootNode.get("howItWorks");
+
+                        // Update subtitle if it is the old one
+                        if (howItWorksNode.has("subtitle") && howItWorksNode.get("subtitle").asText().equals("Chỉ với 4 bước đơn giản để tạo ra hộp quà chứa đựng tâm ý của riêng bạn")) {
+                            howItWorksNode.put("subtitle", "Từ ý tưởng đến món quà hoàn thiện, mỗi chi tiết đều được chăm chút để mang đến trải nghiệm trao tặng đầy ý nghĩa.");
+                            updated = true;
+                        }
+
+                        // Update steps with images and descriptions
+                        if (howItWorksNode.has("steps") && howItWorksNode.get("steps").isArray()) {
+                            com.fasterxml.jackson.databind.node.ArrayNode stepsNode = (com.fasterxml.jackson.databind.node.ArrayNode) howItWorksNode.get("steps");
+                            String[] defaultImages = {
+                                "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&auto=format&fit=crop&q=80",
+                                "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=600&auto=format&fit=crop&q=80",
+                                "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=80",
+                                "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600&auto=format&fit=crop&q=80"
+                            };
+                            String[] oldDescs = {
+                                "Lựa chọn giữa hàng chục set combo quà tặng sẵn có hoặc sản phẩm lẻ của Haniu.",
+                                "Nhập tên, ngày kỷ niệm hoặc lời nhắn gửi để chúng tôi thiết kế bản khắc laser.",
+                                "Đội ngũ thiết kế gửi bản vẽ mô phỏng cho bạn duyệt trước khi tiến hành chế tác.",
+                                "Quà được gói hộp sang trọng kèm nơ lụa và thiệp viết tay, giao hỏa tốc đến người nhận."
+                            };
+                            String[] newDescs = {
+                                "Khám phá bộ sưu tập quà tặng được tuyển chọn kỹ lưỡng hoặc tự do kết hợp các sản phẩm yêu thích để tạo nên set quà mang dấu ấn riêng.",
+                                "Thêm tên, ngày kỷ niệm hoặc thông điệp đặc biệt. Công nghệ khắc laser tinh xảo giúp mỗi món quà trở nên duy nhất.",
+                                "Nhận bản mô phỏng trực quan từ đội ngũ thiết kế và duyệt trước khi sản phẩm được chế tác chính thức.",
+                                "Món quà được hoàn thiện, đóng gói sang trọng cùng thiệp viết tay và giao đến tận nơi với sự chỉn chu trong từng chi tiết."
+                            };
+
+                            for (int i = 0; i < stepsNode.size(); i++) {
+                                com.fasterxml.jackson.databind.node.ObjectNode stepNode = (com.fasterxml.jackson.databind.node.ObjectNode) stepsNode.get(i);
+                                
+                                // Set image if missing
+                                if (!stepNode.has("image")) {
+                                    if (i < defaultImages.length) {
+                                        stepNode.put("image", defaultImages[i]);
+                                        updated = true;
+                                    }
+                                }
+                                
+                                // Set descriptions if they match the old defaults
+                                if (stepNode.has("desc") && i < oldDescs.length && i < newDescs.length) {
+                                    if (stepNode.get("desc").asText().equals(oldDescs[i])) {
+                                        stepNode.put("desc", newDescs[i]);
+                                        updated = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Migrate the story configuration block
+                    if (rootNode.has("story")) {
+                        com.fasterxml.jackson.databind.node.ObjectNode storyNode = (com.fasterxml.jackson.databind.node.ObjectNode) rootNode.get("story");
+                        if (!storyNode.has("titleHighlight")) {
+                            storyNode.put("titleHighlight", "Những Bàn Tay");
+                            updated = true;
+                        }
+                        if (!storyNode.has("titlePart2")) {
+                            storyNode.put("titlePart2", "Thủ Công");
+                            updated = true;
+                        }
+                        if (storyNode.has("title") && storyNode.get("title").asText().equals("Nghệ Thuật Từ Những Bàn Tay Thủ Công")) {
+                            storyNode.put("title", "Nghệ Thuật Từ");
+                            updated = true;
+                        }
+                        if (!storyNode.has("videoUrl") || storyNode.get("videoUrl").asText().isEmpty() || storyNode.get("videoUrl").asText().contains("mixkit.co")) {
+                            storyNode.put("videoUrl", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4");
+                            updated = true;
+                        }
+                        if (!storyNode.has("videoPlaceholderUrl") || storyNode.get("videoPlaceholderUrl").asText().isEmpty()) {
+                            storyNode.put("videoPlaceholderUrl", "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=1200&auto=format&fit=crop&q=80");
+                            updated = true;
+                        }
+                        if (!storyNode.has("videoTitle") || storyNode.get("videoTitle").asText().isEmpty()) {
+                            storyNode.put("videoTitle", "Xem video Behind the Scenes");
+                            updated = true;
+                        }
+                    } else {
+                        com.fasterxml.jackson.databind.node.ObjectNode storyNode = mapper.createObjectNode();
+                        storyNode.put("title", "Nghệ Thuật Từ");
+                        storyNode.put("titleHighlight", "Những Bàn Tay");
+                        storyNode.put("titlePart2", "Thủ Công");
+                        storyNode.put("subtitle", "Hành trình chăm chút tỉ mỉ cho từng góc cạnh hộp quà");
+                        storyNode.put("content", "Tại xưởng chế tác của Haniu, mỗi chi tiết nhỏ đều được chúng tôi trân quý. Từ khâu tuyển chọn những tấm da bò nguyên tấm, mài giũa các góc cạnh of gỗ, cho đến kỹ thuật nung men gốm sứ hỏa biến độc bản. Chúng tôi không sản xuất công nghiệp hàng loạt. Mỗi món quà bạn cầm trên tay đều mang hơi ấm và tâm huyết of những người thợ thủ công Việt Nam.");
+                        storyNode.put("videoPlaceholderUrl", "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=1200&auto=format&fit=crop&q=80");
+                        storyNode.put("videoTitle", "Xem video Behind the Scenes");
+                        storyNode.put("videoUrl", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4");
+                        ((com.fasterxml.jackson.databind.node.ObjectNode) rootNode).set("story", storyNode);
+                        updated = true;
+                    }
+
+                    // Migrate the videoBanner configuration block to replace mixkit
+                    if (rootNode.has("videoBanner")) {
+                        com.fasterxml.jackson.databind.node.ObjectNode videoBannerNode = (com.fasterxml.jackson.databind.node.ObjectNode) rootNode.get("videoBanner");
+                        if (videoBannerNode.has("videoUrl") && videoBannerNode.get("videoUrl").asText().contains("mixkit.co")) {
+                            videoBannerNode.put("videoUrl", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4");
+                            updated = true;
+                        }
+                    }
+
+                    if (updated) {
+                        config.setConfigValue(mapper.writeValueAsString(rootNode));
+                        systemConfigRepository.save(config);
+                        log.info("HOME_LAYOUT configuration successfully migrated and saved!");
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to migrate HOME_LAYOUT configuration: " + e.getMessage());
+                }
+            }
         }
     }
 

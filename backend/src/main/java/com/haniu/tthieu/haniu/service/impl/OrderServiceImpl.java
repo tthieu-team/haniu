@@ -289,7 +289,19 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order = orderRepository.save(order);
-        return convertToDto(order);
+        OrderResponseDto responseDto = convertToDto(order);
+
+        if (order.getOrderStatus() == OrderStatus.DELIVERED || order.getOrderStatus() == OrderStatus.CANCELLED) {
+            try {
+                if (responseDto.getCustomerEmail() != null && !responseDto.getCustomerEmail().trim().isEmpty()) {
+                    emailService.sendOrderStatusUpdate(responseDto.getCustomerEmail(), responseDto, order.getOrderStatus().name());
+                }
+            } catch (Exception e) {
+                log.error("Failed to send order status update email for order code: {}", responseDto.getOrderCode(), e);
+            }
+        }
+
+        return responseDto;
     }
 
     @Override

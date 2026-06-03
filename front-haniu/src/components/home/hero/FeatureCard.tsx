@@ -2,6 +2,7 @@
 
 import { GridFeatureCard } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
+import { getFullImageUrl } from '@/lib/api';
 
 export default function FeatureCard({ card }: { card: GridFeatureCard }) {
   return (
@@ -26,7 +27,7 @@ export default function FeatureCard({ card }: { card: GridFeatureCard }) {
         </span>
         {card.image && (
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-white shadow-xs overflow-hidden flex-shrink-0">
-            <img src={card.image} alt={card.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <img src={getFullImageUrl(card.image) || card.image} alt={card.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
           </div>
         )}
       </div>

@@ -806,6 +806,152 @@ export default function LiveConfigPanel() {
                       </div>
                     </div>
                   </div>
+                  {/* Story section */}
+                  <div className="space-y-3 bg-zinc-950/30 p-4 rounded-2xl border border-zinc-800/60">
+                    <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest block border-b border-zinc-800 pb-1.5 mb-2">
+                      Câu chuyện & Chế tác (Story Section)
+                    </span>
+                    <div className="space-y-2.5">
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Tiêu đề lớn (Phần đầu)</label>
+                        <input
+                          type="text"
+                          value={story.title}
+                          onChange={(e) => updateStory({ title: e.target.value })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Từ khóa nổi bật (Nghiêng - Gradient)</label>
+                        <input
+                          type="text"
+                          value={story.titleHighlight || ''}
+                          onChange={(e) => updateStory({ titleHighlight: e.target.value })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Tiêu đề lớn (Phần cuối)</label>
+                        <input
+                          type="text"
+                          value={story.titlePart2 || ''}
+                          onChange={(e) => updateStory({ titlePart2: e.target.value })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Tiêu đề phụ</label>
+                        <input
+                          type="text"
+                          value={story.subtitle}
+                          onChange={(e) => updateStory({ subtitle: e.target.value })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Nội dung câu chuyện</label>
+                        <textarea
+                          rows={3}
+                          value={story.content}
+                          onChange={(e) => updateStory({ content: e.target.value })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Tiêu đề nút xem video</label>
+                        <input
+                          type="text"
+                          value={story.videoTitle}
+                          onChange={(e) => updateStory({ videoTitle: e.target.value })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Đường dẫn ảnh bìa video</label>
+                        <input
+                          type="text"
+                          value={story.videoPlaceholderUrl}
+                          onChange={(e) => updateStory({ videoPlaceholderUrl: e.target.value })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Đường dẫn Video (.mp4)</label>
+                        <input
+                          type="text"
+                          value={story.videoUrl || ''}
+                          onChange={(e) => updateStory({ videoUrl: e.target.value })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* How It Works section */}
+                  <div className="space-y-3 bg-zinc-950/30 p-4 rounded-2xl border border-zinc-800/60">
+                    <span className="text-[10px] font-bold text-rose-450 uppercase tracking-widest block border-b border-zinc-800 pb-1.5 mb-2">
+                      Quy trình dịch vụ (Service Process)
+                    </span>
+                    <div className="space-y-2.5">
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Tiêu đề chính</label>
+                        <input
+                          type="text"
+                          value={howItWorks.title}
+                          onChange={(e) => updateHowItWorks({ title: e.target.value })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-zinc-500 uppercase font-semibold">Mô tả phụ</label>
+                        <textarea
+                          rows={2}
+                          value={howItWorks.subtitle}
+                          onChange={(e) => updateHowItWorks({ subtitle: e.target.value })}
+                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-2 pt-2 border-t border-zinc-800/60">
+                        <label className="text-[10px] text-zinc-500 uppercase font-bold">Các bước thực hiện</label>
+                        {(howItWorks.steps || []).map((step, idx) => (
+                          <div key={idx} className="space-y-1.5 p-2 bg-zinc-900/60 rounded-xl border border-zinc-800/50">
+                            <span className="text-[9px] font-bold text-rose-400">Bước {step.number}</span>
+                            <input
+                              type="text"
+                              value={step.title}
+                              onChange={(e) => {
+                                const newSteps = [...howItWorks.steps];
+                                newSteps[idx] = { ...newSteps[idx], title: e.target.value };
+                                updateHowItWorks({ steps: newSteps });
+                              }}
+                              className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-lg px-2.5 py-1.5 text-xs text-white"
+                            />
+                            <textarea
+                              rows={2}
+                              value={step.desc}
+                              onChange={(e) => {
+                                const newSteps = [...howItWorks.steps];
+                                newSteps[idx] = { ...newSteps[idx], desc: e.target.value };
+                                updateHowItWorks({ steps: newSteps });
+                              }}
+                              className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-lg px-2.5 py-1.5 text-xs text-white"
+                            />
+                            <input
+                              type="text"
+                              value={step.image || ''}
+                              placeholder="Đường dẫn ảnh..."
+                              onChange={(e) => {
+                                const newSteps = [...howItWorks.steps];
+                                newSteps[idx] = { ...newSteps[idx], image: e.target.value };
+                                updateHowItWorks({ steps: newSteps });
+                              }}
+                              className="w-full bg-zinc-900 border border-zinc-800 focus:border-rose-500 focus:outline-none rounded-lg px-2.5 py-1.5 text-xs text-white"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Contact settings */}
                   <div className="space-y-3 bg-zinc-950/30 p-4 rounded-2xl border border-zinc-800/60">

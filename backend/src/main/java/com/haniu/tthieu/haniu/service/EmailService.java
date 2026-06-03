@@ -4,5 +4,6 @@ public interface EmailService {
     void sendVerificationCode(String to, String code);
     void sendPasswordResetCode(String to, String code);
     void sendOrderConfirmation(String to, com.haniu.tthieu.haniu.dto.OrderResponseDto order);
+    void sendOrderStatusUpdate(String to, com.haniu.tthieu.haniu.dto.OrderResponseDto order, String status);
 }
 

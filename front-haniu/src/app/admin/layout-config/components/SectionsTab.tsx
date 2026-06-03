@@ -23,6 +23,8 @@ export function SectionsTab() {
     updateSocialProof,
     footer,
     updateFooter,
+    howItWorks,
+    updateHowItWorks,
   } = useHomeLayoutStore();
 
   return (
@@ -166,6 +168,84 @@ export function SectionsTab() {
         </div>
       </div>
 
+      {/* Quy trình dịch vụ (How It Works) */}
+      <div className="py-6 space-y-4">
+        <h4 className="text-xs font-bold text-rose-500 uppercase tracking-widest">
+          Quy trình dịch vụ (How It Works)
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Tiêu đề lớn</label>
+              <input
+                type="text"
+                value={howItWorks.title}
+                onChange={(e) => updateHowItWorks({ title: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Mô tả phụ</label>
+              <textarea
+                rows={3}
+                value={howItWorks.subtitle}
+                onChange={(e) => updateHowItWorks({ subtitle: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
+              Các bước thực hiện (Steps)
+            </span>
+            <div className="space-y-4 max-h-[350px] overflow-y-auto pr-1">
+              {(howItWorks.steps || []).map((step, idx) => (
+                <div key={idx} className="space-y-2 border-b border-slate-200/50 dark:border-zinc-800 pb-3 last:border-b-0 last:pb-0">
+                  <span className="text-[10px] font-bold text-rose-500">Bước {step.number}</span>
+                  <div className="grid grid-cols-1 gap-2">
+                    <input
+                      type="text"
+                      value={step.title}
+                      placeholder="Tiêu đề bước"
+                      onChange={(e) => {
+                        const newSteps = [...howItWorks.steps];
+                        newSteps[idx] = { ...newSteps[idx], title: e.target.value };
+                        updateHowItWorks({ steps: newSteps });
+                      }}
+                      className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-1.5 text-xs font-bold"
+                    />
+                    <textarea
+                      rows={2}
+                      value={step.desc}
+                      placeholder="Mô tả bước"
+                      onChange={(e) => {
+                        const newSteps = [...howItWorks.steps];
+                        newSteps[idx] = { ...newSteps[idx], desc: e.target.value };
+                        updateHowItWorks({ steps: newSteps });
+                      }}
+                      className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-1.5 text-xs"
+                    />
+                    <FileUploadInput
+                      label="Ảnh minh họa"
+                      value={step.image || ''}
+                      onChange={(url) => {
+                        const newSteps = [...howItWorks.steps];
+                        newSteps[idx] = { ...newSteps[idx], image: url };
+                        updateHowItWorks({ steps: newSteps });
+                      }}
+                      accept="image/*"
+                      type="image"
+                      placeholder="Đường dẫn ảnh..."
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Video banner & Collections headers */}
       <div className="py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Video Banner with File Uploader */}
@@ -242,11 +322,29 @@ export function SectionsTab() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
             <div className="space-y-1">
-              <label className="text-[10px] text-slate-500 font-bold uppercase">Tiêu đề lớn</label>
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Tiêu đề lớn (Phần đầu)</label>
               <input
                 type="text"
                 value={story.title}
                 onChange={(e) => updateStory({ title: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Từ khóa nổi bật (Nghiêng - Gradient)</label>
+              <input
+                type="text"
+                value={story.titleHighlight || ''}
+                onChange={(e) => updateStory({ titleHighlight: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Tiêu đề lớn (Phần cuối)</label>
+              <input
+                type="text"
+                value={story.titlePart2 || ''}
+                onChange={(e) => updateStory({ titlePart2: e.target.value })}
                 className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
               />
             </div>
@@ -288,6 +386,16 @@ export function SectionsTab() {
                 accept="image/*"
                 type="image"
                 placeholder="Tải lên tệp ảnh hoặc điền link ảnh..."
+              />
+            </div>
+            <div>
+              <FileUploadInput
+                label="Đường dẫn Video (.mp4)"
+                value={story.videoUrl || ''}
+                onChange={(url) => updateStory({ videoUrl: url })}
+                accept="video/*"
+                type="video"
+                placeholder="Tải lên tệp video hoặc điền link video..."
               />
             </div>
           </div>

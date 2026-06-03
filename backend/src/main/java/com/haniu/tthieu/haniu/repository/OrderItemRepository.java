@@ -15,7 +15,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
     boolean existsByVariantId(UUID variantId);
 
     @Query("SELECT oi FROM OrderItem oi " +
-           "WHERE oi.order.user.email = :email " +
+           "WHERE (oi.order.customerEmail = :email OR (oi.order.user IS NOT NULL AND oi.order.user.email = :email)) " +
            "AND oi.product.id = :productId " +
            "AND oi.order.orderStatus = com.haniu.tthieu.haniu.entity.enums.OrderStatus.DELIVERED " +
            "AND NOT EXISTS (SELECT r FROM Review r WHERE r.orderItem.id = oi.id)")

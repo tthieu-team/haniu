@@ -7,6 +7,7 @@ import { useHomeLayoutStore } from '@/store/homeLayout';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    useHomeLayoutStore.persist.rehydrate();
     useAuthStore.getState().initializeAuth();
     useThemeStore.getState().initializeTheme();
     useHomeLayoutStore.getState().fetchConfigFromServer();

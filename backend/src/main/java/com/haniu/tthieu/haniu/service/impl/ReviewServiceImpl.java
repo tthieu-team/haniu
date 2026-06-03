@@ -41,7 +41,9 @@ public class ReviewServiceImpl implements ReviewService {
         if (!orderItem.getProduct().getId().equals(productId)) {
             throw new RuntimeException("This order item is not for the specified product");
         }
-        if (!orderItem.getOrder().getUser().getEmail().equals(email)) {
+        String orderEmail = orderItem.getOrder().getCustomerEmail();
+        String userEmail = orderItem.getOrder().getUser() != null ? orderItem.getOrder().getUser().getEmail() : null;
+        if (!email.equals(orderEmail) && !email.equals(userEmail)) {
             throw new RuntimeException("You do not own this order item");
         }
         if (orderItem.getOrder().getOrderStatus() != com.haniu.tthieu.haniu.entity.enums.OrderStatus.DELIVERED) {

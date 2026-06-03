@@ -127,6 +127,7 @@ export interface HowItWorksStep {
   number: string;
   title: string;
   desc: string;
+  image: string;
 }
 
 export interface HowItWorksConfig {
@@ -164,10 +165,13 @@ export interface BlogConfig {
 
 export interface StoryConfig {
   title: string;
+  titleHighlight?: string;
+  titlePart2?: string;
   subtitle: string;
   content: string;
   videoPlaceholderUrl: string;
   videoTitle: string;
+  videoUrl: string;
 }
 
 export interface CtaConfig {
@@ -463,7 +467,7 @@ export const DEFAULT_STATE = {
   videoBanner: {
     title: "Nghệ Thuật Chế Tác Độc Bản",
     subtitle: "Khám phá quy trình tỉ mỉ để tạo ra một tác phẩm quà tặng được khắc laser cá nhân hóa bởi Haniu.",
-    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-wrapping-a-gift-box-with-ribbon-39922-large.mp4",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
     placeholderImage: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=1200&auto=format&fit=crop&q=80",
     buttonText: "Xem Thêm Câu Chuyện",
     buttonHref: "/#story",
@@ -504,12 +508,12 @@ export const DEFAULT_STATE = {
   },
   howItWorks: {
     title: "Quy Trình Tạo Nên Món Quà Độc Bản",
-    subtitle: "Chỉ với 4 bước đơn giản để tạo ra hộp quà chứa đựng tâm ý của riêng bạn",
+    subtitle: "Từ ý tưởng đến món quà hoàn thiện, mỗi chi tiết đều được chăm chút để mang đến trải nghiệm trao tặng đầy ý nghĩa.",
     steps: [
-      { number: "01", title: "Chọn Mẫu Quà", desc: "Lựa chọn giữa hàng chục set combo quà tặng sẵn có hoặc sản phẩm lẻ của Haniu." },
-      { number: "02", title: "Cá Nhân Hóa", desc: "Nhập tên, ngày kỷ niệm hoặc lời nhắn gửi để chúng tôi thiết kế bản khắc laser." },
-      { number: "03", title: "Xác Nhận Preview", desc: "Đội ngũ thiết kế gửi bản vẽ mô phỏng cho bạn duyệt trước khi tiến hành chế tác." },
-      { number: "04", title: "Nhận Quà Hoàn Mỹ", desc: "Quà được gói hộp sang trọng kèm nơ lụa và thiệp viết tay, giao hỏa tốc đến người nhận." },
+      { number: "01", title: "Chọn Mẫu Quà", desc: "Khám phá bộ sưu tập quà tặng được tuyển chọn kỹ lưỡng hoặc tự do kết hợp các sản phẩm yêu thích để tạo nên set quà mang dấu ấn riêng.", image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&auto=format&fit=crop&q=80" },
+      { number: "02", title: "Cá Nhân Hóa", desc: "Thêm tên, ngày kỷ niệm hoặc thông điệp đặc biệt. Công nghệ khắc laser tinh xảo giúp mỗi món quà trở nên duy nhất.", image: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=600&auto=format&fit=crop&q=80" },
+      { number: "03", title: "Xác Nhận Thiết Kế", desc: "Nhận bản mô phỏng trực quan từ đội ngũ thiết kế và duyệt trước khi sản phẩm được chế tác chính thức.", image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=80" },
+      { number: "04", title: "Nhận Quà Hoàn Mỹ", desc: "Món quà được hoàn thiện, đóng gói sang trọng cùng thiệp viết tay và giao đến tận nơi với sự chỉn chu trong từng chi tiết.", image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600&auto=format&fit=crop&q=80" },
     ],
   },
   ugcFeed: {
@@ -563,11 +567,14 @@ export const DEFAULT_STATE = {
     ]
   },
   story: {
-    title: "Nghệ Thuật Từ Những Bàn Tay Thủ Công",
+    title: "Nghệ Thuật Từ",
+    titleHighlight: "Những Bàn Tay",
+    titlePart2: "Thủ Công",
     subtitle: "Hành trình chăm chút tỉ mỉ cho từng góc cạnh hộp quà",
     content: "Tại xưởng chế tác của Haniu, mỗi chi tiết nhỏ đều được chúng tôi trân quý. Từ khâu tuyển chọn những tấm da bò nguyên tấm, mài giũa các góc cạnh của gỗ, cho đến kỹ thuật nung men gốm sứ hỏa biến độc bản. Chúng tôi không sản xuất công nghiệp hàng loạt. Mỗi món quà bạn cầm trên tay đều mang hơi ấm và tâm huyết của những người thợ thủ công Việt Nam.",
     videoPlaceholderUrl: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=1200&auto=format&fit=crop&q=80",
     videoTitle: "Xem video Behind the Scenes",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
   },
   cta: {
     title: "Tạo Nên Món Quà Mang Dấu Ấn Riêng Của Bạn",
@@ -852,7 +859,8 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
       },
     }),
     {
-      name: 'haniu-home-layout-config-v8',
+      name: 'haniu-home-layout-config-v10',
+      skipHydration: true,
     }
   )
 );

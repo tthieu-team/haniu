@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
@@ -21,7 +22,11 @@ public class EmailServiceImpl implements EmailService {
     @Value("${app.mail.from:tthieu.dev.02@gmail.com}")
     private String fromEmail;
 
+    @Value("${app.frontend.url:https://haniu.vercel.app}")
+    private String frontendUrl;
+
     @Override
+    @Async
     public void sendVerificationCode(String to, String code) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -63,6 +68,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendPasswordResetCode(String to, String code) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -104,6 +110,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendOrderConfirmation(String to, com.haniu.tthieu.haniu.dto.OrderResponseDto order) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -239,10 +246,15 @@ public class EmailServiceImpl implements EmailService {
                 "      </table>" +
                 "    </div>" +
                 "    " +
+                "    <!-- Action Button -->" +
+                "    <div style=\"text-align: center; margin-bottom: 25px;\">" +
+                "      <a href=\"" + frontendUrl + "/orders/lookup?query=" + order.getOrderCode() + "\" style=\"display: inline-block; background-color: #f43f5e; color: #ffffff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.2);\">Chi tiết & Theo dõi đơn hàng</a>" +
+                "    </div>" +
+                "    " +
                 "    <!-- Footer -->" +
                 "    <p style=\"color: #94a3b8; font-size: 12px; line-height: 1.5; text-align: center; margin-top: 30px; border-top: 1px solid #f1f5f9; padding-top: 20px;\">" +
                 "      Haniu Gifting - Trao quà tặng, gửi yêu thương.<br/>" +
-                "      Website: <a href=\"https://haniu.vercel.app\" style=\"color: #f43f5e; text-decoration: none;\">haniu.vercel.app</a><br/>" +
+                "      Website: <a href=\"" + frontendUrl + "\" style=\"color: #f43f5e; text-decoration: none;\">" + frontendUrl.replace("https://", "").replace("http://", "") + "</a><br/>" +
                 "      &copy; 2026 Haniu. All rights reserved." +
                 "    </p>" +
                 "  </div>" +
@@ -273,6 +285,94 @@ public class EmailServiceImpl implements EmailService {
             case "FAST": return "Giao hàng nhanh";
             case "EXPRESS": return "Giao hàng hỏa tốc";
             default: return method;
+        }
+    }
+
+    @Override
+    @Async
+    public void sendOrderStatusUpdate(String to, com.haniu.tthieu.haniu.dto.OrderResponseDto order, String status) {
+        try {
+            jakarta.mail.internet.MimeMessage mimeMessage = mailSender.createMimeMessage();
+            org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(mimeMessage, "utf-8");
+
+            String statusText = "DELIVERED".equalsIgnoreCase(status) ? "ĐÃ GIAO HÀNG THÀNH CÔNG" : "ĐÃ BỊ HỦY";
+            String color = "DELIVERED".equalsIgnoreCase(status) ? "#15803d" : "#b91c1c";
+            String bgColor = "DELIVERED".equalsIgnoreCase(status) ? "#f0fdf4" : "#fef2f2";
+            String borderColor = "DELIVERED".equalsIgnoreCase(status) ? "#bbf7d0" : "#fecaca";
+
+            StringBuilder reviewHtml = new StringBuilder();
+            if ("DELIVERED".equalsIgnoreCase(status) && order.getItems() != null && !order.getItems().isEmpty()) {
+                reviewHtml.append("<div style=\"margin: 25px 0; border-top: 1px dashed #cbd5e1; padding-top: 20px;\">")
+                          .append("  <h4 style=\"color: #0f172a; font-size: 15px; margin: 0 0 8px 0; border-left: 3px solid #15803d; padding-left: 8px;\">Viết đánh giá sản phẩm</h4>")
+                          .append("  <p style=\"color: #64748b; font-size: 12px; margin-bottom: 15px; line-height: 1.5;\">Bạn hãy chia sẻ cảm nhận về các sản phẩm đã nhận dưới đây để giúp Haniu cải thiện dịch vụ nhé:</p>")
+                          .append("  <table style=\"width: 100%; border-collapse: collapse;\">");
+
+                for (com.haniu.tthieu.haniu.dto.OrderResponseDto.OrderItemResponseDto item : order.getItems()) {
+                    String thumbnail = item.getProductThumbnail();
+                    if (thumbnail == null || thumbnail.isEmpty()) {
+                        thumbnail = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=100&auto=format&fit=crop&q=80";
+                    }
+                    String productUrl = frontendUrl + "/products/" + item.getProductSlug();
+                    reviewHtml.append("<tr>")
+                            .append("  <td style=\"padding: 8px 0; border-bottom: 1px solid #f1f5f9; width: 45px; vertical-align: middle;\">")
+                            .append("    <img src=\"").append(thumbnail).append("\" style=\"width: 35px; height: 35px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;\" />")
+                            .append("  </td>")
+                            .append("  <td style=\"padding: 8px; border-bottom: 1px solid #f1f5f9; vertical-align: middle;\">")
+                            .append("    <div style=\"color: #0f172a; font-weight: 600; font-size: 13px;\">").append(item.getProductName()).append("</div>")
+                            .append("  </td>")
+                            .append("  <td style=\"padding: 8px 0; border-bottom: 1px solid #f1f5f9; text-align: right; vertical-align: middle;\">")
+                            .append("    <a href=\"").append(productUrl).append("\" style=\"display: inline-block; background-color: #15803d; color: #ffffff; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 11px;\">Viết đánh giá ★</a>")
+                            .append("  </td>")
+                            .append("</tr>");
+                }
+                reviewHtml.append("  </table>")
+                          .append("</div>");
+            }
+
+            String htmlMsg = "<div style=\"font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px 10px; background-color: #f8fafc;\">" +
+                    "  <div style=\"background-color: #ffffff; padding: 30px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;\">" +
+                    "    <!-- Header -->" +
+                    "    <div style=\"text-align: center; margin-bottom: 25px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px;\">" +
+                    "      <h2 style=\"color: #f43f5e; margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px;\">HANIU Gifting</h2>" +
+                    "      <p style=\"color: #64748b; font-size: 13px; margin: 5px 0 0 0;\">Cập nhật trạng thái đơn hàng của bạn</p>" +
+                    "    </div>" +
+                    "    " +
+                    "    <!-- Status Banner -->" +
+                    "    <div style=\"background-color: " + bgColor + "; border: 1px solid " + borderColor + "; border-radius: 12px; padding: 18px; text-align: center; margin-bottom: 25px;\">" +
+                    "      <span style=\"color: " + color + "; font-weight: 800; font-size: 16px; letter-spacing: 0.5px;\">ĐƠN HÀNG " + statusText + "!</span>" +
+                    "      <p style=\"color: #475569; font-size: 13px; margin: 8px 0 0 0;\">Mã đơn hàng: <strong>" + order.getOrderCode() + "</strong></p>" +
+                    "    </div>" +
+                    "    " +
+                    "    <p style=\"color: #334155; font-size: 14px; line-height: 1.6; margin-bottom: 25px;\">" +
+                    "      Chào <strong>" + order.getCustomerName() + "</strong>,<br/>" +
+                    "      Hệ thống Haniu xin thông báo đơn hàng của bạn hiện đã chuyển sang trạng thái <strong>" + ("DELIVERED".equalsIgnoreCase(status) ? "Đã giao hàng" : "Đã bị hủy") + "</strong>." +
+                    "    </p>" +
+                    "    " +
+                    "    " + reviewHtml.toString() +
+                    "    " +
+                    "    <!-- Action Button -->" +
+                    "    <div style=\"text-align: center; margin-top: 25px; margin-bottom: 30px;\">" +
+                    "      <a href=\"" + frontendUrl + "/orders/lookup?query=" + order.getOrderCode() + "\" style=\"display: inline-block; background-color: #f43f5e; color: #ffffff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.2);\">Chi tiết đơn hàng tại Haniu</a>" +
+                    "    </div>" +
+                    "    " +
+                    "    <!-- Footer -->" +
+                    "    <p style=\"color: #94a3b8; font-size: 12px; line-height: 1.5; text-align: center; margin-top: 30px; border-top: 1px solid #f1f5f9; padding-top: 20px;\">" +
+                    "      Haniu Gifting - Trao quà tặng, gửi yêu thương.<br/>" +
+                    "      Website: <a href=\"" + frontendUrl + "\" style=\"color: #f43f5e; text-decoration: none;\">" + frontendUrl.replace("https://", "").replace("http://", "") + "</a><br/>" +
+                    "      &copy; 2026 Haniu. All rights reserved." +
+                    "    </p>" +
+                    "  </div>" +
+                    "</div>";
+
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject("[Haniu] Cập nhật trạng thái đơn hàng #" + order.getOrderCode() + " - " + ("DELIVERED".equalsIgnoreCase(status) ? "Đã giao hàng" : "Đã hủy"));
+            helper.setText(htmlMsg, true);
+
+            mailSender.send(mimeMessage);
+            log.info("Order status update email sent to: {} with status: {}", to, status);
+        } catch (Exception e) {
+            log.error("Failed to send order status update email to: " + to, e);
         }
     }
 }

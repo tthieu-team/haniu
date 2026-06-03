@@ -42,7 +42,7 @@ public class CloudinaryStorageServiceImpl implements StorageService {
             if (file.isEmpty()) {
                 throw new RuntimeException("Failed to store empty file.");
             }
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
             return (String) uploadResult.get("secure_url");
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file to Cloudinary", e);
@@ -57,7 +57,13 @@ public class CloudinaryStorageServiceImpl implements StorageService {
         try {
             String publicId = extractPublicId(fileUrl);
             if (publicId != null && !publicId.isEmpty()) {
-                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+                String resourceType = "image";
+                if (fileUrl.contains("/video/")) {
+                    resourceType = "video";
+                } else if (fileUrl.contains("/raw/")) {
+                    resourceType = "raw";
+                }
+                cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("resource_type", resourceType));
             }
         } catch (IOException e) {
             // Log error but do not block primary flow

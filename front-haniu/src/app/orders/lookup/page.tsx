@@ -1,18 +1,46 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import Icon from '@/components/common/Icons';
 import { orderService } from '@/services/order.service';
 import OrderLookupCard, { OrderDetails } from './components/OrderLookupCard';
 
 function LookupContent() {
-  const [query, setQuery] = useState('');
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get('query') || searchParams.get('code') || '';
+
+  const [query, setQuery] = useState(initialQuery);
   const [orders, setOrders] = useState<OrderDetails[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialQuery) {
+      setQuery(initialQuery);
+      const fetchInitial = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          setSearched(true);
+          const data = await orderService.lookupOrders(initialQuery);
+          setOrders(data || []);
+          if (data && data.length > 0) {
+            setExpandedOrderId(data[0].id);
+          }
+        } catch (err: any) {
+          setError(err.message || 'Có lỗi xảy ra khi tra cứu. Vui lòng thử lại.');
+          setOrders([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchInitial();
+    }
+  }, [initialQuery]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();

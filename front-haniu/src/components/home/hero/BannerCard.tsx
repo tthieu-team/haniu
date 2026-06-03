@@ -2,6 +2,7 @@
 
 import { HeroSlide } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
+import { getFullImageUrl } from '@/lib/api';
 
 interface BannerCardProps {
   slide: HeroSlide;
@@ -19,7 +20,7 @@ export default function BannerCard({ slide, isMain }: BannerCardProps) {
         <>
           <div className="absolute inset-0">
             <img
-              src={slide.backgroundImage}
+              src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
               alt={slide.boldTitle || 'Banner'}
               className="w-full h-full object-cover object-center"
             />
@@ -63,7 +64,7 @@ export default function BannerCard({ slide, isMain }: BannerCardProps) {
           {/* Image Pane */}
           <div className="w-full sm:w-1/2 relative h-48 sm:h-full overflow-hidden shrink-0">
             <img
-              src={slide.backgroundImage}
+              src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
               alt={slide.boldTitle || 'Banner'}
               className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
             />

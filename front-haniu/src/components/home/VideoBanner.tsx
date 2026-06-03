@@ -1,26 +1,39 @@
 'use client';
 
-import { useHomeLayoutStore } from '@/store/homeLayout';
+import { useEffect, useState } from 'react';
+import { useHomeLayoutStore, DEFAULT_STATE } from '@/store/homeLayout';
+import { getFullImageUrl } from '@/lib/api';
 
 export default function VideoBanner() {
+  const [mounted, setMounted] = useState(false);
   const config = useHomeLayoutStore((state) => state.videoBanner);
   const isVisible = useHomeLayoutStore((state) => state.visibility.videoBanner);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
   if (!isVisible) return null;
+
+  const videoUrl = getFullImageUrl(config.videoUrl);
+  const placeholderImage = getFullImageUrl(config.placeholderImage);
 
   return (
     <section className="relative w-full h-[60vh] sm:h-[70vh] overflow-hidden rounded-3xl shadow-xl bg-zinc-950 border border-zinc-800/40">
       {/* Video Loop Element */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover opacity-60"
-        poster={config.placeholderImage}
-      >
-        <source src={config.videoUrl} type="video/mp4" />
-      </video>
+      {videoUrl && (
+        <video
+          key={videoUrl}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+          poster={placeholderImage}
+          src={videoUrl}
+        />
+      )}
 
       {/* Dark overlay with gradients */}
       <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-zinc-950/70" />

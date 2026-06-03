@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
 import { HeroTab } from './components/HeroTab';
@@ -14,13 +14,66 @@ type TabType = 'hero' | 'visibility' | 'sections' | 'product-details' | 'payment
 export default function AdminLayoutConfigPage() {
   const {
     isSaving,
+    isLoading,
     resetAll,
     saveConfigToServer,
+    fetchConfigFromServer,
   } = useHomeLayoutStore();
 
   const [activeTab, setActiveTab] = useState<TabType>('hero');
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [initError, setInitError] = useState(false);
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await fetchConfigFromServer();
+        setHasLoaded(true);
+      } catch (err) {
+        console.error('Failed to init layout config:', err);
+        setInitError(true);
+      }
+    };
+    init();
+  }, [fetchConfigFromServer]);
+
+  const activeTabRef = useRef(activeTab);
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
+
+  const hasLoadedRef = useRef(hasLoaded);
+  useEffect(() => {
+    hasLoadedRef.current = hasLoaded;
+  }, [hasLoaded]);
+
+  // Auto-save when navigating away / page unmounts
+  useEffect(() => {
+    return () => {
+      if (hasLoadedRef.current && activeTabRef.current !== 'payment-methods') {
+        useHomeLayoutStore.getState().saveConfigToServer().catch((err) => {
+          console.error('Lỗi tự động lưu khi rời trang:', err);
+        });
+      }
+    };
+  }, []);
+
+  const handleTabChange = async (newTab: TabType) => {
+    if (hasLoaded && activeTab !== 'payment-methods' && activeTab !== newTab) {
+      setSuccessMsg('Đang tự động lưu cấu hình...');
+      try {
+        await saveConfigToServer();
+        setSuccessMsg('Đã tự động lưu cấu hình! ✓');
+        setTimeout(() => setSuccessMsg(''), 2500);
+      } catch (err: any) {
+        setErrorMsg(err.message || 'Lỗi tự động lưu. Vui lòng kiểm tra kết nối backend.');
+        setTimeout(() => setErrorMsg(''), 4000);
+      }
+    }
+    setActiveTab(newTab);
+  };
 
   const handleSave = async () => {
     setSuccessMsg('');
@@ -46,6 +99,37 @@ export default function AdminLayoutConfigPage() {
     }
   };
 
+  if (initError) {
+    return (
+      <div className="p-6 bg-red-500/10 border border-red-500/20 text-red-650 dark:text-red-400 text-xs rounded-xl font-semibold space-y-4">
+        <p className="flex items-center gap-2">
+          <Icon name="close" size={16} />
+          <span>Không thể tải cấu hình từ máy chủ. Vui lòng kiểm tra kết nối Backend.</span>
+        </p>
+        <button
+          onClick={() => {
+            setInitError(false);
+            fetchConfigFromServer().then(() => setHasLoaded(true)).catch(() => setInitError(true));
+          }}
+          className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold cursor-pointer"
+        >
+          Thử lại
+        </button>
+      </div>
+    );
+  }
+
+  if (!hasLoaded || isLoading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <svg className="animate-spin h-8 w-8 text-rose-500" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        </svg>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* 1. Header section */}
@@ -55,7 +139,7 @@ export default function AdminLayoutConfigPage() {
             Cấu hình Giao diện trang chủ
           </h1>
           <p className="text-xs text-slate-400">
-            Tùy biến màn hình Hero, bố cục slideshow banner, thông tin chân trang và hiển thị các khối nội dung.
+            Tùy biến màn hình Hero, bố cục slideshow banner, thông tin chân trang và hiển thị các khối nội dung. (Giao diện tự động lưu khi chuyển tab hoặc rời trang)
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -104,7 +188,7 @@ export default function AdminLayoutConfigPage() {
       {/* 3. Navigation Tabs */}
       <div className="border-b border-slate-200 dark:border-zinc-800 flex gap-2">
         <button
-          onClick={() => setActiveTab('hero')}
+          onClick={() => handleTabChange('hero')}
           className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === 'hero'
               ? 'border-rose-500 text-rose-500'
@@ -115,7 +199,7 @@ export default function AdminLayoutConfigPage() {
           <span>Hero Banner & Slideshow</span>
         </button>
         <button
-          onClick={() => setActiveTab('visibility')}
+          onClick={() => handleTabChange('visibility')}
           className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === 'visibility'
               ? 'border-rose-500 text-rose-500'
@@ -126,7 +210,7 @@ export default function AdminLayoutConfigPage() {
           <span>Trạng thái hiển thị (Visibility)</span>
         </button>
         <button
-          onClick={() => setActiveTab('sections')}
+          onClick={() => handleTabChange('sections')}
           className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === 'sections'
               ? 'border-rose-500 text-rose-500'
@@ -137,7 +221,7 @@ export default function AdminLayoutConfigPage() {
           <span>Cấu hình chi tiết các khối</span>
         </button>
         <button
-          onClick={() => setActiveTab('product-details')}
+          onClick={() => handleTabChange('product-details')}
           className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === 'product-details'
               ? 'border-rose-500 text-rose-500'
@@ -148,7 +232,7 @@ export default function AdminLayoutConfigPage() {
           <span>Chi tiết sản phẩm</span>
         </button>
         <button
-          onClick={() => setActiveTab('payment-methods')}
+          onClick={() => handleTabChange('payment-methods')}
           className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === 'payment-methods'
               ? 'border-rose-500 text-rose-500'

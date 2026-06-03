@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { HeroConfig } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
+import { getFullImageUrl } from '@/lib/api';
 
 interface SliderHeroProps {
   hero: HeroConfig;
@@ -65,7 +66,7 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
               {/* Background Image Container */}
               <div className="absolute inset-0">
                 <Image
-                  src={slide.backgroundImage}
+                  src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
                   alt={slide.boldTitle || 'Banner image'}
                   fill
                   priority={idx === 0}
