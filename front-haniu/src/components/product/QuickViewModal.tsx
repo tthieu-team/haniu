@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { createPortal } from 'react-dom';
 import { useCartStore } from '@/store/cart';
 import PersonalizationForm from './PersonalizationForm';
@@ -20,7 +21,7 @@ interface Product {
   description: string;
   price?: number;
   basePrice?: number;
-  salePrice?: number;
+  salePrice?: number | null;
   stock: number;
   isFeatured: boolean;
   isNew: boolean;
@@ -29,6 +30,11 @@ interface Product {
   media?: Media[];
   thumbnailUrl?: string;
   layoutConfig?: string;
+  variants?: any[];
+  occasions?: any[];
+  recipients?: any[];
+  specifications?: string;
+  includedItems?: string;
 }
 
 interface QuickViewModalProps {
@@ -39,6 +45,7 @@ interface QuickViewModalProps {
 
 export default function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps) {
   const { addToCart } = useCartStore();
+  const [selectedVariant, setSelectedVariant] = useState<any | null>(null);
   const [activeImage, setActiveImage] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
@@ -52,13 +59,20 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
   // Reset state on open/close or product change
   useEffect(() => {
     if (product) {
-      const thumb = product.thumbnailUrl || (product as any).thumbnail_url || product.media?.find(m => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://placehold.co/300';
+      const thumb = (product.media && product.media.length > 0)
+        ? (product.media.find(m => m.isThumbnail)?.url || product.media[0]?.url)
+        : (product.thumbnailUrl || (product as any).thumbnail_url || 'https://placehold.co/300');
       setActiveImage(thumb);
       setQuantity(1);
       setEngravingText('');
       setCardMessage('');
       setGiftWrap('Red Ribbon');
       setSuccessMsg('');
+      if (product.variants && product.variants.length > 0) {
+        setSelectedVariant(product.variants[0]);
+      } else {
+        setSelectedVariant(null);
+      }
     }
   }, [product, isOpen]);
 
@@ -97,22 +111,24 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
 
   if (!mounted || !isRendered || !product) return null;
 
-  const currentPrice = product.salePrice || product.basePrice || product.price || 0;
-  const originalPrice = product.salePrice ? (product.basePrice || product.price) : undefined;
-  const discountPercent = originalPrice ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
+  const currentPrice = selectedVariant?.salePrice || selectedVariant?.price || product.salePrice || product.basePrice || product.price || 0;
+  const originalPrice = selectedVariant?.salePrice ? selectedVariant.price : (product.salePrice ? (product.basePrice || product.price) : undefined);
+  const discountPercent = originalPrice && originalPrice > currentPrice ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
 
   const handleDecreaseQty = () => {
     if (quantity > 1) setQuantity(prev => prev - 1);
   };
 
   const handleIncreaseQty = () => {
-    if (quantity < product.stock) setQuantity(prev => prev + 1);
+    const maxStock = selectedVariant ? selectedVariant.stock : product.stock;
+    if (quantity < maxStock) setQuantity(prev => prev + 1);
   };
 
   const handleAddToCart = async () => {
     setAdding(true);
     const payload = {
       productId: product.id,
+      variantId: selectedVariant?.id || undefined,
       quantity,
       customizationInfo: product.isCustomizable ? JSON.stringify({
         engravingText,
@@ -141,25 +157,23 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
   };
 
   return createPortal(
-    <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 transition-all duration-300 font-sans ${
-        isAnimated ? 'opacity-100' : 'opacity-0'
-      }`}
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 transition-all duration-300 font-sans ${isAnimated ? 'opacity-100' : 'opacity-0'
+        }`}
     >
       {/* Backdrop */}
-      <div 
+      <div
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300"
       />
 
       {/* Modal Box */}
-      <div 
-        className={`bg-white dark:bg-zinc-950 rounded-[32px] border border-slate-100 dark:border-zinc-800/80 shadow-2xl w-full max-w-4xl overflow-hidden relative z-10 flex flex-col md:flex-row max-h-[90vh] md:max-h-[85vh] transition-transform duration-300 ${
-          isAnimated ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
-        }`}
+      <div
+        className={`bg-white dark:bg-zinc-950 rounded-[32px] border border-slate-100 dark:border-zinc-800/80 shadow-2xl w-full max-w-4xl overflow-hidden relative z-10 flex flex-col md:flex-row max-h-[90vh] md:max-h-[85vh] transition-transform duration-300 ${isAnimated ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
+          }`}
       >
         {/* Close Button */}
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200 flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95"
         >
@@ -171,12 +185,12 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
           <div className="space-y-6">
             {/* Active Display */}
             <div className="aspect-square bg-slate-50 dark:bg-zinc-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-zinc-800 relative group">
-              <img 
-                src={getFullImageUrl(activeImage)} 
-                alt={product.name} 
+              <img
+                src={getFullImageUrl(activeImage)}
+                alt={product.name}
                 className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
               />
-              
+
               {/* Floating tags */}
               <div className="absolute left-3 top-3 flex flex-col gap-1.5 z-10">
                 {product.isFeatured && (
@@ -200,11 +214,10 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                   <button
                     key={idx}
                     onClick={() => setActiveImage(med.url)}
-                    className={`relative w-20 aspect-square rounded-2xl overflow-hidden border-2 bg-white dark:bg-zinc-900 shrink-0 transition-all cursor-pointer ${
-                      activeImage === med.url 
-                        ? 'border-rose-500 shadow-md scale-102' 
-                        : 'border-transparent opacity-70 hover:opacity-100'
-                    }`}
+                    className={`relative w-20 aspect-square rounded-2xl overflow-hidden border-2 bg-white dark:bg-zinc-900 shrink-0 transition-all cursor-pointer ${activeImage === med.url
+                      ? 'border-rose-500 shadow-md scale-102'
+                      : 'border-transparent opacity-70 hover:opacity-100'
+                      }`}
                   >
                     <img src={getFullImageUrl(med.url)} alt={`sub-${idx}`} className="w-full h-full object-cover" />
                   </button>
@@ -236,8 +249,13 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
               <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-zinc-100 leading-tight">
                 {product.name}
               </h2>
-              <div className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">
-                SKU: <span className="text-slate-600 dark:text-zinc-300 font-semibold">{product.sku}</span>
+              <div className="flex items-center gap-3 text-[10px] font-medium text-slate-400 dark:text-zinc-550 flex-wrap">
+                <div>SKU: <span className="text-slate-600 dark:text-zinc-300 font-semibold">{product.sku}</span></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-zinc-800"></div>
+                <div className="flex items-center gap-1 font-semibold text-slate-550 dark:text-zinc-400">
+                  <Icon name="star" size={11} className="text-amber-500 fill-current" />
+                  <span>4.8/5 (128 đánh giá)</span>
+                </div>
               </div>
             </div>
 
@@ -261,10 +279,135 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
             {/* Description */}
             <div className="space-y-2">
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">Mô tả sản phẩm</h4>
-              <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-light">
+              <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-light whitespace-pre-line">
                 {product.description}
               </p>
             </div>
+
+            {/* Occasions & Recipients Tags */}
+            {((product.occasions && product.occasions.length > 0) || (product.recipients && product.recipients.length > 0)) && (
+              <div className="bg-slate-50 dark:bg-zinc-900/30 p-3.5 rounded-2xl space-y-2 border border-slate-100 dark:border-zinc-900/60 text-[10px]">
+                {product.occasions && product.occasions.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-450 dark:text-zinc-500 font-bold uppercase tracking-wider text-[8px] w-16 shrink-0">Dịp tặng:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {product.occasions.map((o: any) => (
+                        <span key={o.id || o.slug} className="bg-white dark:bg-zinc-850 text-slate-650 dark:text-zinc-300 border border-slate-200/50 dark:border-zinc-800 px-2 py-0.5 rounded-md font-semibold text-[9px]">
+                          {o.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {product.recipients && product.recipients.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-455 dark:text-zinc-500 font-bold uppercase tracking-wider text-[8px] w-16 shrink-0">Đối tượng:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {product.recipients.map((r: any) => (
+                        <span key={r.id || r.slug} className="bg-white dark:bg-zinc-850 text-slate-650 dark:text-zinc-300 border border-slate-200/50 dark:border-zinc-800 px-2 py-0.5 rounded-md font-semibold text-[9px]">
+                          {r.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Variants Selector */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Mẫu sản phẩm / Màu sắc</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {product.variants.map((v: any) => {
+                    const isSelected = selectedVariant?.id === v.id;
+                    const isOutOfStock = v.stock === 0;
+
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        disabled={isOutOfStock}
+                        onClick={() => {
+                          setSelectedVariant(v);
+                          if (v.imageUrl) {
+                            setActiveImage(v.imageUrl);
+                          }
+                        }}
+                        className={`relative p-2.5 rounded-xl border text-[10px] font-bold transition-all duration-200 w-full flex flex-col justify-between gap-1 text-left select-none outline-none group cursor-pointer ${isSelected
+                          ? 'border-rose-500 bg-rose-500/[0.03] text-rose-600 dark:border-rose-450 dark:text-rose-400 dark:bg-rose-950/10 shadow-[0_2px_8px_rgba(244,63,94,0.06)]'
+                          : isOutOfStock
+                            ? 'border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed dark:border-zinc-850 dark:bg-zinc-900/50 dark:text-zinc-650'
+                            : 'border-slate-100 bg-white hover:border-rose-200 dark:border-zinc-800 dark:bg-zinc-900 text-slate-700 dark:text-zinc-350'
+                          }`}
+                      >
+                        {isSelected && (
+                          <span className="absolute top-1 right-1 p-0.5 rounded-full bg-rose-500 text-white dark:bg-rose-600 shadow-xs z-10">
+                            <Icon name="check" size={8} />
+                          </span>
+                        )}
+                        <div className="leading-tight break-words line-clamp-1 pr-3">
+                          {v.name}
+                        </div>
+                        <div className="text-[9px] text-slate-400 dark:text-zinc-550 font-medium">
+                          {isOutOfStock ? 'Hết hàng' : `${v.stock} sản phẩm`}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Specifications / Included Items */}
+            {(product.specifications || product.includedItems) && (
+              <div className="space-y-3 bg-slate-50 dark:bg-zinc-900/30 p-3.5 rounded-2xl border border-slate-100 dark:border-zinc-900/60">
+                {product.specifications && (
+                  <div className="space-y-1">
+                    <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Thông số kỹ thuật</h5>
+                    <div className="text-[10px] text-slate-550 dark:text-zinc-400 space-y-1 leading-relaxed font-light">
+                      {(() => {
+                        try {
+                          const specs = typeof product.specifications === 'string'
+                            ? JSON.parse(product.specifications)
+                            : product.specifications;
+                          return Object.entries(specs).map(([key, val]) => (
+                            <div key={key} className="flex justify-between border-b border-slate-150 dark:border-zinc-850/40 pb-0.5">
+                              <span className="font-semibold text-slate-600 dark:text-zinc-300">{key}:</span>
+                              <span>{String(val)}</span>
+                            </div>
+                          ));
+                        } catch (e) {
+                          return <div className="whitespace-pre-line">{product.specifications}</div>;
+                        }
+                      })()}
+                    </div>
+                  </div>
+                )}
+                {product.includedItems && (
+                  <div className="space-y-1 border-t border-slate-100 dark:border-zinc-855/40 pt-2">
+                    <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Sản phẩm bao gồm</h5>
+                    <div className="text-[10px] text-slate-555 dark:text-zinc-400 space-y-1 leading-relaxed font-light">
+                      {(() => {
+                        try {
+                          const items = typeof product.includedItems === 'string'
+                            ? JSON.parse(product.includedItems)
+                            : product.includedItems;
+                          return Object.entries(items).map(([key, val]) => (
+                            <div key={key} className="flex justify-between border-b border-slate-150 dark:border-zinc-850/40 pb-0.5">
+                              <span className="font-semibold text-slate-600 dark:text-zinc-300">{key}:</span>
+                              <span>{String(val)}</span>
+                            </div>
+                          ));
+                        } catch (e) {
+                          return <div className="whitespace-pre-line">{product.includedItems}</div>;
+                        }
+                      })()}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Personalization if enabled */}
             {(() => {
@@ -282,7 +425,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
 
               return product.isCustomizable && (
                 <div className="space-y-2">
-                  <PersonalizationForm 
+                  <PersonalizationForm
                     engravingText={engravingText}
                     setEngravingText={setEngravingText}
                     cardMessage={cardMessage}
@@ -294,6 +437,17 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                 </div>
               );
             })()}
+
+            {/* View Full Details Link */}
+            <div className="text-center pt-2">
+              <Link
+                href={`/products/${product.slug}`}
+                onClick={onClose}
+                className="text-[10px] font-bold text-rose-500 hover:text-rose-600 hover:underline transition-colors flex items-center justify-center gap-1"
+              >
+                Xem chi tiết đầy đủ sản phẩm <Icon name="→" size={12} />
+              </Link>
+            </div>
           </div>
 
           {/* Action section */}
@@ -351,5 +505,5 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
         </div>
       </div>
     </div>
-  , document.body);
+    , document.body);
 }

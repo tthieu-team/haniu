@@ -455,10 +455,22 @@ public class ProductServiceImpl implements ProductService {
         List<String> recipientSlugs = product.getRecipients() != null ?
                 product.getRecipients().stream().map(Recipient::getSlug).toList() : Collections.emptyList();
 
+        String categoryId = null;
+        String categoryName = null;
+        try {
+            if (product.getCategory() != null) {
+                categoryId = product.getCategory().getId().toString();
+                categoryName = product.getCategory().getName();
+            }
+        } catch (jakarta.persistence.EntityNotFoundException | org.hibernate.ObjectNotFoundException e) {
+            log.warn("Category for product {} not found in database: {}", product.getId(), e.getMessage());
+            categoryName = "Chưa phân loại";
+        }
+
         return ProductDocument.builder()
                 .id(product.getId().toString())
-                .categoryId(product.getCategory().getId().toString())
-                .categoryName(product.getCategory().getName())
+                .categoryId(categoryId)
+                .categoryName(categoryName)
                 .brandId(product.getBrand() != null ? product.getBrand().getId().toString() : null)
                 .brandName(product.getBrand() != null ? product.getBrand().getName() : null)
                 .collectionId(product.getCollection() != null ? product.getCollection().getId().toString() : null)
@@ -507,11 +519,23 @@ public class ProductServiceImpl implements ProductService {
                         .build())
                 .collect(Collectors.toList()) : Collections.emptyList();
 
-        ProductResponseDto.CategoryInfo catInfo = ProductResponseDto.CategoryInfo.builder()
-                .id(product.getCategory().getId())
-                .name(product.getCategory().getName())
-                .slug(product.getCategory().getSlug())
-                .build();
+        ProductResponseDto.CategoryInfo catInfo = null;
+        try {
+            if (product.getCategory() != null) {
+                catInfo = ProductResponseDto.CategoryInfo.builder()
+                        .id(product.getCategory().getId())
+                        .name(product.getCategory().getName())
+                        .slug(product.getCategory().getSlug())
+                        .build();
+            }
+        } catch (jakarta.persistence.EntityNotFoundException | org.hibernate.ObjectNotFoundException e) {
+            log.warn("Category for product {} not found in database: {}", product.getId(), e.getMessage());
+            catInfo = ProductResponseDto.CategoryInfo.builder()
+                    .id(null)
+                    .name("Chưa phân loại")
+                    .slug("chua-phan-loai")
+                    .build();
+        }
 
         ProductResponseDto.BrandInfo brandInfo = product.getBrand() != null ?
                 ProductResponseDto.BrandInfo.builder()
