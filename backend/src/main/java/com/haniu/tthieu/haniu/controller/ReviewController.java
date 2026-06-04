@@ -75,6 +75,11 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getApprovedReviewsByProduct(productId));
     }
 
+    @GetMapping("/all-approved")
+    public ResponseEntity<List<Review>> getAllApprovedReviews() {
+        return ResponseEntity.ok(reviewService.getAllApprovedReviews());
+    }
+
     @GetMapping("/product/{productId}/all")
     public ResponseEntity<List<Review>> getAllReviews(@PathVariable UUID productId) {
         return ResponseEntity.ok(reviewService.getAllReviewsByProduct(productId));

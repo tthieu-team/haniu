@@ -482,6 +482,18 @@ public class DatabaseSeeder implements CommandLineRunner {
                 productVariantRepository.save(v);
             });
         });
+
+        systemConfigRepository.findByConfigKey("HOME_LAYOUT").ifPresent(config -> {
+            String val = config.getConfigValue();
+            if (val != null) {
+                String newVal = val.replace("/#story", "/story").replace("/#collections", "/collections");
+                if (!newVal.equals(val)) {
+                    config.setConfigValue(newVal);
+                    systemConfigRepository.save(config);
+                    log.info("Updated HOME_LAYOUT config links to /story and /collections in database.");
+                }
+            }
+        });
     }
 
     private void seedUsers() {
@@ -549,8 +561,12 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "menuLinks": [
                   { "name": "Trang chủ", "href": "/" },
                   { "name": "Sản phẩm", "href": "/products" },
-                  { "name": "Bộ sưu tập", "href": "/#collections" },
-                  { "name": "Câu chuyện", "href": "/#story" },
+                  { "name": "Bộ sưu tập", "href": "/collections" },
+                  { "name": "Câu chuyện", "href": "/story" },
+                  { "name": "Tin tức", "href": "/blog" },
+                  { "name": "Hỏi đáp", "href": "/faq" },
+                  { "name": "Liên hệ", "href": "/contact" },
+                  { "name": "Về chúng tôi", "href": "/about" },
                   { "name": "Yêu thích", "href": "/wishlist" }
                 ],
                 "isSticky": true
@@ -962,6 +978,45 @@ public class DatabaseSeeder implements CommandLineRunner {
                         if (videoBannerNode.has("videoUrl") && videoBannerNode.get("videoUrl").asText().contains("mixkit.co")) {
                             videoBannerNode.put("videoUrl", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4");
                             updated = true;
+                        }
+                    }
+
+                    // Migrate header.menuLinks to contain only primary pages and clean up extra ones to avoid clutter
+                    if (rootNode.has("header")) {
+                        com.fasterxml.jackson.databind.node.ObjectNode headerNode = (com.fasterxml.jackson.databind.node.ObjectNode) rootNode.get("header");
+                        if (headerNode.has("menuLinks") && headerNode.get("menuLinks").isArray()) {
+                            com.fasterxml.jackson.databind.node.ArrayNode menuLinksNode = (com.fasterxml.jackson.databind.node.ArrayNode) headerNode.get("menuLinks");
+                            
+                            boolean hasBlog = false;
+                            java.util.List<Integer> indicesToRemove = new java.util.ArrayList<>();
+                            
+                            for (int i = 0; i < menuLinksNode.size(); i++) {
+                                com.fasterxml.jackson.databind.JsonNode node = menuLinksNode.get(i);
+                                if (node.has("href")) {
+                                    String href = node.get("href").asText();
+                                    if (href.equals("/blog")) {
+                                        hasBlog = true;
+                                    } else if (href.equals("/faq") || href.equals("/contact") || href.equals("/about")) {
+                                        indicesToRemove.add(i);
+                                    }
+                                }
+                            }
+                            
+                            // Remove in reverse order to keep indices correct
+                            if (!indicesToRemove.isEmpty()) {
+                                for (int i = indicesToRemove.size() - 1; i >= 0; i--) {
+                                    menuLinksNode.remove(indicesToRemove.get(i));
+                                }
+                                updated = true;
+                            }
+                            
+                            if (!hasBlog) {
+                                com.fasterxml.jackson.databind.node.ObjectNode link = mapper.createObjectNode();
+                                link.put("name", "Tin tức");
+                                link.put("href", "/blog");
+                                menuLinksNode.add(link);
+                                updated = true;
+                            }
                         }
                     }
 

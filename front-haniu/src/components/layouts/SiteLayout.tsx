@@ -29,12 +29,19 @@ export default function SiteLayout({
   const isSticky = isMounted ? storeIsSticky : DEFAULT_STATE.header.isSticky;
   const isAnnouncementBar = isMounted ? storeIsAnnouncementBar : DEFAULT_STATE.announcementBar.isEnabled;
 
-  const isFullWidth = isHome || pathname?.startsWith('/collections');
+  const isFullWidth = isHome || 
+    pathname?.startsWith('/collections') || 
+    pathname?.startsWith('/story') || 
+    pathname?.startsWith('/about') || 
+    pathname?.startsWith('/faq') || 
+    pathname?.startsWith('/contact') || 
+    pathname?.startsWith('/blog') || 
+    pathname?.startsWith('/reviews');
   const isAuth = pathname?.startsWith('/auth');
   const isAdmin = pathname?.startsWith('/admin');
 
-  const ptClass = isSticky && !isFullWidth
-    ? (isAnnouncementBar ? 'pt-28 sm:pt-32 md:pt-36' : 'pt-20 sm:pt-24 md:pt-28')
+  const ptClass = isSticky && (!isFullWidth || !isHome)
+    ? (isAnnouncementBar ? 'pt-24 sm:pt-28' : 'pt-16 sm:pt-20')
     : 'pt-0';
 
   if (isAuth || isAdmin) {

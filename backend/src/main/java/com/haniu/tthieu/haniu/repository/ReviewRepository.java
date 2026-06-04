@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
     List<Review> findByProductIdAndIsApprovedTrue(UUID productId);
     List<Review> findByProductId(UUID productId);
+    List<Review> findByIsApprovedTrue();
 }

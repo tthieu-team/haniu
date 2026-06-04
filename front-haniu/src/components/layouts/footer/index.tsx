@@ -23,7 +23,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Brand Col */}
-          <div className="md:col-span-5 space-y-4">
+          <div className="md:col-span-4 space-y-4">
             <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-amber-600 via-rose-500 to-amber-500 bg-clip-text text-transparent">
               {header.logoText}
             </span>
@@ -50,9 +50,9 @@ export default function Footer() {
           </div>
 
           {/* Directory Col */}
-          <div className="md:col-span-3 space-y-4">
+          <div className="md:col-span-2 space-y-4">
             <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-100 uppercase tracking-widest">
-              Đường Dẫn Nhanh
+              Đường Dẫn
             </h4>
             <div className="flex flex-col gap-2.5 text-xs text-slate-500 dark:text-zinc-400">
               {(
@@ -61,9 +61,15 @@ export default function Footer() {
                     { name: 'Trang chủ', href: '/' },
                     { name: 'Sản phẩm', href: '/products' },
                     { name: 'Bộ sưu tập', href: '/collections' },
-                    { name: 'Câu chuyện', href: '/#story' },
-                  ]).filter(link => link.href !== '/wishlist' && link.name !== 'Yêu thích'),
-                  { name: 'Tra cứu đơn hàng', href: '/orders/lookup' }
+                    { name: 'Câu chuyện', href: '/story' },
+                    { name: 'Tin tức', href: '/blog' },
+                  ]).filter(link => 
+                    link.href !== '/wishlist' && 
+                    link.name !== 'Yêu thích' &&
+                    link.href !== '/about' &&
+                    link.href !== '/faq' &&
+                    link.href !== '/contact'
+                  )
                 ]
               ).map((link, idx) => (
                 <Link key={idx} href={link.href} className="hover:text-rose-500 transition-colors font-light">
@@ -73,9 +79,32 @@ export default function Footer() {
             </div>
           </div>
 
+          {/* Support Col */}
+          <div className="md:col-span-3 space-y-4">
+            <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-100 uppercase tracking-widest">
+              Hỗ Trợ & Thông Tin
+            </h4>
+            <div className="flex flex-col gap-2.5 text-xs text-slate-500 dark:text-zinc-400">
+              <Link href="/about" className="hover:text-rose-500 transition-colors font-light">
+                Về chúng tôi
+              </Link>
+              <Link href="/faq" className="hover:text-rose-500 transition-colors font-light">
+                Hỏi đáp thường gặp
+              </Link>
+              <Link href="/contact" className="hover:text-rose-500 transition-colors font-light">
+                Liên hệ
+              </Link>
+              <Link href="/reviews" className="hover:text-rose-500 transition-colors font-light">
+                Đánh giá từ khách hàng
+              </Link>
+              <Link href="/orders/lookup" className="hover:text-rose-500 transition-colors font-light">
+                Tra cứu đơn hàng
+              </Link>
+            </div>
+          </div>
 
           {/* Contact Col */}
-          <div className="md:col-span-4 space-y-4">
+          <div className="md:col-span-3 space-y-4">
             <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-100 uppercase tracking-widest">
               Thông Tin Liên Hệ
             </h4>

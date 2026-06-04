@@ -352,7 +352,8 @@ export const DEFAULT_STATE = {
       { name: "Trang chủ", href: "/" },
       { name: "Sản phẩm", href: "/products" },
       { name: "Bộ sưu tập", href: "/collections" },
-      { name: "Câu chuyện", href: "/#story" },
+      { name: "Câu chuyện", href: "/story" },
+      { name: "Tin tức", href: "/blog" },
       { name: "Yêu thích", href: "/wishlist" },
     ],
     isSticky: true,
@@ -589,6 +590,9 @@ export const DEFAULT_STATE = {
       { question: "Tôi có thể xem trước thiết kế khắc laser trước khi thực hiện không?", answer: "Có, sau khi bạn đặt hàng, bộ phận thiết kế của Haniu sẽ thiết kế layout chữ/hình ảnh và gửi ảnh phác thảo (mockup) qua Zalo/Email để bạn duyệt. Haniu chỉ tiến hành khắc khi bạn đã hoàn toàn đồng ý." },
       { question: "Haniu có chính sách đổi trả như thế nào đối với quà cá nhân hóa?", answer: "Đối với sản phẩm có khắc tên/cá nhân hóa, Haniu cam kết 1 đổi 1 miễn phí nếu có lỗi từ phía sản xuất (sai chính tả so với bản duyệt, trầy xước, nứt vỡ do vận chuyển). Với các sản phẩm không cá nhân hóa, bạn được đổi trả trong vòng 7 ngày." },
       { question: "Hộp quà của Haniu đã bao gồm những gì?", answer: "Tất cả các set combo quà tặng tại Haniu đều được đóng gói tiêu chuẩn bao gồm: Hộp cứng cao cấp lót rơm giấy, ruy băng lụa thắt nơ nghệ thuật, thiệp viết tay theo yêu cầu và túi giấy sang trọng đi kèm để bạn tiện đem tặng." },
+      { question: "Hoa hồng sáp thơm tại Haniu để được bao lâu?", answer: "Hoa sáp thơm của Haniu được chế tác từ xà phòng thiên nhiên cao cấp, có độ bền màu từ 3-5 năm. Bạn chỉ cần bảo quản ở nơi khô ráo, thoáng mát, tránh tiếp xúc trực tiếp với nước và ánh nắng gay gắt." },
+      { question: "Haniu có hỗ trợ viết thiệp hộ và giao quà giấu tên không?", answer: "Có, Haniu hỗ trợ viết thiệp tay miễn phí theo nội dung yêu cầu. Chúng tôi cũng cung cấp dịch vụ giao quà ẩn danh (không hiển thị thông tin người gửi trên vận đơn) để tạo bất ngờ tuyệt đối cho người nhận." },
+      { question: "Hợp đồng số lượng lớn cho doanh nghiệp có ưu đãi gì không?", answer: "Với các đơn hàng số lượng lớn cho doanh nghiệp hoặc sự kiện, Haniu chiết khấu hấp dẫn từ 10% - 30%. Đồng thời miễn phí khắc logo thương hiệu, hỗ trợ giao hàng nhiều điểm và xuất hóa đơn VAT đầy đủ." }
     ],
   },
   footer: {
@@ -859,7 +863,7 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
       },
     }),
     {
-      name: 'haniu-home-layout-config-v10',
+      name: 'haniu-home-layout-config-v11',
       skipHydration: true,
     }
   )

@@ -89,11 +89,11 @@ export default function OrderLookupCard({ order, isExpanded, onToggle }: OrderLo
   const fullAddress = `${order.shippingAddressLine}, ${order.shippingWard}, ${order.shippingDistrict}, ${order.shippingProvince}`;
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-slate-200/40 dark:border-zinc-800/60 rounded-2xl shadow-sm overflow-hidden transition-all duration-300">
+    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden transition-all duration-300">
       {/* Header */}
       <div
         onClick={onToggle}
-        className="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50/50 dark:hover:bg-zinc-850/20 transition-colors select-none"
+        className="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50/50 dark:hover:bg-zinc-800/20 transition-colors select-none"
       >
         <div className="space-y-1.5 min-w-0">
           <div className="flex items-center gap-2">
@@ -104,7 +104,7 @@ export default function OrderLookupCard({ order, isExpanded, onToggle }: OrderLo
               {statusInfo.text}
             </span>
           </div>
-          <div className="flex items-center gap-3 text-[10px] text-slate-400 dark:text-zinc-550">
+          <div className="flex items-center gap-3 text-[10px] text-slate-400 dark:text-zinc-500">
             <span>
               {order.orderedAt ? new Date(order.orderedAt).toLocaleDateString('vi-VN') : '---'}
             </span>
@@ -116,7 +116,7 @@ export default function OrderLookupCard({ order, isExpanded, onToggle }: OrderLo
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs sm:text-sm font-black text-rose-500 dark:text-rose-455">
+          <span className="text-xs sm:text-sm font-black text-rose-500 dark:text-rose-400">
             {order.totalPrice?.toLocaleString('vi-VN')}đ
           </span>
           <div className={`text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
@@ -127,37 +127,37 @@ export default function OrderLookupCard({ order, isExpanded, onToggle }: OrderLo
 
       {/* Expanded Content */}
       {isExpanded && (
-        <div className="border-t border-slate-100 dark:border-zinc-850 p-5 space-y-6 bg-slate-50/30 dark:bg-zinc-900/40 animate-slide-down">
+        <div className="border-t border-slate-100 dark:border-zinc-800 p-5 space-y-6 bg-slate-50/30 dark:bg-zinc-900/40 animate-slide-down">
           {/* Stepper Timeline */}
           {!isCancelled && <OrderTimeline orderStep={orderStep} />}
 
           {/* Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs text-slate-600 dark:text-zinc-350">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs text-slate-600 dark:text-zinc-300">
             {/* Delivery address */}
-            <div className="bg-white dark:bg-zinc-950 p-4 border border-slate-150/40 dark:border-zinc-850/60 rounded-xl space-y-2">
-              <div className="font-bold text-slate-850 dark:text-zinc-250 flex items-center gap-1.5">
+            <div className="bg-white dark:bg-zinc-950 p-4 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-2">
+              <div className="font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-1.5">
                 <Icon name="map-pin" size={13} className="text-rose-500" />
                 Thông tin giao hàng
               </div>
               <div className="space-y-1 pl-5">
-                <div className="font-medium text-slate-750 dark:text-zinc-300">
+                <div className="font-medium text-slate-700 dark:text-zinc-300">
                   {order.customerName} - {order.customerPhone}
                 </div>
-                <div className="text-slate-450 dark:text-zinc-500 text-[11px] leading-relaxed">
+                <div className="text-slate-400 dark:text-zinc-500 text-[11px] leading-relaxed">
                   {fullAddress}
                 </div>
               </div>
             </div>
 
             {/* Pricing totals */}
-            <div className="bg-white dark:bg-zinc-950 p-4 border border-slate-150/40 dark:border-zinc-850/60 rounded-xl space-y-2">
-              <div className="font-bold text-slate-850 dark:text-zinc-250 flex items-center gap-1.5">
+            <div className="bg-white dark:bg-zinc-950 p-4 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-2">
+              <div className="font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-1.5">
                 <Icon name="bag" size={13} className="text-rose-500" />
                 Chi tiết thanh toán
               </div>
               <div className="space-y-1 pl-5 text-[11px]">
                 <div className="flex justify-between">
-                  <span className="text-slate-400 dark:text-zinc-550">Phí giao hàng:</span>
+                  <span className="text-slate-400 dark:text-zinc-500">Phí giao hàng:</span>
                   <span className="font-medium text-slate-700 dark:text-zinc-300">{order.shippingFee?.toLocaleString('vi-VN')}đ</span>
                 </div>
                 {order.discountAmount > 0 && (
@@ -166,7 +166,7 @@ export default function OrderLookupCard({ order, isExpanded, onToggle }: OrderLo
                     <span className="font-bold">-{order.discountAmount?.toLocaleString('vi-VN')}đ</span>
                   </div>
                 )}
-                <div className="flex justify-between text-[12px] pt-1.5 border-t border-slate-100 dark:border-zinc-850 font-bold text-slate-800 dark:text-zinc-250">
+                <div className="flex justify-between text-[12px] pt-1.5 border-t border-slate-100 dark:border-zinc-800 font-bold text-slate-800 dark:text-zinc-200">
                   <span>Tổng cộng:</span>
                   <span className="text-rose-500">{order.totalPrice?.toLocaleString('vi-VN')}đ</span>
                 </div>
@@ -179,7 +179,7 @@ export default function OrderLookupCard({ order, isExpanded, onToggle }: OrderLo
             <div className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider pl-1">
               Sản phẩm ({order.items?.length})
             </div>
-            <div className="bg-white dark:bg-zinc-950 border border-slate-150/40 dark:border-zinc-850/60 rounded-xl divide-y divide-slate-100 dark:divide-zinc-850 px-3">
+            <div className="bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl divide-y divide-slate-100 dark:divide-zinc-800 px-3">
               {order.items?.map((item) => (
                 <div key={item.id} className="py-2.5 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -189,7 +189,7 @@ export default function OrderLookupCard({ order, isExpanded, onToggle }: OrderLo
                       className="w-9 h-9 rounded-lg object-cover border border-slate-100 dark:border-zinc-800/40 shrink-0"
                     />
                     <div className="min-w-0">
-                      <div className="font-semibold text-slate-750 dark:text-zinc-300 truncate" title={item.productName}>
+                      <div className="font-semibold text-slate-700 dark:text-zinc-300 truncate" title={item.productName}>
                         {item.productName}
                       </div>
                       <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">
@@ -203,7 +203,7 @@ export default function OrderLookupCard({ order, isExpanded, onToggle }: OrderLo
                     </div>
                   </div>
                   <div className="text-right pl-3 shrink-0">
-                    <span className="text-[11px] text-slate-450 dark:text-zinc-500 mr-2">x{item.quantity}</span>
+                    <span className="text-[11px] text-slate-400 dark:text-zinc-500 mr-2">x{item.quantity}</span>
                     <span className="font-bold text-slate-700 dark:text-zinc-300">{item.totalPrice?.toLocaleString('vi-VN')}đ</span>
                   </div>
                 </div>

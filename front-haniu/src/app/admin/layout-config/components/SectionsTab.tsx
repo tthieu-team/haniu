@@ -25,6 +25,8 @@ export function SectionsTab() {
     updateFooter,
     howItWorks,
     updateHowItWorks,
+    faq,
+    updateFaq,
   } = useHomeLayoutStore();
 
   return (
@@ -633,6 +635,99 @@ export function SectionsTab() {
                 className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
               />
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Hỏi đáp thường gặp (FAQ) */}
+      <div className="py-6 space-y-4">
+        <h4 className="text-xs font-bold text-rose-500 uppercase tracking-widest">
+          Câu hỏi thường gặp (FAQ Settings)
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-3 space-y-1">
+            <label className="text-[10px] text-slate-500 font-bold uppercase">Tiêu đề lớn của khối FAQ</label>
+            <input
+              type="text"
+              value={faq.title}
+              onChange={(e) => updateFaq({ title: e.target.value })}
+              className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+            />
+          </div>
+        </div>
+
+        {/* FAQ Item List Manager */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-2">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              Danh sách Câu hỏi & Trả lời ({faq.items?.length || 0})
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                const newFaqItem = {
+                  question: 'Câu hỏi mới?',
+                  answer: 'Câu trả lời tương ứng...',
+                };
+                updateFaq({ items: [...(faq.items || []), newFaqItem] });
+              }}
+              className="px-3 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-bold flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+            >
+              <Icon name="plus" size={10} />
+              <span>Thêm FAQ</span>
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {(faq.items || []).map((item, idx) => (
+              <div
+                key={idx}
+                className="p-4 rounded-2xl border border-slate-150 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-850/30 space-y-3 relative group"
+              >
+                <div className="absolute top-4 right-4 flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updatedItems = faq.items.filter((_, i) => i !== idx);
+                      updateFaq({ items: updatedItems });
+                    }}
+                    className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all cursor-pointer"
+                    title="Xóa câu hỏi này"
+                  >
+                    <Icon name="trash" size={12} />
+                  </button>
+                </div>
+
+                <div className="space-y-2 pr-10">
+                  <div className="space-y-1">
+                    <label className="text-[9px] text-slate-400 font-bold uppercase">Câu hỏi</label>
+                    <input
+                      type="text"
+                      value={item.question}
+                      onChange={(e) => {
+                        const updatedItems = [...faq.items];
+                        updatedItems[idx] = { ...updatedItems[idx], question: e.target.value };
+                        updateFaq({ items: updatedItems });
+                      }}
+                      className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-1.5 text-xs font-bold"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] text-slate-400 font-bold uppercase">Câu trả lời</label>
+                    <textarea
+                      rows={3}
+                      value={item.answer}
+                      onChange={(e) => {
+                        const updatedItems = [...faq.items];
+                        updatedItems[idx] = { ...updatedItems[idx], answer: e.target.value };
+                        updateFaq({ items: updatedItems });
+                      }}
+                      className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-1.5 text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

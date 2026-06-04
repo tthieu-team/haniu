@@ -84,6 +84,12 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Review> getAllApprovedReviews() {
+        return reviewRepository.findByIsApprovedTrue();
+    }
+
+    @Override
     public Review approveReview(UUID reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));

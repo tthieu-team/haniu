@@ -52,7 +52,8 @@ import {
   CreditCard,
   Wallet,
   Calendar,
-  AlertTriangle
+  AlertTriangle,
+  Leaf
 } from 'lucide-react';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -120,6 +121,10 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
     case 'Gem':
     case '💎':
       return <Gem size={size} className={className} {...props} />;
+    case 'leaf':
+    case 'Leaf':
+    case '🌱':
+      return <Leaf size={size} className={className} {...props} />;
     case 'gear':
     case 'Gear':
     case 'settings':

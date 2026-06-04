@@ -10,6 +10,7 @@ public interface ReviewService {
     UUID getPendingOrderItemId(String email, UUID productId);
     List<Review> getApprovedReviewsByProduct(UUID productId);
     List<Review> getAllReviewsByProduct(UUID productId);
+    List<Review> getAllApprovedReviews();
     Review approveReview(UUID reviewId);
     void deleteReview(UUID reviewId);
 }

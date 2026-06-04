@@ -41,7 +41,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
         return (
           <div
             key={idx}
-            className="relative py-4 lg:py-4.5"
+            className={`relative py-4 lg:py-4.5 ${idx >= 3 ? 'hidden min-[1200px]:block' : ''}`}
             onMouseEnter={() => {
               if (isShopMenu) setActiveDropdown('shop');
               else if (isCollectionsMenu) setActiveDropdown('collections');
@@ -228,6 +228,38 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
           </div>
         );
       })}
+
+      {/* "Thêm" dropdown for screens < 1200px (768px to 1199px) */}
+      <div
+        className="relative py-4 lg:py-4.5 min-[1200px]:hidden block"
+        onMouseEnter={() => setActiveDropdown('more')}
+        onMouseLeave={() => setActiveDropdown(null)}
+      >
+        <button
+          className="relative flex items-center gap-1 text-[10px] xl:text-[11px] font-semibold uppercase tracking-widest transition-all duration-300 cursor-pointer text-slate-700 dark:text-zinc-200 hover:text-rose-500 dark:hover:text-rose-400 group"
+        >
+          <span>Thêm</span>
+          <span className={`opacity-60 transition-transform duration-300 flex items-center justify-center ${activeDropdown === 'more' ? 'rotate-180' : ''}`}>
+            <Icon name="chevron-down" size={8} />
+          </span>
+          <span className="absolute bottom-[-6px] left-0 w-full h-[1.5px] bg-rose-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" />
+        </button>
+
+        {activeDropdown === 'more' && (
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 z-50 w-48 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200 dark:border-zinc-800 rounded-2xl p-3 shadow-2xl flex flex-col gap-1 animate-fade-in text-slate-800 dark:text-zinc-100 before:absolute before:-top-2 before:left-0 before:right-0 before:h-2 before:content-['']">
+            {menuLinks.slice(3).map((link, subIdx) => (
+              <Link
+                key={subIdx}
+                href={link.href}
+                onClick={() => setActiveDropdown(null)}
+                className="flex items-center gap-2 p-2.5 rounded-xl hover:bg-rose-500/[0.04] dark:hover:bg-rose-500/[0.06] hover:translate-x-1 transition-all duration-200 text-[10px] font-bold text-slate-700 dark:text-zinc-300 hover:text-rose-500 dark:hover:text-rose-400"
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </nav>
   );
 }

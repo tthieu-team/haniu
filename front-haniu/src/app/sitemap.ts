@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { productService } from '@/services/product.service';
 import { catalogService } from '@/services/catalog.service';
+import { postService } from '@/services/post.service';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://haniu.vercel.app';
@@ -12,6 +13,42 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/about`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/story`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/faq`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/reviews`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/privacy`,
@@ -84,10 +121,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Sitemap: Error fetching collections:', error);
   }
 
+  // Fetch Blog Posts
+  let blogRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const posts = await postService.getActivePosts();
+    blogRoutes = (posts || []).map((post: any) => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.publishedAt || post.updatedAt || new Date()),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    }));
+  } catch (error) {
+    console.error('Sitemap: Error fetching blog posts:', error);
+  }
+
   return [
     ...staticRoutes,
     ...categoryRoutes,
     ...collectionRoutes,
     ...productRoutes,
+    ...blogRoutes,
   ];
 }

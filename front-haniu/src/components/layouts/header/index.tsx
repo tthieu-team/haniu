@@ -140,10 +140,21 @@ export default function Header() {
     { name: 'Trang chủ', href: '/' },
     { name: 'Sản phẩm', href: '/products' },
     { name: 'Bộ sưu tập', href: '/collections' },
-    { name: 'Câu chuyện', href: '/#story' },
+    { name: 'Câu chuyện', href: '/story' },
   ];
   const menuLinks = [
     ...rawMenuLinks.filter(link => link.href !== '/wishlist' && link.name !== 'Yêu thích'),
+    { name: 'Tra cứu đơn hàng', href: '/orders/lookup' }
+  ];
+
+  const mobileMenuLinks = [
+    { name: 'Trang chủ', href: '/' },
+    { name: 'Sản phẩm', href: '/products' },
+    { name: 'Bộ sưu tập', href: '/collections' },
+    { name: 'Câu chuyện', href: '/story' },
+    { name: 'Tin tức', href: '/blog' },
+    { name: 'Giới thiệu', href: '/about' },
+    { name: 'Liên hệ', href: '/contact' },
     { name: 'Tra cứu đơn hàng', href: '/orders/lookup' }
   ];
 
@@ -159,6 +170,13 @@ export default function Header() {
             setShowMobileSearch(false);
             setSuggestions([]);
           }}
+          className="fixed inset-0 bg-black/40 dark:bg-black/60 z-40 backdrop-blur-xs md:hidden"
+        />
+      )}
+      {/* Mobile Drawer Backdrop (Click to close mobile menu) */}
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
           className="fixed inset-0 bg-black/40 dark:bg-black/60 z-40 backdrop-blur-xs md:hidden"
         />
       )}
@@ -286,7 +304,7 @@ export default function Header() {
             <form
               ref={searchRef}
               onSubmit={handleSearchSubmit}
-              className="hidden md:flex relative items-center"
+              className="hidden min-[991px]:flex relative items-center"
             >
               <Icon name="search" size={13} className="absolute left-3 text-slate-400 dark:text-zinc-500 pointer-events-none" />
               <input
@@ -430,7 +448,7 @@ export default function Header() {
             <button
               type="button"
               onClick={() => setShowMobileSearch(true)}
-              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors flex md:hidden items-center cursor-pointer text-slate-800 dark:text-zinc-100"
+              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors flex min-[991px]:hidden items-center cursor-pointer text-slate-800 dark:text-zinc-100"
               title="Tìm kiếm"
             >
               <Icon name="search" size={16} />
@@ -519,9 +537,9 @@ export default function Header() {
 
         {/* Mobile Dropdown Drawer Menu */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-slate-200 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md p-6 space-y-6 shadow-xl animate-fade-in text-slate-800 dark:text-zinc-100">
+          <div className="relative z-50 md:hidden border-t border-slate-200 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md p-6 space-y-6 shadow-xl animate-fade-in text-slate-800 dark:text-zinc-100">
             <div className="flex flex-col gap-4">
-              {menuLinks.map((link, idx) => (
+              {mobileMenuLinks.map((link, idx) => (
                 <Link
                   key={idx}
                   href={link.href}
@@ -531,25 +549,6 @@ export default function Header() {
                   {link.name}
                 </Link>
               ))}
-
-              <hr className="border-slate-200/80 dark:border-zinc-800/80 my-1" />
-
-              {/* Mobile Search inside drawer */}
-              <form onSubmit={handleSearchSubmit} className="relative w-full">
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm set quà..."
-                  value={searchVal}
-                  onChange={(e) => setSearchVal(e.target.value)}
-                  className="w-full text-xs px-4 py-2.5 rounded-full border border-slate-200/85 dark:border-zinc-800/80 bg-slate-50/50 dark:bg-zinc-900/50 text-slate-800 dark:text-zinc-100 focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs flex items-center justify-center"
-                >
-                  <Icon name="search" size={14} className="text-slate-400" />
-                </button>
-              </form>
 
               {/* Wishlist, Theme Toggle and Account for Mobile Drawer */}
               <div className="flex items-center justify-between gap-3 pt-2">
