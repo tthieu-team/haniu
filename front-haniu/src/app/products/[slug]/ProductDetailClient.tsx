@@ -103,6 +103,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
   const [giftWrap, setGiftWrap] = useState('Red Ribbon');
   const [designPhotoUrl, setDesignPhotoUrl] = useState('');
   const [photoboothPhotoUrl, setPhotoboothPhotoUrl] = useState('');
+  const [photoboothPhotoFile, setPhotoboothPhotoFile] = useState<File | null>(null);
 
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -131,6 +132,24 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
   const handleAddToCart = async () => {
     if (!product) return;
 
+    let finalPhotoUrl = photoboothPhotoUrl;
+    if (photoboothPhotoFile) {
+      setSuccessMsg("⏳ Đang chuẩn bị tải lên hình ảnh photobooth...");
+      try {
+        const data = await productService.uploadImage(photoboothPhotoFile);
+        if (data && data.url) {
+          finalPhotoUrl = data.url;
+          setPhotoboothPhotoUrl(data.url);
+          setPhotoboothPhotoFile(null); // uploaded, clear file state
+        }
+      } catch (err) {
+        console.error("Failed to upload photobooth image before adding to cart:", err);
+        setSuccessMsg("❌ Gặp lỗi khi tải lên hình ảnh photobooth. Vui lòng thử lại!");
+        setTimeout(() => setSuccessMsg(''), 5000);
+        return;
+      }
+    }
+
     const payload = {
       productId: product.id,
       variantId: selectedVariant?.id || undefined,
@@ -140,7 +159,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
         cardMessage,
         giftWrap,
         designPhotoUrl,
-        photoboothPhotoUrl
+        photoboothPhotoUrl: finalPhotoUrl
       }) : undefined
     };
 
@@ -158,6 +177,24 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
   const handleBuyNow = async () => {
     if (!product) return;
 
+    let finalPhotoUrl = photoboothPhotoUrl;
+    if (photoboothPhotoFile) {
+      setSuccessMsg("⏳ Đang chuẩn bị tải lên hình ảnh photobooth...");
+      try {
+        const data = await productService.uploadImage(photoboothPhotoFile);
+        if (data && data.url) {
+          finalPhotoUrl = data.url;
+          setPhotoboothPhotoUrl(data.url);
+          setPhotoboothPhotoFile(null); // uploaded, clear file state
+        }
+      } catch (err) {
+        console.error("Failed to upload photobooth image before buy now:", err);
+        setSuccessMsg("❌ Gặp lỗi khi tải lên hình ảnh photobooth. Vui lòng thử lại!");
+        setTimeout(() => setSuccessMsg(''), 5000);
+        return;
+      }
+    }
+
     const payload = {
       productId: product.id,
       variantId: selectedVariant?.id || undefined,
@@ -167,7 +204,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
         cardMessage,
         giftWrap,
         designPhotoUrl,
-        photoboothPhotoUrl
+        photoboothPhotoUrl: finalPhotoUrl
       }) : undefined
     };
 
@@ -305,6 +342,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
               <StudioPhotobooth
                 photoboothPhotoUrl={photoboothPhotoUrl}
                 setPhotoboothPhotoUrl={setPhotoboothPhotoUrl}
+                onPhotoSelected={setPhotoboothPhotoFile}
               />
             )}
 

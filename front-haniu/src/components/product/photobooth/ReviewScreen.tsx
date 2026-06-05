@@ -1,0 +1,91 @@
+'use client';
+
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Icon from '@/components/common/Icons';
+import { CapturedPhoto, PhotoboothTemplate } from './types';
+
+interface ReviewScreenProps {
+  photos: CapturedPhoto[];
+  template: PhotoboothTemplate;
+  onRetake: (index: number) => void;
+  onConfirm: () => void;
+  onRetakeAll: () => void;
+}
+
+export const ReviewScreen: React.FC<ReviewScreenProps> = ({
+  photos,
+  template,
+  onRetake,
+  onConfirm,
+  onRetakeAll
+}) => {
+  return (
+    <div className="w-full h-full bg-background flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto min-h-[500px]">
+      <motion.div
+        initial={{ y: -15, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="text-center mb-6 sm:mb-8"
+      >
+        <h2 className="text-xl sm:text-2xl font-black text-foreground mb-1 uppercase tracking-tight font-sans">KIỂM TRA HÌNH ẢNH 📸</h2>
+        <p className="text-muted-color text-[10px] sm:text-xs">Nhấp vào từng hình để chụp lại nếu chưa ưng ý</p>
+      </motion.div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-4xl w-full mb-8">
+        <AnimatePresence mode="popLayout">
+          {photos.map((photo, index) => (
+            <motion.div
+              key={photo.id}
+              layout
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              whileHover={{ y: -4 }}
+              className="relative group aspect-[3/4] bg-card-bg rounded-2xl overflow-hidden border border-border-color shadow-lg"
+            >
+              <img src={photo.url} alt={`Shot ${index + 1}`} className="w-full h-full object-cover" />
+
+              <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-2.5 p-3">
+                <div className="text-center">
+                  <p className="text-white font-black text-xs uppercase tracking-wider">ẢNH {index + 1}</p>
+                  <p className="text-white/70 text-[9px] font-bold mt-0.5">Bạn muốn chụp lại?</p>
+                </div>
+
+                <button
+                  onClick={() => onRetake(index)}
+                  className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-900 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md font-bold text-[9px] uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                >
+                  <Icon name="refresh" size={10} className="text-primary-color" />
+                  Chụp lại
+                </button>
+              </div>
+
+              <div className="absolute top-3 left-3 w-6 h-6 bg-primary-color rounded-lg flex items-center justify-center text-white text-[10px] font-black shadow-md">
+                {index + 1}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md mb-6">
+        <button
+          onClick={onRetakeAll}
+          className="h-11 px-6 rounded-xl font-bold flex-1 border border-primary-color/20 bg-primary-color/10 text-primary-color hover:bg-primary-color/20 transition-all text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+        >
+          <Icon name="trash" size={12} />
+          Xóa chụp lại tất cả
+        </button>
+        <button
+          onClick={onConfirm}
+          className="h-11 px-8 rounded-xl font-black flex-1 bg-primary-color hover:bg-primary-color/90 text-white transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-md shadow-primary-color/20 cursor-pointer"
+        >
+          <Icon name="check" size={12} />
+          Ghép ảnh tiếp tục
+        </button>
+      </div>
+
+      <p className="text-[8px] text-muted-color/40 uppercase tracking-[0.25em] font-sans">Haniu Collection Photobooth Studio</p>
+    </div>
+  );
+};
