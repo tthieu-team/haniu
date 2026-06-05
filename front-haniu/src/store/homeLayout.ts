@@ -654,7 +654,7 @@ export const DEFAULT_STATE = {
 };
 
 export const useHomeLayoutStore = create<HomeLayoutState>()(
-  persist(
+  // persist(
     (set, get) => ({
       ...DEFAULT_STATE,
       isLoading: false,
@@ -862,9 +862,9 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
         }
       },
     }),
-    {
-      name: 'haniu-home-layout-config-v11',
-      skipHydration: true,
-    }
-  )
+    // {
+    //   name: 'haniu-home-layout-config-v11',
+    //   skipHydration: true,
+    // }
+  // )
 );

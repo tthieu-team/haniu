@@ -3,7 +3,6 @@ import { Be_Vietnam_Pro, Geist_Mono, Dancing_Script, Cormorant_Garamond } from "
 import "./globals.css";
 import { AuthProvider } from "@/providers/AuthProvider";
 import SiteLayout from "@/components/layouts/SiteLayout";
-import Script from "next/script";
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-be-vietnam-pro",
@@ -89,11 +88,10 @@ export default function RootLayout({
       className={`${beVietnamPro.variable} ${geistMono.variable} ${dancingScript.variable} ${cormorantGaramond.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head />
-      <body className="min-h-full bg-slate-50 text-slate-800 dark:bg-zinc-950 dark:text-zinc-100 font-sans">
-        <Script
+      <head>
+        <script
           id="theme-initializer"
-          strategy="beforeInteractive"
+          async
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -127,6 +125,8 @@ export default function RootLayout({
             `,
           }}
         />
+      </head>
+      <body className="min-h-full bg-slate-50 text-slate-800 dark:bg-zinc-950 dark:text-zinc-100 font-sans">
         <AuthProvider>
           <SiteLayout>{children}</SiteLayout>
         </AuthProvider>

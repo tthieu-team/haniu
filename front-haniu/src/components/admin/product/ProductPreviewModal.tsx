@@ -7,9 +7,9 @@ import Icon from '@/components/common/Icons';
 // Import detail page subcomponents
 import MediaGallery from '@/components/product/MediaGallery';
 import PersonalizationForm from '@/components/product/PersonalizationForm';
+import GiftWrapSelector from '@/components/product/GiftWrapSelector';
 import ProductInfo from '@/components/product/ProductInfo';
 import ProductSpecifications from '@/components/product/ProductSpecifications';
-import RealtimePreview from '@/components/product/RealtimePreview';
 import ProductReviews from '@/components/product/ProductReviews';
 import ProductPolicies from '@/components/product/ProductPolicies';
 
@@ -60,8 +60,8 @@ function ProductDetailPreview({ product }: { product: any }) {
   }, [product.variants]);
 
   let customizationConfig = {
-    showEngraving: true,
-    showEngravingMockup: true,
+    showEngraving: false,
+    showEngravingMockup: false,
     engravingLabel: "Khắc chữ / Tên theo yêu cầu (Miễn phí)",
     engravingPlaceholder: "Nhập tên hoặc lời chúc muốn khắc (tối đa 50 ký tự)",
     engravingMaxLength: 50,
@@ -72,9 +72,9 @@ function ProductDetailPreview({ product }: { product: any }) {
     showGiftWrap: true,
     giftWrapLabel: "Chọn ruy băng nơ / hộp gói",
     giftWrapOptions: [
-      "Ruy băng Đỏ Lãng Mạn",
-      "Ruy băng Vàng Hoàng Gia",
-      "Gói bọc giấy Kraft Hoài Cổ"
+      "🎀 Ruy băng Đỏ Lãng Mạn",
+      "✨ Ruy băng Vàng Hoàng Gia",
+      "📦 Gói bọc giấy Kraft Hoài Cổ"
     ]
   };
 
@@ -120,7 +120,7 @@ function ProductDetailPreview({ product }: { product: any }) {
 
         {/* Right Column: Buy options, Personalization Form & Live Mockup */}
         <div className="lg:col-span-5 space-y-8">
-          <ProductInfo
+           <ProductInfo
             product={adaptedProduct}
             selectedVariant={selectedVariant}
             setSelectedVariant={setSelectedVariant}
@@ -131,32 +131,30 @@ function ProductDetailPreview({ product }: { product: any }) {
               const el = document.getElementById('detail-tabs');
               if (el) el.scrollIntoView({ behavior: 'smooth' });
             }}
+            giftWrap={giftWrap}
+            setGiftWrap={setGiftWrap}
+            giftWrapOptions={customizationConfig.giftWrapOptions}
+            giftWrapLabel={customizationConfig.giftWrapLabel}
+            showGiftWrap={customizationConfig.showGiftWrap}
           />
 
           {/* Personalization Inputs */}
           {product.isCustomizable && (
-            <PersonalizationForm
-              engravingText={engravingText}
-              setEngravingText={setEngravingText}
-              cardMessage={cardMessage}
-              setCardMessage={setCardMessage}
-              giftWrap={giftWrap}
-              setGiftWrap={setGiftWrap}
-              config={customizationConfig}
-            />
+            <div className="space-y-4">
+              <PersonalizationForm
+                engravingText={engravingText}
+                setEngravingText={setEngravingText}
+                cardMessage={cardMessage}
+                setCardMessage={setCardMessage}
+                config={customizationConfig}
+              />
+            </div>
           )}
 
-          {/* Real-time mockup engraving canvas */}
-          <RealtimePreview
-            engravingText={engravingText}
-            cardMessage={cardMessage}
-            giftWrap={giftWrap}
-            isCustomizable={product.isCustomizable}
-            config={customizationConfig}
-          />
+
 
           {/* Service options trigger block */}
-          {product.allowAdminChat && (
+          {false && product.allowAdminChat && (
             <div className="bg-sky-500/5 border border-sky-500/10 p-4 rounded-2xl flex items-center justify-between text-xs">
               <div>
                 <h4 className="font-bold text-sky-700 dark:text-sky-400 flex items-center gap-1.5">
@@ -215,11 +213,10 @@ function ProductDetailPreview({ product }: { product: any }) {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveDetailTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer text-xs font-bold ${
-                  activeDetailTab === tab.id
-                    ? 'bg-white dark:bg-zinc-800 text-rose-500 dark:text-rose-400 shadow-md shadow-slate-200/50 dark:shadow-none'
-                    : 'text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200'
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer text-xs font-bold ${activeDetailTab === tab.id
+                  ? 'bg-white dark:bg-zinc-800 text-rose-500 dark:text-rose-400 shadow-md shadow-slate-200/50 dark:shadow-none'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200'
+                  }`}
               >
                 <Icon name={tab.icon} size={14} className={activeDetailTab === tab.id ? 'text-rose-500' : 'text-slate-400'} />
                 {tab.label}
@@ -288,7 +285,7 @@ export function ProductPreviewModal({ isOpen, onClose, product }: ProductPreview
     });
 
     observer.observe(canvasRef.current);
-    
+
     // Initial size
     setContainerWidth(canvasRef.current.getBoundingClientRect().width);
 
@@ -316,9 +313,9 @@ export function ProductPreviewModal({ isOpen, onClose, product }: ProductPreview
       height: 720,
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect width="20" height="14" x="2" y="3" rx="2"/>
-          <line x1="8" x2="16" y1="21" y2="21"/>
-          <line x1="12" x2="12" y1="17" y2="21"/>
+          <rect width="20" height="14" x="2" y="3" rx="2" />
+          <line x1="8" x2="16" y1="21" y2="21" />
+          <line x1="12" x2="12" y1="17" y2="21" />
         </svg>
       ),
     },
@@ -328,8 +325,8 @@ export function ProductPreviewModal({ isOpen, onClose, product }: ProductPreview
       height: 850,
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
-          <line x1="12" x2="12" y1="18" y2="18"/>
+          <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+          <line x1="12" x2="12" y1="18" y2="18" />
         </svg>
       ),
     },
@@ -339,8 +336,8 @@ export function ProductPreviewModal({ isOpen, onClose, product }: ProductPreview
       height: 667,
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
-          <path d="M12 18h.01"/>
+          <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+          <path d="M12 18h.01" />
         </svg>
       ),
     },
@@ -354,7 +351,7 @@ export function ProductPreviewModal({ isOpen, onClose, product }: ProductPreview
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 transition-all duration-300 animate-fade-in text-xs font-medium">
-      <div 
+      <div
         className="bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[28px] w-full max-w-[96vw] xl:max-w-[1400px] h-[94vh] flex flex-col shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -384,11 +381,10 @@ export function ProductPreviewModal({ isOpen, onClose, product }: ProductPreview
                   <button
                     key={mode}
                     onClick={() => setDeviceMode(mode)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                      isActive
-                        ? 'bg-white dark:bg-zinc-700 text-rose-500 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
-                    }`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${isActive
+                      ? 'bg-white dark:bg-zinc-700 text-rose-500 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
+                      }`}
                   >
                     {dev.icon}
                     <span className="hidden md:inline">{dev.name}</span>
@@ -408,8 +404,8 @@ export function ProductPreviewModal({ isOpen, onClose, product }: ProductPreview
         </div>
 
         {/* Canvas Body */}
-        <div 
-          ref={canvasRef} 
+        <div
+          ref={canvasRef}
           className="flex-1 bg-slate-200 dark:bg-zinc-955 p-6 flex items-center justify-center overflow-hidden relative"
           style={{
             backgroundImage: `radial-gradient(circle, var(--border-color, #e2e8f0) 1px, transparent 1px)`,

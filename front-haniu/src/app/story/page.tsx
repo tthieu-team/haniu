@@ -121,29 +121,29 @@ export default function StoryPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
 
-      <main className="bg-slate-50/50 dark:bg-zinc-950 min-h-screen py-12 space-y-20 animate-fade-in font-sans">
+      <div className="bg-slate-50/50 dark:bg-zinc-950 min-h-screen pt-4 pb-12 space-y-20 animate-fade-in font-sans">
         
         {/* Banner Section */}
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-[40px] overflow-hidden bg-slate-100/60 dark:bg-zinc-950 text-slate-800 dark:text-white p-8 sm:p-16 lg:p-20 shadow-xl dark:shadow-2xl border border-slate-200 dark:border-zinc-900">
+          <div className="relative rounded-[32px] overflow-hidden bg-slate-100/60 dark:bg-zinc-950 text-slate-800 dark:text-white p-6 sm:p-10 lg:p-12 shadow-lg border border-slate-200 dark:border-zinc-900">
             <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 via-rose-500/10 to-transparent opacity-60 dark:opacity-40 pointer-events-none" />
-            <div className="relative z-10 max-w-3xl space-y-6">
-              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 border border-rose-500/25">
+            <div className="relative z-10 max-w-3xl space-y-4">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 border border-rose-500/25">
                 <Icon name="sparkles" size={10} className="animate-pulse" /> {activeStory.subtitle || 'OUR JOURNEY'}
               </span>
-              <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-none text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-amber-400 to-rose-500">
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight py-1 text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-amber-400 to-rose-500">
                 {activeStory.title}
                 {activeStory.titleHighlight && (
                   <>
                     <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-rose-500 font-serif italic font-light">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-rose-500 font-serif italic font-light text-xl sm:text-3xl lg:text-4xl">
                       {activeStory.titleHighlight}
                     </span>
                   </>
                 )}
                 {activeStory.titlePart2 && <> {activeStory.titlePart2}</>}
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-300 leading-relaxed font-light tracking-wide max-w-xl">
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-zinc-350 leading-relaxed font-light tracking-wide max-w-xl">
                 Khám phá câu chuyện phía sau những hộp quà trao tay - hành trình của sự chân thành, nhiệt huyết nghệ nhân và công nghệ chế tác tinh xảo tại Haniu.
               </p>
             </div>
@@ -354,7 +354,7 @@ export default function StoryPage() {
           </div>
         </div>
 
-      </main>
+      </div>
     </>
   );
 }

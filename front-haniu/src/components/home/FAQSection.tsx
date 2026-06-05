@@ -39,7 +39,7 @@ export default function FAQSection() {
               {/* Question Trigger */}
               <button
                 onClick={() => toggle(idx)}
-                className="w-full flex items-center justify-between p-6 text-left font-semibold text-sm text-slate-800 dark:text-zinc-100 cursor-pointer hover:bg-slate-50/50 dark:hover:bg-zinc-850/50 transition-colors"
+                className="w-full flex items-center justify-between p-6 text-left font-semibold text-sm text-slate-800 dark:text-zinc-100 cursor-pointer hover:bg-slate-50/50 dark:hover:bg-zinc-800/50 transition-colors"
               >
                 <span>{item.question}</span>
                 <span className={`text-rose-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
@@ -50,10 +50,10 @@ export default function FAQSection() {
               {/* Answer Content */}
               <div
                 className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                  isOpen ? 'max-h-96 border-t border-slate-200/50 dark:border-zinc-850' : 'max-h-0'
+                  isOpen ? 'max-h-96 border-t border-slate-200/50 dark:border-zinc-800' : 'max-h-0'
                 }`}
               >
-                <p className="p-6 text-xs text-slate-500 dark:text-zinc-450 leading-relaxed font-light whitespace-pre-line bg-slate-50/30 dark:bg-zinc-950/20">
+                <p className="p-6 text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-light whitespace-pre-line bg-slate-50/30 dark:bg-zinc-950/20">
                   {item.answer}
                 </p>
               </div>

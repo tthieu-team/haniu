@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '@/components/common/Icons';
 import { useWishlistStore } from '@/store/wishlist';
+import GiftWrapSelector from '@/components/product/GiftWrapSelector';
 
 interface Variant {
   id: string;
@@ -28,11 +29,13 @@ interface Product {
   stock: number;
   isFeatured: boolean;
   isNew: boolean;
-  category?: { name: string };
-  brand?: { name: string } | null;
-  collection?: { name: string } | null;
-  occasions?: Array<{ id: string; name: string }>;
-  recipients?: Array<{ id: string; name: string }>;
+  category?: { name: string; icon?: string; imageUrl?: string };
+  brand?: { name: string; icon?: string; imageUrl?: string } | null;
+  collection?: { name: string; icon?: string; imageUrl?: string } | null;
+  occasions?: Array<{ id: string; name: string; icon?: string; imageUrl?: string }>;
+  recipients?: Array<{ id: string; name: string; icon?: string; imageUrl?: string }>;
+  totalSold?: number;
+  averageRating?: number;
 }
 
 interface ProductInfoProps {
@@ -43,6 +46,11 @@ interface ProductInfoProps {
   totalReviews: number;
   soldCount?: number;
   onReviewsClick?: () => void;
+  giftWrap?: string;
+  setGiftWrap?: (v: string) => void;
+  giftWrapOptions?: string[];
+  giftWrapLabel?: string;
+  showGiftWrap?: boolean;
 }
 
 export default function ProductInfo({
@@ -51,11 +59,17 @@ export default function ProductInfo({
   setSelectedVariant,
   averageRating,
   totalReviews,
-  soldCount = 1240,
-  onReviewsClick
+  soldCount,
+  onReviewsClick,
+  giftWrap,
+  setGiftWrap,
+  giftWrapOptions,
+  giftWrapLabel,
+  showGiftWrap
 }: ProductInfoProps) {
   const { toggleWishlist, isInWishlist } = useWishlistStore();
   const isFavorite = isInWishlist(product.id);
+  const finalSoldCount = product.totalSold ?? soldCount ?? 0;
 
   // Scarcity simulation
   const [viewersCount, setViewersCount] = useState(12);
@@ -104,27 +118,54 @@ export default function ProductInfo({
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="bg-white dark:bg-zinc-900/40 p-5 rounded-3xl border border-slate-200/60 dark:border-zinc-800/80 shadow-xs space-y-5">
       {/* Category, Brand, Collection Tags */}
       <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
+        {product.isFeatured && (
+          <span className="bg-gradient-to-r from-amber-500 to-rose-500 text-white border-0 text-[9px] sm:text-[10px] font-extrabold px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1">
+            🔥 Nổi bật
+          </span>
+        )}
         {product.category && (
-          <span className="bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-100/50 dark:border-rose-950/30 text-[9px] sm:text-[10px] font-extrabold px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-wider">
+          <span className="bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 text-[9px] sm:text-[10px] font-extrabold px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+            {product.category.imageUrl || product.category.icon ? (
+              product.category.imageUrl ? (
+                <img src={product.category.imageUrl} className="w-3.5 h-3.5 rounded-full object-cover shrink-0" alt="" />
+              ) : (
+                <span className="shrink-0">{product.category.icon}</span>
+              )
+            ) : (
+              <span className="shrink-0">🌸</span>
+            )}
             {product.category.name}
           </span>
         )}
         {product.brand && (
-          <span className="bg-slate-100 dark:bg-zinc-900/80 text-slate-650 dark:text-zinc-300 border border-slate-200/50 dark:border-zinc-800/80 text-[9px] sm:text-[10px] font-extrabold px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-wider">
+          <span className="bg-slate-50 dark:bg-zinc-800/60 text-slate-700 dark:text-zinc-300 border border-slate-200/50 dark:border-zinc-800/80 text-[9px] sm:text-[10px] font-extrabold px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+            {product.brand.imageUrl || product.brand.icon ? (
+              product.brand.imageUrl ? (
+                <img src={product.brand.imageUrl} className="w-3.5 h-3.5 rounded-full object-cover shrink-0" alt="" />
+              ) : (
+                <span className="shrink-0">{product.brand.icon}</span>
+              )
+            ) : (
+              <span className="shrink-0">✨</span>
+            )}
             Hãng: {product.brand.name}
           </span>
         )}
         {product.collection && (
-          <span className="bg-slate-100 dark:bg-zinc-900/80 text-slate-650 dark:text-zinc-300 border border-slate-200/50 dark:border-zinc-800/80 text-[9px] sm:text-[10px] font-extrabold px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-wider">
+          <span className="bg-slate-50 dark:bg-zinc-800/60 text-slate-700 dark:text-zinc-300 border border-slate-200/50 dark:border-zinc-800/80 text-[9px] sm:text-[10px] font-extrabold px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+            {product.collection.imageUrl || product.collection.icon ? (
+              product.collection.imageUrl ? (
+                <img src={product.collection.imageUrl} className="w-3.5 h-3.5 rounded-full object-cover shrink-0" alt="" />
+              ) : (
+                <span className="shrink-0">{product.collection.icon}</span>
+              )
+            ) : (
+              <span className="shrink-0">📦</span>
+            )}
             {product.collection.name}
-          </span>
-        )}
-        {product.isFeatured && (
-          <span className="bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-100/50 dark:border-rose-950/30 text-[9px] sm:text-[10px] font-extrabold px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-wider">
-            Nổi bật
           </span>
         )}
       </div>
@@ -137,11 +178,10 @@ export default function ProductInfo({
         <div className="flex gap-1.5 sm:gap-2 shrink-0 pt-0.5">
           <button
             onClick={() => toggleWishlist(product as any)}
-            className={`p-2 sm:p-2.5 rounded-full border transition-all ${
-              isFavorite
-                ? 'bg-rose-500 border-rose-500 text-white shadow-sm'
-                : 'bg-white border-slate-200 text-slate-450 hover:text-rose-500 dark:bg-zinc-900 dark:border-zinc-800'
-            }`}
+            className={`p-2 sm:p-2.5 rounded-full border transition-all ${isFavorite
+              ? 'bg-rose-500 border-rose-500 text-white shadow-sm'
+              : 'bg-white border-slate-200 text-slate-400 hover:text-rose-500 dark:bg-zinc-900 dark:border-zinc-800'
+              }`}
             title="Thêm yêu thích"
           >
             <Icon name="heart" size={14} className={isFavorite ? 'fill-current text-white' : 'text-slate-400'} />
@@ -157,169 +197,191 @@ export default function ProductInfo({
       </div>
 
       {/* Ratings & Sold Count */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[11px] sm:text-xs font-semibold">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[11px] sm:text-xs font-semibold pb-3 border-b border-slate-100 dark:border-zinc-800/80">
         <button
           onClick={onReviewsClick}
           className="flex items-center gap-1 hover:text-rose-500 transition-colors cursor-pointer focus:outline-none"
         >
           <Icon name="star" size={13} className="text-amber-500 fill-current" />
           <span className="text-slate-700 dark:text-zinc-200">{averageRating.toFixed(1)}/5</span>
-          <span className="text-slate-450 font-normal">({totalReviews} đánh giá)</span>
+          <span className="text-slate-400 font-normal">({totalReviews} đánh giá)</span>
         </button>
-        <div className="w-1 h-1 rounded-full bg-slate-350 shrink-0 hidden xs:block"></div>
+        <div className="w-1 h-1 rounded-full bg-slate-300 shrink-0 hidden xs:block"></div>
         <div className="text-slate-500 dark:text-zinc-400">
-          Đã bán <span className="text-slate-850 dark:text-zinc-200 font-extrabold">{soldCount}+</span>
+          Đã bán <span className="text-slate-800 dark:text-zinc-200 font-extrabold">{finalSoldCount}</span>
         </div>
       </div>
 
-      {/* Scarcity Widget */}
-      <div className="p-2.5 sm:p-3.5 bg-rose-500/5 border border-rose-500/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-[11px] sm:text-xs font-semibold">
-        <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400">
-          <Icon name="zap" size={13} className="text-rose-500 animate-pulse" />
-          <span>Chỉ còn <strong>{stockCount} sản phẩm</strong> trong kho!</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-slate-500 dark:text-zinc-400">
-          <Icon name="users" size={13} className="text-slate-400" />
-          <span>{viewersCount} người đang xem sản phẩm này</span>
-        </div>
-      </div>
+      {/* Scarcity & Flash Sale Widgets Combined */}
+      <div className="p-3 bg-gradient-to-br from-amber-500/5 via-rose-500/5 to-rose-500/10 border border-rose-500/10 rounded-2xl space-y-2 text-[11px] sm:text-xs">
+        {/* Flash Sale Countdown Row */}
+        {discountPercent > 0 && (
+          <div className="flex flex-row items-center justify-between pb-1.5 border-b border-rose-500/10">
+            <span className="font-extrabold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
+              <Icon name="zap" size={12} className="text-amber-500 animate-bounce" /> FLASH SALE ĐANG DIỄN RA
+            </span>
+            <div className="flex items-center gap-1 font-mono font-bold">
+              <span className="bg-slate-900 dark:bg-zinc-800 text-white px-1.5 py-0.5 rounded text-[10px] min-w-[20px] text-center">
+                {String(flashSaleTime.hours).padStart(2, '0')}
+              </span>
+              <span className="text-slate-500 dark:text-zinc-500">:</span>
+              <span className="bg-slate-900 dark:bg-zinc-800 text-white px-1.5 py-0.5 rounded text-[10px] min-w-[20px] text-center">
+                {String(flashSaleTime.minutes).padStart(2, '0')}
+              </span>
+              <span className="text-slate-500 dark:text-zinc-500">:</span>
+              <span className="bg-slate-900 dark:bg-zinc-800 text-white px-1.5 py-0.5 rounded text-[10px] min-w-[20px] text-center">
+                {String(flashSaleTime.seconds).padStart(2, '0')}
+              </span>
+            </div>
+          </div>
+        )}
 
-      {/* Countdown Widget */}
-      {discountPercent > 0 && (
-        <div className="p-2.5 sm:p-3.5 bg-gradient-to-r from-amber-500/10 to-rose-500/10 border border-amber-500/15 rounded-2xl flex flex-col xs:flex-row xs:items-center justify-between gap-2 text-[11px] sm:text-xs">
-          <span className="font-extrabold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-            <Icon name="zap" size={13} className="text-amber-500 animate-bounce" /> FLASH SALE ĐANG DIỄN RA
-          </span>
-          <div className="flex items-center gap-1 font-mono font-bold">
-            <span className="bg-slate-850 dark:bg-zinc-800 text-slate-800 dark:text-white px-2 py-0.5 rounded text-[10px]">
-              {String(flashSaleTime.hours).padStart(2, '0')}
-            </span>
-            <span className="text-slate-800 dark:text-zinc-300">:</span>
-            <span className="bg-slate-850 dark:bg-zinc-800 text-slate-800 dark:text-white px-2 py-0.5 rounded text-[10px]">
-              {String(flashSaleTime.minutes).padStart(2, '0')}
-            </span>
-            <span className="text-slate-880 dark:text-zinc-300">:</span>
-            <span className="bg-slate-850 dark:bg-zinc-800 text-slate-800 dark:text-white px-2 py-0.5 rounded text-[10px]">
-              {String(flashSaleTime.seconds).padStart(2, '0')}
-            </span>
+        {/* Scarcity info row */}
+        <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-1.5 font-semibold">
+          <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400">
+            <Icon name="zap" size={12} className="text-rose-500 shrink-0" />
+            <span>Chỉ còn <strong className="text-rose-700 dark:text-rose-400">{stockCount} sản phẩm</strong> trong kho!</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-slate-500 dark:text-zinc-400">
+            <Icon name="users" size={12} className="text-slate-400 shrink-0" />
+            <span>{viewersCount} người đang xem</span>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Price Container */}
-      <div className="bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md p-3 sm:p-4 rounded-2xl flex items-center gap-3 sm:gap-4 flex-wrap border border-slate-200/80 dark:border-zinc-800/60 shadow-sm">
-        <span className="text-xl sm:text-2xl md:text-3xl font-black text-rose-500">
+      <div className="flex items-baseline gap-3 flex-wrap pt-1">
+        <span className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-500 tracking-tight">
           {currentPrice.toLocaleString('vi-VN')}đ
         </span>
         {originalPrice && originalPrice > currentPrice && (
-          <>
-            <span className="text-xs sm:text-sm text-slate-450 line-through">
+          <div className="flex items-center gap-2">
+            <span className="text-sm sm:text-base text-slate-400 dark:text-zinc-500 line-through">
               {originalPrice.toLocaleString('vi-VN')}đ
             </span>
-            <span className="bg-rose-500/10 text-rose-500 text-[10px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg">
+            <span className="bg-rose-500 text-white dark:bg-rose-600 text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
               -{discountPercent}%
             </span>
-          </>
+          </div>
         )}
       </div>
 
       {/* Short Description */}
-      <p className="text-xs sm:text-sm text-slate-650 dark:text-zinc-400 leading-relaxed whitespace-pre-line">
+      <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed whitespace-pre-line pt-2">
         {product.description}
       </p>
 
-      {/* Occasions & Recipients Tags */}
-      {((product.occasions && product.occasions.length > 0) || (product.recipients && product.recipients.length > 0)) && (
-        <div className="bg-white/50 dark:bg-zinc-900/30 p-3 sm:p-4 rounded-2xl space-y-2.5 sm:space-y-3.5 border border-slate-200/60 dark:border-zinc-800/50">
-          {product.occasions && product.occasions.length > 0 && (
-            <div className="flex flex-col xs:flex-row xs:items-center text-xs gap-1.5">
-              <span className="text-slate-450 dark:text-zinc-450 font-extrabold uppercase tracking-wider text-[9px] sm:text-[10px] w-20 shrink-0">Dịp tặng:</span>
-              <div className="flex flex-wrap gap-1.5">
-                {product.occasions.map(o => (
-                  <span key={o.id} className="bg-slate-100 dark:bg-zinc-850 text-slate-650 dark:text-zinc-300 border border-slate-200/60 dark:border-zinc-800 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[11px] sm:text-xs font-semibold">
-                    {o.name}
-                  </span>
-                ))}
+      {/* Occasions, Recipients, Variants & Gift Wrap Wrapper Section */}
+      {(((product.occasions && product.occasions.length > 0) || (product.recipients && product.recipients.length > 0) || ((product as any).variants && (product as any).variants.length > 0) || (showGiftWrap && setGiftWrap && giftWrap !== undefined)) && (
+        <div className="border-t border-slate-100 dark:border-zinc-800/80 pt-5 space-y-5">
+          {/* Occasions & Recipients Tags */}
+          {((product.occasions && product.occasions.length > 0) || (product.recipients && product.recipients.length > 0)) && (
+            <div className={`space-y-3.5 ${(((product as any).variants && (product as any).variants.length > 0) || (showGiftWrap && setGiftWrap)) ? 'pb-4 border-b border-slate-100 dark:border-zinc-800/80' : ''}`}>
+              {product.occasions && product.occasions.length > 0 && (
+                <div className="flex flex-col xs:flex-row xs:items-center text-xs gap-1.5">
+                  <span className="text-slate-500 dark:text-zinc-400 font-extrabold uppercase tracking-wider text-[9px] sm:text-[10px] w-20 shrink-0">Dịp tặng:</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {product.occasions.map(o => (
+                      <span key={o.id} className="bg-slate-50 dark:bg-zinc-800/40 text-slate-650 dark:text-zinc-300 border border-slate-200/60 dark:border-zinc-800/80 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[11px] sm:text-xs font-semibold">
+                        {o.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {product.recipients && product.recipients.length > 0 && (
+                <div className="flex flex-col xs:flex-row xs:items-center text-xs gap-1.5">
+                  <span className="text-slate-500 dark:text-zinc-400 font-extrabold uppercase tracking-wider text-[9px] sm:text-[10px] w-20 shrink-0">Đối tượng:</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {product.recipients.map(r => (
+                      <span key={r.id} className="bg-slate-50 dark:bg-zinc-800/40 text-slate-650 dark:text-zinc-300 border border-slate-200/60 dark:border-zinc-800/80 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[11px] sm:text-xs font-semibold">
+                        {r.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Variants Selector */}
+          {((product as any).variants && (product as any).variants.length > 0) && (
+            <div className="space-y-2.5">
+              <label className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 block mb-3">Chọn mẫu hộp quà / màu sắc</label>
+              <div className={`grid grid-cols-2 sm:grid-cols-3 gap-2 ${(product as any).variants.length > 6 ? 'max-h-[230px] overflow-y-auto pr-1 scrollbar-thin' : ''}`}>
+                {(product as any).variants.map((v: Variant) => {
+                  const isSelected = selectedVariant?.id === v.id;
+                  const isLowStock = v.stock > 0 && v.stock <= 10;
+                  const isOutOfStock = v.stock === 0;
+
+                  return (
+                    <button
+                      key={v.id}
+                      type="button"
+                      disabled={isOutOfStock}
+                      onClick={() => setSelectedVariant(v)}
+                      className={`relative p-1.5 pr-2 rounded-xl border text-[11px] font-bold transition-all duration-300 w-full flex items-center gap-2 text-left select-none outline-none group cursor-pointer min-h-[46px] ${isSelected
+                        ? 'border-rose-500 bg-gradient-to-br from-rose-500/5 to-rose-600/5 text-rose-600 dark:border-rose-450 dark:text-rose-400 dark:from-rose-500/10 dark:to-rose-600/10 shadow-[0_2px_8px_rgba(244,63,94,0.06)]'
+                        : isOutOfStock
+                          ? 'border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-500'
+                          : 'border-slate-100 bg-white hover:border-rose-300 dark:border-zinc-800 dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:shadow-xs dark:hover:bg-zinc-800/50'
+                        }`}
+                    >
+                      {/* Selected checkmark indicator */}
+                      {isSelected && (
+                        <span className="absolute -top-1 -right-1 p-0.5 rounded-full bg-rose-500 text-white dark:bg-rose-600 shadow-xs animate-scale-up z-10">
+                          <Icon name="check" size={8} />
+                        </span>
+                      )}
+
+                      {/* Image Thumbnail */}
+                      <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-100 dark:border-zinc-800/60 bg-slate-50 dark:bg-zinc-800 flex items-center justify-center">
+                        {v.imageUrl ? (
+                          <img src={v.imageUrl} className="w-full h-full object-cover" alt="" />
+                        ) : (
+                          <span className="text-[10px]">🎁</span>
+                        )}
+                      </div>
+
+                      {/* Name and Stock Info */}
+                      <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                        <div className={`leading-tight break-words line-clamp-1 pr-1 transition-colors ${isSelected ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-zinc-200'}`}>
+                          {v.name}
+                        </div>
+                        <div className="flex items-center gap-1 text-[8px] text-slate-400 dark:text-zinc-500 font-medium">
+                          <span className={`font-bold uppercase ${isOutOfStock
+                            ? 'text-slate-400 dark:text-zinc-500'
+                            : isLowStock
+                              ? 'text-amber-600 dark:text-amber-400 animate-pulse'
+                              : 'text-slate-400 dark:text-zinc-500'
+                            }`}>
+                            {isOutOfStock ? 'Hết' : isLowStock ? 'Sắp hết' : 'Sẵn có'}
+                          </span>
+                          <span className="font-mono shrink-0">({v.stock})</span>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
-          {product.recipients && product.recipients.length > 0 && (
-            <div className="flex flex-col xs:flex-row xs:items-center text-xs gap-1.5">
-              <span className="text-slate-450 dark:text-zinc-450 font-extrabold uppercase tracking-wider text-[9px] sm:text-[10px] w-20 shrink-0">Đối tượng:</span>
-              <div className="flex flex-wrap gap-1.5">
-                {product.recipients.map(r => (
-                  <span key={r.id} className="bg-slate-100 dark:bg-zinc-855 text-slate-650 dark:text-zinc-300 border border-slate-200/60 dark:border-zinc-800 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[11px] sm:text-xs font-semibold">
-                    {r.name}
-                  </span>
-                ))}
-              </div>
+
+          {/* Gift Wrap Selector inside the block */}
+          {showGiftWrap && setGiftWrap && giftWrap !== undefined && (
+            <div className={`pt-4 ${((product as any).variants && (product as any).variants.length > 0) ? 'border-t border-slate-100 dark:border-zinc-800/80 mt-4' : ''}`}>
+              <GiftWrapSelector
+                giftWrap={giftWrap}
+                setGiftWrap={setGiftWrap}
+                options={giftWrapOptions}
+                label={giftWrapLabel}
+                show={showGiftWrap}
+                borderless={true}
+              />
             </div>
           )}
         </div>
-      )}
-
-      {/* Variants Selector */}
-      {((product as any).variants && (product as any).variants.length > 0) && (
-        <div className="space-y-2.5 mt-6">
-          <label className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-450 block mb-3">Chọn mẫu hộp quà / màu sắc</label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {(product as any).variants.map((v: Variant) => {
-              const isSelected = selectedVariant?.id === v.id;
-              const isLowStock = v.stock > 0 && v.stock <= 10;
-              const isOutOfStock = v.stock === 0;
-
-              return (
-                <button
-                  key={v.id}
-                  type="button"
-                  disabled={isOutOfStock}
-                  onClick={() => setSelectedVariant(v)}
-                  className={`relative p-2.5 rounded-xl border text-[11px] font-bold transition-all duration-300 w-full flex flex-col justify-between gap-2 text-left select-none outline-none group cursor-pointer min-h-[72px] ${
-                    isSelected
-                      ? 'border-rose-500 bg-gradient-to-br from-rose-500/5 to-rose-600/5 text-rose-600 dark:border-rose-450 dark:text-rose-400 dark:from-rose-500/10 dark:to-rose-600/10 shadow-[0_2px_8px_rgba(244,63,94,0.06)]'
-                      : isOutOfStock
-                        ? 'border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed dark:border-zinc-850 dark:bg-zinc-900/50 dark:text-zinc-650'
-                        : 'border-slate-100 bg-white hover:border-rose-250 dark:border-zinc-800 dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:shadow-xs dark:hover:bg-zinc-850/50'
-                  }`}
-                >
-                  {/* Selected checkmark indicator (Top right absolute) */}
-                  {isSelected && (
-                    <span className="absolute top-1 right-1 p-0.5 rounded-full bg-rose-500 text-white dark:bg-rose-600 shadow-xs animate-scale-up z-10">
-                      <Icon name="check" size={8} />
-                    </span>
-                  )}
-
-                  {/* Name */}
-                  <div className={`leading-tight break-words line-clamp-2 pr-2 transition-colors ${isSelected ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-zinc-200'}`}>
-                    {v.name}
-                  </div>
-                  
-                  {/* Stock & Status info */}
-                  <div className="flex items-center justify-between w-full mt-auto pt-1.5 border-t border-slate-50/50 dark:border-zinc-850/50 text-[9px] text-slate-400 dark:text-zinc-500 font-medium">
-                    <span className={`text-[8px] font-bold uppercase ${
-                      isOutOfStock 
-                        ? 'text-slate-400 dark:text-zinc-550' 
-                        : isLowStock 
-                          ? 'text-amber-600 dark:text-amber-400 animate-pulse' 
-                          : 'text-slate-400 dark:text-zinc-550'
-                    }`}>
-                      {isOutOfStock 
-                        ? 'Hết' 
-                        : isLowStock 
-                          ? 'Sắp hết' 
-                          : 'Sẵn có'
-                      }
-                    </span>
-                    <span className="font-mono shrink-0">
-                      {v.stock > 999 ? '999+' : `${v.stock} c`}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      ))}
     </div>
   );
 }

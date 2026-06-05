@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { createPortal } from 'react-dom';
 import { useCartStore } from '@/store/cart';
 import PersonalizationForm from './PersonalizationForm';
+import GiftWrapSelector from './GiftWrapSelector';
 import Icon from '@/components/common/Icons';
 import { getFullImageUrl } from '@/lib/api';
 
@@ -249,10 +250,10 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
               <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-zinc-100 leading-tight">
                 {product.name}
               </h2>
-              <div className="flex items-center gap-3 text-[10px] font-medium text-slate-400 dark:text-zinc-550 flex-wrap">
+              <div className="flex items-center gap-3 text-[10px] font-medium text-slate-400 dark:text-zinc-500 flex-wrap">
                 <div>SKU: <span className="text-slate-600 dark:text-zinc-300 font-semibold">{product.sku}</span></div>
                 <div className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-zinc-800"></div>
-                <div className="flex items-center gap-1 font-semibold text-slate-550 dark:text-zinc-400">
+                <div className="flex items-center gap-1 font-semibold text-slate-500 dark:text-zinc-400">
                   <Icon name="star" size={11} className="text-amber-500 fill-current" />
                   <span>4.8/5 (128 đánh giá)</span>
                 </div>
@@ -286,13 +287,13 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
 
             {/* Occasions & Recipients Tags */}
             {((product.occasions && product.occasions.length > 0) || (product.recipients && product.recipients.length > 0)) && (
-              <div className="bg-slate-50 dark:bg-zinc-900/30 p-3.5 rounded-2xl space-y-2 border border-slate-100 dark:border-zinc-900/60 text-[10px]">
+              <div className="bg-white dark:bg-zinc-900/40 p-5 rounded-3xl space-y-3.5 border border-slate-200/60 dark:border-zinc-800/80 shadow-xs">
                 {product.occasions && product.occasions.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-450 dark:text-zinc-500 font-bold uppercase tracking-wider text-[8px] w-16 shrink-0">Dịp tặng:</span>
+                    <span className="text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-wider text-[8px] w-16 shrink-0">Dịp tặng:</span>
                     <div className="flex flex-wrap gap-1">
                       {product.occasions.map((o: any) => (
-                        <span key={o.id || o.slug} className="bg-white dark:bg-zinc-850 text-slate-650 dark:text-zinc-300 border border-slate-200/50 dark:border-zinc-800 px-2 py-0.5 rounded-md font-semibold text-[9px]">
+                        <span key={o.id || o.slug} className="bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200/65 dark:border-zinc-800 px-2 py-0.5 rounded-md font-semibold text-[9px]">
                           {o.name}
                         </span>
                       ))}
@@ -301,10 +302,10 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                 )}
                 {product.recipients && product.recipients.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-455 dark:text-zinc-500 font-bold uppercase tracking-wider text-[8px] w-16 shrink-0">Đối tượng:</span>
+                    <span className="text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-wider text-[8px] w-16 shrink-0">Đối tượng:</span>
                     <div className="flex flex-wrap gap-1">
                       {product.recipients.map((r: any) => (
-                        <span key={r.id || r.slug} className="bg-white dark:bg-zinc-850 text-slate-650 dark:text-zinc-300 border border-slate-200/50 dark:border-zinc-800 px-2 py-0.5 rounded-md font-semibold text-[9px]">
+                        <span key={r.id || r.slug} className="bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200/65 dark:border-zinc-800 px-2 py-0.5 rounded-md font-semibold text-[9px]">
                           {r.name}
                         </span>
                       ))}
@@ -337,7 +338,7 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                         className={`relative p-2.5 rounded-xl border text-[10px] font-bold transition-all duration-200 w-full flex flex-col justify-between gap-1 text-left select-none outline-none group cursor-pointer ${isSelected
                           ? 'border-rose-500 bg-rose-500/[0.03] text-rose-600 dark:border-rose-450 dark:text-rose-400 dark:bg-rose-950/10 shadow-[0_2px_8px_rgba(244,63,94,0.06)]'
                           : isOutOfStock
-                            ? 'border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed dark:border-zinc-850 dark:bg-zinc-900/50 dark:text-zinc-650'
+                            ? 'border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-500'
                             : 'border-slate-100 bg-white hover:border-rose-200 dark:border-zinc-800 dark:bg-zinc-900 text-slate-700 dark:text-zinc-350'
                           }`}
                       >
@@ -365,14 +366,14 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                 {product.specifications && (
                   <div className="space-y-1">
                     <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Thông số kỹ thuật</h5>
-                    <div className="text-[10px] text-slate-550 dark:text-zinc-400 space-y-1 leading-relaxed font-light">
+                    <div className="text-[10px] text-slate-500 dark:text-zinc-400 space-y-1 leading-relaxed font-light">
                       {(() => {
                         try {
                           const specs = typeof product.specifications === 'string'
                             ? JSON.parse(product.specifications)
                             : product.specifications;
                           return Object.entries(specs).map(([key, val]) => (
-                            <div key={key} className="flex justify-between border-b border-slate-150 dark:border-zinc-850/40 pb-0.5">
+                            <div key={key} className="flex justify-between border-b border-slate-200 dark:border-zinc-800/40 pb-0.5">
                               <span className="font-semibold text-slate-600 dark:text-zinc-300">{key}:</span>
                               <span>{String(val)}</span>
                             </div>
@@ -385,16 +386,16 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
                   </div>
                 )}
                 {product.includedItems && (
-                  <div className="space-y-1 border-t border-slate-100 dark:border-zinc-855/40 pt-2">
+                  <div className="space-y-1 border-t border-slate-100 dark:border-zinc-800/40 pt-2">
                     <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Sản phẩm bao gồm</h5>
-                    <div className="text-[10px] text-slate-555 dark:text-zinc-400 space-y-1 leading-relaxed font-light">
+                    <div className="text-[10px] text-slate-500 dark:text-zinc-400 space-y-1 leading-relaxed font-light">
                       {(() => {
                         try {
                           const items = typeof product.includedItems === 'string'
                             ? JSON.parse(product.includedItems)
                             : product.includedItems;
                           return Object.entries(items).map(([key, val]) => (
-                            <div key={key} className="flex justify-between border-b border-slate-150 dark:border-zinc-850/40 pb-0.5">
+                            <div key={key} className="flex justify-between border-b border-slate-200 dark:border-zinc-800/40 pb-0.5">
                               <span className="font-semibold text-slate-600 dark:text-zinc-300">{key}:</span>
                               <span>{String(val)}</span>
                             </div>
@@ -424,15 +425,20 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
               }
 
               return product.isCustomizable && (
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <PersonalizationForm
                     engravingText={engravingText}
                     setEngravingText={setEngravingText}
                     cardMessage={cardMessage}
                     setCardMessage={setCardMessage}
+                    config={customizationConfig}
+                  />
+                  <GiftWrapSelector
                     giftWrap={giftWrap}
                     setGiftWrap={setGiftWrap}
-                    config={customizationConfig}
+                    options={customizationConfig?.giftWrapOptions}
+                    label={customizationConfig?.giftWrapLabel}
+                    show={customizationConfig?.showGiftWrap}
                   />
                 </div>
               );

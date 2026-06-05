@@ -73,7 +73,7 @@ export default function ProductSeoDescription({ product }: ProductSeoDescription
       <div className={`space-y-5 sm:space-y-6 text-xs sm:text-sm text-slate-660 dark:text-zinc-350 leading-relaxed font-normal ${!isExpanded ? 'max-h-[250px] sm:max-h-[300px] overflow-hidden relative' : ''}`}>
         {sections.map((section, idx) => (
           <div key={idx} className="space-y-1.5">
-            <h3 className="font-extrabold text-slate-850 dark:text-zinc-200 flex items-center gap-2 text-xs sm:text-sm">
+            <h3 className="font-extrabold text-slate-800 dark:text-zinc-200 flex items-center gap-2 text-xs sm:text-sm">
               <span className="select-none shrink-0">{section.icon}</span> <span>{section.title}</span>
             </h3>
             <p className="pl-4 sm:pl-6 text-[11px] sm:text-xs text-slate-500 dark:text-zinc-400 font-medium leading-relaxed whitespace-pre-line">

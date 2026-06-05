@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import MediaGallery from '@/components/product/MediaGallery';
 import PersonalizationForm from '@/components/product/PersonalizationForm';
+import GiftWrapSelector from '@/components/product/GiftWrapSelector';
 import Icon from '@/components/common/Icons';
 
 interface Variant {
@@ -168,15 +169,20 @@ export default function ProductPreviewPanel({ product }: ProductPreviewPanelProp
         }
 
         return product.isCustomizable && (
-          <div className="pointer-events-none opacity-80">
+          <div className="pointer-events-none opacity-80 space-y-4">
             <PersonalizationForm
               engravingText={engravingText}
               setEngravingText={setEngravingText}
               cardMessage={cardMessage}
               setCardMessage={setCardMessage}
+              config={customizationConfig}
+            />
+            <GiftWrapSelector
               giftWrap={giftWrap}
               setGiftWrap={setGiftWrap}
-              config={customizationConfig}
+              options={customizationConfig?.giftWrapOptions}
+              label={customizationConfig?.giftWrapLabel}
+              show={customizationConfig?.showGiftWrap}
             />
           </div>
         );

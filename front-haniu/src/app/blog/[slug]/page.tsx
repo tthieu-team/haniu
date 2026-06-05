@@ -63,7 +63,7 @@ export default async function BlogPostDetailPage({ params }: PageProps) {
 
   if (!post) {
     return (
-      <main className="bg-slate-50/50 dark:bg-zinc-950 min-h-screen py-24 flex items-center justify-center">
+      <div className="bg-slate-50/50 dark:bg-zinc-950 min-h-screen pt-12 pb-24 flex items-center justify-center">
         <div className="text-center space-y-4 animate-fade-in">
           <h2 className="text-xl font-bold text-slate-800 dark:text-zinc-200">Không tìm thấy bài viết</h2>
           <p className="text-xs text-slate-400">Bài viết có thể đã bị xóa hoặc không còn tồn tại.</p>
@@ -74,7 +74,7 @@ export default async function BlogPostDetailPage({ params }: PageProps) {
             Quay lại Blog
           </Link>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -113,7 +113,7 @@ export default async function BlogPostDetailPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
 
-      <main className="bg-slate-50/50 dark:bg-zinc-950 min-h-screen py-8 sm:py-12 animate-fade-in">
+      <div className="bg-slate-50/50 dark:bg-zinc-950 min-h-screen pt-4 pb-8 sm:pb-12 animate-fade-in">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 space-y-8">
           
           {/* Back button */}
@@ -190,7 +190,7 @@ export default async function BlogPostDetailPage({ params }: PageProps) {
           </div>
 
         </div>
-      </main>
+      </div>
     </>
   );
 }

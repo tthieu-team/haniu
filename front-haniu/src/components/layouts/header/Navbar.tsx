@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Icon from '@/components/common/Icons';
 import { useOccasionStore } from '@/store/occasion';
 import { useCollectionStore } from '@/store/collection';
@@ -13,6 +14,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
+  const pathname = usePathname();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   // Lấy data từ store (không gọi API lại nếu đã có)
@@ -37,6 +39,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
         const isShopMenu = link.name.toLowerCase() === 'shop' || link.name.toLowerCase() === 'sản phẩm';
         const isCollectionsMenu = link.name.toLowerCase() === 'collections' || link.name.toLowerCase() === 'bộ sưu tập';
         const hasDropdown = isShopMenu || isCollectionsMenu;
+        const isActive = pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href));
 
         return (
           <div
@@ -50,7 +53,11 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
           >
             <Link
               href={link.href}
-              className="relative flex items-center gap-1 text-[10px] xl:text-[11px] font-semibold uppercase tracking-widest transition-all duration-300 cursor-pointer text-slate-700 dark:text-zinc-200 hover:text-rose-500 dark:hover:text-rose-400 group"
+              className={`relative flex items-center gap-1 text-[10px] xl:text-[11px] font-semibold uppercase tracking-widest transition-all duration-300 cursor-pointer group ${
+                isActive 
+                  ? 'text-rose-500 dark:text-rose-400 font-bold'
+                  : 'text-slate-700 dark:text-zinc-200 hover:text-rose-500 dark:hover:text-rose-400'
+              }`}
             >
               <span>{link.name}</span>
               {hasDropdown && (
@@ -58,7 +65,9 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                   <Icon name="chevron-down" size={8} />
                 </span>
               )}
-              <span className="absolute bottom-[-6px] left-0 w-full h-[1.5px] bg-rose-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" />
+              <span className={`absolute bottom-[-6px] left-0 w-full h-[1.5px] bg-rose-500 transition-transform duration-300 origin-center ${
+                isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+              }`} />
             </Link>
 
             {/* === Dropdown: Sản phẩm theo dịp lễ === */}

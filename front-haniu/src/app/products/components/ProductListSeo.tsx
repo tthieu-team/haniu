@@ -2,7 +2,7 @@
 
 export default function ProductListSeo() {
   return (
-    <div className="mt-24 border-t border-slate-100 dark:border-zinc-850 pt-16">
+    <div className="mt-24 border-t border-slate-200/60 dark:border-zinc-800 pt-16">
       <div className="max-w-4xl mx-auto space-y-12">
         {/* Header */}
         <div className="text-center space-y-3">
@@ -16,7 +16,7 @@ export default function ProductListSeo() {
 
         {/* Grid of SEO blocks */}
         <div className="grid md:grid-cols-2 gap-8 text-slate-500 dark:text-zinc-400 leading-relaxed font-light text-xs">
-          <div className="space-y-3 bg-white dark:bg-zinc-950 p-6 rounded-[28px] border border-slate-100 dark:border-zinc-850/80 shadow-xs">
+          <div className="space-y-3 bg-white dark:bg-zinc-950 p-6 rounded-[28px] border border-slate-200/60 dark:border-zinc-800 shadow-xs">
             <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-800 dark:text-zinc-200 flex items-center gap-2">
               <span>🎁</span> Ý nghĩa của việc chọn quà thiết kế
             </h3>
@@ -25,7 +25,7 @@ export default function ProductListSeo() {
             </p>
           </div>
           
-          <div className="space-y-3 bg-white dark:bg-zinc-950 p-6 rounded-[28px] border border-slate-100 dark:border-zinc-850/80 shadow-xs">
+          <div className="space-y-3 bg-white dark:bg-zinc-950 p-6 rounded-[28px] border border-slate-200/60 dark:border-zinc-800 shadow-xs">
             <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-800 dark:text-zinc-200 flex items-center gap-2">
               <span>✨</span> Dịch vụ khắc tên laser độc bản theo yêu cầu
             </h3>
@@ -34,7 +34,7 @@ export default function ProductListSeo() {
             </p>
           </div>
 
-          <div className="space-y-3 bg-white dark:bg-zinc-950 p-6 rounded-[28px] border border-slate-100 dark:border-zinc-850/80 shadow-xs">
+          <div className="space-y-3 bg-white dark:bg-zinc-950 p-6 rounded-[28px] border border-slate-200/60 dark:border-zinc-800 shadow-xs">
             <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-800 dark:text-zinc-200 flex items-center gap-2">
               <span>🌹</span> Chất liệu cao cấp và an toàn cho người sử dụng
             </h3>
@@ -43,7 +43,7 @@ export default function ProductListSeo() {
             </p>
           </div>
 
-          <div className="space-y-3 bg-white dark:bg-zinc-950 p-6 rounded-[28px] border border-slate-100 dark:border-zinc-850/80 shadow-xs">
+          <div className="space-y-3 bg-white dark:bg-zinc-950 p-6 rounded-[28px] border border-slate-200/60 dark:border-zinc-800 shadow-xs">
             <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-800 dark:text-zinc-200 flex items-center gap-2">
               <span>🚚</span> Trải nghiệm mua sắm tiện lợi tại Haniu
             </h3>

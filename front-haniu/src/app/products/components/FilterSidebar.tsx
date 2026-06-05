@@ -103,7 +103,7 @@ export default function FilterSidebar({
   };
 
   return (
-    <aside className="hidden lg:block w-72 shrink-0 sticky top-24 space-y-6 bg-white dark:bg-zinc-950 p-6 rounded-[32px] border border-slate-100 dark:border-zinc-850 shadow-sm shadow-slate-100/50 dark:shadow-none">
+    <aside className="hidden lg:block w-72 shrink-0 sticky top-24 space-y-6 bg-white dark:bg-zinc-950 p-6 rounded-[32px] border border-slate-200/60 dark:border-zinc-800 shadow-sm shadow-slate-100/50 dark:shadow-none">
       {/* Title & Clear Filters Button */}
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-4">
         <div className="flex items-center gap-2">
@@ -313,7 +313,7 @@ export default function FilterSidebar({
         </button>
         {expanded.service && (
           <div className="mt-2.5">
-            <label className="flex items-center gap-3 cursor-pointer p-3 rounded-2xl border border-slate-100 dark:border-zinc-850 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all select-none">
+            <label className="flex items-center gap-3 cursor-pointer p-3 rounded-2xl border border-slate-200/60 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all select-none">
               <input
                 type="checkbox"
                 checked={customizableOnly}
@@ -351,7 +351,7 @@ export default function FilterSidebar({
                 className={`text-[10px] py-2 px-2.5 rounded-xl border text-center font-bold transition-all cursor-pointer ${
                   activeQuickPrice() === 'under-200'
                     ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                    : 'border-slate-100 dark:border-zinc-850 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
+                    : 'border-slate-200/60 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
                 }`}
               >
                 Dưới 200k
@@ -362,7 +362,7 @@ export default function FilterSidebar({
                 className={`text-[10px] py-2 px-2.5 rounded-xl border text-center font-bold transition-all cursor-pointer ${
                   activeQuickPrice() === '200-500'
                     ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                    : 'border-slate-100 dark:border-zinc-850 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
+                    : 'border-slate-200/60 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
                 }`}
               >
                 200k - 500k
@@ -373,7 +373,7 @@ export default function FilterSidebar({
                 className={`text-[10px] py-2 px-2.5 rounded-xl border text-center font-bold transition-all cursor-pointer ${
                   activeQuickPrice() === '500-1000'
                     ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                    : 'border-slate-100 dark:border-zinc-850 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
+                    : 'border-slate-200/60 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
                 }`}
               >
                 500k - 1M
@@ -384,7 +384,7 @@ export default function FilterSidebar({
                 className={`text-[10px] py-2 px-2.5 rounded-xl border text-center font-bold transition-all cursor-pointer ${
                   activeQuickPrice() === 'over-1000'
                     ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                    : 'border-slate-100 dark:border-zinc-850 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
+                    : 'border-slate-200/60 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
                 }`}
               >
                 Trên 1M
@@ -401,7 +401,7 @@ export default function FilterSidebar({
                   onChange={(e) =>
                     setPriceMin(e.target.value === '' ? '' : Number(e.target.value))
                   }
-                  className="w-full text-[11px] bg-slate-50 dark:bg-zinc-900 rounded-xl px-2.5 py-2.5 border border-slate-100 dark:border-zinc-850 text-slate-700 dark:text-zinc-200 focus:outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-950 font-medium"
+                  className="w-full text-[11px] bg-slate-50 dark:bg-zinc-900 rounded-xl px-2.5 py-2.5 border border-slate-200/60 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 focus:outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-950 font-medium"
                 />
                 {priceMin !== '' && (
                   <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400 select-none">
@@ -418,7 +418,7 @@ export default function FilterSidebar({
                   onChange={(e) =>
                     setPriceMax(e.target.value === '' ? '' : Number(e.target.value))
                   }
-                  className="w-full text-[11px] bg-slate-50 dark:bg-zinc-900 rounded-xl px-2.5 py-2.5 border border-slate-100 dark:border-zinc-850 text-slate-700 dark:text-zinc-200 focus:outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-950 font-medium"
+                  className="w-full text-[11px] bg-slate-50 dark:bg-zinc-900 rounded-xl px-2.5 py-2.5 border border-slate-200/60 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 focus:outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-950 font-medium"
                 />
                 {priceMax !== '' && (
                   <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400 select-none">

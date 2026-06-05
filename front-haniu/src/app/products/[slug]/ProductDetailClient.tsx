@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import MediaGallery from '@/components/product/MediaGallery';
 import PersonalizationForm from '@/components/product/PersonalizationForm';
+import GiftWrapSelector from '@/components/product/GiftWrapSelector';
 import { useProductStore } from '@/store/product';
 import { useCartStore } from '@/store/cart';
 import { cartService } from '@/services/cart.service';
@@ -13,8 +14,6 @@ import Icon from '@/components/common/Icons';
 // Upgraded subcomponents
 import ProductInfo from '@/components/product/ProductInfo';
 import ProductSpecifications from '@/components/product/ProductSpecifications';
-import dynamic from 'next/dynamic';
-const RealtimePreview = dynamic(() => import('@/components/product/RealtimePreview'), { ssr: false });
 import ProductReviews from '@/components/product/ProductReviews';
 import ProductPolicies from '@/components/product/ProductPolicies';
 import StickyBuyBar from '@/components/product/StickyBuyBar';
@@ -79,6 +78,8 @@ interface Product {
   seoKeywords?: string | null;
   variants?: Variant[];
   media?: Media[];
+  totalSold?: number;
+  averageRating?: number;
 }
 
 interface ProductDetailClientProps {
@@ -101,9 +102,9 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
 
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Rating and review counters synchronized dynamically with reviews list
-  const [avgRating, setAvgRating] = useState(4.8);
-  const [totalReviews, setTotalReviews] = useState(128);
+  // Rating and review counters synchronized dynamically with reviews list (default to real values from initialProduct)
+  const [avgRating, setAvgRating] = useState(initialProduct?.averageRating ?? 5.0);
+  const [totalReviews, setTotalReviews] = useState(0);
   const [activeDetailTab, setActiveDetailTab] = useState('description');
 
   const handleReviewsUpdated = (newAvg: number, newCount: number) => {
@@ -117,6 +118,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
       if (initialProduct.variants && initialProduct.variants.length > 0) {
         setSelectedVariant(initialProduct.variants[0] as unknown as Variant);
       }
+      setAvgRating(initialProduct.averageRating ?? 5.0);
     } else {
       useProductStore.setState({ currentProduct: null });
     }
@@ -198,8 +200,8 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
   }
 
   let customizationConfig = {
-    showEngraving: true,
-    showEngravingMockup: true,
+    showEngraving: false,
+    showEngravingMockup: false,
     engravingLabel: "Khắc chữ / Tên theo yêu cầu (Miễn phí)",
     engravingPlaceholder: "Nhập tên hoặc lời chúc muốn khắc (tối đa 50 ký tự)",
     engravingMaxLength: 50,
@@ -210,9 +212,9 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
     showGiftWrap: true,
     giftWrapLabel: "Chọn ruy băng nơ / hộp gói",
     giftWrapOptions: [
-      "Ruy băng Đỏ Lãng Mạn",
-      "Ruy băng Vàng Hoàng Gia",
-      "Gói bọc giấy Kraft Hoài Cổ"
+      "🎀 Ruy băng Đỏ Lãng Mạn",
+      "✨ Ruy băng Vàng Hoàng Gia",
+      "📦 Gói bọc giấy Kraft Hoài Cổ"
     ]
   };
 
@@ -233,56 +235,55 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
   }
 
   return (
-    <div className="space-y-6 md:space-y-12">
-      {/* Back button */}
-      <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-rose-500 transition-colors">
-        <Icon name="arrow-left" size={14} /> Trở lại danh sách sản phẩm
-      </Link>
+    <div className="space-y-8 md:space-y-16 pt-4 sm:pt-6 pb-24 sm:pb-28">
+      <div className="space-y-3 md:space-y-4">
+        {/* Back button */}
+        <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-rose-500 transition-colors">
+          <Icon name="arrow-left" size={14} /> Trở lại danh sách sản phẩm
+        </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
-        {/* Left Column: Media gallery (Sticky) */}
-        <div className="lg:col-span-7 lg:sticky lg:top-28">
-          <MediaGallery mediaList={product.media} name={product.name} />
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
+          {/* Left Column: Media gallery (Sticky) */}
+          <div className="lg:col-span-7 lg:sticky lg:top-28">
+            <MediaGallery mediaList={product.media} name={product.name} />
+          </div>
 
-        {/* Right Column: Buy options, Personalization Form & Live Mockup */}
-        <div className="lg:col-span-5 space-y-8">
-          <ProductInfo
-            product={product}
-            selectedVariant={selectedVariant}
-            setSelectedVariant={setSelectedVariant}
-            averageRating={avgRating}
-            totalReviews={totalReviews}
-            onReviewsClick={() => {
-              setActiveDetailTab('reviews');
-              document.getElementById('detail-tabs')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          />
-
-          {/* Personalization Inputs */}
-          {product.isCustomizable && (
-            <PersonalizationForm
-              engravingText={engravingText}
-              setEngravingText={setEngravingText}
-              cardMessage={cardMessage}
-              setCardMessage={setCardMessage}
+          {/* Right Column: Buy options, Personalization Form & Live Mockup */}
+          <div className="lg:col-span-5 space-y-8">
+            <ProductInfo
+              product={product}
+              selectedVariant={selectedVariant}
+              setSelectedVariant={setSelectedVariant}
+              averageRating={avgRating}
+              totalReviews={totalReviews}
+              onReviewsClick={() => {
+                setActiveDetailTab('reviews');
+                document.getElementById('detail-tabs')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               giftWrap={giftWrap}
               setGiftWrap={setGiftWrap}
-              config={customizationConfig}
+              giftWrapOptions={customizationConfig.giftWrapOptions}
+              giftWrapLabel={customizationConfig.giftWrapLabel}
+              showGiftWrap={customizationConfig.showGiftWrap}
             />
-          )}
 
-          {/* Real-time mockup engraving canvas */}
-          <RealtimePreview
-            engravingText={engravingText}
-            cardMessage={cardMessage}
-            giftWrap={giftWrap}
-            isCustomizable={product.isCustomizable}
-            config={customizationConfig}
-          />
+            {/* Personalization Inputs */}
+            {product.isCustomizable && (
+              <div className="space-y-4">
+                <PersonalizationForm
+                  engravingText={engravingText}
+                  setEngravingText={setEngravingText}
+                  cardMessage={cardMessage}
+                  setCardMessage={setCardMessage}
+                  config={customizationConfig}
+                />
+              </div>
+            )}
+
+
 
           {/* Service options trigger block */}
-          {product.allowAdminChat && (
+          {false && product?.allowAdminChat && (
             <div className="bg-sky-500/5 border border-sky-500/10 p-4 rounded-2xl flex items-center justify-between animate-fade-in text-xs">
               <div>
                 <h4 className="font-bold text-sky-700 dark:text-sky-400 flex items-center gap-1.5">
@@ -320,7 +321,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
           <div className="flex gap-3 sm:gap-4">
             <button
               onClick={handleAddToCart}
-              className="flex-1 bg-slate-900 hover:bg-slate-850 dark:bg-zinc-100 dark:text-zinc-950 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md active:scale-95 text-xs sm:text-sm flex items-center justify-center gap-2"
+              className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:text-zinc-950 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md active:scale-95 text-xs sm:text-sm flex items-center justify-center gap-2"
             >
               <Icon name="bag" size={16} /> Thêm Vào Giỏ Hàng
             </button>
@@ -332,6 +333,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
             </button>
           </div>
         </div>
+      </div>
       </div>
 
       {/* Trust Badges (Horizontal safety bar) */}
@@ -353,11 +355,10 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveDetailTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer text-xs font-bold ${
-                  activeDetailTab === tab.id
-                    ? 'bg-white dark:bg-zinc-800 text-rose-500 dark:text-rose-400 shadow-md shadow-slate-200/50 dark:shadow-none'
-                    : 'text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200'
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer text-xs font-bold ${activeDetailTab === tab.id
+                  ? 'bg-white dark:bg-zinc-800 text-rose-500 dark:text-rose-400 shadow-md shadow-slate-200/50 dark:shadow-none'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200'
+                  }`}
               >
                 <Icon name={tab.icon} size={14} className={activeDetailTab === tab.id ? 'text-rose-500' : 'text-slate-400'} />
                 {tab.label}

@@ -56,7 +56,7 @@ export default function StorySection() {
 
         {/* Right media mockup */}
         <div className="lg:col-span-7">
-          <div className="relative group overflow-hidden rounded-[36px] border border-slate-200 dark:border-zinc-850 shadow-2xl aspect-video bg-zinc-950 ring-4 ring-slate-100/50 dark:ring-zinc-900/40">
+          <div className="relative group overflow-hidden rounded-[36px] border border-slate-200 dark:border-zinc-800 shadow-2xl aspect-video bg-zinc-950 ring-4 ring-slate-100/50 dark:ring-zinc-900/40">
             {isPlaying ? (
               (!videoUrl || videoError) ? (
                 <div className="absolute inset-0 flex flex-col justify-center items-center gap-2 bg-zinc-950 p-6 text-center text-white">
@@ -75,7 +75,7 @@ export default function StorySection() {
                       setVideoError(false);
                       setIsPlaying(false);
                     }}
-                    className="mt-4 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] font-bold rounded-xl cursor-pointer transition-colors border border-zinc-750"
+                    className="mt-4 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] font-bold rounded-xl cursor-pointer transition-colors border border-zinc-700"
                   >
                     Quay lại
                   </button>

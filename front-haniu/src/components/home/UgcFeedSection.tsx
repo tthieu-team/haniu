@@ -51,7 +51,7 @@ export default function UgcFeedSection() {
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative aspect-square overflow-hidden rounded-[28px] bg-zinc-900 border border-slate-200 dark:border-zinc-850 shadow-sm block"
+                className="group relative aspect-square overflow-hidden rounded-[28px] bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-sm block"
               >
                 {/* Image */}
                 <img
@@ -64,7 +64,7 @@ export default function UgcFeedSection() {
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/60 to-rose-950/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-white space-y-3 p-4">
                   {/* Instagram Logo SVG */}
                   <svg
-                    className="w-6 h-6 text-rose-455 animate-scale-up"
+                    className="w-6 h-6 text-rose-500 animate-scale-up"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >

@@ -68,7 +68,7 @@ export default function SocialProofSection() {
             className="group bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200 dark:border-zinc-800/60 p-8 rounded-[32px] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col justify-between relative overflow-hidden"
           >
             {/* Giant quote mark overlay */}
-            <span className="absolute top-1 right-5 text-[90px] text-slate-200/50 dark:text-zinc-850/50 font-serif pointer-events-none select-none select-none">
+            <span className="absolute top-1 right-5 text-[90px] text-slate-200/50 dark:text-zinc-800/50 font-serif pointer-events-none select-none select-none">
               &ldquo;
             </span>
 

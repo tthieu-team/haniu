@@ -36,13 +36,15 @@ export default function SiteLayout({
     pathname?.startsWith('/faq') || 
     pathname?.startsWith('/contact') || 
     pathname?.startsWith('/blog') || 
-    pathname?.startsWith('/reviews');
+    pathname?.startsWith('/reviews') ||
+    pathname?.startsWith('/orders') ||
+    pathname === '/products';
   const isAuth = pathname?.startsWith('/auth');
   const isAdmin = pathname?.startsWith('/admin');
 
   const ptClass = isSticky && (!isFullWidth || !isHome)
-    ? (isAnnouncementBar ? 'pt-24 sm:pt-28' : 'pt-16 sm:pt-20')
-    : 'pt-0';
+    ? (isAnnouncementBar ? 'pt-28 sm:pt-32' : 'pt-20 sm:pt-24')
+    : (isFullWidth ? 'pt-0' : 'pt-8');
 
   if (isAuth || isAdmin) {
     return (
@@ -66,7 +68,7 @@ export default function SiteLayout({
           {children}
         </main>
       ) : (
-        <main className={`flex-1 w-full mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 ${ptClass}`}>
+        <main className={`flex-1 w-full mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 ${ptClass}`}>
           {children}
         </main>
       )}

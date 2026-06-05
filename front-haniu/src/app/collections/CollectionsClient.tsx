@@ -14,33 +14,27 @@ export default function CollectionsClient({ initialCollections }: CollectionsCli
   const [collections] = useState<Collection[]>(initialCollections);
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24">
+    <div className="min-h-screen bg-slate-50/50 dark:bg-zinc-950 pb-24">
       {/* 1. HERO BANNER */}
-      <div className="relative overflow-hidden w-full h-[32vh] md:h-[42vh] flex items-center justify-center text-center bg-gradient-to-tr from-rose-500/5 via-slate-50 to-amber-500/5 dark:from-zinc-900/30 dark:via-zinc-950 dark:to-zinc-900/40 border-b border-slate-200/50 dark:border-zinc-900/80">
-        
-        {/* Decorative Grid Dots */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(198,123,113,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(198,123,113,0.04)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
-        
-        {/* Abstract Glowing Aura */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-rose-400/10 dark:bg-rose-500/5 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute top-1/3 left-1/3 w-[250px] h-[250px] bg-amber-400/10 dark:bg-amber-500/5 rounded-full blur-[80px] pointer-events-none" />
-
-        {/* Banner Details */}
-        <div className="relative z-10 px-4 max-w-3xl space-y-4">
-          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-[#C67B71] dark:text-rose-400 bg-rose-500/10 dark:bg-rose-500/10 border border-[#F5D0CD]/40 dark:border-rose-900/30">
-            <Icon name="sparkles" size={10} className="animate-pulse text-[#C67B71] dark:text-rose-400" /> Haniu Masterpieces
-          </span>
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight text-slate-800 dark:text-zinc-150 uppercase drop-shadow-xs">
-            Bộ Sưu Tập
-          </h1>
-          <p className="text-xs md:text-sm text-slate-500 dark:text-zinc-400 font-light max-w-xl mx-auto leading-relaxed">
-            Khám phá những bộ sưu tập quà tặng độc bản, chế tác thủ công tinh tế giúp bạn gửi trọn tấm lòng gửi tới những người thân yêu.
-          </p>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="relative rounded-[32px] overflow-hidden bg-slate-100/60 dark:bg-zinc-950 text-slate-800 dark:text-white p-6 sm:p-10 lg:p-12 shadow-lg border border-slate-200 dark:border-zinc-900">
+          <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 via-rose-500/10 to-transparent opacity-60 dark:opacity-40 pointer-events-none" />
+          <div className="relative z-10 max-w-3xl space-y-4">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-[#C67B71] dark:text-rose-400 bg-rose-500/10 dark:bg-rose-500/10 border border-[#F5D0CD]/40 dark:border-rose-900/30">
+              <Icon name="sparkles" size={10} className="animate-pulse text-[#C67B71]" /> Haniu Masterpieces
+            </span>
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight py-1 text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-amber-400 to-rose-500 uppercase">
+              Bộ Sưu Tập
+            </h1>
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-zinc-350 leading-relaxed font-light tracking-wide max-w-xl">
+              Khám phá những bộ sưu tập quà tặng độc bản, chế tác thủ công tinh tế giúp bạn gửi trọn tấm lòng gửi tới những người thân yêu.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* 2. BREADCRUMBS & CONTENT CONTAINER */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-6 sm:space-y-8">
         
         {/* Breadcrumbs Navigation */}
         <nav className="text-xs text-slate-450 dark:text-zinc-500 flex items-center gap-1.5 font-medium">

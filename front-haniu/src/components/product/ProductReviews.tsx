@@ -190,7 +190,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
       <h3 className="font-extrabold text-slate-800 dark:text-zinc-200 text-lg uppercase tracking-tight">Đánh giá sản phẩm</h3>
 
       {/* Stats Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center border-b border-slate-50 dark:border-zinc-850 pb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center border-b border-slate-50 dark:border-zinc-800 pb-8">
         <div className="text-center space-y-1">
           <div className="text-5xl font-black text-slate-800 dark:text-white">{averageRating.toFixed(1)}</div>
           <div className="flex justify-center text-amber-500 text-base">
@@ -231,7 +231,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
             Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên nhận xét!
           </div>
         ) : (
-          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 divide-y divide-slate-50 dark:divide-zinc-850">
+          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 divide-y divide-slate-50 dark:divide-zinc-800">
             {reviews.map(review => (
               <div key={review.id} className="pt-4 first:pt-0 space-y-2 text-xs">
                 <div className="flex justify-between items-center">
@@ -271,7 +271,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
       </div>
 
       {/* Submit Form */}
-      <div className="border-t border-slate-50 dark:border-zinc-850 pt-8 space-y-4">
+      <div className="border-t border-slate-50 dark:border-zinc-800 pt-8 space-y-4">
         <h4 className="font-bold text-slate-800 dark:text-zinc-200 text-sm">Viết đánh giá của bạn</h4>
         
         {!isAuthenticated ? (
@@ -285,7 +285,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
             </Link>
           </div>
         ) : !isEligible ? (
-          <div className="bg-slate-50 dark:bg-zinc-850 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800 text-center text-xs text-slate-500 dark:text-zinc-400 italic">
+          <div className="bg-slate-50 dark:bg-zinc-800 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800 text-center text-xs text-slate-500 dark:text-zinc-400 italic">
             Chỉ khách hàng đã mua sản phẩm này và đã giao hàng thành công mới có thể gửi đánh giá. Mỗi lượt mua hàng cho phép gửi 1 đánh giá.
           </div>
         ) : (
@@ -356,7 +356,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
 
             {msg.text && (
               <div className={`p-3 rounded-xl text-xs font-semibold ${
-                msg.type === 'success' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-650'
+                msg.type === 'success' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
               }`}>
                 {msg.text}
               </div>

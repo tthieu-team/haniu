@@ -390,36 +390,40 @@ function ProductsContent() {
   };
 
   return (
-    <div className="space-y-8 pb-16 font-sans">
-
-      {/* Breadcrumbs Navigation */}
-      <nav className="text-xs text-slate-400 dark:text-zinc-500 mb-6 flex items-center gap-1.5 font-medium max-w-7xl mx-auto">
-        <Link href="/" className="hover:text-rose-500 transition-colors">Trang chủ</Link>
-        <span>&gt;</span>
-        <span className="text-slate-600 dark:text-zinc-300">Sản phẩm quà tặng</span>
-        {selectedCat && (
-          <>
-            <span>&gt;</span>
-            <span className="text-rose-500 font-bold">
-              {categories.find(c => c.id === selectedCat || c.slug === selectedCat)?.name || selectedCat}
+    <div className="min-h-screen bg-slate-50/50 dark:bg-zinc-950 pb-16 font-sans">
+      {/* 1. HERO BANNER */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="relative rounded-[32px] overflow-hidden bg-slate-100/60 dark:bg-zinc-950 text-slate-800 dark:text-white p-6 sm:p-10 lg:p-12 shadow-lg border border-slate-200 dark:border-zinc-900">
+          <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 via-rose-500/10 to-transparent opacity-60 dark:opacity-40 pointer-events-none" />
+          <div className="relative z-10 max-w-3xl space-y-4">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 border border-rose-500/25">
+              <Icon name="gift" size={10} className="animate-pulse" /> Haniu Catalog
             </span>
-          </>
-        )}
-      </nav>
-
-      {/* Main Page Title Header */}
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between border-b border-slate-100 dark:border-zinc-850 pb-6 mb-8 gap-4">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-black text-slate-800 dark:text-zinc-100 tracking-tight uppercase bg-gradient-to-r from-slate-900 to-slate-700 dark:from-zinc-100 dark:to-zinc-350 bg-clip-text text-transparent">
-            {categories.find((c) => c.id === selectedCat || c.slug === selectedCat)?.name || 'Bộ Sưu Tập Quà Tặng'}
-          </h1>
-          <p className="text-xs text-slate-455 dark:text-zinc-400 font-light max-w-xl leading-relaxed">
-            Hộp quà tặng thủ công nghệ thuật cá nhân hóa khắc tên riêng và lời chúc theo yêu cầu, chế tác độc bản gửi trọn thành ý của bạn.
-          </p>
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight py-1 text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-amber-400 to-rose-500 uppercase">
+              {categories.find((c) => c.id === selectedCat || c.slug === selectedCat)?.name || 'Sản Phẩm Quà Tặng'}
+            </h1>
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-zinc-350 leading-relaxed font-light tracking-wide max-w-xl">
+              Hộp quà tặng thủ công nghệ thuật cá nhân hóa khắc tên riêng và lời chúc theo yêu cầu, chế tác độc bản gửi trọn thành ý của bạn.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-6 sm:space-y-8">
+        {/* Breadcrumbs Navigation */}
+        <nav className="text-xs text-slate-450 dark:text-zinc-500 flex items-center gap-1.5 font-medium">
+          <Link href="/" className="hover:text-rose-500 transition-colors">Trang chủ</Link>
+          <span>&gt;</span>
+          <span className="text-slate-650 dark:text-zinc-300">Sản phẩm quà tặng</span>
+          {selectedCat && (
+            <>
+              <span>&gt;</span>
+              <span className="text-rose-500 font-bold">
+                {categories.find(c => c.id === selectedCat || c.slug === selectedCat)?.name || selectedCat}
+              </span>
+            </>
+          )}
+        </nav>
 
         {/* Horizontal scrollable category pill bar on top for quick selector */}
         <CategoryPillsBar
