@@ -50,14 +50,17 @@ export default function GiftWrapSelector({
       "Gói bọc giấy Kraft Hoài Cổ"
     ];
 
+  const optionNames = giftWrapOptions.map(opt => typeof opt === 'object' && opt !== null ? (opt as any).name : String(opt));
+  const optionNamesKey = optionNames.join('|');
+
   // Auto-correct giftWrap state if it's not present in the choices
   useEffect(() => {
-    if (show && giftWrapOptions.length > 0) {
-      if (!giftWrapOptions.includes(giftWrap)) {
-        setGiftWrap(giftWrapOptions[0]);
+    if (show && optionNames.length > 0) {
+      if (!optionNames.includes(giftWrap)) {
+        setGiftWrap(optionNames[0]);
       }
     }
-  }, [giftWrapOptions, giftWrap, setGiftWrap, show]);
+  }, [optionNamesKey, giftWrap, setGiftWrap, show]);
 
   if (!show) return null;
 
@@ -70,38 +73,46 @@ export default function GiftWrapSelector({
       {/* Beautiful Visual Cards Grid */}
       <div className={`grid grid-cols-2 sm:grid-cols-3 gap-2 ${giftWrapOptions.length > 3 ? 'max-h-[220px] overflow-y-auto pr-1 scrollbar-thin' : ''}`}>
         {giftWrapOptions.map((opt, index) => {
-          const isSelected = giftWrap === opt;
+          const isObj = typeof opt === 'object' && opt !== null;
+          const optName = isObj ? (opt as any).name : String(opt);
+          const isSelected = giftWrap === optName;
           
-          // Dynamically detect image URL in brackets e.g. [https://...]
-          const imageUrlRegex = /^\[(https?:\/\/[^\]]+)\]/i;
-          const imgMatch = opt.match(imageUrlRegex);
-          
-          let parsedImageUrl = undefined;
-          let textWithoutImage = opt;
-          
-          if (imgMatch) {
-            parsedImageUrl = imgMatch[1];
-            textWithoutImage = opt.replace(imageUrlRegex, '').trim();
-          }
-          
-          // Dynamically detect emoji at the start of option string
-          const emojiRegex = /^([\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F000}-\u{1F09F}]|[\u{1F1E0}-\u{1F1FF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F900}-\u{1F9FF}])/u;
-          const emojiMatch = textWithoutImage.match(emojiRegex);
-          
+          let parsedImageUrl: string | undefined = undefined;
           let icon = "🎁";
-          let displayName = textWithoutImage;
-          
-          if (emojiMatch) {
-            icon = emojiMatch[0];
-            displayName = textWithoutImage.replace(emojiRegex, '').trim();
+          let displayName = optName;
+
+          if (isObj) {
+            parsedImageUrl = (opt as any).imageUrl || undefined;
+            icon = (opt as any).icon || "🎁";
           } else {
-            // Check in standard mapping (removing emoji prefix if matching by key)
-            const cleanKey = opt.replace(emojiRegex, '').trim();
-            const detail = giftWrapDetails[cleanKey] || giftWrapDetails[opt];
-            if (detail) {
-              icon = detail.icon;
-              if (!parsedImageUrl) {
-                parsedImageUrl = detail.imageUrl;
+            // Dynamically detect image URL in brackets e.g. [https://...]
+            const imageUrlRegex = /^\[(https?:\/\/[^\]]+)\]/i;
+            const imgMatch = optName.match(imageUrlRegex);
+            let textWithoutImage = optName;
+            
+            if (imgMatch) {
+              parsedImageUrl = imgMatch[1];
+              textWithoutImage = optName.replace(imageUrlRegex, '').trim();
+            }
+            
+            // Dynamically detect emoji at the start of option string
+            const emojiRegex = /^([\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F000}-\u{1F09F}]|[\u{1F1E0}-\u{1F1FF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F900}-\u{1F9FF}])/u;
+            const emojiMatch = textWithoutImage.match(emojiRegex);
+            
+            displayName = textWithoutImage;
+            
+            if (emojiMatch) {
+              icon = emojiMatch[0];
+              displayName = textWithoutImage.replace(emojiRegex, '').trim();
+            } else {
+              // Check in standard mapping (removing emoji prefix if matching by key)
+              const cleanKey = optName.replace(emojiRegex, '').trim();
+              const detail = giftWrapDetails[cleanKey] || giftWrapDetails[optName];
+              if (detail) {
+                icon = detail.icon;
+                if (!parsedImageUrl) {
+                  parsedImageUrl = detail.imageUrl;
+                }
               }
             }
           }
@@ -110,7 +121,7 @@ export default function GiftWrapSelector({
             <button
               key={index}
               type="button"
-              onClick={() => setGiftWrap(opt)}
+              onClick={() => setGiftWrap(optName)}
               className={`relative p-1.5 pr-2.5 rounded-xl border text-left flex items-center gap-2 transition-all select-none outline-none cursor-pointer text-[11px] font-bold ${
                 isSelected
                   ? 'border-rose-500 bg-rose-500/[0.02] text-rose-600 dark:border-rose-450 dark:text-rose-400 dark:bg-rose-950/10 shadow-[0_2px_8px_rgba(244,63,94,0.06)]'

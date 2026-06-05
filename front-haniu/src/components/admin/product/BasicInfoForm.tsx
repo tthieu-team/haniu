@@ -279,7 +279,7 @@ export default function BasicInfoForm({
             className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
           />
           <span className="text-slate-600 dark:text-zinc-300 font-bold flex items-center gap-1.5">
-            💬 Có thể chat với Admin
+            <Icon name="phone" size={14} className="text-rose-500" /> Có thể chat với Admin
           </span>
         </label>
  
@@ -291,19 +291,7 @@ export default function BasicInfoForm({
             className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
           />
           <span className="text-slate-600 dark:text-zinc-300 font-bold flex items-center gap-1.5">
-            📷 Có thể tải lên ảnh thiết kế
-          </span>
-        </label>
- 
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={allowPhotobooth}
-            onChange={(e) => setAllowPhotobooth(e.target.checked)}
-            className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
-          />
-          <span className="text-slate-600 dark:text-zinc-300 font-bold flex items-center gap-1.5">
-            🖼️ Có thể tải Photobooth bằng ứng dụng
+            <Icon name="🖼️" size={14} className="text-rose-500" /> Studio Photobooth Haniu - In ảnh tặng kèm
           </span>
         </label>
  
@@ -314,7 +302,9 @@ export default function BasicInfoForm({
             onChange={(e) => setIsFeatured(e.target.checked)}
             className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
           />
-          <span className="text-slate-600 dark:text-zinc-300">Sản phẩm Nổi bật (Featured)</span>
+          <span className="text-slate-600 dark:text-zinc-300 font-bold flex items-center gap-1.5">
+            <Icon name="sparkles" size={14} className="text-rose-500" /> Sản phẩm Nổi bật (Featured)
+          </span>
         </label>
  
         <label className="flex items-center gap-2 cursor-pointer">
@@ -324,7 +314,9 @@ export default function BasicInfoForm({
             onChange={(e) => setIsNew(e.target.checked)}
             className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
           />
-          <span className="text-slate-600 dark:text-zinc-300">Sản phẩm mới (New)</span>
+          <span className="text-slate-600 dark:text-zinc-300 font-bold flex items-center gap-1.5">
+            <Icon name="party" size={14} className="text-rose-500" /> Sản phẩm mới (New)
+          </span>
         </label>
       </div>
 

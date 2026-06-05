@@ -1,6 +1,7 @@
 'use client';
 
 import Icon from '@/components/common/Icons';
+import { productService } from '@/services/product.service';
 
 interface VariantInput {
   sku: string;
@@ -148,18 +149,48 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] text-slate-400 uppercase">Đường dẫn ảnh biến thể</label>
-                <input
-                  type="text"
-                  placeholder="https://..."
-                  value={item.imageUrl || ''}
-                  onChange={(e) => {
-                    const list = [...variantsList];
-                    list[idx].imageUrl = e.target.value;
-                    setVariantsList(list);
-                  }}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
-                />
+                <label className="text-[10px] text-slate-400 uppercase block">Đường dẫn ảnh biến thể</label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    placeholder="https://..."
+                    value={item.imageUrl || ''}
+                    onChange={(e) => {
+                      const list = [...variantsList];
+                      list[idx].imageUrl = e.target.value;
+                      setVariantsList(list);
+                    }}
+                    className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                  />
+                  <div className="relative shrink-0">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const files = e.target.files;
+                        if (!files || files.length === 0) return;
+                        const file = files[0];
+                        try {
+                          const data = await productService.uploadImage(file);
+                          if (data && data.url) {
+                            const list = [...variantsList];
+                            list[idx].imageUrl = data.url;
+                            setVariantsList(list);
+                          }
+                        } catch (err) {
+                          console.error("Failed to upload variant image:", err);
+                        }
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <button
+                      type="button"
+                      className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <Icon name="camera" size={12} /> Tải ảnh
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 

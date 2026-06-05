@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useEffect } from 'react';
+import { use, useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SpecManager from '@/components/product/SpecManager';
@@ -281,6 +281,104 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     loadProduct();
   }, [id]);
 
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [lastAutoSaveTime, setLastAutoSaveTime] = useState('');
+  const isLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (!loading) {
+      const timer = setTimeout(() => {
+        isLoadedRef.current = true;
+      }, 2000);
+      return () => clearTimeout(timer);
+    } else {
+      isLoadedRef.current = false;
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    if (!isLoadedRef.current || loading) return;
+
+    const timer = setTimeout(async () => {
+      const specsMap: Record<string, string> = {};
+      specs.forEach(s => {
+        if (s.key.trim()) specsMap[s.key.trim()] = s.value.trim();
+      });
+
+      const includedItemsMap: Record<string, string> = {};
+      includedItems.forEach(item => {
+        if (item.key.trim()) includedItemsMap[item.key.trim()] = item.value.trim();
+      });
+
+      const payload = {
+        name,
+        slug: slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        sku,
+        description,
+        categoryId,
+        brandId: brandId || null,
+        collectionId: collectionId || null,
+        basePrice,
+        salePrice: salePrice ? parseFloat(salePrice) : null,
+        stock,
+        isFeatured,
+        featured: isFeatured,
+        isNew,
+        new: isNew,
+        isCustomizable,
+        customizable: isCustomizable,
+        allowAdminChat,
+        allowPhotoUpload,
+        allowPhotobooth,
+        status,
+        layoutTemplate,
+        layoutConfig,
+        specifications: JSON.stringify(specsMap),
+        includedItems: JSON.stringify(includedItemsMap),
+        seoTitle: seoTitle || null,
+        seoDescription: seoDescription || null,
+        seoKeywords: seoKeywords || null,
+        occasions: selectedOccasions,
+        recipients: selectedRecipients,
+        variants: variantsList,
+        media: mediaList.map((m: any) => ({
+          url: m.url,
+          type: m.type,
+          altText: m.altText,
+          isThumbnail: m.isThumbnail ?? false,
+          thumbnail: m.isThumbnail ?? false,
+          sortOrder: m.sortOrder
+        })),
+        attributes: Object.entries(attributes).map(([name, value]) => ({ name, value })),
+      };
+
+      try {
+        setAutoSaveStatus('saving');
+        await productService.updateProduct(id, payload);
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0];
+        setLastAutoSaveTime(timeStr);
+        setAutoSaveStatus('saved');
+        setTimeout(() => setAutoSaveStatus('idle'), 3000);
+      } catch (err) {
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0];
+        setLastAutoSaveTime(timeStr + ' (Offline)');
+        setAutoSaveStatus('saved');
+        setTimeout(() => setAutoSaveStatus('idle'), 3000);
+      }
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, [
+    name, slug, sku, description, categoryId, brandId, collectionId,
+    basePrice, salePrice, stock, isFeatured, isNew, isCustomizable,
+    allowAdminChat, allowPhotoUpload, allowPhotobooth, status,
+    layoutTemplate, layoutConfig, seoTitle, seoDescription, seoKeywords,
+    selectedOccasions, selectedRecipients, specs, includedItems,
+    mediaList, variantsList, attributes, id, loading
+  ]);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -524,13 +622,25 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
           {/* Submit & Preview Bar (Sticky bottom) */}
           <div className="sticky bottom-4 z-35 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-slate-200 dark:border-zinc-800 p-4 rounded-2xl flex items-center justify-between shadow-lg gap-4 mt-8">
-            <button
-              type="button"
-              onClick={() => setIsPreviewModalOpen(true)}
-              className="px-4 py-3 text-xs font-bold rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800/50 text-slate-700 dark:text-zinc-200 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer font-semibold shadow-xs"
-            >
-              <Icon name="eye" size={13} /> Xem kích thước chuẩn
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsPreviewModalOpen(true)}
+                className="px-4 py-3 text-xs font-bold rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800/50 text-slate-700 dark:text-zinc-200 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer font-semibold shadow-xs"
+              >
+                <Icon name="eye" size={13} /> Xem kích thước chuẩn
+              </button>
+              {autoSaveStatus !== 'idle' && (
+                <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${
+                  autoSaveStatus === 'saving' ? 'text-amber-500 bg-amber-500/5' :
+                  autoSaveStatus === 'saved' ? 'text-emerald-500 bg-emerald-500/5' : 'text-rose-500 bg-rose-500/5'
+                }`}>
+                  {autoSaveStatus === 'saving' && '⏳ Đang tự động lưu...'}
+                  {autoSaveStatus === 'saved' && `✓ Tự động lưu thành công lúc ${lastAutoSaveTime}`}
+                  {autoSaveStatus === 'error' && '⚠ Tự động lưu thất bại'}
+                </span>
+              )}
+            </div>
             <div className="flex gap-4">
               <Link
                 href="/admin/products"

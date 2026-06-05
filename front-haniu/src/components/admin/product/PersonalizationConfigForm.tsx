@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Icon from '@/components/common/Icons';
+import { productService } from '@/services/product.service';
 
 interface PersonalizationConfigFormProps {
   layoutConfig?: string;
@@ -13,6 +14,8 @@ export default function PersonalizationConfigForm({
   setLayoutConfig
 }: PersonalizationConfigFormProps) {
   const [newGiftOption, setNewGiftOption] = useState('');
+  const [newGiftIcon, setNewGiftIcon] = useState('🎁');
+  const [newGiftImage, setNewGiftImage] = useState('');
 
   // Parse layoutConfig safely
   let parsedConfig: any = {};
@@ -99,7 +102,7 @@ export default function PersonalizationConfigForm({
                     type="text"
                     value={customizationConfig.engravingLabel}
                     onChange={(e) => handleCustomizationChange('engravingLabel', e.target.value)}
-                    className="w-full bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                    className="w-full bg-white dark:bg-zinc-850 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
                   />
                 </div>
                 <div className="md:col-span-4 space-y-1">
@@ -108,7 +111,7 @@ export default function PersonalizationConfigForm({
                     type="number"
                     value={customizationConfig.engravingMaxLength}
                     onChange={(e) => handleCustomizationChange('engravingMaxLength', parseInt(e.target.value) || 50)}
-                    className="w-full bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                    className="w-full bg-white dark:bg-zinc-855 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
                   />
                 </div>
                 <div className="md:col-span-12 space-y-1">
@@ -117,7 +120,7 @@ export default function PersonalizationConfigForm({
                     type="text"
                     value={customizationConfig.engravingPlaceholder}
                     onChange={(e) => handleCustomizationChange('engravingPlaceholder', e.target.value)}
-                    className="w-full bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                    className="w-full bg-white dark:bg-zinc-850 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
                   />
                 </div>
               </div>
@@ -174,7 +177,7 @@ export default function PersonalizationConfigForm({
                   type="text"
                   value={customizationConfig.cardMessageLabel}
                   onChange={(e) => handleCustomizationChange('cardMessageLabel', e.target.value)}
-                  className="w-full bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                  className="w-full bg-white dark:bg-zinc-855 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
                 />
               </div>
               <div className="space-y-1">
@@ -183,7 +186,7 @@ export default function PersonalizationConfigForm({
                   type="text"
                   value={customizationConfig.cardMessagePlaceholder}
                   onChange={(e) => handleCustomizationChange('cardMessagePlaceholder', e.target.value)}
-                  className="w-full bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                  className="w-full bg-white dark:bg-zinc-850 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
                 />
               </div>
 
@@ -236,58 +239,166 @@ export default function PersonalizationConfigForm({
                   type="text"
                   value={customizationConfig.giftWrapLabel}
                   onChange={(e) => handleCustomizationChange('giftWrapLabel', e.target.value)}
-                  className="w-full bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+                  className="w-full bg-white dark:bg-zinc-855 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
                 />
               </div>
 
               <div className="space-y-3">
                 <label className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Danh sách tùy chọn gói quà</label>
-                <div className="space-y-2">
-                  {(customizationConfig.giftWrapOptions || []).map((opt: string, idx: number) => (
-                    <div key={idx} className="flex gap-2 items-center">
-                      <input
-                        type="text"
-                        value={opt}
-                        onChange={(e) => {
-                          const list = [...(customizationConfig.giftWrapOptions || [])];
-                          list[idx] = e.target.value;
-                          handleCustomizationChange('giftWrapOptions', list);
-                        }}
-                        className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const list = (customizationConfig.giftWrapOptions || []).filter((_: string, i: number) => i !== idx);
-                          handleCustomizationChange('giftWrapOptions', list);
-                        }}
-                        className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all cursor-pointer"
-                      >
-                        <Icon name="trash" size={14} />
-                      </button>
-                    </div>
-                  ))}
+                <div className="space-y-3">
+                  {(customizationConfig.giftWrapOptions || []).map((opt: any, idx: number) => {
+                    const isObj = typeof opt === 'object' && opt !== null;
+                    const name = isObj ? opt.name : String(opt);
+                    const icon = isObj ? opt.icon : '🎁';
+                    const imageUrl = isObj ? opt.imageUrl : '';
+
+                    const updateOption = (fields: any) => {
+                      const list = [...(customizationConfig.giftWrapOptions || [])];
+                      list[idx] = { name, icon, imageUrl, ...fields };
+                      handleCustomizationChange('giftWrapOptions', list);
+                    };
+
+                    return (
+                      <div key={idx} className="p-3 border border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50/50 dark:bg-zinc-950/10 space-y-2 relative">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const list = (customizationConfig.giftWrapOptions || []).filter((_: any, i: number) => i !== idx);
+                            handleCustomizationChange('giftWrapOptions', list);
+                          }}
+                          className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all cursor-pointer"
+                        >
+                          <Icon name="trash" size={12} />
+                        </button>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pr-8">
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-slate-400 uppercase block font-semibold">Tên tùy chọn</label>
+                            <input
+                              type="text"
+                              value={name}
+                              onChange={(e) => updateOption({ name: e.target.value })}
+                              className="w-full bg-white dark:bg-zinc-850 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-lg px-2.5 py-1 text-xs font-semibold"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-slate-400 uppercase block font-semibold">Icon / Emoji</label>
+                            <input
+                              type="text"
+                              value={icon}
+                              onChange={(e) => updateOption({ icon: e.target.value })}
+                              className="w-full bg-white dark:bg-zinc-855 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-lg px-2.5 py-1 text-xs font-semibold"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-slate-400 uppercase block font-semibold">Ảnh đại diện</label>
+                            <div className="flex gap-1.5 items-center">
+                              <input
+                                type="text"
+                                placeholder="https://..."
+                                value={imageUrl}
+                                onChange={(e) => updateOption({ imageUrl: e.target.value })}
+                                className="flex-1 bg-white dark:bg-zinc-850 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-lg px-2.5 py-1 text-xs font-semibold"
+                              />
+                              <div className="relative shrink-0">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={async (e) => {
+                                    const files = e.target.files;
+                                    if (!files || files.length === 0) return;
+                                    try {
+                                      const data = await productService.uploadImage(files[0]);
+                                      if (data && data.url) {
+                                        updateOption({ imageUrl: data.url });
+                                      }
+                                    } catch (err) {
+                                      console.error("Failed option upload:", err);
+                                    }
+                                  }}
+                                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                />
+                                <button type="button" className="p-1 px-2 rounded-lg border border-slate-250 hover:bg-slate-100 text-[10px] font-bold cursor-pointer">
+                                  Tải ảnh
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <div className="flex gap-2 pt-1">
-                  <input
-                    type="text"
-                    value={newGiftOption}
-                    onChange={(e) => setNewGiftOption(e.target.value)}
-                    placeholder="Thêm mẫu nơ / giấy gói quà mới..."
-                    className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!newGiftOption.trim()) return;
-                      handleCustomizationChange('giftWrapOptions', [...(customizationConfig.giftWrapOptions || []), newGiftOption.trim()]);
-                      setNewGiftOption('');
-                    }}
-                    className="px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold cursor-pointer"
-                  >
-                    Thêm
-                  </button>
+                <div className="p-3 border border-dashed border-slate-200 dark:border-zinc-850 rounded-xl space-y-2 bg-white dark:bg-zinc-900/50">
+                  <label className="text-[10px] text-slate-405 font-bold block uppercase tracking-wider">Thêm mẫu gói quà mới</label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <input
+                      type="text"
+                      value={newGiftOption}
+                      onChange={(e) => setNewGiftOption(e.target.value)}
+                      placeholder="Tên mẫu quà (VD: Hộp hoa hồng đỏ)"
+                      className="w-full bg-white dark:bg-zinc-855 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-lg px-2.5 py-1 text-xs font-semibold"
+                    />
+                    <input
+                      type="text"
+                      value={newGiftIcon}
+                      onChange={(e) => setNewGiftIcon(e.target.value)}
+                      placeholder="Icon (VD: 🎀)"
+                      className="w-full bg-white dark:bg-zinc-855 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-lg px-2.5 py-1 text-xs font-semibold"
+                    />
+                    <div className="flex gap-1.5 items-center">
+                      <input
+                        type="text"
+                        value={newGiftImage}
+                        onChange={(e) => setNewGiftImage(e.target.value)}
+                        placeholder="Đường dẫn ảnh (Tùy chọn)"
+                        className="flex-1 bg-white dark:bg-zinc-855 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-lg px-2.5 py-1 text-xs font-semibold"
+                      />
+                      <div className="relative shrink-0">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const files = e.target.files;
+                            if (!files || files.length === 0) return;
+                            try {
+                              const data = await productService.uploadImage(files[0]);
+                              if (data && data.url) {
+                                setNewGiftImage(data.url);
+                              }
+                            } catch (err) {
+                              console.error("Failed option upload:", err);
+                            }
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <button type="button" className="p-1 px-2 rounded-lg border border-slate-250 hover:bg-slate-100 text-[10px] font-bold cursor-pointer">
+                          Tải ảnh
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newGiftOption.trim()) return;
+                        const newOpt = {
+                          name: newGiftOption.trim(),
+                          icon: newGiftIcon.trim(),
+                          imageUrl: newGiftImage.trim()
+                        };
+                        handleCustomizationChange('giftWrapOptions', [...(customizationConfig.giftWrapOptions || []), newOpt]);
+                        setNewGiftOption('');
+                        setNewGiftIcon('🎁');
+                        setNewGiftImage('');
+                      }}
+                      className="px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg font-bold cursor-pointer text-xs"
+                    >
+                      Thêm tùy chọn mới
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

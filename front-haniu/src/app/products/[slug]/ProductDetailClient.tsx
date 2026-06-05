@@ -10,6 +10,7 @@ import { useProductStore } from '@/store/product';
 import { useCartStore } from '@/store/cart';
 import { cartService } from '@/services/cart.service';
 import Icon from '@/components/common/Icons';
+import { productService } from '@/services/product.service';
 
 // Upgraded subcomponents
 import ProductInfo from '@/components/product/ProductInfo';
@@ -26,6 +27,7 @@ import ProductTrustBadges from '@/components/product/ProductTrustBadges';
 import ProductBrandCommitment from '@/components/product/ProductBrandCommitment';
 import ProductSeoDescription from '@/components/product/ProductSeoDescription';
 import RelatedProducts from '@/components/product/RelatedProducts';
+import StudioPhotobooth from '@/components/product/StudioPhotobooth';
 
 interface Variant {
   id: string;
@@ -99,6 +101,8 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
   const [engravingText, setEngravingText] = useState('');
   const [cardMessage, setCardMessage] = useState('');
   const [giftWrap, setGiftWrap] = useState('Red Ribbon');
+  const [designPhotoUrl, setDesignPhotoUrl] = useState('');
+  const [photoboothPhotoUrl, setPhotoboothPhotoUrl] = useState('');
 
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -134,7 +138,9 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
       customizationInfo: product.isCustomizable ? JSON.stringify({
         engravingText,
         cardMessage,
-        giftWrap
+        giftWrap,
+        designPhotoUrl,
+        photoboothPhotoUrl
       }) : undefined
     };
 
@@ -159,7 +165,9 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
       customizationInfo: product.isCustomizable ? JSON.stringify({
         engravingText,
         cardMessage,
-        giftWrap
+        giftWrap,
+        designPhotoUrl,
+        photoboothPhotoUrl
       }) : undefined
     };
 
@@ -279,61 +287,51 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                 />
               </div>
             )}
-
-
-
-          {/* Service options trigger block */}
-          {false && product?.allowAdminChat && (
-            <div className="bg-sky-500/5 border border-sky-500/10 p-4 rounded-2xl flex items-center justify-between animate-fade-in text-xs">
-              <div>
-                <h4 className="font-bold text-sky-700 dark:text-sky-400 flex items-center gap-1.5">
-                  <Icon name="phone" size={14} className="text-sky-500" /> Tư vấn thiết kế trực tiếp
-                </h4>
-                <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-1">Trực tiếp thảo luận các yêu cầu đặc biệt với Haniu Admin.</p>
+            {false && product?.allowAdminChat && (
+              <div className="bg-sky-500/5 border border-sky-500/10 p-4 rounded-2xl flex items-center justify-between animate-fade-in text-xs">
+                <div>
+                  <h4 className="font-bold text-sky-700 dark:text-sky-400 flex items-center gap-1.5">
+                    <Icon name="phone" size={14} className="text-sky-500" /> Tư vấn thiết kế trực tiếp
+                  </h4>
+                  <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-1">Trực tiếp thảo luận các yêu cầu đặc biệt với Haniu Admin.</p>
+                </div>
+                <button type="button" className="bg-sky-500 hover:bg-sky-600 text-white font-bold px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95 flex items-center gap-1 cursor-pointer">
+                  Chat ngay
+                </button>
               </div>
-              <button type="button" className="bg-sky-500 hover:bg-sky-600 text-white font-bold px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95 flex items-center gap-1 cursor-pointer">
-                Chat ngay
+            )}
+
+            {product.allowPhotoUpload && (
+              <StudioPhotobooth
+                photoboothPhotoUrl={photoboothPhotoUrl}
+                setPhotoboothPhotoUrl={setPhotoboothPhotoUrl}
+              />
+            )}
+
+            {/* Success messages & CTAs */}
+            {successMsg && (
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl font-medium animate-fade-in flex items-center gap-2">
+                <Icon name="check" size={14} className="text-emerald-500" />
+                <span>{successMsg}</span>
+              </div>
+            )}
+
+            <div className="flex gap-3 sm:gap-4">
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:text-zinc-950 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md active:scale-95 text-xs sm:text-sm flex items-center justify-center gap-2"
+              >
+                <Icon name="bag" size={16} /> Thêm Vào Giỏ Hàng
+              </button>
+              <button
+                onClick={handleBuyNow}
+                className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
+              >
+                <Icon name="zap" size={16} /> Mua Ngay
               </button>
             </div>
-          )}
-
-          {product.allowPhotoUpload && (
-            <div className="space-y-2.5 animate-fade-in text-xs font-semibold">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Tải ảnh thiết kế của bạn (Tùy chọn)</label>
-              <div className="border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl p-4 text-center hover:border-rose-500 dark:hover:border-rose-450 transition-colors cursor-pointer">
-                <span className="inline-block p-2 bg-slate-100 dark:bg-zinc-800 rounded-full text-slate-650 dark:text-zinc-400 mb-2">
-                  <Icon name="camera" size={20} />
-                </span>
-                <p className="text-slate-500 font-semibold">Nhập để tải ảnh lên hoặc kéo thả vào đây</p>
-                <p className="text-[9px] text-slate-400 mt-0.5 font-normal">Định dạng hỗ trợ: JPG, PNG (tối đa 5MB)</p>
-              </div>
-            </div>
-          )}
-
-          {/* Success messages & CTAs */}
-          {successMsg && (
-            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl font-medium animate-fade-in flex items-center gap-2">
-              <Icon name="check" size={14} className="text-emerald-500" />
-              <span>{successMsg}</span>
-            </div>
-          )}
-
-          <div className="flex gap-3 sm:gap-4">
-            <button
-              onClick={handleAddToCart}
-              className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:text-zinc-950 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md active:scale-95 text-xs sm:text-sm flex items-center justify-center gap-2"
-            >
-              <Icon name="bag" size={16} /> Thêm Vào Giỏ Hàng
-            </button>
-            <button
-              onClick={handleBuyNow}
-              className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
-            >
-              <Icon name="zap" size={16} /> Mua Ngay
-            </button>
           </div>
         </div>
-      </div>
       </div>
 
       {/* Trust Badges (Horizontal safety bar) */}
