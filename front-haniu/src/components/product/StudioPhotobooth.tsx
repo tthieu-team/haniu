@@ -1,23 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type Dispatch, type SetStateAction } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import Icon from '@/components/common/Icons';
+import { useThemeStore } from '@/store/theme';
 import PhotoboothSystem from './photobooth/PhotoboothSystem';
 
 interface StudioPhotoboothProps {
-  photoboothPhotoUrl: string;
-  setPhotoboothPhotoUrl: (url: string) => void;
-  onPhotoSelected: (file: File | null) => void;
+  photoboothPhotoUrls: string[];
+  setPhotoboothPhotoUrls: Dispatch<SetStateAction<string[]>>;
+  onPhotoSelected: (file: File) => void;
+  onPhotoDeleted: (index: number) => void;
 }
 
 export default function StudioPhotobooth({
-  photoboothPhotoUrl,
-  setPhotoboothPhotoUrl,
+  photoboothPhotoUrls,
+  setPhotoboothPhotoUrls,
   onPhotoSelected,
+  onPhotoDeleted,
 }: StudioPhotoboothProps) {
+  const currentTheme = useThemeStore(state => state.theme);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [selectedPreviewUrl, setSelectedPreviewUrl] = useState('');
+  const [lightboxTheme, setLightboxTheme] = useState<'dark' | 'light'>('dark');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -25,21 +32,27 @@ export default function StudioPhotobooth({
     return () => setMounted(false);
   }, []);
 
+  // Sync lightbox theme with site theme automatically
+  useEffect(() => {
+    setLightboxTheme(currentTheme);
+  }, [currentTheme]);
+
   const handleCaptureComplete = async (file: File) => {
     const localUrl = URL.createObjectURL(file);
-    setPhotoboothPhotoUrl(localUrl);
+    setPhotoboothPhotoUrls(prev => [...prev, localUrl]);
     onPhotoSelected(file);
-    setIsModalOpen(false);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const localUrl = URL.createObjectURL(file);
-      setPhotoboothPhotoUrl(localUrl);
+      setPhotoboothPhotoUrls(prev => [...prev, localUrl]);
       onPhotoSelected(file);
     }
   };
+
+  const hasPhotos = photoboothPhotoUrls.length > 0;
 
   return (
     <div className="bg-white dark:bg-zinc-900/60 border border-slate-200/60 dark:border-zinc-800/80 rounded-3xl p-5 space-y-4 w-full shadow-xs text-xs font-semibold text-slate-800 dark:text-zinc-100">
@@ -47,36 +60,70 @@ export default function StudioPhotobooth({
         <Icon name="🖼️" size={14} className="text-rose-500" /> Studio Photobooth Haniu - In ảnh tặng kèm
       </label>
 
-      {photoboothPhotoUrl ? (
-        /* Completed/Attached State Card */
-        <div className="space-y-4 text-center py-2">
-          <div className="relative inline-block border-8 border-white dark:border-zinc-800 shadow-md rounded-2xl overflow-hidden bg-slate-50 dark:bg-zinc-900 transition-colors">
-            <img src={photoboothPhotoUrl} className="w-36 h-48 object-cover" alt="Completed photobooth design print" />
-            <button
-              type="button"
-              onClick={() => {
-                setPhotoboothPhotoUrl('');
-                onPhotoSelected(null);
-              }}
-              className="absolute -top-2 -right-2 bg-rose-500 hover:bg-rose-600 text-white rounded-full p-1.5 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
-              title="Xóa ảnh kỷ niệm"
-            >
-              <Icon name="close" size={10} />
-            </button>
+      {hasPhotos ? (
+        /* Completed/Attached State Card (Multiple Photos list) */
+        <div className="space-y-4 py-2">
+          {/* Thumbnails grid */}
+          <div className="flex flex-wrap gap-3 justify-center">
+            {photoboothPhotoUrls.map((url, idx) => (
+              <div 
+                key={idx}
+                className="relative w-20 h-20 shrink-0 group"
+              >
+                {/* Image preview box */}
+                <div
+                  onClick={() => {
+                    setSelectedPreviewUrl(url);
+                    setIsLightboxOpen(true);
+                  }}
+                  className="cursor-pointer w-full h-full border-2 border-white dark:border-zinc-800 shadow-md rounded-xl overflow-hidden bg-slate-50 dark:bg-zinc-900 transition-all hover:scale-105 active:scale-95 relative"
+                >
+                  <img src={url} className="w-full h-full object-cover" alt={`Photobooth print ${idx + 1}`} />
+                  <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                    <Icon name="search" size={12} />
+                  </div>
+                </div>
+
+                {/* Larger delete button hanging slightly outside */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPhotoDeleted(idx);
+                  }}
+                  className="absolute -top-1.5 -right-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-full w-5.5 h-5.5 flex items-center justify-center shadow-md hover:scale-110 active:scale-90 transition-all cursor-pointer z-20 border border-white dark:border-zinc-900"
+                  title="Xóa ảnh này"
+                >
+                  <Icon name="close" size={10} className="text-white" />
+                </button>
+              </div>
+            ))}
           </div>
-          <div className="space-y-1 px-4">
-            <p className="text-emerald-500 text-[11px] font-bold">✓ Đã đính kèm ảnh chụp photobooth của bạn!</p>
+          
+          <div className="space-y-1 text-center px-4">
+            <p className="text-emerald-500 text-[11px] font-bold">✓ Đã đính kèm {photoboothPhotoUrls.length} ảnh photobooth!</p>
             <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-normal leading-normal italic">
-              Ảnh kỷ niệm này sẽ được Haniu in màu chất lượng cao và bỏ vào hộp quà nắn nót giúp bạn.
+              Nhấp vào từng ảnh để xem kích thước đầy đủ. Bạn có thể chụp hoặc tải thêm tối đa nhiều ảnh kỷ niệm.
             </p>
-            <div className="flex justify-center mt-3 max-w-[140px] mx-auto">
+            
+            <div className="flex flex-col sm:flex-row gap-2 justify-center mt-3.5 max-w-[280px] mx-auto">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-[10px] font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 w-full"
+                className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-[10px] font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 flex-1"
               >
-                <Icon name="camera" size={11} /> Chụp lại ảnh khác
+                <Icon name="camera" size={11} /> Chụp thêm ảnh
               </button>
+
+              <label className="px-3 py-1.5 border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-bold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 text-[10px] cursor-pointer flex-1 text-center">
+                <Icon name="image" size={11} /> Tải thêm ảnh
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </label>
             </div>
           </div>
         </div>
@@ -84,7 +131,7 @@ export default function StudioPhotobooth({
         /* Invitation / Launcher Card */
         <div className="text-center p-5 border-2 border-dashed border-rose-200/50 dark:border-zinc-800/80 rounded-2xl bg-rose-500/[0.01] dark:bg-zinc-900/10">
           <p className="text-slate-550 dark:text-zinc-400 mb-4 text-[11px] leading-relaxed font-normal">
-            Haniu tặng bạn 1 tấm ảnh in màu lưu niệm kèm theo hộp quà. Tự sướng với webcam hoặc tải lên bức ảnh có sẵn, chèn lời chúc cùng sticker xinh xắn để đặt vào quà tặng nhé!
+            Haniu tặng bạn các tấm ảnh in màu lưu niệm kèm theo hộp quà. Tự sướng với webcam hoặc tải lên bức ảnh có sẵn, chèn lời chúc cùng sticker xinh xắn để đặt vào quà tặng nhé!
           </p>
           
           <div className="flex flex-col sm:flex-row gap-2.5 justify-center max-w-sm mx-auto">
@@ -123,6 +170,53 @@ export default function StudioPhotobooth({
               onClose={() => setIsModalOpen(false)}
             />
           </motion.div>
+        </div>,
+        document.body
+      )}
+
+      {/* FULLSCREEN LIGHTBOX FOR ATTACHED PHOTO */}
+      {mounted && isLightboxOpen && createPortal(
+        <div 
+          className={`fixed inset-0 z-[9999999] flex items-center justify-center transition-all duration-300 cursor-zoom-out p-4 ${
+            lightboxTheme === 'dark' 
+              ? 'bg-black/90 text-white backdrop-blur-md' 
+              : 'bg-white/95 text-slate-900 backdrop-blur-md shadow-2xl'
+          }`}
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Fixed Top Bar Controls for Theme Toggle and Close */}
+          <div className="fixed top-6 right-6 flex items-center gap-2.5 z-[10000000]" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setLightboxTheme(prev => prev === 'dark' ? 'light' : 'dark')}
+              className={`p-2.5 border rounded-full cursor-pointer transition-all ${
+                lightboxTheme === 'dark' 
+                  ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' 
+                  : 'bg-black/5 hover:bg-black/10 border-black/10 text-slate-700'
+              }`}
+              title={lightboxTheme === 'dark' ? "Chuyển sang nền sáng" : "Chuyển sang nền tối"}
+            >
+              <Icon name={lightboxTheme === 'dark' ? 'sun' : 'moon'} size={16} />
+            </button>
+            <button
+              onClick={() => setIsLightboxOpen(false)}
+              className={`p-2.5 border rounded-full cursor-pointer transition-all ${
+                lightboxTheme === 'dark' 
+                  ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' 
+                  : 'bg-black/5 hover:bg-black/10 border-black/10 text-slate-700'
+              }`}
+              title="Đóng xem ảnh"
+            >
+              <Icon name="close" size={16} />
+            </button>
+          </div>
+
+          <div className="relative w-full h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
+            <img 
+              src={selectedPreviewUrl} 
+              className="max-w-[95vw] max-h-[90vh] object-contain transition-all duration-300 cursor-default" 
+              alt="Full size photobooth composite" 
+            />
+          </div>
         </div>,
         document.body
       )}

@@ -54,7 +54,8 @@ import {
   Calendar,
   AlertTriangle,
   Leaf,
-  Image
+  Image,
+  Share
 } from 'lucide-react';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -249,6 +250,9 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
     case 'Save':
     case '💾':
       return <Save size={size} className={className} {...props} />;
+    case 'share':
+    case 'Share':
+      return <Share size={size} className={className} {...props} />;
     case 'sun':
     case 'Sun':
     case '☀️':

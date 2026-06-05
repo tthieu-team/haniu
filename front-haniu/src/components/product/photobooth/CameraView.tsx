@@ -104,11 +104,21 @@ export const CameraView: React.FC<CameraViewProps> = ({
           context.scale(-1, 1);
         }
 
-        // Apply same filter to capture
-        context.filter = filter;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Apply same filter to capture (using a temp canvas to bypass browser bugs drawing filtered video directly)
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        if (tempCtx) {
+          tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+          
+          // Draw with filter to main canvas
+          context.filter = filter;
+          context.drawImage(tempCanvas, 0, 0);
+        }
 
-        // Reset transform
+        // Reset transform and filter
         context.setTransform(1, 0, 0, 1, 0, 0);
         context.filter = 'none';
 

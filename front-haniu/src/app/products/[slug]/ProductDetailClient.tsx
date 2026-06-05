@@ -102,8 +102,29 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
   const [cardMessage, setCardMessage] = useState('');
   const [giftWrap, setGiftWrap] = useState('Red Ribbon');
   const [designPhotoUrl, setDesignPhotoUrl] = useState('');
-  const [photoboothPhotoUrl, setPhotoboothPhotoUrl] = useState('');
-  const [photoboothPhotoFile, setPhotoboothPhotoFile] = useState<File | null>(null);
+  const [photoboothPhotoUrls, setPhotoboothPhotoUrls] = useState<string[]>([]);
+  const [photoboothPhotoFiles, setPhotoboothPhotoFiles] = useState<File[]>([]);
+
+  const handlePhotoDeleted = (index: number) => {
+    const deletedUrl = photoboothPhotoUrls[index];
+    setPhotoboothPhotoUrls(prev => prev.filter((_, i) => i !== index));
+    if (deletedUrl.startsWith('blob:')) {
+      let blobCount = 0;
+      let targetFileIndex = -1;
+      for (let i = 0; i < photoboothPhotoUrls.length; i++) {
+        if (photoboothPhotoUrls[i].startsWith('blob:')) {
+          if (i === index) {
+            targetFileIndex = blobCount;
+            break;
+          }
+          blobCount++;
+        }
+      }
+      if (targetFileIndex !== -1) {
+        setPhotoboothPhotoFiles(prev => prev.filter((_, i) => i !== targetFileIndex));
+      }
+    }
+  };
 
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -129,25 +150,43 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
     }
   }, [initialProduct]);
 
+  const uploadPhotoboothFiles = async (): Promise<string> => {
+    const uploadedUrls = photoboothPhotoUrls.filter(url => !url.startsWith('blob:'));
+    if (photoboothPhotoFiles.length === 0) {
+      return uploadedUrls.join(',');
+    }
+
+    setSuccessMsg(`⏳ Đang tải lên ${photoboothPhotoFiles.length} hình ảnh photobooth...`);
+    const newUrls: string[] = [];
+    for (let i = 0; i < photoboothPhotoFiles.length; i++) {
+      const file = photoboothPhotoFiles[i];
+      try {
+        const data = await productService.uploadImage(file);
+        if (data && data.url) {
+          newUrls.push(data.url);
+        }
+      } catch (err) {
+        console.error(`Failed to upload photobooth image ${i + 1}:`, err);
+        throw new Error("Không thể tải lên toàn bộ hình ảnh photobooth. Vui lòng thử lại!");
+      }
+    }
+
+    const finalUrls = [...uploadedUrls, ...newUrls];
+    setPhotoboothPhotoUrls(finalUrls);
+    setPhotoboothPhotoFiles([]);
+    return finalUrls.join(',');
+  };
+
   const handleAddToCart = async () => {
     if (!product) return;
 
-    let finalPhotoUrl = photoboothPhotoUrl;
-    if (photoboothPhotoFile) {
-      setSuccessMsg("⏳ Đang chuẩn bị tải lên hình ảnh photobooth...");
-      try {
-        const data = await productService.uploadImage(photoboothPhotoFile);
-        if (data && data.url) {
-          finalPhotoUrl = data.url;
-          setPhotoboothPhotoUrl(data.url);
-          setPhotoboothPhotoFile(null); // uploaded, clear file state
-        }
-      } catch (err) {
-        console.error("Failed to upload photobooth image before adding to cart:", err);
-        setSuccessMsg("❌ Gặp lỗi khi tải lên hình ảnh photobooth. Vui lòng thử lại!");
-        setTimeout(() => setSuccessMsg(''), 5000);
-        return;
-      }
+    let finalPhotoUrl = '';
+    try {
+      finalPhotoUrl = await uploadPhotoboothFiles();
+    } catch (err: any) {
+      setSuccessMsg(`❌ ${err.message || 'Gặp lỗi khi tải lên hình ảnh photobooth.'}`);
+      setTimeout(() => setSuccessMsg(''), 5000);
+      return;
     }
 
     const payload = {
@@ -159,7 +198,8 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
         cardMessage,
         giftWrap,
         designPhotoUrl,
-        photoboothPhotoUrl: finalPhotoUrl
+        photoboothPhotoUrl: finalPhotoUrl,
+        photoboothPhotoUrls: finalPhotoUrl ? finalPhotoUrl.split(',') : []
       }) : undefined
     };
 
@@ -177,22 +217,13 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
   const handleBuyNow = async () => {
     if (!product) return;
 
-    let finalPhotoUrl = photoboothPhotoUrl;
-    if (photoboothPhotoFile) {
-      setSuccessMsg("⏳ Đang chuẩn bị tải lên hình ảnh photobooth...");
-      try {
-        const data = await productService.uploadImage(photoboothPhotoFile);
-        if (data && data.url) {
-          finalPhotoUrl = data.url;
-          setPhotoboothPhotoUrl(data.url);
-          setPhotoboothPhotoFile(null); // uploaded, clear file state
-        }
-      } catch (err) {
-        console.error("Failed to upload photobooth image before buy now:", err);
-        setSuccessMsg("❌ Gặp lỗi khi tải lên hình ảnh photobooth. Vui lòng thử lại!");
-        setTimeout(() => setSuccessMsg(''), 5000);
-        return;
-      }
+    let finalPhotoUrl = '';
+    try {
+      finalPhotoUrl = await uploadPhotoboothFiles();
+    } catch (err: any) {
+      setSuccessMsg(`❌ ${err.message || 'Gặp lỗi khi tải lên hình ảnh photobooth.'}`);
+      setTimeout(() => setSuccessMsg(''), 5000);
+      return;
     }
 
     const payload = {
@@ -204,7 +235,8 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
         cardMessage,
         giftWrap,
         designPhotoUrl,
-        photoboothPhotoUrl: finalPhotoUrl
+        photoboothPhotoUrl: finalPhotoUrl,
+        photoboothPhotoUrls: finalPhotoUrl ? finalPhotoUrl.split(',') : []
       }) : undefined
     };
 
@@ -340,9 +372,10 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
 
             {product.allowPhotoUpload && (
               <StudioPhotobooth
-                photoboothPhotoUrl={photoboothPhotoUrl}
-                setPhotoboothPhotoUrl={setPhotoboothPhotoUrl}
-                onPhotoSelected={setPhotoboothPhotoFile}
+                photoboothPhotoUrls={photoboothPhotoUrls}
+                setPhotoboothPhotoUrls={setPhotoboothPhotoUrls}
+                onPhotoSelected={(file) => setPhotoboothPhotoFiles(prev => [...prev, file])}
+                onPhotoDeleted={handlePhotoDeleted}
               />
             )}
 

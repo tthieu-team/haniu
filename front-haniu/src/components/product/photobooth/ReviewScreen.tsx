@@ -53,9 +53,9 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
 
                 <button
                   onClick={() => onRetake(index)}
-                  className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-900 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md font-bold text-[9px] uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                  className="px-3.5 py-1.5 bg-white hover:bg-slate-100 text-slate-900 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
                 >
-                  <Icon name="refresh" size={10} className="text-primary-color" />
+                  <Icon name="refresh" size={11} className="text-primary-color" />
                   Chụp lại
                 </button>
               </div>
@@ -68,19 +68,19 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
         </AnimatePresence>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md mb-6">
+      <div className="grid grid-cols-2 gap-2.5 w-full max-w-md mb-6">
         <button
           onClick={onRetakeAll}
-          className="h-11 px-6 rounded-xl font-bold flex-1 border border-primary-color/20 bg-primary-color/10 text-primary-color hover:bg-primary-color/20 transition-all text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+          className="h-11 px-3 rounded-xl font-bold border border-primary-color/20 bg-primary-color/10 text-primary-color hover:bg-primary-color/20 transition-all text-[10px] sm:text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
         >
-          <Icon name="trash" size={12} />
+          <Icon name="trash" size={13} />
           Xóa chụp lại tất cả
         </button>
         <button
           onClick={onConfirm}
-          className="h-11 px-8 rounded-xl font-black flex-1 bg-primary-color hover:bg-primary-color/90 text-white transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-md shadow-primary-color/20 cursor-pointer"
+          className="h-11 px-3 rounded-xl font-black bg-primary-color hover:bg-primary-color/90 text-white transition-all text-[10px] sm:text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md shadow-primary-color/20 cursor-pointer whitespace-nowrap"
         >
-          <Icon name="check" size={12} />
+          <Icon name="check" size={13} />
           Ghép ảnh tiếp tục
         </button>
       </div>

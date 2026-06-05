@@ -8,7 +8,7 @@ interface ResultViewProps {
   imageBlob: Blob;
   imageUrl: string;
   onRestart: () => void;
-  onConfirm: (blob: Blob) => void;
+  onConfirm: (blob: Blob, shouldClose?: boolean) => void;
 }
 
 export const ResultView: React.FC<ResultViewProps> = ({ 
@@ -45,10 +45,17 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <p className="text-[10px] text-muted-color">Ảnh đã ghép thành công và sẵn sàng để in.</p>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5">
           <button
-            onClick={() => onConfirm(imageBlob)}
-            className="h-12 rounded-xl font-black bg-primary-color hover:bg-primary-color/90 text-white transition-all text-[11px] uppercase tracking-widest shadow-md shadow-primary-color/20 flex items-center justify-center gap-1 cursor-pointer active:scale-98"
+            onClick={() => onConfirm(imageBlob, false)}
+            className="h-11 rounded-xl font-bold bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700/80 transition-all text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
+          >
+            <Icon name="camera" size={13} /> Đính kèm & Chụp tiếp
+          </button>
+          
+          <button
+            onClick={() => onConfirm(imageBlob, true)}
+            className="h-11 rounded-xl font-black bg-primary-color hover:bg-primary-color/90 text-white transition-all text-[11px] uppercase tracking-widest shadow-md shadow-primary-color/20 flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
           >
             <Icon name="check" size={14} /> Đính kèm và Đóng
           </button>

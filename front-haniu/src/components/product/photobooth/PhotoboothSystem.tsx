@@ -168,11 +168,16 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
     setStep('idle');
   };
 
-  const handleConfirmFinal = (blob: Blob) => {
+  const handleConfirmFinal = (blob: Blob, shouldClose: boolean = true) => {
     playSound('click');
     const file = new File([blob], `haniu-photobooth-${Date.now()}.png`, { type: 'image/png' });
     onCapture(file);
-    onClose();
+    if (shouldClose) {
+      onClose();
+    } else {
+      handleRestart();
+      setStep('select-mode');
+    }
   };
 
   return (
