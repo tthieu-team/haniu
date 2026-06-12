@@ -86,6 +86,12 @@ export default function RegisterForm() {
       setLoading(true);
       setErrorMsg('');
 
+      const payload = {
+        fullName,
+        email: emailOrPhone,
+        password,
+      };
+
       const res = await authService.register(payload);
       if (res?.accessToken) {
         setSuccess(true);
