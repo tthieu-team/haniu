@@ -86,15 +86,16 @@ export default function RegisterForm() {
       setLoading(true);
       setErrorMsg('');
 
-      const payload = {
-        fullName,
-        email: emailOrPhone,
-        password
-      };
-
-      await authService.register(payload);
-      setStep('verify');
-      setCountdown(59);
+      const res = await authService.register(payload);
+      if (res?.accessToken) {
+        setSuccess(true);
+        setTimeout(() => {
+          router.push('/');
+        }, 1500);
+      } else {
+        setStep('verify');
+        setCountdown(59);
+      }
 
     } catch (err: any) {
       setErrorMsg(err?.message || 'Đăng ký không thành công. Vui lòng thử lại.');

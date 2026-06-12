@@ -51,10 +51,12 @@ public class AuthServiceImpl implements AuthService {
             if (existing.getStatus() == UserStatus.ACTIVE) {
                 throw new RuntimeException("Email is already in use");
             }
-            // If status is PENDING, we update user info and generate new OTP
+            // If status is PENDING, we update user info and activate them directly
             existing.setFullName(request.getFullName());
             existing.setPassword(passwordEncoder.encode(request.getPassword()));
             existing.setPhone(request.getPhone());
+            existing.setStatus(UserStatus.ACTIVE);
+            existing.setEmailVerified(true);
             user = userRepository.save(existing);
         } else {
             user = User.builder()
@@ -63,22 +65,15 @@ public class AuthServiceImpl implements AuthService {
                     .fullName(request.getFullName())
                     .phone(request.getPhone())
                     .role(Role.USER)
-                    .status(UserStatus.PENDING)
-                    .emailVerified(false)
+                    .status(UserStatus.ACTIVE)
+                    .emailVerified(true)
                     .phoneVerified(false)
                     .build();
             user = userRepository.save(user);
         }
 
-        saveAndSendOtp(user.getEmail());
-
-        // Return token DTO with null accessToken so frontend doesn't auto-login yet
-        return TokenResponseDto.builder()
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .phone(user.getPhone())
-                .role(user.getRole().name())
-                .build();
+        // Return token DTO with accessToken directly to auto-login
+        return generateTokens(user);
     }
 
     @Override
@@ -91,7 +86,9 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (user.getStatus() == UserStatus.PENDING) {
-            throw new RuntimeException("Tài khoản chưa được xác thực. Vui lòng xác thực mã OTP gửi qua Email.");
+            user.setStatus(UserStatus.ACTIVE);
+            user.setEmailVerified(true);
+            user = userRepository.save(user);
         }
 
         if (user.getStatus() != UserStatus.ACTIVE) {
