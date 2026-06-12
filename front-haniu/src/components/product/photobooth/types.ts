@@ -41,8 +41,21 @@ export interface PhotoboothConfig {
   filter: string;
   frameStyle: 'white' | 'black' | 'pink' | 'retro';
   countdown: number;
-  userName: string;
+  userName?: string;
   showDate: boolean;
+  frameColor?: string;
+  backgroundImage?: string;
+  borderSize?: number;
+  userNameFont?: string;
+  userNameColor?: string;
+  userNameSize?: number;
+  userNameX?: number;
+  userNameY?: number;
+  dateFont?: string;
+  dateColor?: string;
+  dateSize?: number;
+  dateX?: number;
+  dateY?: number;
 }
 
 export interface Sticker {
@@ -52,6 +65,7 @@ export interface Sticker {
   y: number;
   scale: number;
   rotation: number;
+  color?: string;
 }
 
 export type PhotoboothStep = 
@@ -60,6 +74,8 @@ export type PhotoboothStep =
   | 'countdown' 
   | 'capturing' 
   | 'review' 
+  | 'design-menu'
+  | 'edit-frame'
   | 'editing' 
   | 'result' 
   | 'error' 

@@ -23,7 +23,7 @@ export default function StudioPhotobooth({
   const currentTheme = useThemeStore(state => state.theme);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [selectedPreviewUrl, setSelectedPreviewUrl] = useState('');
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number>(0);
   const [lightboxTheme, setLightboxTheme] = useState<'dark' | 'light'>('dark');
   const [mounted, setMounted] = useState(false);
 
@@ -36,6 +36,36 @@ export default function StudioPhotobooth({
   useEffect(() => {
     setLightboxTheme(currentTheme);
   }, [currentTheme]);
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        setSelectedPhotoIndex(prev => prev === 0 ? photoboothPhotoUrls.length - 1 : prev - 1);
+      } else if (e.key === 'ArrowRight') {
+        setSelectedPhotoIndex(prev => prev === photoboothPhotoUrls.length - 1 ? 0 : prev + 1);
+      } else if (e.key === 'Escape') {
+        setIsLightboxOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLightboxOpen, photoboothPhotoUrls.length]);
+
+  const handlePrevPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedPhotoIndex(prev => 
+      prev === 0 ? photoboothPhotoUrls.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedPhotoIndex(prev => 
+      prev === photoboothPhotoUrls.length - 1 ? 0 : prev + 1
+    );
+  };
 
   const handleCaptureComplete = async (file: File) => {
     const localUrl = URL.createObjectURL(file);
@@ -54,6 +84,19 @@ export default function StudioPhotobooth({
 
   const hasPhotos = photoboothPhotoUrls.length > 0;
 
+  // Helper to determine optimal grid columns and max-width based on photo count (from 1 to 10)
+  const getGridLayout = (count: number) => {
+    if (count === 1) return { gridClass: 'grid-cols-1', maxW: 'max-w-[180px]' };
+    if (count === 2) return { gridClass: 'grid-cols-2', maxW: 'max-w-sm' };
+    if (count === 3) return { gridClass: 'grid-cols-3', maxW: 'max-w-md' };
+    if (count === 4) return { gridClass: 'grid-cols-2 sm:grid-cols-4', maxW: 'max-w-xl' };
+    if (count <= 6) return { gridClass: 'grid-cols-3', maxW: 'max-w-xl' };
+    if (count <= 8) return { gridClass: 'grid-cols-4', maxW: 'max-w-2xl' };
+    return { gridClass: 'grid-cols-5', maxW: 'max-w-3xl' };
+  };
+
+  const { gridClass, maxW } = getGridLayout(photoboothPhotoUrls.length);
+
   return (
     <div className="bg-white dark:bg-zinc-900/60 border border-slate-200/60 dark:border-zinc-800/80 rounded-3xl p-5 space-y-4 w-full shadow-xs text-xs font-semibold text-slate-800 dark:text-zinc-100">
       <label className="block text-slate-500 dark:text-zinc-400 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
@@ -63,24 +106,32 @@ export default function StudioPhotobooth({
       {hasPhotos ? (
         /* Completed/Attached State Card (Multiple Photos list) */
         <div className="space-y-4 py-2">
-          {/* Thumbnails grid */}
-          <div className="flex flex-wrap gap-3 justify-center">
+          {/* Thumbnails grid / Slider */}
+          <div className={
+            photoboothPhotoUrls.length >= 3
+              ? "flex gap-4 overflow-x-auto pt-3 pb-3.5 scrollbar-thin scrollbar-thumb-rose-500/20 dark:scrollbar-thumb-zinc-700 scrollbar-track-transparent w-full snap-x snap-mandatory px-2 custom-scrollbar"
+              : `grid ${gridClass} gap-4 w-full ${maxW} mx-auto pt-3 px-2`
+          }>
             {photoboothPhotoUrls.map((url, idx) => (
               <div 
                 key={idx}
-                className="relative w-20 h-20 shrink-0 group"
+                className={
+                  photoboothPhotoUrls.length >= 3
+                    ? "relative w-[45%] sm:w-36 aspect-[2/3] shrink-0 snap-start group"
+                    : "relative w-full aspect-[2/3] group"
+                }
               >
                 {/* Image preview box */}
                 <div
                   onClick={() => {
-                    setSelectedPreviewUrl(url);
+                    setSelectedPhotoIndex(idx);
                     setIsLightboxOpen(true);
                   }}
-                  className="cursor-pointer w-full h-full border-2 border-white dark:border-zinc-800 shadow-md rounded-xl overflow-hidden bg-slate-50 dark:bg-zinc-900 transition-all hover:scale-105 active:scale-95 relative"
+                  className="cursor-pointer w-full h-full border-2 border-white dark:border-zinc-850 shadow-md rounded-2xl overflow-hidden bg-slate-50 dark:bg-zinc-900 transition-all hover:scale-[1.03] active:scale-98 relative"
                 >
                   <img src={url} className="w-full h-full object-cover" alt={`Photobooth print ${idx + 1}`} />
                   <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                    <Icon name="search" size={12} />
+                    <Icon name="search" size={16} />
                   </div>
                 </div>
 
@@ -91,7 +142,7 @@ export default function StudioPhotobooth({
                     e.stopPropagation();
                     onPhotoDeleted(idx);
                   }}
-                  className="absolute -top-1.5 -right-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-full w-5.5 h-5.5 flex items-center justify-center shadow-md hover:scale-110 active:scale-90 transition-all cursor-pointer z-20 border border-white dark:border-zinc-900"
+                  className="absolute -top-2 -right-2 bg-rose-500 hover:bg-rose-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:scale-110 active:scale-90 transition-all cursor-pointer z-20 border border-white dark:border-zinc-900"
                   title="Xóa ảnh này"
                 >
                   <Icon name="close" size={10} className="text-white" />
@@ -104,6 +155,9 @@ export default function StudioPhotobooth({
             <p className="text-emerald-500 text-[11px] font-bold">✓ Đã đính kèm {photoboothPhotoUrls.length} ảnh photobooth!</p>
             <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-normal leading-normal italic">
               Nhấp vào từng ảnh để xem kích thước đầy đủ. Bạn có thể chụp hoặc tải thêm tối đa nhiều ảnh kỷ niệm.
+            </p>
+            <p className="text-[10px] text-rose-500 dark:text-rose-400 font-bold leading-normal">
+              * Đừng lo lắng về kích thước ảnh! Đội ngũ Haniu sẽ tự động tối ưu hóa và căn chỉnh chuyên nghiệp để đảm bảo thành phẩm in đạt chất lượng tốt nhất.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-2 justify-center mt-3.5 max-w-[280px] mx-auto">
@@ -158,12 +212,11 @@ export default function StudioPhotobooth({
 
       {/* FULLSCREEN POPUP MODAL SYSTEM - ESCAPING STACKING CONTEXT VIA PORTAL */}
       {mounted && isModalOpen && createPortal(
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-4">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/85 backdrop-blur-md p-0 sm:p-4">
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="w-full max-w-5xl xl:max-w-6xl h-[90vh] max-h-[800px] bg-white dark:bg-zinc-950 rounded-3xl sm:rounded-[32px] overflow-hidden shadow-2xl border border-slate-200/50 dark:border-zinc-800 relative flex flex-col"
-            style={{ width: '91.666667%', height: '90vh' }}
+            className="w-full h-full sm:w-[91.666667%] sm:max-w-5xl sm:xl:max-w-6xl sm:h-[90vh] sm:max-h-[800px] bg-white dark:bg-zinc-950 rounded-none sm:rounded-[32px] overflow-hidden shadow-2xl border-0 sm:border border-slate-200/50 dark:border-zinc-800 relative flex flex-col"
           >
             <PhotoboothSystem 
               onCapture={handleCaptureComplete}
@@ -184,8 +237,38 @@ export default function StudioPhotobooth({
           }`}
           onClick={() => setIsLightboxOpen(false)}
         >
-          {/* Fixed Top Bar Controls for Theme Toggle and Close */}
-          <div className="fixed top-6 right-6 flex items-center gap-2.5 z-[10000000]" onClick={e => e.stopPropagation()}>
+           {/* Fixed Top Bar Controls for Theme Toggle, Navigation, and Close */}
+          <div className="fixed top-6 right-6 flex items-center gap-2 z-[10000000]" onClick={e => e.stopPropagation()}>
+            {/* Prev button */}
+            {photoboothPhotoUrls.length > 1 && (
+              <button
+                onClick={handlePrevPhoto}
+                className={`p-2.5 border rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 ${
+                  lightboxTheme === 'dark' 
+                    ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' 
+                    : 'bg-black/5 hover:bg-black/10 border-black/10 text-slate-700'
+                }`}
+                title="Ảnh trước"
+              >
+                <Icon name="arrow-left" size={16} />
+              </button>
+            )}
+
+            {/* Next button */}
+            {photoboothPhotoUrls.length > 1 && (
+              <button
+                onClick={handleNextPhoto}
+                className={`p-2.5 border rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 ${
+                  lightboxTheme === 'dark' 
+                    ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' 
+                    : 'bg-black/5 hover:bg-black/10 border-black/10 text-slate-700'
+                }`}
+                title="Ảnh sau"
+              >
+                <Icon name="arrow-right" size={16} />
+              </button>
+            )}
+
             <button
               onClick={() => setLightboxTheme(prev => prev === 'dark' ? 'light' : 'dark')}
               className={`p-2.5 border rounded-full cursor-pointer transition-all ${
@@ -210,10 +293,10 @@ export default function StudioPhotobooth({
             </button>
           </div>
 
-          <div className="relative w-full h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
+          <div className="relative w-full h-full flex items-center justify-center p-4 sm:p-12" onClick={e => e.stopPropagation()}>
             <img 
-              src={selectedPreviewUrl} 
-              className="max-w-[95vw] max-h-[90vh] object-contain transition-all duration-300 cursor-default" 
+              src={photoboothPhotoUrls[selectedPhotoIndex]} 
+              className="max-w-[95vw] max-h-[85vh] object-contain transition-all duration-300 cursor-default rounded-xl shadow-2xl" 
               alt="Full size photobooth composite" 
             />
           </div>

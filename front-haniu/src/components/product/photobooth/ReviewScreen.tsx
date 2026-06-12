@@ -21,7 +21,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
   onRetakeAll
 }) => {
   return (
-    <div className="w-full h-full bg-background flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto min-h-[500px]">
+    <div className="w-full h-full bg-background flex flex-col items-center justify-start p-4 sm:p-6 overflow-y-auto min-h-0">
       <motion.div
         initial={{ y: -15, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -78,7 +78,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
         </button>
         <button
           onClick={onConfirm}
-          className="h-11 px-3 rounded-xl font-black bg-primary-color hover:bg-primary-color/90 text-white transition-all text-[10px] sm:text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md shadow-primary-color/20 cursor-pointer whitespace-nowrap"
+          className="h-11 px-3 rounded-xl font-black bg-rose-600 hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600 text-white transition-all text-[10px] sm:text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md shadow-rose-550/20 cursor-pointer whitespace-nowrap"
         >
           <Icon name="check" size={13} />
           Ghép ảnh tiếp tục

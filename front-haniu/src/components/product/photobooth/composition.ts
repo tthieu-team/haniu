@@ -13,9 +13,28 @@ export const generateComposition = async (
 
   if (!ctx) throw new Error('Could not get canvas context');
 
+  console.log('generateComposition CONFIG:', {
+    frameColor: config.frameColor,
+    backgroundImage: config.backgroundImage ? 'Length: ' + config.backgroundImage.length : 'none',
+    borderSize: config.borderSize,
+    templateBackground: template.background
+  });
+
   // 1. Draw Background
-  ctx.fillStyle = template.background;
+  ctx.fillStyle = config.frameColor || template.background;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (config.backgroundImage) {
+    const bgImg = await new Promise<HTMLImageElement>((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(new Image());
+      img.src = config.backgroundImage!;
+    });
+    if (bgImg.complete && bgImg.naturalWidth > 0) {
+      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+    }
+  }
 
   // 2. Load and Draw Photos into slots
   const photoImages = await Promise.all(
@@ -32,13 +51,18 @@ export const generateComposition = async (
     })
   );
 
+  const inset = config.borderSize !== undefined ? config.borderSize : 15;
+  const minX = template.slots.length > 0 ? Math.min(...template.slots.map(s => s.x)) : 40;
+  const offset = inset < 15 ? (inset - 15) * (minX / 15) : (inset - 15) * 2.67;
+  
   template.slots.forEach((slot, index) => {
     if (photoImages[index]) {
       const img = photoImages[index];
-      const slotX = slot.x;
-      const slotY = slot.y;
-      const slotW = slot.width;
-      const slotH = slot.height;
+      // Adjust slots dynamically based on borderSize slider
+      const slotX = Math.max(0, slot.x + offset);
+      const slotY = Math.max(0, slot.y + offset);
+      const slotW = slot.width - offset * 2;
+      const slotH = slot.height - offset * 2;
 
       ctx.save();
       // Create clipping region for the slot
@@ -90,7 +114,12 @@ export const generateComposition = async (
       const iconKey = s.url.replace('icon:', '');
       const svgString = ICON_SVGS[iconKey];
       if (svgString) {
-        const svgUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
+        let finalSvg = svgString;
+        if (s.color) {
+          finalSvg = finalSvg.replace(/stroke="#[0-9a-fA-F]{6}"/g, `stroke="${s.color}"`);
+          finalSvg = finalSvg.replace(/fill="#[0-9a-fA-F]{6}"/g, `fill="${s.color}"`);
+        }
+        const svgUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(finalSvg)));
         const img = await new Promise<HTMLImageElement>((resolve) => {
           const img = new Image();
           img.onload = () => resolve(img);
@@ -134,41 +163,71 @@ export const generateComposition = async (
     ctx.restore();
   }
 
-  // 4. Draw Premium Branding (Adjusted to Haniu)
+  // 4. Draw Premium Branding (Adjusted to Haniu with drag-drop coordinates and fonts)
   ctx.save();
   const bottomY = canvas.height - 80;
+
+  const resolveFont = (fontKey?: string) => {
+    switch (fontKey) {
+      case 'dancing-script': return '"Dancing Script", cursive';
+      case 'patrick-hand': return '"Patrick Hand", cursive';
+      case 'mali': return '"Mali", cursive';
+      case 'cormorant-garamond': return '"Cormorant Garamond", serif';
+      case 'be-vietnam-pro': return '"Be Vietnam Pro", sans-serif';
+      default: return '"Be Vietnam Pro", sans-serif';
+    }
+  };
   
-  // Subtle Divider
-  ctx.beginPath();
-  ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-  ctx.lineWidth = 1;
-  ctx.moveTo(100, bottomY - 20);
-  ctx.lineTo(canvas.width - 100, bottomY - 20);
-  ctx.stroke();
+  // Subtle Divider (Draw only if custom positions aren't overriding it entirely)
+  const isCustomized = config.userNameX !== undefined || config.userNameY !== undefined || config.dateX !== undefined || config.dateY !== undefined;
+  if (!isCustomized) {
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+    ctx.lineWidth = 1;
+    ctx.moveTo(100, bottomY - 20);
+    ctx.lineTo(canvas.width - 100, bottomY - 20);
+    ctx.stroke();
+  }
 
   // Branding Text
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
   // User Name / Main Brand
-  ctx.fillStyle = '#e11d48'; // Haniu Rose / Primary color
-  ctx.font = 'bold 36px var(--font-cormorant-garamond), serif';
-  const brandTitle = config.userName?.toUpperCase() || 'HANIU STUDIO';
-  ctx.fillText(brandTitle, canvas.width / 2, bottomY + 10);
+  if (config.userName !== '') {
+    const uFont = resolveFont(config.userNameFont || 'cormorant-garamond');
+    ctx.fillStyle = config.userNameColor || '#e11d48';
+    ctx.font = `bold ${config.userNameSize || 36}px ${uFont}`;
+    
+    const userX = config.userNameX !== undefined ? (config.userNameX / 100) * canvas.width : canvas.width / 2;
+    const userY = config.userNameY !== undefined ? (config.userNameY / 100) * canvas.height : bottomY + 10;
+    
+    const brandTitle = config.userName || 'HANIU STUDIO';
+    ctx.fillText(brandTitle, userX, userY);
+  }
 
   // Date / Tagline
-  ctx.fillStyle = '#64748b'; // Slate 500
-  ctx.font = '500 18px var(--font-be-vietnam-pro), sans-serif';
-  const tagline = config.showDate 
-    ? `HANIU PHOTOBOOTH • ${new Date().toLocaleDateString('vi-VN')}`
-    : 'CAPTURED BY HANIU PHOTOBOOTH';
-  ctx.fillText(tagline, canvas.width / 2, bottomY + 50);
+  if (config.showDate) {
+    const dFont = resolveFont(config.dateFont || 'be-vietnam-pro');
+    ctx.fillStyle = config.dateColor || '#64748b';
+    ctx.font = `500 ${config.dateSize || 18}px ${dFont}`;
+    
+    const dX = config.dateX !== undefined ? (config.dateX / 100) * canvas.width : canvas.width / 2;
+    const dY = config.dateY !== undefined ? (config.dateY / 100) * canvas.height : bottomY + 50;
+    
+    const tagline = new Date().toLocaleDateString('vi-VN');
+    ctx.fillText(tagline, dX, dY);
+  }
   
   ctx.restore();
 
-  return new Promise((resolve) => {
+  return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
-      if (blob) resolve(blob);
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject(new Error('Canvas toBlob failed'));
+      }
     }, 'image/png');
   });
 };
