@@ -18,6 +18,7 @@ interface RealtimeState {
   notifications: NotificationItem[];
   unreadCount: number;
   connected: boolean;
+  reconnectAttempts: number;
   initSocket: () => void;
   disconnectSocket: () => void;
   fetchNotifications: () => Promise<void>;
@@ -32,6 +33,7 @@ export const useRealtimeStore = create<RealtimeState>((set, get) => ({
   notifications: [],
   unreadCount: 0,
   connected: false,
+  reconnectAttempts: 0,
 
   initSocket: () => {
     if (get().socket) return;
@@ -41,19 +43,26 @@ export const useRealtimeStore = create<RealtimeState>((set, get) => ({
 
     ws.onopen = () => {
       console.log('🟢 WebSocket connected');
-      set({ connected: true });
+      set({ connected: true, reconnectAttempts: 0 });
       get().fetchNotifications();
     };
 
     ws.onclose = () => {
       console.log('🔴 WebSocket disconnected');
       set({ connected: false, socket: null });
-      // Reconnect after 5 seconds
+      
+      const attempts = get().reconnectAttempts;
+      // Exponential backoff: starts at 5s, grows by 1.5x up to max 60s
+      const delay = Math.min(5000 * Math.pow(1.5, attempts), 60000);
+      set({ reconnectAttempts: attempts + 1 });
+      
+      console.log(`⏳ Reconnecting in ${(delay / 1000).toFixed(1)}s (Attempt ${attempts + 1})...`);
       setTimeout(() => {
+        // Only reconnect if no active socket has been re-established
         if (get().socket === null) {
           get().initSocket();
         }
-      }, 5000);
+      }, delay);
     };
 
     ws.onerror = (error) => {
@@ -65,7 +74,6 @@ export const useRealtimeStore = create<RealtimeState>((set, get) => ({
         const payload = JSON.parse(event.data);
         console.log('📩 Realtime event received:', payload);
         if (payload.event === 'realtime.notification.created') {
-          // Re-fetch all notifications from database to guarantee synchronization of DB IDs and values
           get().fetchNotifications();
         }
       } catch (err) {
@@ -80,7 +88,7 @@ export const useRealtimeStore = create<RealtimeState>((set, get) => ({
     const { socket } = get();
     if (socket) {
       socket.close();
-      set({ socket: null, connected: false });
+      set({ socket: null, connected: false, reconnectAttempts: 0 });
     }
   },
 
@@ -115,7 +123,6 @@ export const useRealtimeStore = create<RealtimeState>((set, get) => ({
   },
 
   markAsRead: async (id) => {
-    // Optimistic UI update
     set((state) => {
       const updated = state.notifications.map((n) =>
         n.id === id ? { ...n, unread: false } : n
@@ -134,7 +141,6 @@ export const useRealtimeStore = create<RealtimeState>((set, get) => ({
   },
 
   markAllAsRead: async () => {
-    // Optimistic UI update
     set((state) => {
       const updated = state.notifications.map((n) => ({ ...n, unread: false }));
       return {

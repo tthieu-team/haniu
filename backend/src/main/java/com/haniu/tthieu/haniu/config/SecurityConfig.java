@@ -52,6 +52,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/ugc-items/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/posts/**").permitAll()
                 .requestMatchers("/api/health", "/api/health/").permitAll()
+                .requestMatchers("/realtime", "/realtime/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
             )

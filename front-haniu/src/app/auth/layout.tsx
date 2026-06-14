@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import Icon from '@/components/common/Icons';
+import LogoSvg from '@/components/common/LogoSvg';
 
 export default function AuthLayout({
   children,
@@ -48,16 +48,7 @@ export default function AuthLayout({
         
         {/* Brand Identity Header Above Card */}
         <div className="flex flex-col items-center gap-2.5 mb-8 animate-fade-in">
-          <div className="relative w-14 h-14 transition-transform duration-500 hover:rotate-6">
-            <Image
-              src="/logo/logo-transparent.png"
-              alt="Haniu Logo"
-              fill
-              sizes="56px"
-              className="object-contain drop-shadow-[0_4px_12px_rgba(244,63,94,0.15)] dark:brightness-110"
-              priority
-            />
-          </div>
+          <LogoSvg className="w-14 h-14 text-slate-800 dark:text-zinc-100 transition-transform duration-500 hover:rotate-6 drop-shadow-[0_4px_12px_rgba(244,63,94,0.15)]" />
           <div className="text-center">
             <span className="text-2xl font-black tracking-widest bg-gradient-to-r from-amber-600 via-rose-500 to-amber-500 bg-clip-text text-transparent uppercase">
               Haniu

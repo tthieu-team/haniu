@@ -23,7 +23,8 @@ import java.util.Map;
 public class SocketIOService {
 
     private final RealtimeWebSocketHandler webSocketHandler;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
 

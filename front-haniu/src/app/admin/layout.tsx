@@ -223,7 +223,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         notifications.map((item) => (
                           <div 
                             key={item.id} 
-                            onClick={() => markAsRead(item.id)}
+                            onClick={() => {
+                              markAsRead(item.id);
+                              setNotifOpen(false);
+                              router.push('/admin/orders');
+                            }}
                             className={`p-2 rounded-xl cursor-pointer transition-colors ${
                               item.unread 
                                 ? 'bg-rose-50 dark:bg-rose-950/20 border-l-2 border-rose-500' 

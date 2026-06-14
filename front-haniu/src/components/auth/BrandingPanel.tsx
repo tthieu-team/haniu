@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import Icon from '@/components/common/Icons';
+import LogoSvg from '@/components/common/LogoSvg';
 
 export default function BrandingPanel() {
   const benefits = [
@@ -35,16 +35,7 @@ export default function BrandingPanel() {
       {/* Header Info */}
       <div className="relative z-10">
         <Link href="/" className="inline-flex items-center gap-2.5 mb-6 group">
-          <div className="relative w-7 h-7">
-            <Image
-              src="/logo/logo-transparent.png"
-              alt="Haniu Logo"
-              fill
-              sizes="28px"
-              className="object-contain dark:brightness-110"
-              priority
-            />
-          </div>
+          <LogoSvg className="w-7 h-7 text-slate-800 dark:text-zinc-100" />
           <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-amber-600 via-rose-500 to-amber-500 bg-clip-text text-transparent group-hover:opacity-90 transition-opacity">
             Haniu
           </span>
@@ -80,16 +71,7 @@ export default function BrandingPanel() {
             <div className="absolute inset-6 rounded-[1.8rem] xl:rounded-[2rem] bg-gradient-to-tr from-rose-500/5 to-amber-500/5 border border-white/40 dark:border-zinc-800/20 flex items-center justify-center">
               
               {/* Modern Abstract logo-transparent.png */}
-              <div className="w-24 h-24 xl:w-28 xl:h-28 relative">
-                <Image
-                  src="/logo/logo-transparent.png"
-                  alt="Haniu Logo Large"
-                  fill
-                  sizes="(max-width: 768px) 96px, 112px"
-                  className="object-contain drop-shadow-[0_8px_16px_rgba(244,63,94,0.25)] dark:brightness-110"
-                  priority
-                />
-              </div>
+              <LogoSvg className="w-24 h-24 xl:w-28 xl:h-28 text-slate-800 dark:text-zinc-100 drop-shadow-[0_8px_16px_rgba(244,63,94,0.25)]" />
 
             </div>
           </div>

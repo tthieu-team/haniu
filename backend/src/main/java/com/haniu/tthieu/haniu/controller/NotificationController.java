@@ -40,7 +40,7 @@ public class NotificationController {
             notification.setRead(true);
             notificationRepository.save(notification);
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/read-all")
@@ -59,6 +59,6 @@ public class NotificationController {
                 notificationRepository.save(n);
             }
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
