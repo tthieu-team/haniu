@@ -56,19 +56,12 @@ public class TranslationResponseAdvice implements ResponseBodyAdvice<Object> {
             HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
             String acceptLanguage = servletRequest.getHeader("Accept-Language");
             String lang = extractPrimaryLanguage(acceptLanguage);
-            
-            System.out.println(">>> [TranslationAdvice] Accept-Language Header: " + acceptLanguage);
-            System.out.println(">>> [TranslationAdvice] Resolved Primary Language: " + lang);
-            
             if (!"vi".equalsIgnoreCase(lang)) {
-                System.out.println(">>> [TranslationAdvice] Translating response to: " + lang);
                 try {
                     translateObject(body, lang, new HashSet<>());
                 } catch (Exception e) {
-                    System.err.println("Failed to dynamically translate response body: " + e.getMessage());
+                    // Fail silently or log if using a proper logger
                 }
-            } else {
-                System.out.println(">>> [TranslationAdvice] Skipping translation (Vietnamese detected)");
             }
         }
 
