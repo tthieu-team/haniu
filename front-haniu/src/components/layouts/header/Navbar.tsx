@@ -8,6 +8,9 @@ import { useOccasionStore } from '@/store/occasion';
 import { useCollectionStore } from '@/store/collection';
 import { getFullImageUrl } from '@/lib/api';
 
+import { useLanguage } from '@/providers/LanguageProvider';
+import { useTranslate } from '@/lib/translator';
+
 interface NavbarProps {
   isScrolled: boolean;
   menuLinks: Array<{ name: string; href: string }>;
@@ -16,6 +19,12 @@ interface NavbarProps {
 export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
   const pathname = usePathname();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const { t } = useLanguage();
+  const trans = useTranslate();
+
+  const getTranslatedName = (name: string) => {
+    return trans(name);
+  };
 
   // Lấy data từ store (không gọi API lại nếu đã có)
   const { occasions, fetchOccasions } = useOccasionStore();
@@ -59,7 +68,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                   : 'text-slate-700 dark:text-zinc-200 hover:text-rose-500 dark:hover:text-rose-400'
               }`}
             >
-              <span>{link.name}</span>
+              <span>{getTranslatedName(link.name)}</span>
               {hasDropdown && (
                 <span className={`opacity-60 transition-transform duration-300 flex items-center justify-center ${activeDropdown === (isShopMenu ? 'shop' : 'collections') ? 'rotate-180' : ''}`}>
                   <Icon name="chevron-down" size={8} />
@@ -76,7 +85,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                 {/* Left: Occasions list */}
                 <div className="space-y-3">
                   <span className="text-[10px] font-extrabold tracking-widest text-rose-500 uppercase flex items-center gap-1">
-                    <Icon name="gift" size={12} /> Chọn theo dịp lễ
+                    <Icon name="gift" size={12} /> {trans("Chọn theo dịp lễ")}
                   </span>
                   <div className="grid grid-cols-1 gap-1">
                     {activeOccasions.length > 0 ? (
@@ -119,7 +128,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                       onClick={() => setActiveDropdown(null)}
                       className="flex items-center gap-2 p-2 text-[10px] font-bold text-rose-500 hover:text-rose-600 hover:underline transition-all mt-1"
                     >
-                      Xem tất cả sản phẩm <Icon name="→" size={12} />
+                      {trans("Xem tất cả sản phẩm")} <Icon name="→" size={12} />
                     </Link>
                   </div>
                 </div>
@@ -128,13 +137,13 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                 <div className="bg-gradient-to-br from-rose-50/80 to-pink-50/20 dark:from-zinc-950 dark:to-zinc-900/60 p-5 rounded-2xl flex flex-col justify-between border border-rose-100 dark:border-zinc-800/80">
                   <div className="space-y-2">
                     <span className="text-[9px] font-bold tracking-wider text-amber-500 uppercase bg-amber-500/10 px-2.5 py-1 rounded-full">
-                      Set quà bán chạy
+                      {trans("Set quà bán chạy")}
                     </span>
                     <h4 className="text-xs font-extrabold text-slate-800 dark:text-zinc-200 leading-snug mt-2">
-                      Combo Quà Tặng Lãng Mạn Eternal Love
+                      {trans("Combo Quà Tặng Lãng Mạn Eternal Love")}
                     </h4>
-                    <p className="text-[10px] text-slate-500 dark:text-zinc-400 leading-relaxed font-light">
-                      Miễn phí khắc tên và lời chúc bằng laser lên gốm tre. Tặng kèm thiệp viết tay từ Haniu.
+                    <p className="text-[10px] text-slate-500 dark:text-zinc-450 leading-relaxed font-light">
+                      {trans("Miễn phí khắc tên và lời chúc bằng laser lên gốm tre. Tặng kèm thiệp viết tay từ Haniu.")}
                     </p>
                   </div>
                   <Link
@@ -142,7 +151,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                     onClick={() => setActiveDropdown(null)}
                     className="mt-4 inline-flex items-center justify-center bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-xl text-[10px] shadow-sm hover:shadow-md transition-all text-center gap-1.5"
                   >
-                    <Icon name="gift" size={11} /> Xem tất cả quà tặng
+                    <Icon name="gift" size={11} /> {trans("Xem tất cả quà tặng")}
                   </Link>
                 </div>
               </div>
@@ -154,7 +163,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                 {/* Left: Collections list */}
                 <div className="space-y-3">
                   <span className="text-[10px] font-extrabold tracking-widest text-rose-500 uppercase flex items-center gap-1">
-                    <Icon name="sparkles" size={12} /> Bộ sưu tập độc quyền
+                    <Icon name="sparkles" size={12} /> {trans("Bộ sưu tập độc quyền")}
                   </span>
                   <div className="grid grid-cols-1 gap-1">
                     {activeCollections.length > 0 ? (
@@ -206,7 +215,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                       onClick={() => setActiveDropdown(null)}
                       className="flex items-center gap-2 p-2 text-[10px] font-bold text-rose-500 hover:text-rose-600 hover:underline transition-all mt-1"
                     >
-                      Xem tất cả bộ sưu tập <Icon name="→" size={12} />
+                      {trans("Xem tất cả bộ sưu tập")} <Icon name="→" size={12} />
                     </Link>
                   </div>
                 </div>
@@ -215,13 +224,13 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                 <div className="bg-gradient-to-br from-amber-50/80 to-orange-50/20 dark:from-zinc-950 dark:to-zinc-900/60 p-5 rounded-2xl flex flex-col justify-between border border-amber-100 dark:border-zinc-800/80">
                   <div className="space-y-2">
                     <span className="text-[9px] font-bold tracking-wider text-rose-500 uppercase bg-rose-500/10 px-2.5 py-1 rounded-full">
-                      Ưu đãi đặc biệt
+                      {trans("Ưu đãi đặc biệt")}
                     </span>
                     <h4 className="text-xs font-extrabold text-slate-800 dark:text-zinc-200 leading-snug mt-2">
-                      Thiết Kế Độc Bản Theo Yêu Cầu
+                      {trans("Thiết Kế Độc Bản Theo Yêu Cầu")}
                     </h4>
-                    <p className="text-[10px] text-slate-500 dark:text-zinc-400 leading-relaxed font-light">
-                      Khắc laser cá nhân hóa miễn phí cho tất cả set quà thuộc bộ sưu tập mới.
+                    <p className="text-[10px] text-slate-500 dark:text-zinc-450 leading-relaxed font-light">
+                      {trans("Khắc laser cá nhân hóa miễn phí cho tất cả set quà thuộc bộ sưu tập mới.")}
                     </p>
                   </div>
                   <Link
@@ -229,7 +238,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                     onClick={() => setActiveDropdown(null)}
                     className="mt-4 inline-flex items-center justify-center bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-xl text-[10px] shadow-sm hover:shadow-md transition-all text-center gap-1.5"
                   >
-                    <Icon name="sparkles" size={11} /> Khám phá BST ngay
+                    <Icon name="sparkles" size={11} /> {trans("Khám phá BST ngay")}
                   </Link>
                 </div>
               </div>
@@ -247,7 +256,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
         <button
           className="relative flex items-center gap-1 text-[10px] xl:text-[11px] font-semibold uppercase tracking-widest transition-all duration-300 cursor-pointer text-slate-700 dark:text-zinc-200 hover:text-rose-500 dark:hover:text-rose-400 group"
         >
-          <span>Thêm</span>
+          <span>{t('nav.more')}</span>
           <span className={`opacity-60 transition-transform duration-300 flex items-center justify-center ${activeDropdown === 'more' ? 'rotate-180' : ''}`}>
             <Icon name="chevron-down" size={8} />
           </span>
@@ -263,7 +272,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                 onClick={() => setActiveDropdown(null)}
                 className="flex items-center gap-2 p-2.5 rounded-xl hover:bg-rose-500/[0.04] dark:hover:bg-rose-500/[0.06] hover:translate-x-1 transition-all duration-200 text-[10px] font-bold text-slate-700 dark:text-zinc-300 hover:text-rose-500 dark:hover:text-rose-400"
               >
-                {link.name}
+                {getTranslatedName(link.name)}
               </Link>
             ))}
           </div>

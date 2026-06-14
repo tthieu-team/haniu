@@ -3,12 +3,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@/components/common/Icons';
+import { useTranslate } from '@/lib/translator';
 
 interface IdleStateProps {
   onStart: () => void;
 }
 
 export const IdleState: React.FC<IdleStateProps> = ({ onStart }) => {
+  const trans = useTranslate();
   return (
     <div
       className="relative w-full h-full cursor-pointer overflow-hidden group bg-background transition-colors duration-500 flex flex-col items-center justify-center min-h-[500px]"
@@ -59,7 +61,7 @@ export const IdleState: React.FC<IdleStateProps> = ({ onStart }) => {
             Haniu <span className="bg-gradient-to-r from-primary-color to-primary-color/75 bg-clip-text text-transparent">Studio</span> Photobooth
           </motion.h1>
           <p className="text-[11px] sm:text-xs font-bold text-muted-color uppercase tracking-[0.25em] leading-none">
-            Lưu giữ khoảnh khắc ngọt ngào
+            {trans("Lưu giữ khoảnh khắc ngọt ngào")}
           </p>
           <motion.div 
             initial={{ scaleX: 0 }}
@@ -75,7 +77,7 @@ export const IdleState: React.FC<IdleStateProps> = ({ onStart }) => {
           className="mt-10 flex flex-col items-center gap-3"
         >
           <span className="text-[11px] sm:text-xs font-bold text-primary-color uppercase tracking-[0.2em] sm:tracking-[0.3em]">
-            Chạm màn hình để bắt đầu
+            {trans("Chạm màn hình để bắt đầu")}
           </span>
           <div className="flex gap-1">
             {[0, 1, 2].map(i => (

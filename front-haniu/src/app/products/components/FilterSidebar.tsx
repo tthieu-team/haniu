@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Icon from '@/components/common/Icons';
 import { Category, Brand, Collection } from '@/services/catalog.service';
+import { useTranslate } from '@/lib/translator';
 
 export interface FilterSidebarProps {
   selectedCat: string;
@@ -15,6 +16,14 @@ export interface FilterSidebarProps {
   setSearchQuery: (query: string) => void;
   customizableOnly: boolean;
   setCustomizableOnly: (val: boolean) => void;
+  adminChatOnly: boolean;
+  setAdminChatOnly: (val: boolean) => void;
+  photoboothOnly: boolean;
+  setPhotoboothOnly: (val: boolean) => void;
+  featuredOnly: boolean;
+  setFeaturedOnly: (val: boolean) => void;
+  newOnly: boolean;
+  setNewOnly: (val: boolean) => void;
   priceMin: number | '';
   setPriceMin: (val: number | '') => void;
   priceMax: number | '';
@@ -37,6 +46,14 @@ export default function FilterSidebar({
   setSearchQuery,
   customizableOnly,
   setCustomizableOnly,
+  adminChatOnly,
+  setAdminChatOnly,
+  photoboothOnly,
+  setPhotoboothOnly,
+  featuredOnly,
+  setFeaturedOnly,
+  newOnly,
+  setNewOnly,
   priceMin,
   setPriceMin,
   priceMax,
@@ -47,6 +64,7 @@ export default function FilterSidebar({
   brands,
   collections,
 }: FilterSidebarProps) {
+  const trans = useTranslate();
   const [expanded, setExpanded] = useState({
     categories: true,
     brands: true,
@@ -109,7 +127,7 @@ export default function FilterSidebar({
         <div className="flex items-center gap-2">
           <Icon name="filter" size={14} className="text-rose-500" />
           <h3 className="font-black text-xs text-slate-800 dark:text-zinc-100 uppercase tracking-widest">
-            Bộ lọc tìm kiếm
+            {trans('Bộ lọc tìm kiếm')}
           </h3>
         </div>
         {hasActiveFilters && (
@@ -117,7 +135,7 @@ export default function FilterSidebar({
             onClick={clearAllFilters}
             className="text-[10px] font-bold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer bg-rose-50 dark:bg-rose-950/20 px-2.5 py-1 rounded-full"
           >
-            Xóa tất cả
+            {trans('Xóa tất cả')}
           </button>
         )}
       </div>
@@ -125,12 +143,12 @@ export default function FilterSidebar({
       {/* 1. Keyword Search */}
       <form onSubmit={handleSearchSubmit} className="space-y-2">
         <label className="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-wider block">
-          Tìm kiếm từ khóa
+          {trans('Tìm kiếm từ khóa')}
         </label>
         <div className="relative">
           <input
             type="text"
-            placeholder="Nhập tên quà tặng..."
+            placeholder={trans('Nhập tên quà tặng...')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full text-xs bg-slate-50 dark:bg-zinc-900 rounded-2xl px-4 py-3 pr-10 border border-slate-100 dark:border-zinc-800/80 focus:outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-950 text-slate-700 dark:text-zinc-200 transition-all font-medium"
@@ -146,7 +164,7 @@ export default function FilterSidebar({
           )}
           <button
             type="submit"
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-450 hover:text-rose-500 transition-colors"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-455 hover:text-rose-500 transition-colors"
           >
             <Icon name="search" size={13} />
           </button>
@@ -160,7 +178,7 @@ export default function FilterSidebar({
           className="w-full flex items-center justify-between py-2 text-left focus:outline-none cursor-pointer"
         >
           <span className="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-            Danh mục quà tặng ({categories.length})
+            {trans('Danh mục quà tặng')} ({categories.length})
           </span>
           <span className={`text-slate-455 transition-transform duration-300 ${expanded.categories ? 'rotate-180' : ''}`}>
             <Icon name="chevron-down" size={12} />
@@ -176,7 +194,7 @@ export default function FilterSidebar({
                   : 'hover:bg-slate-50 dark:hover:bg-zinc-900/60 text-slate-650 dark:text-zinc-350 font-medium'
               }`}
             >
-              <span>Tất cả danh mục</span>
+              <span>{trans('Tất cả danh mục')}</span>
               {selectedCat === '' && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
             </button>
             {categories.map((cat) => {
@@ -191,7 +209,7 @@ export default function FilterSidebar({
                       : 'hover:bg-slate-50 dark:hover:bg-zinc-900/60 text-slate-650 dark:text-zinc-350 font-medium'
                   }`}
                 >
-                  <span className="truncate pr-2">{cat.name}</span>
+                  <span className="truncate pr-2">{trans(cat.name)}</span>
                   {isActive && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
                 </button>
               );
@@ -208,7 +226,7 @@ export default function FilterSidebar({
             className="w-full flex items-center justify-between py-2 text-left focus:outline-none cursor-pointer"
           >
             <span className="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-              Thương hiệu ({brands.length})
+              {trans('Thương hiệu')} ({brands.length})
             </span>
             <span className={`text-slate-455 transition-transform duration-300 ${expanded.brands ? 'rotate-180' : ''}`}>
               <Icon name="chevron-down" size={12} />
@@ -224,7 +242,7 @@ export default function FilterSidebar({
                     : 'hover:bg-slate-50 dark:hover:bg-zinc-900/60 text-slate-650 dark:text-zinc-350 font-medium'
                 }`}
               >
-                <span>Tất cả thương hiệu</span>
+                <span>{trans('Tất cả thương hiệu')}</span>
                 {selectedBrand === '' && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
               </button>
               {brands.map((brand) => {
@@ -239,7 +257,7 @@ export default function FilterSidebar({
                         : 'hover:bg-slate-50 dark:hover:bg-zinc-900/60 text-slate-650 dark:text-zinc-350 font-medium'
                     }`}
                   >
-                    <span className="truncate pr-2">{brand.name}</span>
+                    <span className="truncate pr-2">{trans(brand.name)}</span>
                     {isActive && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
                   </button>
                 );
@@ -257,7 +275,7 @@ export default function FilterSidebar({
             className="w-full flex items-center justify-between py-2 text-left focus:outline-none cursor-pointer"
           >
             <span className="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-              Bộ sưu tập ({collections.length})
+              {trans('Bộ sưu tập')} ({collections.length})
             </span>
             <span className={`text-slate-455 transition-transform duration-300 ${expanded.collections ? 'rotate-180' : ''}`}>
               <Icon name="chevron-down" size={12} />
@@ -273,7 +291,7 @@ export default function FilterSidebar({
                     : 'hover:bg-slate-50 dark:hover:bg-zinc-900/60 text-slate-650 dark:text-zinc-350 font-medium'
                 }`}
               >
-                <span>Tất cả bộ sưu tập</span>
+                <span>{trans('Tất cả bộ sưu tập')}</span>
                 {selectedCollection === '' && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
               </button>
               {collections.map((coll) => {
@@ -288,7 +306,7 @@ export default function FilterSidebar({
                         : 'hover:bg-slate-50 dark:hover:bg-zinc-900/60 text-slate-650 dark:text-zinc-350 font-medium'
                     }`}
                   >
-                    <span className="truncate pr-2">{coll.name}</span>
+                    <span className="truncate pr-2">{trans(coll.name)}</span>
                     {isActive && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
                   </button>
                 );
@@ -305,23 +323,67 @@ export default function FilterSidebar({
           className="w-full flex items-center justify-between py-2 text-left focus:outline-none cursor-pointer"
         >
           <span className="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-            Dịch vụ cá nhân hóa
+            {trans('Dịch vụ cá nhân hóa')}
           </span>
           <span className={`text-slate-455 transition-transform duration-300 ${expanded.service ? 'rotate-180' : ''}`}>
             <Icon name="chevron-down" size={12} />
           </span>
         </button>
         {expanded.service && (
-          <div className="mt-2.5">
-            <label className="flex items-center gap-3 cursor-pointer p-3 rounded-2xl border border-slate-200/60 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all select-none">
+          <div className="mt-2.5 space-y-2">
+            <label className="flex items-center gap-3 cursor-pointer p-2.5 rounded-2xl border border-slate-200/60 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all select-none">
               <input
                 type="checkbox"
                 checked={customizableOnly}
                 onChange={(e) => setCustomizableOnly(e.target.checked)}
                 className="w-4 h-4 rounded text-rose-500 focus:ring-rose-500 accent-rose-500 cursor-pointer"
               />
-              <span className="text-xs text-slate-600 dark:text-zinc-300 font-semibold">
-                Khắc tên / Lời chúc theo yêu cầu
+              <span className="text-xs text-slate-655 dark:text-zinc-300 font-semibold">
+                {trans('Cho phép Khắc tên / Cá nhân hóa quà')}
+              </span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer p-2.5 rounded-2xl border border-slate-200/60 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all select-none">
+              <input
+                type="checkbox"
+                checked={adminChatOnly}
+                onChange={(e) => setAdminChatOnly(e.target.checked)}
+                className="w-4 h-4 rounded text-rose-500 focus:ring-rose-500 accent-rose-500 cursor-pointer"
+              />
+              <span className="text-xs text-slate-655 dark:text-zinc-300 font-semibold">
+                {trans('Có thể chat với Admin')}
+              </span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer p-2.5 rounded-2xl border border-slate-200/60 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all select-none">
+              <input
+                type="checkbox"
+                checked={photoboothOnly}
+                onChange={(e) => setPhotoboothOnly(e.target.checked)}
+                className="w-4 h-4 rounded text-rose-500 focus:ring-rose-500 accent-rose-500 cursor-pointer"
+              />
+              <span className="text-xs text-slate-655 dark:text-zinc-300 font-semibold">
+                {trans('Studio Photobooth Haniu - In ảnh tặng kèm')}
+              </span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer p-2.5 rounded-2xl border border-slate-200/60 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all select-none">
+              <input
+                type="checkbox"
+                checked={featuredOnly}
+                onChange={(e) => setFeaturedOnly(e.target.checked)}
+                className="w-4 h-4 rounded text-rose-500 focus:ring-rose-500 accent-rose-500 cursor-pointer"
+              />
+              <span className="text-xs text-slate-655 dark:text-zinc-300 font-semibold">
+                {trans('Sản phẩm Nổi bật (Featured)')}
+              </span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer p-2.5 rounded-2xl border border-slate-200/60 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all select-none">
+              <input
+                type="checkbox"
+                checked={newOnly}
+                onChange={(e) => setNewOnly(e.target.checked)}
+                className="w-4 h-4 rounded text-rose-500 focus:ring-rose-500 accent-rose-500 cursor-pointer"
+              />
+              <span className="text-xs text-slate-655 dark:text-zinc-300 font-semibold">
+                {trans('Sản phẩm mới (New)')}
               </span>
             </label>
           </div>
@@ -335,7 +397,7 @@ export default function FilterSidebar({
           className="w-full flex items-center justify-between py-2 text-left focus:outline-none cursor-pointer"
         >
           <span className="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-            Khoảng giá (VNĐ)
+            {trans('Khoảng giá (VNĐ)')}
           </span>
           <span className={`text-slate-455 transition-transform duration-300 ${expanded.price ? 'rotate-180' : ''}`}>
             <Icon name="chevron-down" size={12} />
@@ -354,7 +416,7 @@ export default function FilterSidebar({
                     : 'border-slate-200/60 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
                 }`}
               >
-                Dưới 200k
+                {trans('Dưới 200k')}
               </button>
               <button
                 type="button"
@@ -365,7 +427,7 @@ export default function FilterSidebar({
                     : 'border-slate-200/60 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
                 }`}
               >
-                200k - 500k
+                {trans('200k - 500k')}
               </button>
               <button
                 type="button"
@@ -376,7 +438,7 @@ export default function FilterSidebar({
                     : 'border-slate-200/60 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
                 }`}
               >
-                500k - 1M
+                {trans('500k - 1M')}
               </button>
               <button
                 type="button"
@@ -387,7 +449,7 @@ export default function FilterSidebar({
                     : 'border-slate-200/60 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
                 }`}
               >
-                Trên 1M
+                {trans('Trên 1M')}
               </button>
             </div>
 
@@ -396,7 +458,7 @@ export default function FilterSidebar({
               <div className="relative w-1/2">
                 <input
                   type="number"
-                  placeholder="Từ"
+                  placeholder={trans('Từ')}
                   value={priceMin}
                   onChange={(e) =>
                     setPriceMin(e.target.value === '' ? '' : Number(e.target.value))
@@ -409,11 +471,11 @@ export default function FilterSidebar({
                   </span>
                 )}
               </div>
-              <span className="text-slate-350 dark:text-zinc-650 font-light">-</span>
+              <span className="text-slate-355 dark:text-zinc-650 font-light">-</span>
               <div className="relative w-1/2">
                 <input
                   type="number"
-                  placeholder="Đến"
+                  placeholder={trans('Đến')}
                   value={priceMax}
                   onChange={(e) =>
                     setPriceMax(e.target.value === '' ? '' : Number(e.target.value))

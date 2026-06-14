@@ -1,10 +1,12 @@
 'use client';
 
 import { useHomeLayoutStore } from '@/store/homeLayout';
+import { useTranslate } from '@/lib/translator';
 
 export default function CTASection() {
   const cta = useHomeLayoutStore((state) => state.cta);
   const isVisible = useHomeLayoutStore((state) => state.visibility.cta);
+  const translate = useTranslate();
 
   if (!isVisible) return null;
 
@@ -17,17 +19,17 @@ export default function CTASection() {
       
       <div className="relative z-10 max-w-2xl mx-auto space-y-6">
         <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight text-white drop-shadow-sm">
-          {cta.title}
+          {translate(cta.title)}
         </h2>
         <p className="text-xs md:text-sm text-rose-50/90 font-light max-w-lg mx-auto leading-relaxed tracking-wide">
-          {cta.subtitle}
+          {translate(cta.subtitle)}
         </p>
         <div className="pt-4">
           <a
             href={cta.buttonHref}
             className="inline-flex items-center justify-center rounded-2xl bg-white text-rose-600 hover:bg-rose-50/95 px-8.5 py-4 text-xs font-black uppercase tracking-widest shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-95 transition-all duration-300 cursor-pointer"
           >
-            {cta.buttonText}
+            {translate(cta.buttonText)}
           </a>
         </div>
       </div>

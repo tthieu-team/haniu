@@ -3,6 +3,7 @@
 import React from 'react';
 import Icon from '@/components/common/Icons';
 import { useHomeLayoutStore } from '@/store/homeLayout';
+import { useTranslate } from '@/lib/translator';
 
 interface ProductDeliveryPolicyProps {
   product: {
@@ -12,6 +13,7 @@ interface ProductDeliveryPolicyProps {
 
 export default function ProductDeliveryPolicy({ product }: ProductDeliveryPolicyProps) {
   const globalProductDetails = useHomeLayoutStore((state) => state.productDetails);
+  const trans = useTranslate();
 
   const globalConfig = globalProductDetails || {
     showDeliveryPolicy: true,
@@ -53,14 +55,14 @@ export default function ProductDeliveryPolicy({ product }: ProductDeliveryPolicy
   return (
     <div className="bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/60 rounded-3xl p-6 space-y-4 shadow-sm hover:shadow-md transition-all duration-300">
       <h3 className="font-extrabold text-xs tracking-wider uppercase text-slate-450 dark:text-zinc-400 flex items-center gap-2">
-        <Icon name="🚚" size={14} className="text-rose-500" /> Chính sách giao hàng
+        <Icon name="🚚" size={14} className="text-rose-500" /> {trans("Chính sách giao hàng")}
       </h3>
       <div className="space-y-3.5">
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-2 border-b border-slate-100 dark:border-zinc-800/80">
           {finalConfig.lines.map((line: any, idx: number) => (
             <div key={idx} className="text-xs">
-              <dt className="text-slate-450 font-semibold">{line.label}</dt>
-              <dd className="text-sm font-extrabold text-slate-700 dark:text-zinc-200 mt-0.5">{line.value}</dd>
+              <dt className="text-slate-450 font-semibold">{trans(line.label)}</dt>
+              <dd className="text-sm font-extrabold text-slate-700 dark:text-zinc-200 mt-0.5">{trans(line.value)}</dd>
             </div>
           ))}
         </dl>
@@ -69,7 +71,7 @@ export default function ProductDeliveryPolicy({ product }: ProductDeliveryPolicy
           {finalConfig.bulletPoints.map((point: string, idx: number) => (
             <div key={idx} className="flex items-start gap-2.5 text-xs font-semibold text-slate-650 dark:text-zinc-300">
               <Icon name="check" size={14} className="text-emerald-500 shrink-0 mt-0.5" />
-              <span className="leading-relaxed">{point}</span>
+              <span className="leading-relaxed">{trans(point)}</span>
             </div>
           ))}
         </div>

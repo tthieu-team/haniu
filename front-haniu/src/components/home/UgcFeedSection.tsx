@@ -2,11 +2,15 @@ import { useEffect } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import { useUgcStore } from '@/store/ugc';
 import Icon from '@/components/common/Icons';
+import { useLanguage } from '@/providers/LanguageProvider';
+import { useTranslate } from '@/lib/translator';
 
 export default function UgcFeedSection() {
   const ugc = useHomeLayoutStore((state) => state.ugcFeed);
   const isVisible = useHomeLayoutStore((state) => state.visibility.ugcFeed);
   const { activeUgcItems, fetchActiveUgcItems } = useUgcStore();
+  const { t } = useLanguage();
+  const trans = useTranslate();
 
   useEffect(() => {
     if (isVisible) {
@@ -24,17 +28,13 @@ export default function UgcFeedSection() {
         {/* Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto px-4">
           <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
-            <Icon name="✨" size={10} className="animate-pulse" /> INSTAGRAM MOMENTS
+            <Icon name="✨" size={10} className="animate-pulse" /> {trans(ugc?.badge || 'Khoảnh khắc của Haniu')}
           </span>
           <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
-            Khoảnh Khắc{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-amber-500">
-              Của Haniu
-            </span>
+            {trans(ugc?.title || 'Khoảnh Khắc Của Haniu')}
           </h2>
           <p className="text-xs md:text-sm text-slate-500 dark:text-zinc-400 font-light leading-relaxed">
-            Chia sẻ khoảnh khắc nhận quà của bạn cùng hashtag{' '}
-            <span className="text-rose-500 font-extrabold">{ugc.hashtag}</span> để nhận ngay voucher <span className="font-extrabold text-slate-800 dark:text-zinc-200">100.000đ</span>
+            {trans(ugc?.hashtag || '#mygiftmoment')}
           </p>
         </div>
 

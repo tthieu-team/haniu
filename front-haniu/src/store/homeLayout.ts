@@ -68,9 +68,17 @@ export interface CategoryItem {
   count: string;
 }
 
+export interface FeaturedProductsConfig {
+  badge: string;
+  title: string;
+  subtitle: string;
+  buttonText: string;
+}
+
 export interface CategoriesConfig {
   title: string;
   subtitle: string;
+  badge?: string;
   items: CategoryItem[];
 }
 
@@ -104,6 +112,9 @@ export interface CollectionItem {
 export interface CollectionsConfig {
   title: string;
   subtitle: string;
+  badge?: string;
+  limitedTag?: string;
+  buyNowText?: string;
   items: CollectionItem[];
 }
 
@@ -120,6 +131,7 @@ export interface SocialProofConfig {
   title: string;
   ratingScore: string;
   reviewsCount: string;
+  badge?: string;
   reviews: ReviewItem[];
 }
 
@@ -133,6 +145,7 @@ export interface HowItWorksStep {
 export interface HowItWorksConfig {
   title: string;
   subtitle: string;
+  badge?: string;
   steps: HowItWorksStep[];
 }
 
@@ -145,6 +158,7 @@ export interface UgcItem {
 export interface UgcFeedConfig {
   title: string;
   hashtag: string;
+  badge?: string;
   items: UgcItem[];
 }
 
@@ -160,6 +174,8 @@ export interface BlogItem {
 export interface BlogConfig {
   title: string;
   subtitle: string;
+  badge?: string;
+  buttonText?: string;
   items: BlogItem[];
 }
 
@@ -279,6 +295,7 @@ export interface HomeLayoutState {
   trustBar: TrustBarConfig;
   brandIntro: BrandIntroConfig;
   categories: CategoriesConfig;
+  featuredProducts: FeaturedProductsConfig;
   benefits: BenefitsConfig;
   videoBanner: VideoBannerConfig;
   collections: CollectionsConfig;
@@ -306,6 +323,7 @@ export interface HomeLayoutState {
   updateTrustBar: (config: Partial<TrustBarConfig>) => void;
   updateBrandIntro: (config: Partial<BrandIntroConfig>) => void;
   updateCategories: (config: Partial<CategoriesConfig>) => void;
+  updateFeaturedProducts: (config: Partial<FeaturedProductsConfig>) => void;
   updateBenefits: (config: Partial<BenefitsConfig>) => void;
   updateVideoBanner: (config: Partial<VideoBannerConfig>) => void;
   updateCollections: (config: Partial<CollectionsConfig>) => void;
@@ -449,12 +467,19 @@ export const DEFAULT_STATE = {
   categories: {
     title: "Bộ Sưu Tập Quà Tặng Theo Dịp",
     subtitle: "Lựa chọn món quà hoàn hảo nhất cho những cột mốc ý nghĩa trong cuộc sống",
+    badge: "Chọn theo dịp lễ",
     items: [
       { name: "Quà Sinh Nhật", slug: "sinh-nhat", image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=500&auto=format&fit=crop&q=80", count: "24+ set quà" },
       { name: "Quà Tốt Nghiệp", slug: "tot-nghiep", image: "https://images.unsplash.com/photo-1627556704302-624286467c65?w=600&auto=format&fit=crop&q=80", count: "12+ set quà" },
       { name: "Quà Cặp Đôi", slug: "cap-doi", image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500&auto=format&fit=crop&q=80", count: "18+ set quà" },
       { name: "Quà Doanh Nghiệp", slug: "doanh-nghiep", image: "https://images.unsplash.com/photo-1512909006721-3d6018887383?w=500&auto=format&fit=crop&q=80", count: "30+ set quà" },
     ],
+  },
+  featuredProducts: {
+    badge: "Set quà bán chạy",
+    title: "Sản phẩm nổi bật",
+    subtitle: "Những set quà được yêu thích nhất thiết kế chỉn chu riêng cho bạn",
+    buttonText: "Xem tất cả sản phẩm"
   },
   benefits: {
     title: "Trải Nghiệm Dịch Vụ Khác Biệt Tại Haniu",
@@ -476,6 +501,9 @@ export const DEFAULT_STATE = {
   collections: {
     title: "Bộ Sưu Tập Độc Quyền",
     subtitle: "Dòng sản phẩm được thiết kế theo mùa và xu hướng nghệ thuật đương đại",
+    badge: "Bộ sưu tập độc quyền",
+    limitedTag: "Limited Edition",
+    buyNowText: "Mua ngay",
     items: [
       {
         title: "Summer Breeze Collection",
@@ -501,6 +529,7 @@ export const DEFAULT_STATE = {
     title: "Cảm Nhận Từ Khách Hàng",
     ratingScore: "4.9",
     reviewsCount: "1.250+",
+    badge: "Khách hàng nói gì về Haniu",
     reviews: [
       { id: "r1", name: "Nguyễn Thu Trang", role: "Khách mua Quà Sinh Nhật", content: "Mình rất bất ngờ về chất lượng khắc tên trên ly sứ. Rất sắc nét và tinh tế! Bạn gái mình nhận quà thích lắm, khóc luôn vì xúc động.", rating: 5, avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80" },
       { id: "r2", name: "Trần Anh Tuấn", role: "Giám đốc nhân sự TechCorp", content: "Đặt 200 set quà doanh nghiệp khắc logo công ty cho đối tác dịp lễ, Haniu làm siêu nhanh, đóng gói sang trọng, đối tác ai cũng khen chu đáo.", rating: 5, avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&auto=format&fit=crop&q=80" },
@@ -510,8 +539,9 @@ export const DEFAULT_STATE = {
   howItWorks: {
     title: "Quy Trình Tạo Nên Món Quà Độc Bản",
     subtitle: "Từ ý tưởng đến món quà hoàn thiện, mỗi chi tiết đều được chăm chút để mang đến trải nghiệm trao tặng đầy ý nghĩa.",
+    badge: "Quy trình dịch vụ",
     steps: [
-      { number: "01", title: "Chọn Mẫu Quà", desc: "Khám phá bộ sưu tập quà tặng được tuyển chọn kỹ lưỡng hoặc tự do kết hợp các sản phẩm yêu thích để tạo nên set quà mang dấu ấn riêng.", image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&auto=format&fit=crop&q=80" },
+      { number: "01", title: "Chọn Mẫu Quà", desc: "Khám phá bộ sưu tập quà tặng được tuyển chọn kỹ lưu hoặc tự do kết hợp các sản phẩm yêu thích để tạo nên set quà mang dấu ấn riêng.", image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&auto=format&fit=crop&q=80" },
       { number: "02", title: "Cá Nhân Hóa", desc: "Thêm tên, ngày kỷ niệm hoặc thông điệp đặc biệt. Công nghệ khắc laser tinh xảo giúp mỗi món quà trở nên duy nhất.", image: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=600&auto=format&fit=crop&q=80" },
       { number: "03", title: "Xác Nhận Thiết Kế", desc: "Nhận bản mô phỏng trực quan từ đội ngũ thiết kế và duyệt trước khi sản phẩm được chế tác chính thức.", image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=80" },
       { number: "04", title: "Nhận Quà Hoàn Mỹ", desc: "Món quà được hoàn thiện, đóng gói sang trọng cùng thiệp viết tay và giao đến tận nơi với sự chỉn chu trong từng chi tiết.", image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600&auto=format&fit=crop&q=80" },
@@ -520,6 +550,7 @@ export const DEFAULT_STATE = {
   ugcFeed: {
     title: "Khoảnh Khắc Của Haniu",
     hashtag: "#mygiftmoment",
+    badge: "Khoảnh khắc của Haniu",
     items: [
       { id: "u1", imageUrl: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=400&auto=format&fit=crop&q=80", link: "https://instagram.com" },
       { id: "u2", imageUrl: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&auto=format&fit=crop&q=80", link: "https://instagram.com" },
@@ -532,6 +563,8 @@ export const DEFAULT_STATE = {
   blog: {
     title: "Góc Chia Sẻ Kinh Nghiệm",
     subtitle: "Những lời khuyên bổ ích giúp bạn lựa chọn và trao gửi những lời nhắn nhủ tuyệt vời nhất",
+    badge: "Góc chia sẻ kinh nghiệm",
+    buttonText: "Xem tất cả bài viết",
     items: [
       {
         id: "b1",
@@ -734,6 +767,11 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
           categories: { ...state.categories, ...config },
         })),
 
+      updateFeaturedProducts: (config) =>
+        set((state) => ({
+          featuredProducts: { ...state.featuredProducts, ...config },
+        })),
+
       updateBenefits: (config) =>
         set((state) => ({
           benefits: { ...state.benefits, ...config },
@@ -838,6 +876,7 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
             trustBar: state.trustBar,
             brandIntro: state.brandIntro,
             categories: state.categories,
+            featuredProducts: state.featuredProducts,
             benefits: state.benefits,
             videoBanner: state.videoBanner,
             collections: state.collections,

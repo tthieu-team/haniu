@@ -2,10 +2,12 @@
 
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
+import { useTranslate } from '@/lib/translator';
 
 export default function TrustBar() {
   const trust = useHomeLayoutStore((state) => state.trustBar);
   const isVisible = useHomeLayoutStore((state) => state.visibility.trustBar);
+  const translate = useTranslate();
 
   if (!isVisible) return null;
 
@@ -27,11 +29,11 @@ export default function TrustBar() {
               </span>
               <div className="text-left space-y-0.5 sm:space-y-1">
                 <h4 className="text-[10px] sm:text-xs font-black text-slate-800 dark:text-zinc-100 uppercase tracking-wider sm:tracking-widest group-hover:text-rose-500 transition-colors duration-300">
-                  {item.title || item.text}
+                  {translate(item.title || item.text)}
                 </h4>
                 {item.desc && (
                   <p className="text-[9px] sm:text-[10px] text-slate-500 dark:text-zinc-400 font-light tracking-wide leading-tight sm:leading-relaxed group-hover:text-slate-600 dark:group-hover:text-zinc-300 transition-colors duration-300">
-                    {item.desc}
+                    {translate(item.desc)}
                   </p>
                 )}
               </div>

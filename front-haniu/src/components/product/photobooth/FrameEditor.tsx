@@ -5,6 +5,7 @@ import Icon from '@/components/common/Icons';
 import { CapturedPhoto, PhotoboothConfig, Sticker } from './types';
 import { generateComposition } from './composition';
 import { playSound } from './sounds';
+import { useTranslate } from '@/lib/translator';
 
 interface FrameEditorProps {
   photos: CapturedPhoto[];
@@ -31,6 +32,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const trans = useTranslate();
   // Local state to modify config copy
   const [localConfig, setLocalConfig] = useState<PhotoboothConfig>({ ...config });
   const [liveUrl, setLiveUrl] = useState('');
@@ -139,7 +141,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
           className="h-9 px-4 rounded-full bg-card-bg border border-border-color text-foreground hover:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-all font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 pointer-events-auto cursor-pointer shadow-xs"
         >
           <Icon name="arrow-left" size={12} className="text-primary-color" />
-          <span>Hủy bỏ</span>
+          <span>{trans('Hủy bỏ')}</span>
         </button>
 
         <button
@@ -150,7 +152,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
           className="px-5 py-2 rounded-xl bg-rose-600 dark:bg-rose-500 text-white text-[10px] font-black uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all flex items-center gap-1 shadow-md cursor-pointer pointer-events-auto"
         >
           <Icon name="check" size={12} />
-          <span>Áp dụng khung & chữ</span>
+          <span>{trans('Áp dụng khung & chữ')}</span>
         </button>
       </div>
 
@@ -206,7 +208,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
         ) : (
           <div className="flex flex-col items-center justify-center gap-2">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500" />
-            <span className="text-[10px] text-muted-color uppercase tracking-wider font-bold">Đang vẽ bản xem trước...</span>
+            <span className="text-[10px] text-muted-color uppercase tracking-wider font-bold">{trans('Đang vẽ bản xem trước...')}</span>
           </div>
         )}
       </div>
@@ -216,14 +218,14 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
         <div className="border-b border-border-color pb-3">
           <h3 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-1.5 font-sans">
             <Icon name="palette" size={14} className="text-rose-500" />
-            Khung & Nền
+            {trans('Khung & Nền')}
           </h3>
         </div>
 
         {/* 1. Border Padding spacing slider */}
         <div className="space-y-2">
           <div className="flex justify-between items-center text-[10px] font-bold uppercase text-muted-color tracking-wide">
-            <span>Độ dày viền</span>
+            <span>{trans('Độ dày viền')}</span>
             <span className="text-rose-500 font-mono font-bold">
               {sliderBorderSize}px
             </span>
@@ -245,7 +247,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
 
         {/* 2. Color Swatches */}
         <div className="space-y-2.5">
-          <label className="text-[10px] font-bold uppercase text-muted-color tracking-wide block">Màu viền</label>
+          <label className="text-[10px] font-bold uppercase text-muted-color tracking-wide block">{trans('Màu viền')}</label>
           <div className="grid grid-cols-4 gap-2">
             {TRENDY_COLORS.map((color) => (
               <button
@@ -256,10 +258,10 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
                     : 'border-border-color'
                   }`}
                 style={{ backgroundColor: color.value }}
-                title={color.name}
+                title={trans(color.name)}
               >
-                {color.value === '#ffffff' && <span className="text-slate-400 text-[8px]">Trắng</span>}
-                {color.value === '#18181b' && <span className="text-zinc-400 text-[8px]">Đen</span>}
+                {color.value === '#ffffff' && <span className="text-slate-400 text-[8px]">{trans('Trắng')}</span>}
+                {color.value === '#18181b' && <span className="text-zinc-400 text-[8px]">{trans('Đen')}</span>}
                 {localConfig.frameColor === color.value && !localConfig.backgroundImage && (
                   <div className="absolute inset-0 bg-black/10 rounded-lg flex items-center justify-center text-rose-500">
                     <Icon name="check" size={14} className="font-bold stroke-[3px]" />
@@ -284,7 +286,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
 
         {/* 3. Predefined Background Templates */}
         <div className="space-y-2.5">
-          <label className="text-[10px] font-bold uppercase text-muted-color tracking-wide block">Ảnh nền thiết kế sẵn</label>
+          <label className="text-[10px] font-bold uppercase text-muted-color tracking-wide block">{trans('Ảnh nền thiết kế sẵn')}</label>
           <div className="grid grid-cols-3 gap-2">
             {[
               { name: 'Gấu Haniu 🧸', url: '/image/bear_bg.png' },
@@ -323,7 +325,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
                   </div>
                 )}
                 <span className="relative z-10 text-[7px] font-black text-white bg-black/55 px-1 py-0.5 rounded-sm line-clamp-1 select-none pointer-events-none">
-                  {bg.name}
+                  {trans(bg.name)}
                 </span>
               </button>
             ))}
@@ -334,7 +336,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
 
         {/* 3. Custom Background Image Upload */}
         <div className="space-y-2.5">
-          <label className="text-[10px] font-bold uppercase text-muted-color tracking-wide block">Tải ảnh nền riêng</label>
+          <label className="text-[10px] font-bold uppercase text-muted-color tracking-wide block">{trans('Tải ảnh nền riêng')}</label>
 
           {localConfig.backgroundImage && !localConfig.backgroundImage.startsWith('/image/') ? (
             <div className="p-2.5 bg-rose-500/5 border border-rose-500/20 rounded-xl flex items-center justify-between gap-3">
@@ -344,12 +346,12 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
                   className="w-8 h-8 object-cover rounded-lg border border-border-color"
                   alt="Custom background selected"
                 />
-                <span className="text-[9px] font-bold text-rose-500">Đã nhận nền riêng</span>
+                <span className="text-[9px] font-bold text-rose-500">{trans('Đã nhận nền riêng')}</span>
               </div>
               <button
                 onClick={clearBgImage}
                 className="w-6 h-6 rounded-full bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white flex items-center justify-center transition-all cursor-pointer"
-                title="Xóa nền"
+                title={trans('Xóa nền')}
               >
                 <Icon name="close" size={10} />
               </button>
@@ -357,7 +359,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
           ) : (
             <label className="w-full h-16 border-2 border-dashed border-border-color hover:border-rose-500 rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer bg-slate-50/[0.02] hover:bg-rose-500/[0.01] transition-all p-2 text-center">
               <Icon name="image" size={18} className="text-slate-400" />
-              <span className="text-[9px] font-bold text-slate-500">Tải ảnh lên (.png, .jpg)</span>
+              <span className="text-[9px] font-bold text-slate-500">{trans('Tải ảnh lên (.png, .jpg)')}</span>
               <input
                 type="file"
                 accept="image/*"
@@ -374,16 +376,16 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
         <div className="space-y-4">
           <div className="border-t border-border-color pt-3">
             <label className="text-[10px] font-black uppercase text-foreground tracking-wider flex items-center gap-1">
-              <span>✍️ Thiết Kế Chữ Ký</span>
+              <span>{trans('✍️ Thiết Kế Chữ Ký')}</span>
             </label>
           </div>
           
           <div className="space-y-2.5">
             <div className="space-y-1">
-              <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">Nội dung chữ ký</label>
+              <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">{trans('Nội dung chữ ký')}</label>
               <input
                 type="text"
-                placeholder="Ví dụ: HANIU STUDIO"
+                placeholder={trans('Ví dụ: HANIU STUDIO')}
                 value={localConfig.userName || ''}
                 onChange={(e) => setLocalConfig(prev => ({ ...prev, userName: e.target.value }))}
                 className="w-full bg-background border border-border-color rounded-xl px-3 h-9 text-foreground text-xs focus:outline-none focus:border-rose-500 transition-all font-sans font-bold"
@@ -392,14 +394,14 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
 
             {/* Font Family selector for signature */}
             <div className="space-y-1">
-              <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">Font Chữ ký</label>
+              <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">{trans('Font Chữ ký')}</label>
               <select
                 value={localConfig.userNameFont || 'cormorant-garamond'}
                 onChange={(e) => setLocalConfig(prev => ({ ...prev, userNameFont: e.target.value }))}
                 className="w-full bg-background border border-border-color rounded-xl px-2.5 h-9 text-foreground text-xs focus:outline-none focus:border-rose-500 transition-all font-bold"
               >
                 {AVAILABLE_FONTS.map(f => (
-                  <option key={f.id} value={f.id}>{f.name}</option>
+                  <option key={f.id} value={f.id}>{trans(f.name)}</option>
                 ))}
               </select>
             </div>
@@ -407,7 +409,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
             {/* Font Size slider for signature */}
             <div className="space-y-1">
               <div className="flex justify-between text-[9px] font-bold uppercase text-muted-color tracking-wide">
-                <span>Cỡ chữ ký</span>
+                <span>{trans('Cỡ chữ ký')}</span>
                 <span className="text-rose-500 font-mono">{localConfig.userNameSize || 36}px</span>
               </div>
               <input
@@ -424,7 +426,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
             {/* Horizontal Position (X) for signature */}
             <div className="space-y-1">
               <div className="flex justify-between text-[9px] font-bold uppercase text-muted-color tracking-wide">
-                <span>Vị trí ngang (Trái - Phải)</span>
+                <span>{trans('Vị trí ngang (Trái - Phải)')}</span>
                 <span className="text-rose-500 font-mono">{localConfig.userNameX !== undefined ? Math.round(localConfig.userNameX) : 50}%</span>
               </div>
               <input
@@ -441,7 +443,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
             {/* Vertical Position (Y) for signature */}
             <div className="space-y-1">
               <div className="flex justify-between text-[9px] font-bold uppercase text-muted-color tracking-wide">
-                <span>Vị trí dọc (Trên - Dưới)</span>
+                <span>{trans('Vị trí dọc (Trên - Dưới)')}</span>
                 <span className="text-rose-500 font-mono">
                   {localConfig.userNameY !== undefined 
                     ? Math.round(localConfig.userNameY) 
@@ -463,7 +465,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
 
             {/* Color selector for signature */}
             <div className="space-y-1">
-              <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">Màu chữ ký</label>
+              <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">{trans('Màu chữ ký')}</label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -482,7 +484,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-[10px] font-black uppercase text-foreground tracking-wider flex items-center gap-1">
-                <span>📅 Ngày Chụp</span>
+                <span>{trans('📅 Ngày Chụp')}</span>
               </label>
               <button
                 onClick={() => setLocalConfig(prev => ({ ...prev, showDate: !prev.showDate }))}
@@ -496,14 +498,14 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
               <div className="space-y-2.5 bg-slate-50/50 dark:bg-zinc-900/40 p-2.5 rounded-2xl border border-border-color/60">
                 {/* Font Family selector for date */}
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">Font Ngày</label>
+                  <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">{trans('Font Ngày')}</label>
                   <select
                     value={localConfig.dateFont || 'be-vietnam-pro'}
                     onChange={(e) => setLocalConfig(prev => ({ ...prev, dateFont: e.target.value }))}
                     className="w-full bg-background border border-border-color rounded-xl px-2.5 h-8 text-foreground text-xs focus:outline-none focus:border-rose-500 transition-all font-bold"
                   >
                     {AVAILABLE_FONTS.map(f => (
-                      <option key={f.id} value={f.id}>{f.name}</option>
+                      <option key={f.id} value={f.id}>{trans(f.name)}</option>
                     ))}
                   </select>
                 </div>
@@ -511,7 +513,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
                 {/* Font Size slider for date */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-[9px] font-bold uppercase text-muted-color tracking-wide">
-                    <span>Cỡ chữ ngày</span>
+                    <span>{trans('Cỡ chữ ngày')}</span>
                     <span className="text-rose-500 font-mono">{localConfig.dateSize || 18}px</span>
                   </div>
                   <input
@@ -528,7 +530,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
                 {/* Horizontal Position (X) for Date */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-[9px] font-bold uppercase text-muted-color tracking-wide">
-                    <span>Vị trí ngang</span>
+                    <span>{trans('Vị trí ngang')}</span>
                     <span className="text-rose-500 font-mono">{localConfig.dateX !== undefined ? Math.round(localConfig.dateX) : 50}%</span>
                   </div>
                   <input
@@ -545,7 +547,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
                 {/* Vertical Position (Y) for Date */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-[9px] font-bold uppercase text-muted-color tracking-wide">
-                    <span>Vị trí dọc</span>
+                    <span>{trans('Vị trí dọc')}</span>
                     <span className="text-rose-500 font-mono">
                       {localConfig.dateY !== undefined 
                         ? Math.round(localConfig.dateY) 
@@ -567,7 +569,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
 
                 {/* Color selector for date */}
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">Màu chữ ngày</label>
+                  <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">{trans('Màu chữ ngày')}</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="color"

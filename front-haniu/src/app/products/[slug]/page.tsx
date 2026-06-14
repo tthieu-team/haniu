@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { productService } from '@/services/product.service';
+import { cookies } from 'next/headers';
 import ProductDetailClient from './ProductDetailClient';
 
 export const revalidate = 60; // Revalidate static cache every 60 seconds
@@ -98,7 +99,9 @@ const MOCK_PRODUCTS: Record<string, Product> = {
 
 async function getProduct(slug: string): Promise<Product | null> {
   try {
-    const data = await productService.getProductBySlug(slug);
+    const cookieStore = await cookies();
+    const lang = cookieStore.get('haniu_lang')?.value || 'vi';
+    const data = await productService.getProductBySlug(slug, lang);
     if (data) {
       return {
         ...data,

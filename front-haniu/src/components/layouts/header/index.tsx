@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Logo from './Logo';
 import Navbar from './Navbar';
+import LanguageSelector from './LanguageSelector';
 import Icon from '@/components/common/Icons';
 import { useHomeLayoutStore, DEFAULT_STATE } from '@/store/homeLayout';
 import { useAuthStore } from '@/store/auth';
@@ -14,9 +15,17 @@ import { useWishlistStore } from '@/store/wishlist';
 import { authService } from '@/services/auth.service';
 import { productService } from '@/services/product.service';
 import { getFullImageUrl } from '@/lib/api';
+import { useLanguage } from '@/providers/LanguageProvider';
+import { useTranslate } from '@/lib/translator';
 
 export default function Header() {
   const router = useRouter();
+  const { t } = useLanguage();
+  const trans = useTranslate();
+
+  const getTranslatedName = (name: string) => {
+    return trans(name);
+  };
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const isHome = pathname === '/';
@@ -188,9 +197,9 @@ export default function Header() {
             href={announcementBar.linkHref || '#products'}
             className="hover:underline flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 cursor-pointer leading-relaxed"
           >
-            <span>{announcementBar.text}</span>
+            <span>{trans(announcementBar.text)}</span>
             {announcementBar.linkText && (
-              <span className="underline font-bold">{announcementBar.linkText} →</span>
+              <span className="underline font-bold">{trans(announcementBar.linkText)} →</span>
             )}
           </a>
         </div>
@@ -212,7 +221,7 @@ export default function Header() {
               <Icon name="search" size={16} className="text-slate-400 shrink-0" />
               <input
                 type="text"
-                placeholder="Tìm kiếm set quà..."
+                placeholder={trans("Tìm kiếm set quà...")}
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
                 autoFocus
@@ -238,7 +247,7 @@ export default function Header() {
                 }}
                 className="text-xs font-bold text-slate-500 hover:text-rose-500 dark:text-zinc-400 dark:hover:text-rose-400 px-2 py-1 shrink-0 cursor-pointer"
               >
-                Hủy
+                {trans("Hủy")}
               </button>
 
               {/* Suggestions Dropdown for Mobile Search Overlay */}
@@ -247,16 +256,16 @@ export default function Header() {
                   {loadingSuggestions ? (
                     <div className="flex items-center justify-center p-6 text-xs text-slate-450 dark:text-zinc-500 gap-2">
                       <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-rose-500" />
-                      <span>Đang tìm kiếm...</span>
+                      <span>{trans("Đang tìm kiếm...")}</span>
                     </div>
                   ) : suggestions.length === 0 ? (
                     <div className="p-4 text-center text-xs text-slate-450 dark:text-zinc-500">
-                      Không tìm thấy kết quả phù hợp
+                      {trans("Không tìm thấy kết quả phù hợp")}
                     </div>
                   ) : (
                     <>
                       <div className="text-[9px] font-extrabold text-slate-400 dark:text-zinc-500 px-3 py-1 uppercase tracking-wider">
-                        Gợi ý sản phẩm ({suggestions.length})
+                        {trans("Gợi ý sản phẩm")} ({suggestions.length})
                       </div>
                       {suggestions.map((product) => {
                         const priceVal = product.salePrice || product.basePrice || product.price || 0;
@@ -301,7 +310,6 @@ export default function Header() {
           </div>
           {/* Right: Search, Account, Wishlist, Cart */}
           <div className="flex items-center gap-2 sm:gap-3.5 lg:gap-5">
-            {/* Search Bar Form (Desktop Only) */}
             <form
               ref={searchRef}
               onSubmit={handleSearchSubmit}
@@ -310,7 +318,7 @@ export default function Header() {
               <Icon name="search" size={13} className="absolute left-3 text-slate-400 dark:text-zinc-500 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Tìm kiếm set quà..."
+                placeholder={trans("Tìm kiếm set quà...")}
                 value={searchVal}
                 onChange={(e) => {
                   setSearchVal(e.target.value);
@@ -326,7 +334,7 @@ export default function Header() {
                     setSearchVal('');
                     setSuggestions([]);
                   }}
-                  className="absolute right-3 text-slate-450 dark:text-zinc-500 hover:text-rose-500 text-[10px] cursor-pointer"
+                  className="absolute right-3 text-slate-455 dark:text-zinc-500 hover:text-rose-500 text-[10px] cursor-pointer"
                 >
                   ✕
                 </button>
@@ -338,16 +346,16 @@ export default function Header() {
                   {loadingSuggestions ? (
                     <div className="flex items-center justify-center p-6 text-xs text-slate-400 dark:text-zinc-500 gap-2">
                       <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-rose-500" />
-                      <span>Đang tìm kiếm...</span>
+                      <span>{trans("Đang tìm kiếm...")}</span>
                     </div>
                   ) : suggestions.length === 0 ? (
                     <div className="p-4 text-center text-xs text-slate-400 dark:text-zinc-500">
-                      Không tìm thấy kết quả phù hợp
+                      {trans("Không tìm thấy kết quả phù hợp")}
                     </div>
                   ) : (
                     <div className="space-y-1">
                       <div className="text-[9px] font-extrabold text-slate-400 dark:text-zinc-500 px-3 py-1 uppercase tracking-wider">
-                        Gợi ý sản phẩm ({suggestions.length})
+                        {trans("Gợi ý sản phẩm")} ({suggestions.length})
                       </div>
                       <div className="max-h-80 overflow-y-auto pr-1 scrollbar-thin">
                         {suggestions.map((product) => {
@@ -369,10 +377,10 @@ export default function Header() {
                                   src={getFullImageUrl(product.thumbnailUrl || product.media?.find((m: any) => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://placehold.co/100')}
                                   alt={product.name}
                                   className="w-full h-full object-cover"
-                                />
+                                  />
                                 {isOutOfStock && (
                                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[7px] text-white font-bold uppercase">
-                                    Hết hàng
+                                    {trans("Hết hàng")}
                                   </div>
                                 )}
                               </div>
@@ -389,12 +397,12 @@ export default function Header() {
                                   </span>
                                   {product.isCustomizable && (
                                     <span className="text-[8px] text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/20 px-1 py-0.5 rounded-sm font-bold flex items-center gap-0.5 shrink-0">
-                                      🎨 Khắc tên
+                                      🎨 {trans("Khắc tên")}
                                     </span>
                                   )}
                                   {isLowStock && (
                                     <span className="text-[8px] text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/20 px-1 py-0.5 rounded-sm font-black shrink-0">
-                                      Sắp hết
+                                      {trans("Sắp hết")}
                                     </span>
                                   )}
                                 </div>
@@ -423,7 +431,7 @@ export default function Header() {
                         type="submit"
                         className="w-full text-center block text-[10px] font-bold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 py-2 border-t border-slate-200/80 dark:border-zinc-800/80 mt-1 cursor-pointer transition-colors"
                       >
-                        Xem tất cả kết quả cho "{searchVal}"
+                        {trans("Xem tất cả kết quả cho")} "{searchVal}"
                       </button>
                     </div>
                   )}
@@ -435,7 +443,7 @@ export default function Header() {
             <Link
               href="/wishlist"
               className="hidden md:flex p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors items-center relative cursor-pointer"
-              title="Danh sách yêu thích"
+              title={trans("Danh sách yêu thích")}
             >
               <Icon name="heart" size={16} className="text-rose-500" />
               {mounted && wishlistItems.length > 0 && (
@@ -450,7 +458,7 @@ export default function Header() {
               type="button"
               onClick={() => setShowMobileSearch(true)}
               className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors flex min-[991px]:hidden items-center cursor-pointer text-slate-800 dark:text-zinc-100"
-              title="Tìm kiếm"
+              title={trans("Tìm kiếm")}
             >
               <Icon name="search" size={16} />
             </button>
@@ -459,7 +467,7 @@ export default function Header() {
             <Link
               href="/cart"
               className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors flex items-center relative cursor-pointer"
-              title="Giỏ hàng"
+              title={trans("Giỏ hàng")}
             >
               <Icon name="cart" size={16} />
               <span className="absolute -top-1.5 -right-1 bg-amber-500 text-white text-[8px] font-black rounded-full h-4 w-4 flex items-center justify-center border border-white dark:border-zinc-950 shadow-sm">
@@ -471,10 +479,15 @@ export default function Header() {
             <button
               onClick={toggleTheme}
               className="hidden md:flex p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors items-center cursor-pointer"
-              title={mounted && theme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}
+              title={mounted && theme === 'dark' ? trans("Chế độ sáng") : trans("Chế độ tối")}
             >
               <Icon name={mounted && theme === 'dark' ? 'sun' : 'moon'} size={16} />
             </button>
+
+            {/* Language Selector (Desktop Only) */}
+            <div className="hidden md:block">
+              <LanguageSelector />
+            </div>
 
             {/* User Account / Login (Desktop Only) */}
             {isAuthenticated ? (
@@ -488,12 +501,12 @@ export default function Header() {
                       {user?.role === 'ADMIN' ? (
                         <>
                           <Icon name="shield" size={10} className="text-amber-500" />
-                          <span>Quản trị viên</span>
+                          <span>{trans("Quản trị viên")}</span>
                         </>
                       ) : (
                         <>
                           <Icon name="user" size={10} />
-                          <span>Khách hàng</span>
+                          <span>{trans("Khách hàng")}</span>
                         </>
                       )}
                     </span>
@@ -502,14 +515,14 @@ export default function Header() {
                         href="/admin/products"
                         className="text-xs font-semibold px-2 py-1.5 rounded-xl hover:bg-rose-500/[0.04] dark:hover:bg-rose-500/[0.06] text-slate-700 dark:text-zinc-300 border border-transparent hover:border-rose-100/50 dark:hover:border-rose-950/20"
                       >
-                        Quản trị Admin
+                        {trans("Quản trị Admin")}
                       </Link>
                     )}
                     <button
                       onClick={() => authService.logout()}
                       className="text-left text-xs font-semibold text-rose-500 hover:text-rose-600 px-2 py-1.5 rounded-xl hover:bg-rose-500/[0.06] dark:hover:bg-rose-950/30 border border-transparent hover:border-rose-100/50 dark:hover:border-rose-950/20 cursor-pointer"
                     >
-                      Đăng xuất
+                      {trans("Đăng xuất")}
                     </button>
                   </div>
                 </div>
@@ -518,7 +531,7 @@ export default function Header() {
               <Link
                 href="/auth/login"
                 className="hidden md:flex p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors items-center cursor-pointer"
-                title="Đăng nhập"
+                title={trans("Đăng nhập")}
               >
                 <Icon name="user" size={16} />
               </Link>
@@ -547,7 +560,7 @@ export default function Header() {
                   onClick={() => setMobileOpen(false)}
                   className="text-xs font-bold hover:text-rose-500 px-2 py-2 border-b border-slate-100 dark:border-zinc-900/40 transition-all"
                 >
-                  {link.name}
+                  {getTranslatedName(link.name)}
                 </Link>
               ))}
 
@@ -559,7 +572,7 @@ export default function Header() {
                   className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 text-slate-700 dark:text-zinc-350 border border-slate-200/80 dark:border-zinc-800/80 cursor-pointer"
                 >
                   <Icon name={mounted && theme === 'dark' ? 'sun' : 'moon'} size={13} />
-                  <span>{mounted && theme === 'dark' ? 'Sáng' : 'Tối'}</span>
+                  <span>{mounted && theme === 'dark' ? trans("Sáng") : trans("Tối")}</span>
                 </button>
 
                 {/* Wishlist Link Mobile */}
@@ -569,8 +582,14 @@ export default function Header() {
                   className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 text-rose-500 border border-slate-200/80 dark:border-zinc-800/80 cursor-pointer"
                 >
                   <Icon name="heart" size={13} className="text-rose-500" />
-                  <span>Yêu thích ({wishlistItems.length})</span>
+                  <span>{trans("Yêu thích")} ({wishlistItems.length})</span>
                 </Link>
+              </div>
+
+              {/* Language Selector Mobile */}
+              <div className="flex items-center justify-between gap-2 border border-slate-200/80 dark:border-zinc-800/80 p-2 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50">
+                <span className="text-xs font-bold text-slate-500 dark:text-zinc-450 pl-2">{trans("Ngôn ngữ / Language:")}</span>
+                <LanguageSelector />
               </div>
 
               {/* User Account / Login Mobile */}
@@ -579,7 +598,7 @@ export default function Header() {
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 text-slate-700 dark:text-zinc-350">
                       <Icon name="user" size={13} />
-                      <span>Chào, {user?.fullName.split(' ').slice(-1)[0]}</span>
+                      <span>{trans("Chào,")} {user?.fullName.split(' ').slice(-1)[0]}</span>
                     </div>
                     {user?.role === 'ADMIN' && (
                       <Link
@@ -587,7 +606,7 @@ export default function Header() {
                         onClick={() => setMobileOpen(false)}
                         className="w-full text-center bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm"
                       >
-                        <Icon name="shield" size={13} /> Quản trị Admin
+                        <Icon name="shield" size={13} /> {trans("Quản trị Admin")}
                       </Link>
                     )}
                     <button
@@ -597,7 +616,7 @@ export default function Header() {
                       }}
                       className="w-full text-center bg-rose-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
                     >
-                      Đăng xuất
+                      {trans("Đăng xuất")}
                     </button>
                   </div>
                 ) : (
@@ -606,7 +625,7 @@ export default function Header() {
                     onClick={() => setMobileOpen(false)}
                     className="w-full text-center bg-slate-900 text-white dark:bg-zinc-800 font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm"
                   >
-                    <Icon name="user" size={13} /> Đăng nhập
+                    <Icon name="user" size={13} /> {trans("Đăng nhập")}
                   </Link>
                 )}
               </div>

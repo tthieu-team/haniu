@@ -1,6 +1,7 @@
 'use client';
 
 import { Category } from '@/services/catalog.service';
+import { useTranslate } from '@/lib/translator';
 
 export interface CategoryPillsBarProps {
   categories: Category[];
@@ -13,6 +14,7 @@ export default function CategoryPillsBar({
   selectedCat,
   onSelectCategory,
 }: CategoryPillsBarProps) {
+  const trans = useTranslate();
   return (
     <div className="w-full overflow-x-auto pb-4 mb-6 scrollbar-none">
       <div className="flex gap-2.5 min-w-max px-1">
@@ -24,7 +26,7 @@ export default function CategoryPillsBar({
               : 'bg-white dark:bg-zinc-900 border-slate-200/60 dark:border-zinc-800 text-slate-600 dark:text-zinc-350 hover:border-rose-400'
           }`}
         >
-          Tất cả sản phẩm
+          {trans('Tất cả sản phẩm')}
         </button>
         {categories.map((cat) => {
           const isActive = selectedCat === cat.id || selectedCat === cat.slug;
@@ -38,7 +40,7 @@ export default function CategoryPillsBar({
                   : 'bg-white dark:bg-zinc-900 border-slate-200/60 dark:border-zinc-800 text-slate-600 dark:text-zinc-350 hover:border-rose-400'
               }`}
             >
-              {cat.name}
+              {trans(cat.name)}
             </button>
           );
         })}

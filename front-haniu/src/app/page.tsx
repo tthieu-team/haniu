@@ -338,6 +338,7 @@ function HomeContent() {
           <CategoriesSection
             onOccasionSelect={handleOccasionClick}
             selectedOccasion={selectedOccasion}
+            occasions={dbOccasions.filter(o => o.slug !== "")}
           />
         </div>
       </ScrollReveal>

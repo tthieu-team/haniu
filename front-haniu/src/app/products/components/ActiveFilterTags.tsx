@@ -1,6 +1,7 @@
 'use client';
 
 import Icon from '@/components/common/Icons';
+import { useTranslate } from '@/lib/translator';
 
 export interface ActiveFilterTagsProps {
   activeFilters: Array<{ key: string; label: string }>;
@@ -13,12 +14,13 @@ export default function ActiveFilterTags({
   onRemoveFilter,
   onClearAll,
 }: ActiveFilterTagsProps) {
+  const trans = useTranslate();
   if (activeFilters.length === 0) return null;
 
   return (
     <div className="flex flex-wrap items-center gap-2 mb-6">
       <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-550 select-none mr-1">
-        Đang lọc theo:
+        {trans('Đang lọc theo:')}
       </span>
       {activeFilters.map((tag) => (
         <div
@@ -29,7 +31,7 @@ export default function ActiveFilterTags({
           <button
             onClick={() => onRemoveFilter(tag.key)}
             className="hover:text-rose-800 dark:hover:text-rose-300 transition-colors p-0.5 cursor-pointer"
-            title="Xóa tiêu chí lọc này"
+            title={trans('Xóa tiêu chí lọc này')}
           >
             <Icon name="close" size={10} />
           </button>
@@ -39,7 +41,7 @@ export default function ActiveFilterTags({
         onClick={onClearAll}
         className="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition-colors py-1.5 px-3 cursor-pointer"
       >
-        Hủy tất cả bộ lọc
+        {trans('Hủy tất cả bộ lọc')}
       </button>
     </div>
   );

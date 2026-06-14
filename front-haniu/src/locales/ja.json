@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "home": "ホーム",
+    "products": "商品一覧",
+    "collections": "コレクション",
+    "blog": "ブログ",
+    "about": "会社概要",
+    "contact": "お問い合わせ",
+    "faq": "よくある質問",
+    "cart": "カート",
+    "search": "商品を検索...",
+    "wishlist": "お気に入り",
+    "profile": "マイページ",
+    "logout": "ログアウト",
+    "login": "ログイン",
+    "register": "新規登録",
+    "story": "ストーリー",
+    "order_lookup": "注文照会",
+    "more": "その他"
+  },
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました。もう一度お試しください。",
+    "no_data": "データがありません。",
+    "currency": "VND",
+    "add_to_cart": "カートに入れる",
+    "buy_now": "今すぐ購入",
+    "out_of_stock": "在庫切れ",
+    "in_stock": "在庫あり",
+    "customizable": "カスタマイズ可能"
+  },
+  "home": {
+    "categories": {
+      "badge": "ギフトの分類",
+      "title": "祝日・イベント別コレクション",
+      "special_occasion": "特別な日のために",
+      "explore": "見つける",
+      "selected": "選択中",
+      "gift_sets": "個のギフトセット"
+    },
+    "products": {
+      "badge": "限定コレクション",
+      "title_normal": "オリジナルギフト",
+      "title_gradient": "限定デザイン",
+      "subtitle": "あなたのメッセージに合わせてパーソナライズできる洗練されたギフトコレクションをご覧ください",
+      "search_placeholder": "ギフトを検索（例：名前入りマグカップ...）",
+      "clear_filters": "フィルターをクリア",
+      "showing": "表示中",
+      "unique_gifts": "個のユニークなギフト",
+      "filter_occasion": "イベント・祝日別",
+      "filter_recipient": "贈る相手",
+      "all_occasions": "すべて",
+      "all_recipients": "すべて",
+      "no_products": "該当する商品が見つかりません",
+      "no_products_desc": "別のイベントを選択するか、新しい検索キーワードを入力してもう一度お試しください。",
+      "load_more": "もっとギフト商品を見る",
+      "loading_more": "読み込み中..."
+    },
+    "benefits": {
+      "badge": "フルサービス",
+      "title": "Haniuで異なるサービスを体験",
+      "subtitle": "あなたにとって最も完璧で、細心の注意を払い、安心して購入できるギフトショッピング体験を生み出す卓越した価値。"
+    },
+    "how_it_works": {
+      "badge": "サービスの流れ",
+      "title": "ユニークなギフトを作るプロセス",
+      "subtitle": "アイデアからギフトの完成まで、あらゆる細部にまで配慮し、有意義なギフト体験を生み出します。"
+    },
+    "reviews": {
+      "badge": "お客様の評価",
+      "title": "お客様の声",
+      "subtitle": "お客様の満足度は、Haniuが常に創造し、すべてのギフトボックスを完成させるための最大の動力です。",
+      "rating": "評価",
+      "trust": "信頼の選択"
+    },
+    "ugc": {
+      "badge": "インスタグラムモーメント",
+      "title": "Haniuの瞬間",
+      "subtitle": "ハッシュタグ #mygiftmoment を付けてギフトの受け取りの瞬間をシェアし、100,000đのクーポンをゲットしよう"
+    },
+    "blog": {
+      "badge": "ギフトのインスピレーション",
+      "title": "経験とアドバイスの共有",
+      "read_more": "続きを読む"
+    },
+    "faq": {
+      "subtitle": "私たちの製品やサービスに関するよくある質問に迅速にお答えします"
+    },
+    "story": {
+      "title": "職人の手から生まれる芸術",
+      "subtitle": "ギフトボックスの隅々まで行き届いたこだわりの旅",
+      "explore": "ストーリーを見る",
+      "behind": "メイキング映像を見る",
+      "error_play": "ビデオを再生できません",
+      "error_detail": "サーバーからリソースをロードできませんでした。ビデオのパスを確認するか、バックエンドサーバーを再起動してください。",
+      "go_back": "戻る"
+    },
+    "collections": {
+      "badge": "特別セレクトシリーズ",
+      "title": "限定コレクション",
+      "buy_now": "今すぐ購入",
+      "limited": "限定",
+      "fallback_desc": "Haniuによって独占的にデザインされ、精巧に作られた製品ライン。"
+    }
+  },
+  "footer": {
+    "directory": "リンク",
+    "support": "サポート＆情報",
+    "contact": "連絡先情報",
+    "about_us": "会社概要",
+    "faq": "よくある質問",
+    "contact_us": "お問い合わせ",
+    "reviews": "お客様の声",
+    "order_lookup": "注文照会",
+    "privacy": "個人情報保護方針",
+    "terms": "利用規約",
+    "policy": "運営規則",
+    "tagline": "ベトナムを代表するプレミアム＆パーソナライズされたギフトプラットフォームです。"
+  }
+}

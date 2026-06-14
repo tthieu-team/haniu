@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Icon from '@/components/common/Icons';
+import { useTranslate } from '@/lib/translator';
 
 import { PhotoboothStep, PhotoboothMode, PhotoboothConfig, CapturedPhoto, Sticker } from './types';
 import { IdleState } from './IdleState';
@@ -23,6 +24,7 @@ interface PhotoboothSystemProps {
 }
 
 export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, onClose }) => {
+  const trans = useTranslate();
   const [step, setStep] = useState<PhotoboothStep>('idle');
   const [photos, setPhotos] = useState<CapturedPhoto[]>([]);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -235,7 +237,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-50 p-2 bg-card-bg hover:bg-accent-color/20 border border-border-color rounded-full transition-all text-muted-color hover:text-foreground cursor-pointer"
-          title="Đóng Photobooth"
+          title={trans("Đóng Photobooth")}
         >
           <Icon name="close" size={16} />
         </button>
@@ -283,7 +285,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
                 ))}
               </div>
               <p className="text-[9px] font-black uppercase tracking-wider text-white/50">
-                {retakeIndex !== null ? `CHỤP LẠI ẢNH ${retakeIndex + 1}` : `ẢNH ${photos.length + 1} / ${config.template.slots.length}`}
+                {retakeIndex !== null ? `${trans("CHỤP LẠI ẢNH")} ${retakeIndex + 1}` : `${trans("ẢNH")} ${photos.length + 1} / ${config.template.slots.length}`}
               </p>
             </div>
 
@@ -301,7 +303,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
                   className={`w-8 h-8 rounded-full border-2 transition-all cursor-pointer ${config.filter === f.filterStyle ? 'border-primary-color scale-105 shadow-md' : 'border-white/20 hover:border-white/40'
                     }`}
                   style={{ filter: f.filterStyle, backgroundColor: '#333' }}
-                  title="Chọn bộ lọc"
+                  title={trans("Chọn bộ lọc")}
                 />
               ))}
             </div>
@@ -326,10 +328,10 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
               
               <div className="text-center pb-2">
                 <span className="inline-block px-3 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-450 rounded-full text-[10px] font-black uppercase tracking-wider mb-2">
-                  BƯỚC CHỈNH SỬA HÌNH ẢNH 🎨
+                  {trans("BƯỚC CHỈNH SỬA HÌNH ẢNH 🎨")}
                 </span>
-                <h2 className="text-xl sm:text-2xl font-black text-foreground uppercase tracking-tight font-sans">Chọn chế độ thiết kế</h2>
-                <p className="text-[11px] text-muted-color mt-1 max-w-md">Lựa chọn một trong các tính năng bên dưới để bắt đầu trang trí bức ảnh kỷ niệm của bạn.</p>
+                <h2 className="text-xl sm:text-2xl font-black text-foreground uppercase tracking-tight font-sans">{trans("Chọn chế độ thiết kế")}</h2>
+                <p className="text-[11px] text-muted-color mt-1 max-w-md">{trans("Lựa chọn một trong các tính năng bên dưới để bắt đầu trang trí bức ảnh kỷ niệm của bạn.")}</p>
               </div>
 
               {/* Grid of Options */}
@@ -342,8 +344,8 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
                     <Icon name="palette" size={20} className="sm:scale-125" />
                   </div>
                   <div>
-                    <p className="font-black text-[9px] sm:text-[12px] uppercase tracking-wide">Khung & Viền</p>
-                    <p className="text-[7.5px] sm:text-[9px] text-muted-color font-normal mt-0.5 sm:mt-1 leading-tight line-clamp-2 sm:line-clamp-none">Thay đổi màu viền, tải hình nền riêng, chữ ký.</p>
+                    <p className="font-black text-[9px] sm:text-[12px] uppercase tracking-wide">{trans("Khung & Viền")}</p>
+                    <p className="text-[7.5px] sm:text-[9px] text-muted-color font-normal mt-0.5 sm:mt-1 leading-tight line-clamp-2 sm:line-clamp-none">{trans("Thay đổi màu viền, tải hình nền riêng, chữ ký.")}</p>
                   </div>
                 </button>
 
@@ -355,8 +357,8 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
                     <Icon name="heart" size={20} className="sm:scale-125" />
                   </div>
                   <div>
-                    <p className="font-black text-[9px] sm:text-[12px] uppercase tracking-wide">Trang trí Sticker</p>
-                    <p className="text-[7.5px] sm:text-[9px] text-muted-color font-normal mt-0.5 sm:mt-1 leading-tight line-clamp-2 sm:line-clamp-none">Dán nhãn biểu tượng đáng yêu của Haniu hoặc emoji.</p>
+                    <p className="font-black text-[9px] sm:text-[12px] uppercase tracking-wide">{trans("Trang trí Sticker")}</p>
+                    <p className="text-[7.5px] sm:text-[9px] text-muted-color font-normal mt-0.5 sm:mt-1 leading-tight line-clamp-2 sm:line-clamp-none">{trans("Dán nhãn biểu tượng đáng yêu của Haniu hoặc emoji.")}</p>
                   </div>
                 </button>
               </div>
@@ -368,7 +370,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
                   className="w-full h-11 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-[11px] uppercase tracking-wider shadow-md shadow-rose-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98"
                 >
                   <Icon name="check" size={14} />
-                  Xem kết quả & Hoàn tất
+                  {trans("Xem kết quả & Hoàn tất")}
                 </button>
 
                 <div className="flex gap-2">
@@ -377,14 +379,14 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
                     className="flex-1 h-9 rounded-xl border border-border-color hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-350 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer"
                   >
                     <Icon name="camera" size={12} className="text-rose-500" />
-                    Lưu & Chụp tiếp
+                    {trans("Lưu & Chụp tiếp")}
                   </button>
 
                   <button
                     onClick={() => setStep('review')}
                     className="flex-1 h-9 rounded-xl border border-border-color hover:bg-slate-50 dark:hover:bg-zinc-800 text-muted-color font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer"
                   >
-                    Quay lại Review
+                    {trans("Quay lại Review")}
                   </button>
                 </div>
               </div>
@@ -432,13 +434,13 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
             <div className="w-16 h-16 bg-primary-color/10 rounded-full flex items-center justify-center mb-4 border border-primary-color/20">
               <Icon name="alert" size={32} className="text-primary-color" />
             </div>
-            <h2 className="text-xl font-black text-foreground mb-2 uppercase tracking-wide font-sans">Đã xảy ra lỗi</h2>
+            <h2 className="text-xl font-black text-foreground mb-2 uppercase tracking-wide font-sans">{trans("Đã xảy ra lỗi")}</h2>
             <p className="text-muted-color mb-6 text-xs max-w-xs">{errorMessage}</p>
             <button
               onClick={handleRestart}
               className="px-6 py-2 bg-rose-600 hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer shadow-sm transition-all"
             >
-              Quay lại trang chính
+              {trans("Quay lại trang chính")}
             </button>
           </motion.div>
         )}
@@ -448,13 +450,13 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
             <div className="w-16 h-16 bg-primary-color/10 rounded-full flex items-center justify-center mb-4 border border-primary-color/20">
               <Icon name="hourglass" size={32} className="text-primary-color" />
             </div>
-            <h2 className="text-xl font-black text-foreground mb-2 uppercase tracking-wide font-sans">Hết thời gian chờ</h2>
-            <p className="text-muted-color mb-6 text-xs max-w-xs">Hệ thống đã tự động làm mới để phục vụ lượt chụp tiếp theo.</p>
+            <h2 className="text-xl font-black text-foreground mb-2 uppercase tracking-wide font-sans">{trans("Hết thời gian chờ")}</h2>
+            <p className="text-muted-color mb-6 text-xs max-w-xs">{trans("Hệ thống đã tự động làm mới để phục vụ lượt chụp tiếp theo.")}</p>
             <button
               onClick={handleRestart}
               className="px-6 py-2 bg-rose-600 hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer shadow-sm transition-all"
             >
-              Tôi đã quay lại
+              {trans("Tôi đã quay lại")}
             </button>
           </motion.div>
         )}

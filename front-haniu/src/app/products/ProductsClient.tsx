@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import ProductCard from '@/components/product/ProductCard';
 import QuickViewModal from '@/components/product/QuickViewModal';
 import Icon from '@/components/common/Icons';
+import { useTranslate } from '@/lib/translator';
 
 // Modular Subcomponents
 import FilterSidebar from './components/FilterSidebar';
@@ -24,6 +25,7 @@ import { productService } from '@/services/product.service';
 function ProductsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const trans = useTranslate();
 
   // Read URL search params
   const paramSearch = searchParams.get('search') || '';
@@ -34,6 +36,10 @@ function ProductsContent() {
   const paramMinPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : '';
   const paramMaxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : '';
   const paramCustomizable = searchParams.get('customizable') === 'true';
+  const paramAdminChat = searchParams.get('adminChat') === 'true';
+  const paramPhotobooth = searchParams.get('photobooth') === 'true';
+  const paramFeatured = searchParams.get('featured') === 'true';
+  const paramNew = searchParams.get('new') === 'true';
 
   // Dynamic lists from backend
   const [categories, setCategories] = useState<Category[]>([]);
@@ -48,6 +54,10 @@ function ProductsContent() {
   const [selectedCollection, setSelectedCollection] = useState(paramCollection);
   const [sortOption, setSortOption] = useState(paramSort);
   const [customizableOnly, setCustomizableOnly] = useState(paramCustomizable);
+  const [adminChatOnly, setAdminChatOnly] = useState(paramAdminChat);
+  const [photoboothOnly, setPhotoboothOnly] = useState(paramPhotobooth);
+  const [featuredOnly, setFeaturedOnly] = useState(paramFeatured);
+  const [newOnly, setNewOnly] = useState(paramNew);
   const [priceMin, setPriceMin] = useState<number | ''>(paramMinPrice);
   const [priceMax, setPriceMax] = useState<number | ''>(paramMaxPrice);
 
@@ -78,10 +88,10 @@ function ProductsContent() {
   useEffect(() => {
     if (catalogLoaded) {
       const activeCat = categories.find(c => c.id === selectedCat || c.slug === selectedCat);
-      const title = activeCat ? `${activeCat.name} | Haniu Quà Tặng` : 'Bộ Sưu Tập Quà Tặng Cao Cấp | Haniu';
+      const title = activeCat ? `${trans(activeCat.name)} | ${trans('Haniu Quà Tặng')}` : trans('Bộ Sưu Tập Quà Tặng Cao Cấp | Haniu');
       document.title = title;
     }
-  }, [selectedCat, categories, catalogLoaded]);
+  }, [selectedCat, categories, catalogLoaded, trans]);
 
   // Fetch catalogs on mount
   useEffect(() => {
@@ -114,6 +124,10 @@ function ProductsContent() {
     setPriceMin(paramMinPrice);
     setPriceMax(paramMaxPrice);
     setCustomizableOnly(paramCustomizable);
+    setAdminChatOnly(paramAdminChat);
+    setPhotoboothOnly(paramPhotobooth);
+    setFeaturedOnly(paramFeatured);
+    setNewOnly(paramNew);
   }, [
     paramSearch,
     paramCat,
@@ -122,7 +136,11 @@ function ProductsContent() {
     paramSort,
     paramMinPrice,
     paramMaxPrice,
-    paramCustomizable
+    paramCustomizable,
+    paramAdminChat,
+    paramPhotobooth,
+    paramFeatured,
+    paramNew
   ]);
 
   // Function to push parameters to URL (Source of truth)
@@ -304,14 +322,31 @@ function ProductsContent() {
     paramSort,
     paramMinPrice,
     paramMaxPrice,
-    paramCustomizable
+    paramCustomizable,
+    paramAdminChat,
+    paramPhotobooth,
+    paramFeatured,
+    paramNew
   ]);
 
   // Client side filters (for price and custom check tags)
   const filteredProducts = products.filter((product: any) => {
     // 1. Customizable
-    if (customizableOnly && !product.isCustomizable) return false;
-    // 2. Price range
+    const isCustomizable = product.isCustomizable || product.is_customizable || product.customizable;
+    if (customizableOnly && !isCustomizable) return false;
+    // 2. Admin Chat
+    const allowAdminChat = product.allowAdminChat || product.allow_admin_chat;
+    if (adminChatOnly && !allowAdminChat) return false;
+    // 3. Photobooth
+    const allowPhotobooth = product.allowPhotobooth || product.allowPhotoUpload || product.allow_photobooth || product.allow_photo_upload;
+    if (photoboothOnly && !allowPhotobooth) return false;
+    // 4. Featured
+    const isFeatured = product.isFeatured || product.is_featured || product.featured;
+    if (featuredOnly && !isFeatured) return false;
+    // 5. New
+    const isNew = product.isNew || product.is_new || product.new;
+    if (newOnly && !isNew) return false;
+    // 6. Price range
     const price = product.salePrice || product.basePrice || product.price || 0;
     if (priceMin !== '' && price < priceMin) return false;
     if (priceMax !== '' && price > priceMax) return false;
@@ -324,6 +359,10 @@ function ProductsContent() {
     setSelectedBrand('');
     setSelectedCollection('');
     setCustomizableOnly(false);
+    setAdminChatOnly(false);
+    setPhotoboothOnly(false);
+    setFeaturedOnly(false);
+    setNewOnly(false);
     setPriceMin('');
     setPriceMax('');
     setSortOption('newest');
@@ -340,28 +379,40 @@ function ProductsContent() {
     const list = [];
     if (selectedCat) {
       const found = categories.find(c => c.id === selectedCat || c.slug === selectedCat);
-      list.push({ key: 'category', label: `Danh mục: ${found ? found.name : selectedCat}` });
+      list.push({ key: 'category', label: `${trans('Danh mục')}: ${found ? trans(found.name) : selectedCat}` });
     }
     if (selectedBrand) {
       const found = brands.find(b => b.id === selectedBrand || b.slug === selectedBrand);
-      list.push({ key: 'brand', label: `Thương hiệu: ${found ? found.name : selectedBrand}` });
+      list.push({ key: 'brand', label: `${trans('Thương hiệu')}: ${found ? trans(found.name) : selectedBrand}` });
     }
     if (selectedCollection) {
       const found = collections.find(c => c.id === selectedCollection || c.slug === selectedCollection);
-      list.push({ key: 'collection', label: `Bộ sưu tập: ${found ? found.name : selectedCollection}` });
+      list.push({ key: 'collection', label: `${trans('Bộ sưu tập')}: ${found ? trans(found.name) : selectedCollection}` });
     }
     if (customizableOnly) {
-      list.push({ key: 'customizable', label: 'Khắc tên theo yêu cầu' });
+      list.push({ key: 'customizable', label: trans('Cho phép Khắc tên / Cá nhân hóa quà') });
+    }
+    if (adminChatOnly) {
+      list.push({ key: 'adminChat', label: trans('Có thể chat với Admin') });
+    }
+    if (photoboothOnly) {
+      list.push({ key: 'photobooth', label: trans('Studio Photobooth Haniu - In ảnh tặng kèm') });
+    }
+    if (featuredOnly) {
+      list.push({ key: 'featured', label: trans('Sản phẩm Nổi bật (Featured)') });
+    }
+    if (newOnly) {
+      list.push({ key: 'new', label: trans('Sản phẩm mới (New)') });
     }
     if (priceMin !== '' || priceMax !== '') {
-      let label = 'Giá: ';
+      let label = trans('Giá') + ': ';
       if (priceMin !== '' && priceMax !== '') label += `${(priceMin / 1000)}k - ${(priceMax / 1000)}k`;
       else if (priceMin !== '') label += `> ${(priceMin / 1000)}k`;
       else if (priceMax !== '') label += `< ${(priceMax / 1000)}k`;
       list.push({ key: 'price', label });
     }
     if (searchQuery.trim()) {
-      list.push({ key: 'search', label: `Tìm kiếm: "${searchQuery}"` });
+      list.push({ key: 'search', label: `${trans('Tìm kiếm')}: "${searchQuery}"` });
     }
     return list;
   };
@@ -380,6 +431,18 @@ function ProductsContent() {
       case 'customizable':
         updateUrlParams({ customizable: '' });
         break;
+      case 'adminChat':
+        updateUrlParams({ adminChat: '' });
+        break;
+      case 'photobooth':
+        updateUrlParams({ photobooth: '' });
+        break;
+      case 'featured':
+        updateUrlParams({ featured: '' });
+        break;
+      case 'new':
+        updateUrlParams({ new: '' });
+        break;
       case 'price':
         updateUrlParams({ minPrice: '', maxPrice: '' });
         break;
@@ -397,13 +460,13 @@ function ProductsContent() {
           <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 via-rose-500/10 to-transparent opacity-60 dark:opacity-40 pointer-events-none" />
           <div className="relative z-10 max-w-3xl space-y-4">
             <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 border border-rose-500/25">
-              <Icon name="gift" size={10} className="animate-pulse" /> Haniu Catalog
+              <Icon name="gift" size={10} className="animate-pulse" /> {trans('Haniu Catalog')}
             </span>
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight py-1 text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-amber-400 to-rose-500 uppercase">
-              {categories.find((c) => c.id === selectedCat || c.slug === selectedCat)?.name || 'Sản Phẩm Quà Tặng'}
+              {trans(categories.find((c) => c.id === selectedCat || c.slug === selectedCat)?.name || 'Sản Phẩm Quà Tặng')}
             </h1>
             <p className="text-[11px] sm:text-xs text-slate-500 dark:text-zinc-350 leading-relaxed font-light tracking-wide max-w-xl">
-              Hộp quà tặng thủ công nghệ thuật cá nhân hóa khắc tên riêng và lời chúc theo yêu cầu, chế tác độc bản gửi trọn thành ý của bạn.
+              {trans('Hộp quà tặng thủ công nghệ thuật cá nhân hóa khắc tên riêng và lời chúc theo yêu cầu, chế tác độc bản gửi trọn thành ý của bạn.')}
             </p>
           </div>
         </div>
@@ -412,9 +475,9 @@ function ProductsContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-6 sm:space-y-8">
         {/* Breadcrumbs Navigation */}
         <nav className="text-xs text-slate-450 dark:text-zinc-500 flex items-center gap-1.5 font-medium">
-          <Link href="/" className="hover:text-rose-500 transition-colors">Trang chủ</Link>
+          <Link href="/" className="hover:text-rose-500 transition-colors">{trans('Trang chủ')}</Link>
           <span>&gt;</span>
-          <span className="text-slate-650 dark:text-zinc-300">Sản phẩm quà tặng</span>
+          <span className="text-slate-655 dark:text-zinc-300">{trans('Sản phẩm quà tặng')}</span>
           {selectedCat && (
             <>
               <span>&gt;</span>
@@ -454,6 +517,14 @@ function ProductsContent() {
             setSearchQuery={setSearchQuery}
             customizableOnly={customizableOnly}
             setCustomizableOnly={(val) => updateUrlParams({ customizable: val ? 'true' : '' })}
+            adminChatOnly={adminChatOnly}
+            setAdminChatOnly={(val) => updateUrlParams({ adminChat: val ? 'true' : '' })}
+            photoboothOnly={photoboothOnly}
+            setPhotoboothOnly={(val) => updateUrlParams({ photobooth: val ? 'true' : '' })}
+            featuredOnly={featuredOnly}
+            setFeaturedOnly={(val) => updateUrlParams({ featured: val ? 'true' : '' })}
+            newOnly={newOnly}
+            setNewOnly={(val) => updateUrlParams({ new: val ? 'true' : '' })}
             priceMin={priceMin}
             setPriceMin={(val) => updateUrlParams({ minPrice: val })}
             priceMax={priceMax}
@@ -505,7 +576,7 @@ function ProductsContent() {
                       />
                       {product.isFeatured && (
                         <span className="absolute top-3 left-3 bg-amber-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-xs uppercase tracking-wider">
-                          Nổi bật
+                          {trans('Nổi bật')}
                         </span>
                       )}
                     </div>
@@ -513,10 +584,10 @@ function ProductsContent() {
                     <div className="flex-1 flex flex-col justify-between py-1">
                       <div className="space-y-2">
                         <span className="text-[9px] font-black uppercase text-rose-500 tracking-wider">
-                          {product.category?.name || 'Quà Tặng'}
+                          {trans(product.category?.name || 'Quà Tặng')}
                         </span>
                         <h3 className="text-base font-extrabold text-slate-800 dark:text-zinc-150 hover:text-rose-500 transition-colors">
-                          <Link href={`/products/${product.slug}`}>{product.name}</Link>
+                          <Link href={`/products/${product.slug}`}>{trans(product.name)}</Link>
                         </h3>
                         <p className="text-xs text-slate-400 dark:text-zinc-500 font-light line-clamp-2 max-w-xl leading-relaxed">
                           {product.description}
@@ -537,8 +608,8 @@ function ProductsContent() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => setQuickViewProduct(product)}
-                            className="bg-slate-50 dark:bg-zinc-900 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-slate-650 dark:text-zinc-300 dark:hover:text-rose-400 p-2.5 rounded-xl border border-slate-200/40 dark:border-zinc-800 transition-all cursor-pointer"
-                            title="Xem nhanh"
+                            className="bg-slate-50 dark:bg-zinc-900 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-slate-655 dark:text-zinc-300 dark:hover:text-rose-400 p-2.5 rounded-xl border border-slate-200/40 dark:border-zinc-800 transition-all cursor-pointer"
+                            title={trans('Xem nhanh')}
                           >
                             <Icon name="eye" size={13} />
                           </button>
@@ -546,7 +617,7 @@ function ProductsContent() {
                             href={`/products/${product.slug}`}
                             className="bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all active:scale-98"
                           >
-                            Chi tiết
+                            {trans('Chi tiết')}
                           </Link>
                         </div>
                       </div>
@@ -575,7 +646,7 @@ function ProductsContent() {
             {hasNextPage && (
               <div className="pt-8 text-center space-y-3">
                 <span className="inline-block text-[10px] text-slate-400 dark:text-zinc-550 font-medium tracking-wider uppercase block">
-                  Đã tải {products.length} sản phẩm từ hệ thống
+                  {trans('Đã tải')} {products.length} {trans('sản phẩm từ hệ thống')}
                 </span>
                 <button
                   onClick={() => loadProducts(false)}
@@ -583,7 +654,7 @@ function ProductsContent() {
                   className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:border-slate-350 dark:hover:border-zinc-750 text-slate-700 dark:text-zinc-300 font-bold px-8 py-3.5 rounded-2xl text-xs shadow-xs hover:shadow-md transition-all active:scale-98 cursor-pointer disabled:opacity-50 inline-flex items-center gap-2"
                 >
                   {loadingMore && <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-slate-600 dark:border-zinc-300" />}
-                  <span>Tải thêm sản phẩm</span>
+                  <span>{trans('Tải thêm sản phẩm')}</span>
                 </button>
               </div>
             )}
@@ -607,6 +678,14 @@ function ProductsContent() {
         setSelectedCollection={(coll) => updateUrlParams({ collection: coll })}
         customizableOnly={customizableOnly}
         setCustomizableOnly={(val) => updateUrlParams({ customizable: val ? 'true' : '' })}
+        adminChatOnly={adminChatOnly}
+        setAdminChatOnly={(val) => updateUrlParams({ adminChat: val ? 'true' : '' })}
+        photoboothOnly={photoboothOnly}
+        setPhotoboothOnly={(val) => updateUrlParams({ photobooth: val ? 'true' : '' })}
+        featuredOnly={featuredOnly}
+        setFeaturedOnly={(val) => updateUrlParams({ featured: val ? 'true' : '' })}
+        newOnly={newOnly}
+        setNewOnly={(val) => updateUrlParams({ new: val ? 'true' : '' })}
         priceMin={priceMin}
         setPriceMin={(val) => updateUrlParams({ minPrice: val })}
         priceMax={priceMax}

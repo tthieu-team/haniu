@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '@/components/common/Icons';
 import { Sticker } from './types';
 import { playSound } from './sounds';
+import { useTranslate } from '@/lib/translator';
 
 interface StickerEditorProps {
   imageUrl: string;
@@ -56,6 +57,7 @@ const DEFAULT_ICON_COLORS: Record<string, string> = {
 };
 
 export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialStickers, onConfirm, onCancel }) => {
+  const trans = useTranslate();
   const [stickers, setStickers] = useState<Sticker[]>(initialStickers || []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -205,7 +207,7 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
           className="h-9 px-4 rounded-full bg-card-bg border border-border-color text-foreground hover:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-all font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 pointer-events-auto cursor-pointer"
         >
           <Icon name="arrow-left" size={12} />
-          <span>Quay lại</span>
+          <span>{trans('Quay lại')}</span>
         </button>
 
         <div className="flex items-center gap-2 pointer-events-auto">
@@ -214,7 +216,7 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
             className="px-3 py-2 rounded-xl bg-card-bg border border-border-color text-foreground hover:bg-rose-500/10 dark:hover:bg-rose-500/20 text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer"
           >
             <Icon name="refresh" size={11} />
-            <span>Xóa hết</span>
+            <span>{trans('Xóa hết')}</span>
           </button>
           <button
             disabled={isProcessing}
@@ -230,7 +232,7 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
             ) : (
               <Icon name="check" size={12} />
             )}
-            Lưu ảnh
+            <span>{trans('Lưu ảnh')}</span>
           </button>
         </div>
       </div>
@@ -325,7 +327,7 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
             <div className="bg-card-bg border border-border-color rounded-3xl p-4 shadow-xl">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[10px] font-black uppercase tracking-wider text-primary-color flex items-center gap-1">
-                  <Icon name="settings" size={12} /> Căn chỉnh Sticker
+                  <Icon name="settings" size={12} /> {trans('Căn chỉnh Sticker')}
                 </span>
                 <button onClick={() => setSelectedId(null)} className="w-7 h-7 rounded-full bg-background flex items-center justify-center text-emerald-500 cursor-pointer">
                   <Icon name="check" size={14} />
@@ -335,7 +337,7 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between items-center mb-1 text-[9px] font-bold uppercase text-muted-color">
-                    <span>Kích thước</span>
+                    <span>{trans('Kích thước')}</span>
                     <span className="text-primary-color font-mono">{Math.round(selectedSticker.scale * 100)}%</span>
                   </div>
                   <input
@@ -347,7 +349,7 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
                 </div>
                 <div>
                   <div className="flex justify-between items-center mb-1 text-[9px] font-bold uppercase text-muted-color">
-                    <span>Xoay ảnh</span>
+                    <span>{trans('Xoay ảnh')}</span>
                     <span className="text-primary-color font-mono">{Math.round((selectedSticker.rotation * 180) / Math.PI)}°</span>
                   </div>
                   <input
@@ -364,7 +366,7 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
                   return (
                     <div>
                       <div className="flex justify-between items-center mb-1 text-[9px] font-bold uppercase text-muted-color">
-                        <span>Màu sắc Icon</span>
+                        <span>{trans('Màu sắc Icon')}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <input
@@ -383,13 +385,13 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
                     onClick={(e) => { e.stopPropagation(); moveLayer(selectedId!, 'down'); }}
                     className="flex-1 py-2 bg-background hover:bg-rose-500/10 dark:hover:bg-rose-500/20 rounded-xl flex items-center justify-center text-foreground font-bold text-[9px] cursor-pointer"
                   >
-                    Hạ 1 lớp
+                    {trans('Hạ 1 lớp')}
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); moveLayer(selectedId!, 'up'); }}
                     className="flex-1 py-2 bg-background hover:bg-rose-500/10 dark:hover:bg-rose-500/20 rounded-xl flex items-center justify-center text-foreground font-bold text-[9px] cursor-pointer"
                   >
-                    Lên 1 lớp
+                    {trans('Lên 1 lớp')}
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setStickers(prev => prev.filter(s => s.id !== selectedId)); setSelectedId(null); }}
@@ -424,7 +426,7 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
                 className="bg-card-bg border-t sm:border border-border-color w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 relative z-10 shadow-2xl max-h-[70vh] overflow-y-auto custom-scrollbar"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-black text-foreground uppercase tracking-tight font-sans">Thêm Sticker</span>
+                  <span className="text-sm font-black text-foreground uppercase tracking-tight font-sans">{trans('Thêm Sticker')}</span>
                   <button
                     onClick={() => setIsLibraryOpen(false)}
                     className="w-8 h-8 rounded-full bg-background flex items-center justify-center text-muted-color hover:text-primary-color cursor-pointer"
@@ -436,9 +438,9 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
                 {/* Tab selector */}
                 <div className="flex border-b border-border-color mb-4 overflow-x-auto scrollbar-none gap-2 pb-2">
                   {[
-                    { id: 'icons', label: 'Haniu Icons', icon: 'star' },
-                    { id: 'emoji', label: 'Emojis', icon: 'heart' },
-                    { id: 'custom', label: 'Tự nhập', icon: 'edit' }
+                    { id: 'icons', label: trans('Haniu Icons'), icon: 'star' },
+                    { id: 'emoji', label: trans('Emojis'), icon: 'heart' },
+                    { id: 'custom', label: trans('Tự nhập'), icon: 'edit' }
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -459,7 +461,7 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
 
                   {activeTab === 'icons' && (
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black uppercase text-muted-color tracking-wider block mb-1">Icon thiết kế Haniu</label>
+                      <label className="text-[9px] font-black uppercase text-muted-color tracking-wider block mb-1">{trans('Icon thiết kế Haniu')}</label>
                       <div className="flex flex-wrap gap-2 justify-start sm:justify-center overflow-y-auto max-h-[30vh] p-1 custom-scrollbar">
                         {DECORATIVE_ICONS.map((iconName) => (
                           <button
@@ -476,7 +478,7 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
 
                   {activeTab === 'emoji' && (
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black uppercase text-muted-color tracking-wider block mb-1">Chọn Emoji</label>
+                      <label className="text-[9px] font-black uppercase text-muted-color tracking-wider block mb-1">{trans('Chọn Emoji')}</label>
                       <div className="flex flex-wrap gap-2 justify-start sm:justify-center overflow-y-auto max-h-[30vh] p-1 custom-scrollbar">
                         {EMOJI_LIST.map((emoji) => (
                           <button
@@ -494,10 +496,10 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
                   {activeTab === 'custom' && (
                     <div className="space-y-4 py-2">
                       <div className="flex flex-col gap-2">
-                        <label className="text-[9px] font-black uppercase text-muted-color tracking-wider">Emoji hoặc chữ tự nhập</label>
+                        <label className="text-[9px] font-black uppercase text-muted-color tracking-wider">{trans('Emoji hoặc chữ tự nhập')}</label>
                         <div className="flex gap-2">
                           <input
-                            placeholder="Gõ emoji hoặc chữ..."
+                            placeholder={trans('Gõ emoji hoặc chữ...')}
                             value={customIcon}
                             onChange={e => setCustomIcon(e.target.value)}
                             className="flex-1 bg-background border border-border-color rounded-2xl px-4 h-12 text-foreground text-xs focus:outline-none focus:border-primary-color transition-all"
@@ -507,7 +509,7 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
                             onClick={handleCustomIconSubmit}
                             className="bg-rose-600 dark:bg-rose-500 text-white px-6 rounded-2xl font-bold uppercase tracking-wider text-[10px] hover:opacity-90 active:scale-95 transition-all cursor-pointer"
                           >
-                            Thêm
+                            {trans('Thêm')}
                           </button>
                         </div>
                       </div>
@@ -523,7 +525,7 @@ export const StickerEditor: React.FC<StickerEditorProps> = ({ imageUrl, initialS
 
       {!selectedId && !isLibraryOpen && (
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-zinc-900/95 backdrop-blur-md px-4 py-2 rounded-full border border-border-color pointer-events-none shadow-md">
-          <span className="text-[9px] text-foreground font-bold uppercase tracking-wider">Chạm hai lần để dán Sticker</span>
+          <span className="text-[9px] text-foreground font-bold uppercase tracking-wider">{trans('Chạm hai lần để dán Sticker')}</span>
         </div>
       )}
     </div>

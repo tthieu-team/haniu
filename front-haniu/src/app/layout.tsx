@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Geist_Mono, Dancing_Script, Cormorant_Garamond, Patrick_Hand, Mali } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { LanguageProvider } from "@/providers/LanguageProvider";
 import SiteLayout from "@/components/layouts/SiteLayout";
+import { cookies } from 'next/headers';
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-be-vietnam-pro",
@@ -87,16 +89,29 @@ export const metadata: Metadata = {
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "",
   },
+  alternates: {
+    canonical: 'https://haniu.vercel.app',
+    languages: {
+      'vi': 'https://haniu.vercel.app/?lang=vi',
+      'en': 'https://haniu.vercel.app/?lang=en',
+      'ja': 'https://haniu.vercel.app/?lang=ja',
+      'zh': 'https://haniu.vercel.app/?lang=zh',
+      'x-default': 'https://haniu.vercel.app/',
+    },
+  },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const language = cookieStore.get('haniu_lang')?.value || 'vi';
+
   return (
     <html
-      lang="vi"
+      lang={language}
       className={`${beVietnamPro.variable} ${geistMono.variable} ${dancingScript.variable} ${cormorantGaramond.variable} ${patrickHand.variable} ${mali.variable} h-full antialiased`}
       suppressHydrationWarning
     >
@@ -142,7 +157,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-full bg-slate-50 text-slate-800 dark:bg-zinc-950 dark:text-zinc-100 font-sans">
         <AuthProvider>
-          <SiteLayout>{children}</SiteLayout>
+          <LanguageProvider>
+            <SiteLayout>{children}</SiteLayout>
+          </LanguageProvider>
         </AuthProvider>
       </body>
     </html>

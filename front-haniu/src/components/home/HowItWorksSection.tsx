@@ -3,6 +3,8 @@
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import { getFullImageUrl } from '@/lib/api';
 import Icon from '@/components/common/Icons';
+import { useLanguage } from '@/providers/LanguageProvider';
+import { useTranslate } from '@/lib/translator';
 
 const STEP_DECORATIONS = [
   {
@@ -54,6 +56,8 @@ const STEP_DECORATIONS = [
 export default function HowItWorksSection() {
   const isVisible = useHomeLayoutStore((state) => state.visibility.howItWorks);
   const howItWorks = useHomeLayoutStore((state) => state.howItWorks);
+  const { t } = useLanguage();
+  const trans = useTranslate();
 
   if (!isVisible) return null;
 
@@ -65,22 +69,13 @@ export default function HowItWorksSection() {
       {/* Title */}
       <div className="text-center space-y-3 md:space-y-4 max-w-3xl mx-auto px-4">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
-          <Icon name="✨" size={10} className="animate-pulse" /> QUY TRÌNH DỊCH VỤ
+          <Icon name="✨" size={10} className="animate-pulse" /> {trans(howItWorks.badge || 'Quy trình dịch vụ')}
         </span>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
-          {howItWorks.title === "Quy Trình Tạo Nên Món Quà Độc Bản" ? (
-            <>
-              Quy Trình Tạo Nên{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-amber-500">
-                Món Quà Độc Bản
-              </span>
-            </>
-          ) : (
-            howItWorks.title
-          )}
+          {trans(howItWorks.title)}
         </h2>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed font-light">
-          {howItWorks.subtitle}
+          {trans(howItWorks.subtitle)}
         </p>
       </div>
 
@@ -148,13 +143,13 @@ export default function HowItWorksSection() {
                       <Icon name={dec.icon} size={18} />
                     </span>
                     <h3 className={`font-extrabold text-sm md:text-base text-slate-800 dark:text-zinc-100 tracking-wide transition-colors duration-300 ${dec.colorStyle.hoverTitle}`}>
-                      {step.title}
+                      {trans(step.title)}
                     </h3>
                   </div>
 
                   {/* Description */}
                   <p className="text-xs md:text-[13px] text-slate-500 dark:text-zinc-400 leading-relaxed font-light font-sans text-left flex-grow">
-                    {step.desc}
+                    {trans(step.desc)}
                   </p>
                 </div>
               </div>

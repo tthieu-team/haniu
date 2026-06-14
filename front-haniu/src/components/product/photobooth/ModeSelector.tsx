@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@/components/common/Icons';
 import { PhotoboothMode } from './types';
+import { useTranslate } from '@/lib/translator';
 
 interface ModeSelectorProps {
   onSelect: (mode: PhotoboothMode, userName: string) => void;
@@ -95,6 +96,7 @@ const MODES = [
 ];
 
 export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect }) => {
+  const trans = useTranslate();
   const [userName, setUserName] = useState('');
 
   return (
@@ -109,10 +111,10 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect }) => {
         className="text-center mb-5 z-10 pt-2 shrink-0"
       >
         <h2 className="text-xl sm:text-2xl font-black text-foreground mb-1 tracking-tight uppercase italic font-sans">
-          CHỌN <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-color to-primary-color/75">KHUNG HÌNH</span> YÊU THÍCH
+          {trans("CHỌN")} <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-color to-primary-color/75">{trans("KHUNG HÌNH")}</span> {trans("YÊU THÍCH")}
         </h2>
         <p className="text-muted-color font-bold uppercase tracking-[0.2em] text-[8px] sm:text-[9px]">
-          Thiết kế phong cách in ảnh lưu niệm độc đáo
+          {trans("Thiết kế phong cách in ảnh lưu niệm độc đáo")}
         </p>
       </motion.div>
 
@@ -128,12 +130,12 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect }) => {
           <div className="w-6 h-6 rounded-lg bg-primary-color/10 flex items-center justify-center">
             <Icon name="user" size={12} className="text-primary-color" />
           </div>
-          <span className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-color">Tên hiển thị trên ảnh</span>
+          <span className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-color">{trans("Tên hiển thị trên ảnh")}</span>
         </div>
         
         <input
           type="text"
-          placeholder="Ví dụ: Hieu & Vy, Happy Birthday..."
+          placeholder={trans("Ví dụ: Hieu & Vy, Happy Birthday...")}
           value={userName}
           maxLength={30}
           onChange={e => setUserName(e.target.value)}
@@ -165,12 +167,12 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect }) => {
                 <Icon name={mode.iconName} className="w-5 h-5 text-white relative z-10" />
               </div>
 
-              <h3 className="text-[11px] sm:text-xs font-black text-foreground mb-1 uppercase tracking-tight">{mode.label}</h3>
-              <p className="text-muted-color text-[8.5px] sm:text-[9.5px] font-medium leading-normal px-1">{mode.description}</p>
+              <h3 className="text-[11px] sm:text-xs font-black text-foreground mb-1 uppercase tracking-tight">{trans(mode.label)}</h3>
+              <p className="text-muted-color text-[8.5px] sm:text-[9.5px] font-medium leading-normal px-1">{trans(mode.description)}</p>
             </div>
 
             <div className="mt-3 px-3 py-1 bg-primary-color hover:bg-primary-color/90 text-white rounded-full text-[8.5px] font-bold uppercase tracking-wider transition-opacity shadow-xs">
-              Chọn mẫu
+              {trans("Chọn mẫu")}
             </div>
           </motion.button>
         ))}

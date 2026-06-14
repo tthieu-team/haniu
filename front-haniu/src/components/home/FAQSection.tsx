@@ -3,11 +3,15 @@
 import { useState } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
+import { useLanguage } from '@/providers/LanguageProvider';
+import { useTranslate } from '@/lib/translator';
 
 export default function FAQSection() {
   const faq = useHomeLayoutStore((state) => state.faq);
   const isVisible = useHomeLayoutStore((state) => state.visibility.faq);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const { t } = useLanguage();
+  const trans = useTranslate();
 
   if (!isVisible) return null;
 
@@ -20,10 +24,10 @@ export default function FAQSection() {
       {/* Title */}
       <div className="text-center space-y-3 max-w-2xl mx-auto">
         <h2 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-slate-800 dark:text-zinc-100">
-          {faq.title}
+          {trans(faq.title)}
         </h2>
         <p className="text-sm text-slate-400 dark:text-zinc-400 font-light">
-          Giải đáp nhanh những thắc mắc của bạn về sản phẩm và dịch vụ của chúng tôi
+          {trans("Những thắc mắc thường gặp của khách hàng khi đặt mua set quà tại Haniu")}
         </p>
       </div>
 
@@ -41,7 +45,7 @@ export default function FAQSection() {
                 onClick={() => toggle(idx)}
                 className="w-full flex items-center justify-between p-6 text-left font-semibold text-sm text-slate-800 dark:text-zinc-100 cursor-pointer hover:bg-slate-50/50 dark:hover:bg-zinc-800/50 transition-colors"
               >
-                <span>{item.question}</span>
+                <span>{trans(item.question)}</span>
                 <span className={`text-rose-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
                   <Icon name="chevron-down" size={16} />
                 </span>
@@ -54,7 +58,7 @@ export default function FAQSection() {
                 }`}
               >
                 <p className="p-6 text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-light whitespace-pre-line bg-slate-50/30 dark:bg-zinc-950/20">
-                  {item.answer}
+                  {trans(item.answer)}
                 </p>
               </div>
             </div>

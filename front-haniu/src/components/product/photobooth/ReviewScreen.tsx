@@ -4,6 +4,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '@/components/common/Icons';
 import { CapturedPhoto, PhotoboothTemplate } from './types';
+import { useTranslate } from '@/lib/translator';
 
 interface ReviewScreenProps {
   photos: CapturedPhoto[];
@@ -20,6 +21,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
   onConfirm,
   onRetakeAll
 }) => {
+  const trans = useTranslate();
   return (
     <div className="w-full h-full bg-background flex flex-col items-center justify-start p-4 sm:p-6 overflow-y-auto min-h-0">
       <motion.div
@@ -27,8 +29,8 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
         animate={{ y: 0, opacity: 1 }}
         className="text-center mb-6 sm:mb-8"
       >
-        <h2 className="text-xl sm:text-2xl font-black text-foreground mb-1 uppercase tracking-tight font-sans">KIỂM TRA HÌNH ẢNH 📸</h2>
-        <p className="text-muted-color text-[10px] sm:text-xs">Nhấp vào từng hình để chụp lại nếu chưa ưng ý</p>
+        <h2 className="text-xl sm:text-2xl font-black text-foreground mb-1 uppercase tracking-tight font-sans">{trans("KIỂM TRA HÌNH ẢNH 📸")}</h2>
+        <p className="text-muted-color text-[10px] sm:text-xs">{trans("Nhấp vào từng hình để chụp lại nếu chưa ưng ý")}</p>
       </motion.div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-4xl w-full mb-8">
@@ -47,8 +49,8 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
 
               <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-2.5 p-3">
                 <div className="text-center">
-                  <p className="text-white font-black text-xs uppercase tracking-wider">ẢNH {index + 1}</p>
-                  <p className="text-white/70 text-[9px] font-bold mt-0.5">Bạn muốn chụp lại?</p>
+                  <p className="text-white font-black text-xs uppercase tracking-wider">{trans("ẢNH")} {index + 1}</p>
+                  <p className="text-white/70 text-[9px] font-bold mt-0.5">{trans("Bạn muốn chụp lại?")}</p>
                 </div>
 
                 <button
@@ -56,7 +58,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
                   className="px-3.5 py-1.5 bg-white hover:bg-slate-100 text-slate-900 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
                 >
                   <Icon name="refresh" size={11} className="text-primary-color" />
-                  Chụp lại
+                  {trans("Chụp lại")}
                 </button>
               </div>
 
@@ -74,14 +76,14 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
           className="h-11 px-3 rounded-xl font-bold border border-primary-color/20 bg-primary-color/10 text-primary-color hover:bg-primary-color/20 transition-all text-[10px] sm:text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
         >
           <Icon name="trash" size={13} />
-          Xóa chụp lại tất cả
+          {trans("Xóa chụp lại tất cả")}
         </button>
         <button
           onClick={onConfirm}
           className="h-11 px-3 rounded-xl font-black bg-rose-600 hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600 text-white transition-all text-[10px] sm:text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md shadow-rose-550/20 cursor-pointer whitespace-nowrap"
         >
           <Icon name="check" size={13} />
-          Ghép ảnh tiếp tục
+          {trans("Ghép ảnh tiếp tục")}
         </button>
       </div>
 

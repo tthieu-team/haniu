@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { getFullImageUrl } from '@/lib/api';
+import { useTranslate } from '@/lib/translator';
 
 interface Variant {
   id: string;
@@ -33,6 +34,7 @@ export default function StickyBuyBar({
   onAddToCart,
   onBuyNow
 }: StickyBuyBarProps) {
+  const trans = useTranslate();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -63,11 +65,11 @@ export default function StickyBuyBar({
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
           <img
             src={getFullImageUrl(thumbnail)}
-            alt={product.name}
+            alt={trans(product.name)}
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg object-cover bg-slate-50 border border-slate-100 dark:border-zinc-800 shrink-0"
           />
           <div className="min-w-0">
-            <h4 className="font-bold text-slate-800 dark:text-zinc-200 text-[10px] sm:text-xs truncate max-w-[80px] xs:max-w-[120px] md:max-w-xs">{product.name}</h4>
+            <h4 className="font-bold text-slate-800 dark:text-zinc-200 text-[10px] sm:text-xs truncate max-w-[80px] xs:max-w-[120px] md:max-w-xs">{trans(product.name)}</h4>
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-rose-500 font-extrabold text-xs sm:text-sm">{currentPrice.toLocaleString('vi-VN')}đ</span>
             </div>
@@ -80,13 +82,13 @@ export default function StickyBuyBar({
             onClick={onAddToCart}
             className="px-2.5 py-2 sm:px-4 sm:py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 dark:text-zinc-950 text-white text-[9px] sm:text-[11px] font-bold rounded-xl transition-all shadow active:scale-95 whitespace-nowrap"
           >
-            Thêm giỏ hàng
+            {trans('Thêm giỏ hàng')}
           </button>
           <button
             onClick={onBuyNow}
             className="px-3.5 py-2 sm:px-5 sm:py-2.5 bg-rose-500 hover:bg-rose-600 text-white text-[9px] sm:text-[11px] font-bold rounded-xl transition-all shadow-md shadow-rose-500/10 active:scale-95 cursor-pointer whitespace-nowrap"
           >
-            Mua ngay
+            {trans('Mua ngay')}
           </button>
         </div>
       </div>

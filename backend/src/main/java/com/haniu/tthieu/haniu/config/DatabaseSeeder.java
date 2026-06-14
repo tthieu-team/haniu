@@ -47,10 +47,59 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final StoryRepository storyRepository;
     private final TestimonialRepository testimonialRepository;
     private final UgcItemRepository ugcItemRepository;
+    private final jakarta.persistence.EntityManager entityManager;
+    private final org.springframework.transaction.support.TransactionTemplate transactionTemplate;
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        try {
+            entityManager.createNativeQuery("TRUNCATE TABLE translation_caches CASCADE").executeUpdate();
+            log.info(">>> [DB Check] Truncated translation_caches to clear translation cache.");
+        } catch (Exception e) {
+            log.error("Failed to truncate translation_caches: " + e.getMessage());
+        }
+
+        try {
+            log.info(">>> [DB Check] Current Occasions in DB: " + occasionRepository.findAll().stream().map(o -> o.getName()).toList());
+        } catch (Exception e) {
+            log.error("Failed to print occasions: " + e.getMessage());
+        }
+
+        boolean hasJapanese = false;
+        try {
+            hasJapanese = occasionRepository.findAll().stream()
+                    .anyMatch(o -> o.getName() != null && (o.getName().contains("建国記念日") || o.getName().contains("バレンタインデー") || o.getName().contains("?")));
+        } catch (Exception e) {
+            // Ignore if tables do not exist yet
+        }
+
+        if (hasJapanese) { // Clean Japanese translation leak if detected
+            log.warn("Resetting DB tables to clean up Japanese translations...");
+            try {
+                transactionTemplate.executeWithoutResult(status -> {
+                    entityManager.createNativeQuery("TRUNCATE TABLE reviews, order_items, orders, cart_items, carts, product_variants, products, categories, occasions, recipients, testimonials, posts, stories, ugc_items, product_medias, product_attributes, brands, collections, attribute_definitions, system_configurations, translation_caches CASCADE").executeUpdate();
+                });
+                log.info("Database truncated successfully. Re-seeding database...");
+            } catch (Exception e) {
+                log.error("Failed to truncate database: " + e.getMessage(), e);
+            }
+        }
+
+        try {
+            transactionTemplate.executeWithoutResult(status -> {
+                systemConfigRepository.findByConfigKey("HOME_LAYOUT").ifPresent(config -> {
+                    if (config.getConfigValue() != null && config.getConfigValue().contains("/faq")) {
+                        systemConfigRepository.delete(config);
+                        systemConfigRepository.flush();
+                        log.info("Deleted old HOME_LAYOUT with extra menu links to force clean re-seed.");
+                    }
+                });
+            });
+        } catch (Exception e) {
+            log.error("Failed to check or delete old HOME_LAYOUT: " + e.getMessage());
+        }
+
         seedSystemConfigs();
         seedPosts();
         seedStories();
@@ -564,9 +613,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                   { "name": "Bộ sưu tập", "href": "/collections" },
                   { "name": "Câu chuyện", "href": "/story" },
                   { "name": "Tin tức", "href": "/blog" },
-                  { "name": "Hỏi đáp", "href": "/faq" },
-                  { "name": "Liên hệ", "href": "/contact" },
-                  { "name": "Về chúng tôi", "href": "/about" },
                   { "name": "Yêu thích", "href": "/wishlist" }
                 ],
                 "isSticky": true

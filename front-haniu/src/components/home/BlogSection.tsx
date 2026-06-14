@@ -4,11 +4,15 @@ import { useEffect } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import { usePostStore } from '@/store/post';
 import Icon from '@/components/common/Icons';
+import { useLanguage } from '@/providers/LanguageProvider';
+import { useTranslate } from '@/lib/translator';
 
 export default function BlogSection() {
   const blog = useHomeLayoutStore((state) => state.blog);
   const isVisible = useHomeLayoutStore((state) => state.visibility.blog);
   const { activePosts, fetchActivePosts } = usePostStore();
+  const { t, language } = useLanguage();
+  const trans = useTranslate();
 
   useEffect(() => {
     if (isVisible) {
@@ -18,6 +22,8 @@ export default function BlogSection() {
 
   if (!isVisible) return null;
 
+  const dateLocale = language === 'ja' ? 'ja-JP' : language === 'en' ? 'en-US' : 'vi-VN';
+
   // Prefer backend database articles, fallback to config mock items if empty
   const displayPosts = activePosts.length > 0
     ? activePosts.map((p) => ({
@@ -25,7 +31,7 @@ export default function BlogSection() {
         title: p.title,
         summary: p.summary || '',
         image: p.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80',
-        date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('vi-VN') : '---',
+        date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' }) : '---',
         href: `/blog/${p.slug}`
       }))
     : blog.items;
@@ -36,16 +42,13 @@ export default function BlogSection() {
         {/* Title */}
         <div className="text-center space-y-3 sm:space-y-4 max-w-3xl mx-auto px-3 sm:px-4">
           <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
-            <Icon name="✨" size={10} className="animate-pulse" /> GIFT INSPIRATION
+            <Icon name="✨" size={10} className="animate-pulse" /> {trans(blog.badge)}
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
-            Góc Chia Sẻ{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-amber-500">
-              Kinh Nghiệm
-            </span>
+            {trans(blog.title)}
           </h2>
           <p className="text-[11px] sm:text-xs md:text-sm text-slate-500 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed font-light">
-            {blog.subtitle}
+            {trans(blog.subtitle)}
           </p>
         </div>
 
@@ -76,10 +79,10 @@ export default function BlogSection() {
               <div className="p-3.5 sm:p-6 md:p-8 flex flex-col justify-between flex-1 space-y-3 sm:space-y-4">
                 <div className="space-y-1.5 sm:space-y-3.5">
                   <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-zinc-100 group-hover:text-rose-500 transition-colors line-clamp-2 leading-snug tracking-wide">
-                    <a href={post.href}>{post.title}</a>
+                    <a href={post.href}>{trans(post.title)}</a>
                   </h3>
                   <p className="text-[10px] sm:text-xs text-slate-500 dark:text-zinc-400 font-light line-clamp-2 sm:line-clamp-3 leading-normal sm:leading-relaxed">
-                    {post.summary}
+                    {trans(post.summary)}
                   </p>
                 </div>
 
@@ -88,7 +91,7 @@ export default function BlogSection() {
                     href={post.href}
                     className="inline-flex items-center text-[10px] sm:text-xs font-bold text-rose-500 hover:text-rose-600 dark:text-rose-400 transition-colors group/link"
                   >
-                    <span>Đọc tiếp</span>
+                    <span>{t('home.blog.read_more')}</span>
                     <Icon
                       name="→"
                       size={12}

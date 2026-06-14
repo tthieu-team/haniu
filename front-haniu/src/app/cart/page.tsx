@@ -8,6 +8,7 @@ import { productService } from '@/services/product.service';
 import { getFullImageUrl, fetchApi } from '@/lib/api';
 import Link from 'next/link';
 import Icon from '@/components/common/Icons';
+import { useTranslate } from '@/lib/translator';
 
 // Import subcomponents
 import CartItemCard from './components/CartItemCard';
@@ -29,6 +30,7 @@ const ALL_PAYMENT_METHODS: PaymentMethodConfig[] = [
 ];
 
 export default function CartPage() {
+  const trans = useTranslate();
   const { cart, loading, fetchCart, updateQuantity, removeItem, addToCart } = useCartStore();
   const {
     appliedCoupon,
@@ -228,9 +230,9 @@ export default function CartPage() {
   };
 
   const getDeliveryEstimation = () => {
-    if (shippingMethod === 'FAST') return 'Dự kiến giao: 1 - 2 ngày';
-    if (shippingMethod === 'EXPRESS') return 'Hỏa tốc nhận ngay trong 2 giờ';
-    return 'Dự kiến giao: 2 - 4 ngày';
+    if (shippingMethod === 'FAST') return trans('Dự kiến giao: 1 - 2 ngày');
+    if (shippingMethod === 'EXPRESS') return trans('Hỏa tốc nhận ngay trong 2 giờ');
+    return trans('Dự kiến giao: 2 - 4 ngày');
   };
 
   const freeShippingThreshold = getFreeshipThreshold();
@@ -257,12 +259,12 @@ export default function CartPage() {
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/20 text-rose-500 font-bold text-[10px] uppercase tracking-wider">
             <Icon name="sparkles" size={10} /> Haniu E-Commerce
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Giỏ hàng của bạn</h1>
-          <p className="text-slate-500 dark:text-zinc-400 text-sm">Quản lý các món quà ý nghĩa bạn đã chọn cho người thương</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">{trans("Giỏ hàng của bạn")}</h1>
+          <p className="text-slate-550 dark:text-zinc-400 text-sm">{trans("Quản lý các món quà ý nghĩa bạn đã chọn cho người thương")}</p>
         </div>
         {cart && cart.items.length > 0 && (
           <span className="text-xs text-slate-400 dark:text-zinc-500 mt-2 md:mt-0 font-medium">
-            Có <strong className="text-slate-700 dark:text-zinc-300 font-bold">{cart.totalItems}</strong> sản phẩm trong giỏ hàng
+            {trans("Có")} <strong className="text-slate-700 dark:text-zinc-300 font-bold">{cart.totalItems}</strong> {trans("sản phẩm trong giỏ hàng")}
           </span>
         )}
       </div>
@@ -270,7 +272,7 @@ export default function CartPage() {
       {isInitialLoading ? (
         <div className="flex flex-col items-center justify-center py-32 space-y-4">
           <div className="w-10 h-10 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-500 dark:text-zinc-400 text-sm font-medium">Đang tải giỏ hàng của bạn...</p>
+          <p className="text-slate-500 dark:text-zinc-400 text-sm font-medium">{trans("Đang tải giỏ hàng của bạn...")}</p>
         </div>
       ) : !cart || cart.items.length === 0 ? (
         <div className="space-y-6 sm:space-y-10">
@@ -280,13 +282,13 @@ export default function CartPage() {
               <Icon name="cart" size={36} />
             </div>
             <div className="space-y-2">
-              <h2 className="text-lg font-bold text-slate-800 dark:text-white">Giỏ hàng đang trống</h2>
+              <h2 className="text-lg font-bold text-slate-800 dark:text-white">{trans("Giỏ hàng đang trống")}</h2>
               <p className="text-slate-400 dark:text-zinc-400 text-xs max-w-sm mx-auto leading-relaxed">
-                Có vẻ như bạn chưa chọn được sản phẩm ưng ý. Hãy tiếp tục khám phá các mẫu quà tặng thiết kế độc đáo nhé!
+                {trans("Có vẻ như bạn chưa chọn được sản phẩm ưng ý. Hãy tiếp tục khám phá các mẫu quà tặng thiết kế độc đáo nhé!")}
               </p>
             </div>
             <Link href="/" className="inline-block px-8 py-3.5 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-rose-500/20 transition-all hover:scale-[1.02]">
-              Tiếp tục mua sắm
+              {trans("Tiếp tục mua sắm")}
             </Link>
           </div>
         </div>
@@ -318,7 +320,7 @@ export default function CartPage() {
                 <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-6 rounded-3xl space-y-5 shadow-sm">
                   <div className="flex items-center gap-2">
                     <Icon name="gift" size={18} className="text-rose-500" />
-                    <h3 className="text-sm font-extrabold text-slate-800 dark:text-zinc-200 uppercase tracking-wider">Khách hàng thường mua kèm</h3>
+                    <h3 className="text-sm font-extrabold text-slate-800 dark:text-zinc-200 uppercase tracking-wider">{trans("Khách hàng thường mua kèm")}</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {accessories.map(acc => {
@@ -327,12 +329,12 @@ export default function CartPage() {
                         <div key={acc.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800/80 transition-all">
                           <img
                             src={getFullImageUrl(getProductThumbnail(acc))}
-                            alt={acc.name}
+                            alt={trans(acc.name)}
                             className="w-12 h-12 rounded-xl object-cover bg-slate-150"
                           />
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-slate-800 dark:text-zinc-200 text-xs truncate">{acc.name}</h4>
-                            <p className="text-[10px] text-slate-400 truncate">{acc.shortDescription || 'Món phụ kiện ý nghĩa đi kèm'}</p>
+                            <h4 className="font-bold text-slate-800 dark:text-zinc-200 text-xs truncate">{trans(acc.name)}</h4>
+                            <p className="text-[10px] text-slate-400 truncate">{trans(acc.shortDescription || 'Món phụ kiện ý nghĩa đi kèm')}</p>
                             <span className="text-xs font-bold text-rose-500 block mt-0.5">{(acc.basePrice || acc.price || 0).toLocaleString()}đ</span>
                           </div>
                           <button
@@ -345,7 +347,7 @@ export default function CartPage() {
                                 : 'bg-rose-500 hover:bg-rose-600 text-white shadow-sm shadow-rose-500/10'
                             }`}
                           >
-                            {isAlreadyInCart ? 'Đã thêm' : 'Thêm'}
+                            {isAlreadyInCart ? trans('Đã thêm') : trans('Thêm')}
                           </button>
                         </div>
                       );
@@ -358,11 +360,11 @@ export default function CartPage() {
             {/* Right Column: Order Summary & Coupon Panels */}
             <div className="space-y-6">
               <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6">
-                <h2 className="font-extrabold text-slate-800 dark:text-white text-base">Tổng đơn hàng</h2>
+                <h2 className="font-extrabold text-slate-800 dark:text-white text-base">{trans("Tổng đơn hàng")}</h2>
 
                 {/* Delivery Options Selector */}
                 <div className="space-y-2.5 pb-4 border-b border-slate-100 dark:border-zinc-800">
-                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Chọn phương thức vận chuyển</label>
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{trans("Chọn phương thức vận chuyển")}</label>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
@@ -374,7 +376,7 @@ export default function CartPage() {
                       }`}
                     >
                       <Icon name="truck" size={16} />
-                      <span className="text-[10px] font-bold block">Tiêu chuẩn</span>
+                      <span className="text-[10px] font-bold block">{trans("Tiêu chuẩn")}</span>
                       <span className="text-[9px] opacity-80">30k / Free &gt;300k</span>
                     </button>
                     <button
@@ -387,7 +389,7 @@ export default function CartPage() {
                       }`}
                     >
                       <Icon name="zap" size={16} />
-                      <span className="text-[10px] font-bold block">Giao nhanh</span>
+                      <span className="text-[10px] font-bold block">{trans("Giao nhanh")}</span>
                       <span className="text-[9px] opacity-80">50k / Free &gt;500k</span>
                     </button>
                     <button
@@ -400,7 +402,7 @@ export default function CartPage() {
                       }`}
                     >
                       <Icon name="zap" size={16} />
-                      <span className="text-[10px] font-bold block">Hỏa tốc 2h</span>
+                      <span className="text-[10px] font-bold block">{trans("Hỏa tốc 2h")}</span>
                       <span className="text-[9px] opacity-80">100k / Free &gt;1M</span>
                     </button>
                   </div>
@@ -411,7 +413,7 @@ export default function CartPage() {
 
                 {/* Payment Selection Box */}
                 <div className="space-y-2.5 pb-4 border-b border-slate-100 dark:border-zinc-800">
-                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Phương thức thanh toán</label>
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{trans("Phương thức thanh toán")}</label>
                   <div className="space-y-2">
                     {paymentMethods.map(pm => (
                       <button
@@ -421,13 +423,13 @@ export default function CartPage() {
                         className={`w-full p-2.5 rounded-xl border flex items-center gap-3 text-left transition-all ${
                           paymentMethod === pm.code
                             ? 'border-rose-500 bg-rose-50/10 text-rose-500'
-                            : 'border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-350'
+                            : 'border-slate-200 dark:border-zinc-800 text-slate-650 dark:text-zinc-350'
                         }`}
                       >
                         <Icon name={pm.icon} size={18} className="shrink-0" />
                         <div className="min-w-0">
                           <span className="font-bold text-xs block">{pm.code}</span>
-                          <span className="text-[10px] text-slate-400 block truncate">{pm.name}</span>
+                          <span className="text-[10px] text-slate-400 block truncate">{trans(pm.name)}</span>
                         </div>
                       </button>
                     ))}
@@ -436,17 +438,17 @@ export default function CartPage() {
 
                 {/* Coupon Form */}
                 <form onSubmit={handleApplyCoupon} className="space-y-2 pb-4 border-b border-slate-100 dark:border-zinc-800">
-                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Mã giảm giá</label>
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{trans("Mã giảm giá")}</label>
                   {couponWarning && (
                     <div className="flex items-start gap-2 p-2.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-300/50 dark:border-amber-700/40 rounded-xl text-[10px] text-amber-700 dark:text-amber-400 font-semibold animate-fade-in">
                       <span className="shrink-0 mt-0.5">⚠️</span>
-                      <span>{couponWarning}</span>
+                      <span>{trans(couponWarning)}</span>
                     </div>
                   )}
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Nhập mã..."
+                      placeholder={trans("Nhập mã...")}
                       value={couponCode}
                       onChange={e => setCouponCode(e.target.value)}
                       className="flex-1 text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5 uppercase font-semibold text-slate-800 dark:text-white focus:outline-none focus:border-rose-500 transition-colors"
@@ -456,16 +458,16 @@ export default function CartPage() {
                       disabled={loading || !couponCode.trim()}
                       className="px-4 py-2 text-xs font-bold bg-slate-800 dark:bg-zinc-800 text-white dark:text-zinc-200 rounded-xl hover:bg-slate-900 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 cursor-pointer"
                     >
-                      Áp dụng
+                      {trans("Áp dụng")}
                     </button>
                   </div>
-                  {couponError && <p className="text-[10px] text-red-500 font-semibold">{couponError}</p>}
-                  {couponSuccess && <p className="text-[10px] text-emerald-500 font-semibold">{couponSuccess}</p>}
+                  {couponError && <p className="text-[10px] text-red-500 font-semibold">{trans(couponError)}</p>}
+                  {couponSuccess && <p className="text-[10px] text-emerald-500 font-semibold">{trans(couponSuccess)}</p>}
                 </form>
 
                 {/* Available Coupons list */}
                 <div className="space-y-3 pt-2 pb-4 border-b border-slate-100 dark:border-zinc-800">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Mã giảm giá khả dụng</span>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{trans("Mã giảm giá khả dụng")}</span>
                   {coupons && coupons.length > 0 ? (
                     <div className="space-y-2.5 max-h-[140px] overflow-y-auto pr-1 animate-fade-in">
                       {coupons.map(c => {
@@ -489,11 +491,11 @@ export default function CartPage() {
                                   {c.code}
                                 </span>
                                 <span className="font-bold text-slate-700 dark:text-zinc-300">
-                                  {c.discountType === 'PERCENT' ? `Giảm ${c.discountValue}%` : `Giảm ${Number(c.discountValue).toLocaleString()}đ`}
+                                  {c.discountType === 'PERCENT' ? `${trans("Giảm")} ${c.discountValue}%` : `${trans("Giảm")} ${Number(c.discountValue).toLocaleString()}đ`}
                                 </span>
                               </div>
                               <p className="text-[9px] text-slate-400 font-medium leading-tight">
-                                {c.description || (c.minOrderValue ? `Đơn tối thiểu ${Number(c.minOrderValue).toLocaleString()}đ` : 'Tất cả đơn hàng')}
+                                {trans(c.description) || (c.minOrderValue ? `${trans("Đơn tối thiểu")} ${Number(c.minOrderValue).toLocaleString()}đ` : trans('Tất cả đơn hàng'))}
                               </p>
                             </div>
                             {!isUnavailable && (
@@ -502,7 +504,7 @@ export default function CartPage() {
                                 type="button"
                                 className="px-2.5 py-1 text-[10px] font-bold text-slate-800 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 hover:border-rose-500 hover:text-rose-500 dark:text-white rounded-lg cursor-pointer transition-all shrink-0 shadow-sm"
                               >
-                                Áp dụng
+                                {trans("Áp dụng")}
                               </button>
                             )}
                           </div>
@@ -510,33 +512,33 @@ export default function CartPage() {
                       })}
                     </div>
                   ) : (
-                    <p className="text-[10px] text-slate-400 font-medium italic px-2">Không có mã giảm giá nào khả dụng.</p>
+                    <p className="text-[10px] text-slate-400 font-medium italic px-2">{trans("Không có mã giảm giá nào khả dụng.")}</p>
                   )}
                 </div>
 
                 {/* Price Breakdown */}
                 <div className="space-y-3 text-xs">
                   <div className="flex justify-between text-slate-500 dark:text-zinc-400">
-                    <span>Tạm tính (Giá gốc)</span>
+                    <span>{trans("Tạm tính (Giá gốc)")}</span>
                     <span className="font-semibold text-slate-700 dark:text-zinc-300">{originalSubtotal.toLocaleString()}đ</span>
                   </div>
                   {productDiscount > 0 && (
                     <div className="flex justify-between text-rose-500 font-semibold">
-                      <span>Giảm giá sản phẩm</span>
+                      <span>{trans("Giảm giá sản phẩm")}</span>
                       <span>-{productDiscount.toLocaleString()}đ</span>
                     </div>
                   )}
                   {discountAmount > 0 && (
                     <div className="flex justify-between text-emerald-500 font-semibold">
-                      <span>Giảm giá từ Voucher</span>
+                      <span>{trans("Giảm giá từ Voucher")}</span>
                       <span>-{discountAmount.toLocaleString()}đ</span>
                     </div>
                   )}
                   <div className="flex justify-between text-slate-500 dark:text-zinc-400">
-                    <span>Phí vận chuyển ({shippingMethod === 'FAST' ? 'Nhanh' : (shippingMethod === 'EXPRESS' ? 'Hỏa tốc' : 'Thường')})</span>
+                    <span>{trans("Phí vận chuyển")} ({shippingMethod === 'FAST' ? trans('Nhanh') : (shippingMethod === 'EXPRESS' ? trans('Hỏa tốc') : trans('Thường'))})</span>
                     <span className="font-semibold text-slate-700 dark:text-zinc-300">
                       {deliveryFee === 0 ? (
-                        <span className="text-emerald-500 font-medium">Miễn phí</span>
+                        <span className="text-emerald-500 font-medium">{trans("Miễn phí")}</span>
                       ) : (
                         `${deliveryFee.toLocaleString()}đ`
                       )}
@@ -548,13 +550,13 @@ export default function CartPage() {
                     <div className="flex justify-between items-center bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] animate-fade-in">
                       <div className="font-bold flex items-center gap-1">
                         <Icon name="check" size={10} />
-                        Đã áp dụng: {appliedCoupon.code}
+                        {trans("Đã áp dụng:")} {appliedCoupon.code}
                       </div>
                       <button
                         onClick={handleRemoveCoupon}
                         type="button"
                         className="p-1 hover:bg-emerald-500/20 rounded-lg text-emerald-600 transition-colors cursor-pointer"
-                        title="Gỡ coupon"
+                        title={trans("Gỡ coupon")}
                       >
                         <Icon name="close" size={8} />
                       </button>
@@ -563,12 +565,12 @@ export default function CartPage() {
 
                   {/* Grand Total */}
                   <div className="flex justify-between font-bold text-sm text-slate-800 dark:text-white border-t border-slate-100 dark:border-zinc-800 pt-4">
-                    <span>Tổng tiền</span>
+                    <span>{trans("Tổng tiền")}</span>
                     <div className="text-right">
                       <span className="text-rose-500 font-extrabold text-lg block">{total.toLocaleString()}đ</span>
                       {totalSavings > 0 && (
                         <span className="text-[10px] text-emerald-500 font-bold block bg-emerald-500/5 px-2 py-0.5 rounded-full inline-block mt-1">
-                          🎉 Đã tiết kiệm -{totalSavings.toLocaleString()}đ
+                          🎉 {trans("Đã tiết kiệm")} -{totalSavings.toLocaleString()}đ
                         </span>
                       )}
                     </div>
@@ -582,10 +584,10 @@ export default function CartPage() {
                       disabled
                       className="block w-full py-3.5 bg-slate-200 dark:bg-zinc-800 text-slate-400 dark:text-zinc-650 text-center font-bold text-xs rounded-xl cursor-not-allowed"
                     >
-                      Tiến hành đặt hàng
+                      {trans("Tiến hành đặt hàng")}
                     </button>
                     <p className="text-[9px] text-red-500 text-center font-semibold">
-                      Vui lòng điều chỉnh số lượng hoặc xóa sản phẩm không khả dụng để tiếp tục.
+                      {trans("Vui lòng điều chỉnh số lượng hoặc xóa sản phẩm không khả dụng để tiếp tục.")}
                     </p>
                   </div>
                 ) : (
@@ -601,13 +603,13 @@ export default function CartPage() {
                     }}
                     className="block w-full py-3.5 bg-rose-500 hover:bg-rose-600 text-white text-center font-bold text-xs rounded-xl shadow-lg shadow-rose-500/20 transition-all hover:scale-[1.02]"
                   >
-                    Tiến hành đặt hàng
+                    {trans("Tiến hành đặt hàng")}
                   </Link>
                 )}
 
                 <div className="pt-2 text-center">
                   <Link href="/" className="text-[10px] text-slate-400 dark:text-zinc-550 hover:text-rose-500 hover:underline font-bold transition-colors">
-                    ← Tiếp tục mua sắm
+                    ← {trans("Tiếp tục mua sắm")}
                   </Link>
                 </div>
               </div>
@@ -615,34 +617,34 @@ export default function CartPage() {
               {/* Fast Purchasing Trust Policies */}
               <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 p-5 rounded-3xl space-y-3.5 shadow-sm text-xs">
                 <h4 className="font-extrabold text-slate-800 dark:text-zinc-200 uppercase tracking-wider text-[10px] pb-2 border-b border-slate-50 dark:border-zinc-800 flex items-center gap-1.5">
-                  <Icon name="shield" size={12} className="text-rose-500" /> Cam kết mua sắm tại Haniu
+                  <Icon name="shield" size={12} className="text-rose-500" /> {trans("Cam kết mua sắm tại Haniu")}
                 </h4>
                 <div className="flex items-start gap-2.5">
                   <span className="text-base leading-none text-rose-500"><Icon name="truck" size={16} /></span>
                   <div className="space-y-0.5">
-                    <span className="font-bold text-slate-800 dark:text-zinc-300 block">Miễn phí vận chuyển</span>
-                    <span className="text-slate-400 text-[10px] block leading-normal">Mọi đơn hàng từ 300k, giao siêu nhanh toàn quốc.</span>
+                    <span className="font-bold text-slate-800 dark:text-zinc-300 block">{trans("Miễn phí vận chuyển")}</span>
+                    <span className="text-slate-400 text-[10px] block leading-normal">{trans("Mọi đơn hàng từ 300k, giao siêu nhanh toàn quốc.")}</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="text-base leading-none text-rose-500"><Icon name="lock" size={16} /></span>
                   <div className="space-y-0.5">
-                    <span className="font-bold text-slate-800 dark:text-zinc-300 block">Thanh toán an toàn</span>
-                    <span className="text-slate-400 text-[10px] block leading-normal">Bảo mật thông tin ngân hàng và thẻ 100%.</span>
+                    <span className="font-bold text-slate-800 dark:text-zinc-300 block">{trans("Thanh toán an toàn")}</span>
+                    <span className="text-slate-400 text-[10px] block leading-normal">{trans("Bảo mật thông tin ngân hàng và thẻ 100%.")}</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="text-base leading-none text-rose-500"><Icon name="gift" size={16} /></span>
                   <div className="space-y-0.5">
-                    <span className="font-bold text-slate-800 dark:text-zinc-300 block">Đổi trả 7 ngày</span>
-                    <span className="text-slate-400 text-[10px] block leading-normal">Đổi mới hoàn toàn nếu sản phẩm có lỗi sản xuất.</span>
+                    <span className="font-bold text-slate-800 dark:text-zinc-300 block">{trans("Đổi trả 7 ngày")}</span>
+                    <span className="text-slate-400 text-[10px] block leading-normal">{trans("Đổi mới hoàn toàn nếu sản phẩm có lỗi sản xuất.")}</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="text-base leading-none text-rose-500"><Icon name="check" size={16} /></span>
                   <div className="space-y-0.5">
-                    <span className="font-bold text-slate-800 dark:text-zinc-300 block">Đồng kiểm hàng trước</span>
-                    <span className="text-slate-400 text-[10px] block leading-normal">Nhận hàng, kiểm tra chất lượng rồi mới thanh toán.</span>
+                    <span className="font-bold text-slate-800 dark:text-zinc-300 block">{trans("Đồng kiểm hàng trước")}</span>
+                    <span className="text-slate-400 text-[10px] block leading-normal">{trans("Nhận hàng, kiểm tra chất lượng rồi mới thanh toán.")}</span>
                   </div>
                 </div>
               </div>
@@ -653,7 +655,7 @@ export default function CartPage() {
           {filteredRecommended && filteredRecommended.length > 0 && (
             <div className="space-y-6 pt-10 border-t border-slate-100 dark:border-zinc-800/80">
               <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                <Icon name="sparkles" size={16} className="text-rose-500" /> Quà tặng độc đáo nổi bật khác
+                <Icon name="sparkles" size={16} className="text-rose-500" /> {trans("Quà tặng độc đáo nổi bật khác")}
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
                 {filteredRecommended.map(p => (

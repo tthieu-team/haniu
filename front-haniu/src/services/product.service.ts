@@ -96,12 +96,16 @@ export const productService = {
     return fetchApi(`/api/v1/products/search?q=${encodeURIComponent(query)}&page=${page}&size=${size}`);
   },
 
-  getProductById: async (id: string) => {
-    return fetchApi(`/api/v1/products/${id}`, { cache: 'no-store' });
+  getProductById: async (id: string, lang?: string) => {
+    const headers: Record<string, string> = {};
+    if (lang) headers['Accept-Language'] = lang;
+    return fetchApi(`/api/v1/products/${id}`, { cache: 'no-store', headers });
   },
 
-  getProductBySlug: async (slug: string) => {
-    return fetchApi(`/api/v1/products/slug/${slug}`, { cache: 'no-store' });
+  getProductBySlug: async (slug: string, lang?: string) => {
+    const headers: Record<string, string> = {};
+    if (lang) headers['Accept-Language'] = lang;
+    return fetchApi(`/api/v1/products/slug/${slug}`, { cache: 'no-store', headers });
   },
 
   createProduct: async (payload: ProductRequestPayload) => {

@@ -3,6 +3,7 @@
 import React from 'react';
 import Icon from '@/components/common/Icons';
 import { useHomeLayoutStore } from '@/store/homeLayout';
+import { useTranslate } from '@/lib/translator';
 
 interface ProductBrandCommitmentProps {
   product: {
@@ -12,6 +13,7 @@ interface ProductBrandCommitmentProps {
 
 export default function ProductBrandCommitment({ product }: ProductBrandCommitmentProps) {
   const globalProductDetails = useHomeLayoutStore((state) => state.productDetails);
+  const trans = useTranslate();
 
   const globalConfig = globalProductDetails || {
     showBrandCommitment: true,
@@ -46,18 +48,17 @@ export default function ProductBrandCommitment({ product }: ProductBrandCommitme
   return (
     <div className="bg-white/70 dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/60 rounded-3xl p-6 space-y-4 shadow-sm hover:shadow-md transition-all duration-300">
       <h3 className="font-extrabold text-xs tracking-wider uppercase text-slate-450 dark:text-zinc-400 flex items-center gap-2">
-        <Icon name="🤝" size={14} className="text-rose-500" /> Haniu cam kết:
+        <Icon name="🤝" size={14} className="text-rose-500" /> {trans("Haniu cam kết:")}
       </h3>
       <div className="space-y-3 pl-1">
         {finalConfig.list.map((item, idx) => (
           <div key={idx} className="flex items-start gap-2.5 text-xs font-semibold text-slate-650 dark:text-zinc-300">
             <Icon name="check" size={14} className="text-rose-500 shrink-0 mt-0.5" />
-            <span className="leading-relaxed">{item}</span>
+            <span className="leading-relaxed">{trans(item)}</span>
           </div>
         ))}
       </div>
     </div>
   );
+
 }
-
-

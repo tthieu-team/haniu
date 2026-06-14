@@ -154,7 +154,7 @@ function ProductDetailPreview({ product }: { product: any }) {
 
 
           {/* Service options trigger block */}
-          {false && product.allowAdminChat && (
+          {product.allowAdminChat && (
             <div className="bg-sky-500/5 border border-sky-500/10 p-4 rounded-2xl flex items-center justify-between text-xs">
               <div>
                 <h4 className="font-bold text-sky-700 dark:text-sky-400 flex items-center gap-1.5">
@@ -162,7 +162,11 @@ function ProductDetailPreview({ product }: { product: any }) {
                 </h4>
                 <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-1">Trực tiếp thảo luận các yêu cầu đặc biệt với Haniu Admin.</p>
               </div>
-              <button type="button" className="bg-sky-500 text-white font-bold px-4 py-2 rounded-xl">
+              <button 
+                type="button" 
+                onClick={() => window.open('https://zalo.me/0987654321', '_blank')}
+                className="bg-sky-500 text-white font-bold px-4 py-2 rounded-xl"
+              >
                 Chat ngay
               </button>
             </div>

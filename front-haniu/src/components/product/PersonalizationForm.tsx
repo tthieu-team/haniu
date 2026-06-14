@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Icon from '@/components/common/Icons';
+import { useTranslate } from '@/lib/translator';
 
 export interface PersonalizationConfig {
   showEngraving?: boolean;
@@ -30,6 +31,7 @@ export default function PersonalizationForm({
   setCardMessage,
   config
 }: PersonalizationFormProps) {
+  const trans = useTranslate();
   const showEngraving = config?.showEngraving ?? true;
   const engravingLabel = config?.engravingLabel || "Khắc tên hoặc lời chúc muốn khắc lên sản phẩm";
   const engravingPlaceholder = config?.engravingPlaceholder || "Nhập nội dung muốn khắc (ví dụ: Happy Birthday, Hieu & Vy...)";
@@ -76,7 +78,7 @@ export default function PersonalizationForm({
               : 'text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200'
               }`}
           >
-            <Icon name="edit" size={12} /> Khắc Laser
+            <Icon name="edit" size={12} /> {trans("Khắc Laser")}
           </button>
           <button
             type="button"
@@ -86,7 +88,7 @@ export default function PersonalizationForm({
               : 'text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200'
               }`}
           >
-            <Icon name="mail" size={12} /> Thiệp viết tay
+            <Icon name="mail" size={12} /> {trans("Thiệp viết tay")}
           </button>
         </div>
       )}
@@ -97,8 +99,8 @@ export default function PersonalizationForm({
         {showEngraving && (activeTab === 'engraving' || !showCardMessage) && (
           <div className="space-y-3 w-full animate-fade-in">
             <div className="flex justify-between items-center text-slate-500 dark:text-zinc-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-              <span>{engravingLabel}</span>
-              <span className="font-mono text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-zinc-400">{engravingText.length}/{engravingMaxLength} ký tự</span>
+              <span>{trans(engravingLabel)}</span>
+              <span className="font-mono text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-zinc-400">{engravingText.length}/{engravingMaxLength} {trans("ký tự")}</span>
             </div>
 
             {/* Dark Walnut Laser Engraving simulator canvas */}
@@ -113,7 +115,7 @@ export default function PersonalizationForm({
                 <input
                   type="text"
                   maxLength={engravingMaxLength}
-                  placeholder={engravingPlaceholder}
+                  placeholder={trans(engravingPlaceholder)}
                   value={engravingText}
                   onChange={(e) => setEngravingText(e.target.value)}
                   className="w-full text-center bg-transparent border-none outline-none text-base sm:text-lg md:text-xl font-serif italic font-bold tracking-wide focus:ring-0 focus:border-none focus:outline-none cursor-text text-[#170a01] placeholder-[#170a01]/30"
@@ -132,7 +134,7 @@ export default function PersonalizationForm({
             </div>
 
             <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-normal leading-normal italic text-center">
-              *Nhấp trực tiếp vào thanh gỗ ở trên để chỉnh sửa nội dung khắc laser.
+              {trans("*Nhấp trực tiếp vào thanh gỗ ở trên để chỉnh sửa nội dung khắc laser.")}
             </p>
           </div>
         )}
@@ -141,8 +143,8 @@ export default function PersonalizationForm({
         {showCardMessage && (activeTab === 'card' || !showEngraving) && (
           <div className="space-y-3 w-full animate-fade-in">
             <div className="flex justify-between items-center text-slate-500 dark:text-zinc-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-              <span>{cardMessageLabel}</span>
-              <span className="font-mono text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-zinc-400">{cardMessage.length}/{cardMessageMaxLength} ký tự</span>
+              <span>{trans(cardMessageLabel)}</span>
+              <span className="font-mono text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-zinc-400">{cardMessage.length}/{cardMessageMaxLength} {trans("ký tự")}</span>
             </div>
 
             {/* Handwritten Letter Paper Simulator */}
@@ -154,8 +156,8 @@ export default function PersonalizationForm({
                 className="flex justify-between items-center text-[15px] sm:text-[17px] font-bold tracking-wide text-amber-900/60 dark:text-amber-400/80 pb-2 border-b border-amber-900/10 dark:border-zinc-800/80 z-10"
                 style={{ fontFamily: "var(--font-dancing-script), cursive" }}
               >
-                <span>Thư viết tay gửi người nhận</span>
-                <span className="flex items-center gap-1.5">
+                <span>{trans("Thư viết tay gửi người nhận")}</span>
+                <span className="flex items-center gap-1.5 font-bold">
                   <Icon name="edit" size={10} /> Handmade Note
                 </span>
               </div>
@@ -164,7 +166,7 @@ export default function PersonalizationForm({
                 ref={textareaRef}
                 rows={2}
                 maxLength={cardMessageMaxLength}
-                placeholder={cardMessagePlaceholder}
+                placeholder={trans(cardMessagePlaceholder)}
                 value={cardMessage}
                 onChange={(e) => setCardMessage(e.target.value)}
                 className="my-3 w-full bg-transparent border-none outline-none text-lg font-medium text-left overflow-y-hidden pl-8 pr-4 break-words scrollbar-none resize-none focus:ring-0 focus:border-none focus:outline-none text-slate-800 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 z-10"
@@ -182,14 +184,14 @@ export default function PersonalizationForm({
 
               <div className="flex items-center justify-between text-[9px] text-slate-400 dark:text-zinc-500 pt-3 z-10">
                 <span className="font-medium italic flex items-center gap-1">
-                  Nắn nót từng nét chữ <Icon name="💖" size={9} className="text-rose-500" />
+                  {trans("Nắn nót từng nét chữ")} <Icon name="💖" size={9} className="text-rose-500" />
                 </span>
-                <span className="font-serif italic">Haniu Collection</span>
+                <span className="font-serif italic">{trans("Haniu Collection")}</span>
               </div>
             </div>
 
             <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-normal leading-normal italic text-center">
-              *Nhấp trực tiếp lên thiệp ở trên để viết lời chúc.
+              {trans("*Nhấp trực tiếp lên thiệp ở trên để viết lời chúc.")}
             </p>
           </div>
         )}

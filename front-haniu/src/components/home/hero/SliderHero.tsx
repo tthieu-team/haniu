@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { HeroConfig } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
 import { getFullImageUrl } from '@/lib/api';
+import { useTranslate } from '@/lib/translator';
 
 interface SliderHeroProps {
   hero: HeroConfig;
@@ -15,6 +16,7 @@ interface SliderHeroProps {
 export default function SliderHero({ hero, isSticky, isAnnouncementBar }: SliderHeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const translate = useTranslate();
 
   const slides = hero.slides || [];
   const autoplay = hero.autoplay !== false;
@@ -67,7 +69,7 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
               <div className="absolute inset-0">
                 <Image
                   src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
-                  alt={slide.boldTitle || 'Banner image'}
+                  alt={translate(slide.boldTitle) || 'Banner image'}
                   fill
                   priority={idx === 0}
                   className="object-cover object-center"
@@ -116,7 +118,7 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
                       }`}>
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEBEA] dark:bg-rose-950/40 border border-[#F5D0CD] dark:border-rose-900/30 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#C67B71] dark:text-rose-300 shadow-xs">
                           <Icon name="heart" size={10} className="fill-[#C67B71] text-[#C67B71] dark:fill-rose-300 dark:text-rose-300" />
-                          {slide.badgeText}
+                          {translate(slide.badgeText)}
                         </span>
                       </div>
                     )}
@@ -126,12 +128,12 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
                       <h1 className="leading-tight sm:leading-none text-[#3A2312] dark:text-zinc-100 select-none">
                         {slide.scriptTitle && (
                           <span className="block font-script text-3xl sm:text-5xl md:text-6xl text-[#C67B71] dark:text-rose-400 italic font-normal tracking-wide leading-normal mb-1 sm:mb-[-0.1em] ml-1">
-                            {slide.scriptTitle}
+                            {translate(slide.scriptTitle)}
                           </span>
                         )}
                         {slide.boldTitle && (
                           <span className="block font-serif text-3xl sm:text-6xl md:text-7xl font-bold uppercase tracking-[0.05em] leading-tight mt-1">
-                            {slide.boldTitle}
+                            {translate(slide.boldTitle)}
                           </span>
                         )}
                       </h1>
@@ -149,7 +151,7 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
                               />
                               <text className="text-[7px] font-bold fill-[#C67B71]/70 tracking-[0.14em] uppercase font-sans">
                                 <textPath href={`#circlePath-${idx}`} startOffset="0%">
-                                  {slide.circleBadgeText}
+                                  {translate(slide.circleBadgeText)}
                                 </textPath>
                               </text>
                             </svg>
@@ -164,7 +166,7 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
 
                     {/* Subtitle / Message */}
                     <p className="text-xs sm:text-sm md:text-base text-[#5E4E43] dark:text-zinc-300 font-light leading-relaxed max-w-sm sm:max-w-md mx-auto sm:mx-0">
-                      {slide.subtitle}
+                      {translate(slide.subtitle)}
                     </p>
 
                     {/* Call to Action */}
@@ -180,7 +182,7 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
                         className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#E07A7C] to-[#C67B71] px-7 py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#C67B71]/25 hover:shadow-xl hover:shadow-[#C67B71]/40 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 transition-all duration-300 cursor-pointer"
                       >
                         <Icon name="gift" size={13} className="text-white" />
-                        <span>{slide.ctaText}</span>
+                        <span>{translate(slide.ctaText)}</span>
                       </a>
                     </div>
                   </div>
@@ -197,12 +199,14 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
                   <div className="w-9 h-9 rounded-full bg-[#FCEBEA] dark:bg-rose-950/40 flex items-center justify-center mb-2">
                     <Icon name="gift" size={16} className="text-[#C67B71] dark:text-rose-400" />
                   </div>
-                  <h4 className="text-[10px] font-bold text-[#3A2312] dark:text-zinc-200 tracking-wider uppercase text-center mb-0.5">
-                    {slide.cardTitle}
-                  </h4>
-                  <p className="font-script text-xs sm:text-sm text-[#C67B71] dark:text-rose-400 text-center leading-tight">
-                    {slide.cardSubtitle}
-                  </p>
+                  <div className="text-center">
+                    <h4 className="text-[10px] font-bold text-[#3A2312] dark:text-zinc-200 tracking-wider uppercase mb-0.5">
+                      {translate(slide.cardTitle)}
+                    </h4>
+                    <p className="font-script text-xs sm:text-sm text-[#C67B71] dark:text-rose-400 leading-tight">
+                      {translate(slide.cardSubtitle)}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

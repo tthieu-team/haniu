@@ -27,6 +27,18 @@ export function SectionsTab() {
     updateHowItWorks,
     faq,
     updateFaq,
+    categories,
+    updateCategories,
+    featuredProducts,
+    updateFeaturedProducts,
+    benefits,
+    updateBenefits,
+    ugcFeed,
+    updateUgcFeed,
+    blog,
+    updateBlog,
+    cta,
+    updateCta,
   } = useHomeLayoutStore();
 
   return (
@@ -93,6 +105,113 @@ export function SectionsTab() {
                 onChange={(e) => updateWelcomeScreen({ durationMs: Number(e.target.value) })}
                 className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
               />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Categories, Featured Products & Benefits */}
+      <div className="py-6 space-y-4">
+        <h4 className="text-xs font-bold text-rose-500 uppercase tracking-widest">
+          Sản phẩm & Danh mục & Lợi ích (Products, Categories & Benefits)
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Featured Products */}
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
+              Khối Sản Phẩm Nổi Bật (Featured Products)
+            </span>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Nhãn góc (Badge)</label>
+                <input
+                  type="text"
+                  value={featuredProducts?.badge || ''}
+                  onChange={(e) => updateFeaturedProducts({ badge: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Tiêu đề lớn</label>
+                <input
+                  type="text"
+                  value={featuredProducts?.title || ''}
+                  onChange={(e) => updateFeaturedProducts({ title: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Tiêu đề phụ</label>
+                <input
+                  type="text"
+                  value={featuredProducts?.subtitle || ''}
+                  onChange={(e) => updateFeaturedProducts({ subtitle: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Chữ trên nút bấm</label>
+                <input
+                  type="text"
+                  value={featuredProducts?.buttonText || ''}
+                  onChange={(e) => updateFeaturedProducts({ buttonText: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Categories */}
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
+              Khối Danh Mục Theo Dịp (Categories)
+            </span>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Nhãn góc (Badge)</label>
+                <input
+                  type="text"
+                  value={categories?.badge || ''}
+                  onChange={(e) => updateCategories({ badge: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Tiêu đề lớn</label>
+                <input
+                  type="text"
+                  value={categories?.title || ''}
+                  onChange={(e) => updateCategories({ title: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Tiêu đề phụ</label>
+                <input
+                  type="text"
+                  value={categories?.subtitle || ''}
+                  onChange={(e) => updateCategories({ subtitle: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Benefits */}
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
+              Khối Cam Kết Lợi Ích (Benefits)
+            </span>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Tiêu đề chính</label>
+                <input
+                  type="text"
+                  value={benefits?.title || ''}
+                  onChange={(e) => updateBenefits({ title: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -177,6 +296,15 @@ export function SectionsTab() {
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Nhãn góc (Badge)</label>
+              <input
+                type="text"
+                value={howItWorks.badge || ''}
+                onChange={(e) => updateHowItWorks({ badge: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
             <div className="space-y-1">
               <label className="text-[10px] text-slate-500 font-bold uppercase">Tiêu đề lớn</label>
               <input
@@ -274,6 +402,15 @@ export function SectionsTab() {
                 className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
               />
             </div>
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Chữ trên nút bấm</label>
+              <input
+                type="text"
+                value={videoBanner.buttonText || ''}
+                onChange={(e) => updateVideoBanner({ buttonText: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
             {/* Video file uploader */}
             <div>
               <FileUploadInput
@@ -295,6 +432,15 @@ export function SectionsTab() {
           </h4>
           <div className="space-y-3">
             <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Nhãn góc (Badge)</label>
+              <input
+                type="text"
+                value={collections.badge || ''}
+                onChange={(e) => updateCollections({ badge: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
               <label className="text-[10px] text-slate-500 font-bold uppercase">Tiêu đề lớn</label>
               <input
                 type="text"
@@ -309,6 +455,24 @@ export function SectionsTab() {
                 type="text"
                 value={collections.subtitle}
                 onChange={(e) => updateCollections({ subtitle: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Nhãn giới hạn (Limited Tag)</label>
+              <input
+                type="text"
+                value={collections.limitedTag || ''}
+                onChange={(e) => updateCollections({ limitedTag: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Nhãn nút (Buy Now Text)</label>
+              <input
+                type="text"
+                value={collections.buyNowText || ''}
+                onChange={(e) => updateCollections({ buyNowText: e.target.value })}
                 className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
               />
             </div>
@@ -409,7 +573,16 @@ export function SectionsTab() {
         <h4 className="text-xs font-bold text-rose-500 uppercase tracking-widest">
           Đánh giá từ khách hàng (Social Proof / Testimonials)
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-1">
+            <label className="text-[10px] text-slate-500 font-bold uppercase">Nhãn góc (Badge)</label>
+            <input
+              type="text"
+              value={socialProof.badge || ''}
+              onChange={(e) => updateSocialProof({ badge: e.target.value })}
+              className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs"
+            />
+          </div>
           <div className="space-y-1">
             <label className="text-[10px] text-slate-500 font-bold uppercase">Tiêu đề chính</label>
             <input
@@ -566,6 +739,140 @@ export function SectionsTab() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* UGC Feed, Blog & CTA Config */}
+      <div className="py-6 space-y-6">
+        <h4 className="text-xs font-bold text-rose-500 uppercase tracking-widest">
+          Khối Mạng Xã Hội, Tin Tức & CTA (UGC Feed, Blog & CTA Settings)
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* UGC Feed */}
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
+              Khối Instagram Feed (UGC)
+            </span>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Nhãn góc (Badge)</label>
+                <input
+                  type="text"
+                  value={ugcFeed?.badge || ''}
+                  onChange={(e) => updateUgcFeed({ badge: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Tiêu đề lớn</label>
+                <input
+                  type="text"
+                  value={ugcFeed?.title || ''}
+                  onChange={(e) => updateUgcFeed({ title: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Hashtag chính</label>
+                <input
+                  type="text"
+                  value={ugcFeed?.hashtag || ''}
+                  onChange={(e) => updateUgcFeed({ hashtag: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Blog */}
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
+              Khối Tin Tức & Chia Sẻ (Blog)
+            </span>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Nhãn góc (Badge)</label>
+                <input
+                  type="text"
+                  value={blog?.badge || ''}
+                  onChange={(e) => updateBlog({ badge: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Tiêu đề lớn</label>
+                <input
+                  type="text"
+                  value={blog?.title || ''}
+                  onChange={(e) => updateBlog({ title: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Tiêu đề phụ</label>
+                <input
+                  type="text"
+                  value={blog?.subtitle || ''}
+                  onChange={(e) => updateBlog({ subtitle: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Chữ trên nút (Button Text)</label>
+                <input
+                  type="text"
+                  value={blog?.buttonText || ''}
+                  onChange={(e) => updateBlog({ buttonText: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
+              Lời kêu gọi cuối trang (CTA Section)
+            </span>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Tiêu đề chính</label>
+                <input
+                  type="text"
+                  value={cta?.title || ''}
+                  onChange={(e) => updateCta({ title: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Tiêu đề phụ</label>
+                <input
+                  type="text"
+                  value={cta?.subtitle || ''}
+                  onChange={(e) => updateCta({ subtitle: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Chữ trên nút (Button Text)</label>
+                <input
+                  type="text"
+                  value={cta?.buttonText || ''}
+                  onChange={(e) => updateCta({ buttonText: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Link liên kết (Button Href)</label>
+                <input
+                  type="text"
+                  value={cta?.buttonHref || ''}
+                  onChange={(e) => updateCta({ buttonHref: e.target.value })}
+                  className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-2 py-1 text-xs"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

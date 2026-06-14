@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '@/components/common/Icons';
+import { useTranslate } from '@/lib/translator';
 
 interface CameraViewProps {
   onCapture: (blob: Blob, dataUrl: string) => void;
@@ -19,6 +20,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
   filter = 'none',
   mirrored = true
 }) => {
+  const trans = useTranslate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -34,7 +36,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
         setError(null);
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          throw new Error('Trình duyệt không hỗ trợ truy cập Camera');
+          throw new Error(trans('Trình duyệt không hỗ trợ truy cập Camera'));
         }
 
         const s = await navigator.mediaDevices.getUserMedia({
@@ -54,11 +56,11 @@ export const CameraView: React.FC<CameraViewProps> = ({
       } catch (err: any) {
         console.error('Error accessing camera:', err);
         if (err.name === 'NotAllowedError') {
-          setError('Quyền truy cập Camera bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.');
+          setError(trans('Quyền truy cập Camera bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.'));
         } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-          setError('Không tìm thấy Camera kết nối với thiết bị.');
+          setError(trans('Không tìm thấy Camera kết nối với thiết bị.'));
         } else {
-          setError(err.message || 'Lỗi không xác định khi truy cập Camera');
+          setError(err.message || trans('Lỗi không xác định khi truy cập Camera'));
         }
         setLoading(false);
       }
@@ -66,7 +68,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
 
     startCamera();
 
-    const handleDisconnect = () => setError('Camera đã bị ngắt kết nối.');
+    const handleDisconnect = () => setError(trans('Camera đã bị ngắt kết nối.'));
     if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
       navigator.mediaDevices.addEventListener('devicechange', handleDisconnect);
     }
@@ -152,7 +154,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
           }).catch(e => {
             console.error("Autoplay failed:", e);
             setLoading(false);
-            setError('Trình duyệt chặn phát Video tự động. Vui lòng nhấn vào màn hình để bắt đầu.');
+            setError(trans('Trình duyệt chặn phát Video tự động. Vui lòng nhấn vào màn hình để bắt đầu.'));
           });
         }}
         animate={{
@@ -173,7 +175,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
             className="absolute inset-0 flex flex-col items-center justify-center bg-background z-10"
           >
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-color mb-4" />
-            <p className="text-foreground font-medium text-xs tracking-wider animate-pulse">Khởi tạo Camera...</p>
+            <p className="text-foreground font-medium text-xs tracking-wider animate-pulse">{trans('Khởi tạo Camera...')}</p>
           </motion.div>
         )}
 
@@ -186,13 +188,13 @@ export const CameraView: React.FC<CameraViewProps> = ({
             <div className="w-14 h-14 bg-primary-color/10 rounded-full flex items-center justify-center mb-4 border border-primary-color/25">
               <Icon name="camera" size={24} className="text-primary-color" />
             </div>
-            <h3 className="text-sm font-bold text-foreground mb-1">Không thể mở camera</h3>
+            <h3 className="text-sm font-bold text-foreground mb-1">{trans('Không thể mở camera')}</h3>
             <p className="text-muted-color text-[10px] max-w-xs leading-normal">{error}</p>
             <button
               onClick={() => window.location.reload()}
               className="mt-6 px-4 py-2 bg-primary-color hover:bg-primary-color/90 text-white rounded-xl text-[10px] font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
             >
-              <Icon name="refresh" size={12} /> Thử lại
+              <Icon name="refresh" size={12} /> {trans('Thử lại')}
             </button>
           </motion.div>
         )}

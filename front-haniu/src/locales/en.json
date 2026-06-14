@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "collections": "Collections",
+    "blog": "Blog",
+    "about": "About Us",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "cart": "Cart",
+    "search": "Search products...",
+    "wishlist": "Wishlist",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "story": "Story",
+    "order_lookup": "Order Lookup",
+    "more": "More"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred, please try again.",
+    "no_data": "No data found.",
+    "currency": "VND",
+    "add_to_cart": "Add to Cart",
+    "buy_now": "Buy Now",
+    "out_of_stock": "Out of Stock",
+    "in_stock": "In Stock",
+    "customizable": "Customizable"
+  },
+  "home": {
+    "categories": {
+      "badge": "GIFT CATEGORIES",
+      "title": "Occasion Collections",
+      "special_occasion": "For special occasion",
+      "explore": "Explore",
+      "selected": "Selected",
+      "gift_sets": "gift sets"
+    },
+    "products": {
+      "badge": "EXCLUSIVE COLLECTION",
+      "title_normal": "Gift Products",
+      "title_gradient": "Unique Design",
+      "subtitle": "Discover our exquisite collection of gifts customizable with your own personalized message",
+      "search_placeholder": "Find gifts (e.g. engraved mug...)",
+      "clear_filters": "Clear filters",
+      "showing": "Showing",
+      "unique_gifts": "unique gifts",
+      "filter_occasion": "Choose by occasion",
+      "filter_recipient": "Recipients",
+      "all_occasions": "All",
+      "all_recipients": "All",
+      "no_products": "No matching products found",
+      "no_products_desc": "Please try again by selecting another occasion or entering a new search keyword.",
+      "load_more": "View more gifts",
+      "loading_more": "Loading more..."
+    },
+    "benefits": {
+      "badge": "FULL SERVICE",
+      "title": "Experience The Difference At Haniu",
+      "subtitle": "Outstanding values that create the most complete, meticulous, and secure gift shopping experience for you."
+    },
+    "how_it_works": {
+      "badge": "SERVICE PROCESS",
+      "title": "Process of Creating Unique Gifts",
+      "subtitle": "From idea to finished gift, every detail is cared for to bring a meaningful gifting experience."
+    },
+    "reviews": {
+      "badge": "REAL REVIEWS",
+      "title": "Customer Feedback",
+      "subtitle": "Customer satisfaction is the biggest motivation for Haniu to constantly innovate and perfect each gift box.",
+      "rating": "Rating",
+      "trust": "Trusted By"
+    },
+    "ugc": {
+      "badge": "INSTAGRAM MOMENTS",
+      "title": "Haniu Moments",
+      "subtitle": "Share your gift receiving moment with hashtag #mygiftmoment to get 100,000đ voucher instantly"
+    },
+    "blog": {
+      "badge": "GIFT INSPIRATION",
+      "title": "Gifting Guide & Inspiration",
+      "read_more": "Read more"
+    },
+    "faq": {
+      "subtitle": "Quick answers to your questions about our products and services"
+    },
+    "story": {
+      "title": "Artistry from Handcrafted Hands",
+      "subtitle": "A meticulous journey for every corner of the gift box",
+      "explore": "Explore story",
+      "behind": "Watch Behind the Scenes",
+      "error_play": "Unable to play video",
+      "error_detail": "Failed to load resource from server. Please check the video path or restart the backend server.",
+      "go_back": "Go back"
+    },
+    "collections": {
+      "badge": "CURATED SERIES",
+      "title": "Exclusive Collections",
+      "buy_now": "Shop Now",
+      "limited": "Limited",
+      "fallback_desc": "Product line designed exclusively and meticulously crafted by Haniu."
+    }
+  },
+  "footer": {
+    "directory": "Links",
+    "support": "Support & Information",
+    "contact": "Contact Information",
+    "about_us": "About Us",
+    "faq": "FAQs",
+    "contact_us": "Contact",
+    "reviews": "Customer Reviews",
+    "order_lookup": "Order Lookup",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "policy": "Operating Rules",
+    "tagline": "Vietnam's premium & personalized gift platform."
+  }
+}

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslate } from '@/lib/translator';
 
 interface SeoSection {
   icon: string;
@@ -18,6 +19,7 @@ interface ProductSeoDescriptionProps {
 
 export default function ProductSeoDescription({ product }: ProductSeoDescriptionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const trans = useTranslate();
 
   let config: any = {};
   try {
@@ -67,17 +69,17 @@ export default function ProductSeoDescription({ product }: ProductSeoDescription
   return (
     <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 shadow-sm transition-all duration-300 hover:shadow-md">
       <h2 className="text-sm sm:text-base md:text-lg font-black text-slate-800 dark:text-zinc-100 tracking-tight uppercase border-b border-slate-100 dark:border-zinc-800 pb-3 flex items-center gap-2">
-        {title}
+        {trans(title)}
       </h2>
 
       <div className={`space-y-5 sm:space-y-6 text-xs sm:text-sm text-slate-660 dark:text-zinc-350 leading-relaxed font-normal ${!isExpanded ? 'max-h-[250px] sm:max-h-[300px] overflow-hidden relative' : ''}`}>
         {sections.map((section, idx) => (
           <div key={idx} className="space-y-1.5">
             <h3 className="font-extrabold text-slate-800 dark:text-zinc-200 flex items-center gap-2 text-xs sm:text-sm">
-              <span className="select-none shrink-0">{section.icon}</span> <span>{section.title}</span>
+              <span className="select-none shrink-0">{section.icon}</span> <span>{trans(section.title)}</span>
             </h3>
             <p className="pl-4 sm:pl-6 text-[11px] sm:text-xs text-slate-500 dark:text-zinc-400 font-medium leading-relaxed whitespace-pre-line">
-              {section.content}
+              {trans(section.content)}
             </p>
           </div>
         ))}
@@ -94,7 +96,7 @@ export default function ProductSeoDescription({ product }: ProductSeoDescription
           onClick={() => setIsExpanded(!isExpanded)}
           className="bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 text-rose-600 dark:text-rose-450 font-bold px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-[11px] sm:text-xs transition-all active:scale-95 cursor-pointer shadow-xs"
         >
-          {isExpanded ? 'Thu gọn bài viết' : 'Đọc toàn bộ mô tả sản phẩm'}
+          {isExpanded ? trans('Thu gọn bài viết') : trans('Đọc toàn bộ mô tả sản phẩm')}
         </button>
       </div>
     </div>

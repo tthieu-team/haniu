@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import MediaGallery from '@/components/product/MediaGallery';
 import PersonalizationForm from '@/components/product/PersonalizationForm';
 import GiftWrapSelector from '@/components/product/GiftWrapSelector';
+import { useTranslate } from '@/lib/translator';
 import { useProductStore } from '@/store/product';
 import { useCartStore } from '@/store/cart';
 import { cartService } from '@/services/cart.service';
@@ -91,6 +92,7 @@ interface ProductDetailClientProps {
 
 export default function ProductDetailClient({ slug, initialProduct }: ProductDetailClientProps) {
   const router = useRouter();
+  const trans = useTranslate();
 
   const { loading } = useProductStore();
   const product = useProductStore(state => state.currentProduct) as unknown as Product | null;
@@ -316,7 +318,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
       <div className="space-y-3 md:space-y-4">
         {/* Back button */}
         <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-rose-500 transition-colors">
-          <Icon name="arrow-left" size={14} /> Trở lại danh sách sản phẩm
+          <Icon name="arrow-left" size={14} /> {trans('Trở lại danh sách sản phẩm')}
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
@@ -356,16 +358,20 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                 />
               </div>
             )}
-            {false && product?.allowAdminChat && (
+            {product?.allowAdminChat && (
               <div className="bg-sky-500/5 border border-sky-500/10 p-4 rounded-2xl flex items-center justify-between animate-fade-in text-xs">
                 <div>
                   <h4 className="font-bold text-sky-700 dark:text-sky-400 flex items-center gap-1.5">
-                    <Icon name="phone" size={14} className="text-sky-500" /> Tư vấn thiết kế trực tiếp
+                    <Icon name="phone" size={14} className="text-sky-500" /> {trans('Tư vấn thiết kế trực tiếp')}
                   </h4>
-                  <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-1">Trực tiếp thảo luận các yêu cầu đặc biệt với Haniu Admin.</p>
+                  <p className="text-[10px] text-slate-500 dark:text-zinc-500 mt-1">{trans('Trực tiếp thảo luận các yêu cầu đặc biệt với Haniu Admin.')}</p>
                 </div>
-                <button type="button" className="bg-sky-500 hover:bg-sky-600 text-white font-bold px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95 flex items-center gap-1 cursor-pointer">
-                  Chat ngay
+                <button 
+                  type="button" 
+                  onClick={() => window.open('https://zalo.me/0987654321', '_blank')}
+                  className="bg-sky-500 hover:bg-sky-600 text-white font-bold px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95 flex items-center gap-1 cursor-pointer"
+                >
+                  {trans('Chat ngay')}
                 </button>
               </div>
             )}
@@ -392,13 +398,13 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                 onClick={handleAddToCart}
                 className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:text-zinc-950 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md active:scale-95 text-xs sm:text-sm flex items-center justify-center gap-2"
               >
-                <Icon name="bag" size={16} /> Thêm Vào Giỏ Hàng
+                <Icon name="bag" size={16} /> {trans("Thêm Vào Giỏ Hàng")}
               </button>
               <button
                 onClick={handleBuyNow}
                 className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
               >
-                <Icon name="zap" size={16} /> Mua Ngay
+                <Icon name="zap" size={16} /> {trans("Mua Ngay")}
               </button>
             </div>
           </div>
@@ -418,7 +424,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
               { id: 'description', label: 'Mô tả & Câu chuyện', icon: 'gift' },
               { id: 'specifications', label: 'Thông số kỹ thuật', icon: 'settings' },
               { id: 'policies', label: 'Chính sách & Hướng dẫn', icon: 'shield' },
-              { id: 'reviews', label: `Đánh giá (${totalReviews})`, icon: 'star' },
+              { id: 'reviews', label: 'Đánh giá', icon: 'star' },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -430,7 +436,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                   }`}
               >
                 <Icon name={tab.icon} size={14} className={activeDetailTab === tab.id ? 'text-rose-500' : 'text-slate-400'} />
-                {tab.label}
+                {tab.id === 'reviews' ? `${trans("Đánh giá")} (${totalReviews})` : trans(tab.label)}
               </button>
             ))}
           </div>

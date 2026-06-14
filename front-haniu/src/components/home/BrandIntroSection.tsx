@@ -2,10 +2,12 @@
 
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
+import { useTranslate } from '@/lib/translator';
 
 export default function BrandIntroSection() {
   const brandIntro = useHomeLayoutStore((state) => state.brandIntro);
   const isVisible = useHomeLayoutStore((state) => state.visibility.brandIntro);
+  const translate = useTranslate();
 
   if (!isVisible) return null;
 
@@ -20,18 +22,18 @@ export default function BrandIntroSection() {
           {/* Left Text Column */}
           <div className="lg:col-span-7 space-y-6">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-4 py-1.5 text-[9px] sm:text-[10px] font-black tracking-[0.25em] uppercase text-rose-500 border border-rose-500/25">
-              <Icon name="✨" size={10} className="animate-pulse" /> {brandIntro.subtitle}
+              <Icon name="✨" size={10} className="animate-pulse" /> {translate(brandIntro.subtitle)}
             </span>
             
             <h2 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
-              {brandIntro.title.split(' ').slice(0, 3).join(' ')}{' '}
+              {translate(brandIntro.title).split(' ').slice(0, 3).join(' ')}{' '}
               <span className="bg-gradient-to-r from-rose-500 via-amber-500 to-rose-600 bg-clip-text text-transparent block sm:inline">
-                {brandIntro.title.split(' ').slice(3).join(' ')}
+                {translate(brandIntro.title).split(' ').slice(3).join(' ')}
               </span>
             </h2>
             
             <p className="text-sm md:text-base text-slate-500 dark:text-zinc-400 leading-relaxed font-light max-w-xl">
-              {brandIntro.description}
+              {translate(brandIntro.description)}
             </p>
 
             <div className="pt-2 flex flex-wrap gap-4">
@@ -39,13 +41,13 @@ export default function BrandIntroSection() {
                 href="/#products"
                 className="inline-flex items-center justify-center rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 hover:bg-rose-600 dark:hover:bg-rose-500 hover:text-white dark:hover:text-white px-6 py-3.5 text-xs font-extrabold shadow-md hover:shadow-lg hover:shadow-rose-500/25 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 border border-transparent w-full sm:w-44"
               >
-                Khám phá câu chuyện
+                {translate("Khám phá câu chuyện")}
               </a>
               <a
                 href="/collections"
                 className="inline-flex items-center justify-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-900/50 hover:bg-rose-50/20 dark:hover:bg-rose-950/10 px-6 py-3.5 text-xs font-extrabold shadow-xs hover:shadow-md hover:-translate-y-0.5 active:scale-95 transition-all duration-300 w-full sm:w-44"
               >
-                Các bộ sưu tập
+                {translate("Các bộ sưu tập")}
               </a>
             </div>
           </div>
@@ -66,7 +68,7 @@ export default function BrandIntroSection() {
                     {stat.value}
                   </span>
                   <span className="block mt-1 sm:mt-2 text-[10px] sm:text-xs font-bold tracking-wider uppercase text-slate-500 dark:text-zinc-400 group-hover:text-rose-500 dark:group-hover:text-rose-400 transition-colors duration-300">
-                    {stat.label}
+                    {translate(stat.label)}
                   </span>
                 </div>
               ))}

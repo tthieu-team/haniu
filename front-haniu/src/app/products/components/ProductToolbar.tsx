@@ -1,6 +1,7 @@
 'use client';
 
 import Icon from '@/components/common/Icons';
+import { useTranslate } from '@/lib/translator';
 
 export interface ProductToolbarProps {
   onOpenFilters: () => void;
@@ -21,6 +22,7 @@ export default function ProductToolbar({
   sortOptions,
   totalCount,
 }: ProductToolbarProps) {
+  const trans = useTranslate();
   return (
     <div className="sticky top-20 z-30 flex flex-col sm:flex-row sm:items-center justify-between bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md p-4 sm:px-6 sm:py-3 border border-slate-200/60 dark:border-zinc-800 rounded-2xl sm:rounded-3xl gap-y-0 gap-x-3 w-full shadow-xs">
       {/* Left side: Filter toggle (mobile) & Product Count Display */}
@@ -31,25 +33,25 @@ export default function ProductToolbar({
             className="lg:hidden flex items-center gap-1.5 px-3 py-2 bg-slate-50 dark:bg-zinc-900 border border-slate-200/50 dark:border-zinc-800 rounded-xl text-xs font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all cursor-pointer shadow-2xs"
           >
             <Icon name="filter" size={11} className="text-rose-500" />
-            <span>Bộ lọc</span>
+            <span>{trans('Bộ lọc')}</span>
           </button>
-
-          <div className="text-[11px] sm:text-xs text-slate-400 dark:text-zinc-450 font-medium flex items-center gap-1">
-            <span>Tìm thấy</span>
+ 
+          <div className="text-[11px] sm:text-xs text-slate-400 dark:text-zinc-455 font-medium flex items-center gap-1">
+            <span>{trans('Tìm thấy')}</span>
             <span className="font-black text-rose-500 bg-rose-50 dark:bg-rose-950/20 px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px]">
               {totalCount}
             </span>
-            <span>sản phẩm</span>
+            <span>{trans('sản phẩm')}</span>
           </div>
         </div>
       </div>
-
+ 
       {/* Right side: Sorting & View Mode Toggle */}
       <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto sm:ml-auto border-t sm:border-t-0 pt-3.5 sm:pt-0 border-slate-150 dark:border-zinc-800/60">
         {/* Sort select */}
         <div className="flex items-center gap-2 flex-1 sm:flex-initial">
           <span className="hidden sm:inline text-xs text-slate-400 dark:text-zinc-500 font-light">
-            Sắp xếp:
+            {trans('Sắp xếp:')}
           </span>
           <select
             value={sortOption}
@@ -58,12 +60,12 @@ export default function ProductToolbar({
           >
             {sortOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
-                {opt.name}
+                {trans(opt.name)}
               </option>
             ))}
           </select>
         </div>
-
+ 
         {/* View Mode Grid/List toggle */}
         <div className="flex items-center gap-1 border border-slate-200/50 dark:border-zinc-800 rounded-xl sm:rounded-2xl p-0.5 bg-slate-50 dark:bg-zinc-900 shrink-0">
           <button

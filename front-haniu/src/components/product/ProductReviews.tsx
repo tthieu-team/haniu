@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/auth';
 import { fetchApi, API_BASE_URL } from '@/lib/api';
 import { productService } from '@/services/product.service';
+import { useTranslate } from '@/lib/translator';
 
 interface Review {
   id: string;
@@ -27,6 +28,7 @@ interface ProductReviewsProps {
 
 export default function ProductReviews({ productId, onReviewsUpdated }: ProductReviewsProps) {
   const { isAuthenticated, user } = useAuthStore();
+  const trans = useTranslate();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -187,7 +189,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-6 md:p-8 space-y-8 shadow-sm">
-      <h3 className="font-extrabold text-slate-800 dark:text-zinc-200 text-lg uppercase tracking-tight">Đánh giá sản phẩm</h3>
+      <h3 className="font-extrabold text-slate-800 dark:text-zinc-200 text-lg uppercase tracking-tight">{trans("Đánh giá sản phẩm")}</h3>
 
       {/* Stats Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center border-b border-slate-50 dark:border-zinc-800 pb-8">
@@ -198,7 +200,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
               <span key={star}>{star <= Math.round(averageRating) ? '★' : '☆'}</span>
             ))}
           </div>
-          <p className="text-slate-400 text-xs">Dựa trên {totalCount} nhận xét từ khách hàng</p>
+          <p className="text-slate-400 text-xs">{trans("Dựa trên")} {totalCount} {trans("nhận xét từ khách hàng")}</p>
         </div>
 
         <div className="md:col-span-2 space-y-2 text-xs">
@@ -206,7 +208,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
             const percentage = starPercentages[idx];
             return (
               <div key={star} className="flex items-center gap-3">
-                <span className="w-12 text-slate-500 font-medium text-right shrink-0">{star} sao</span>
+                <span className="w-12 text-slate-500 font-medium text-right shrink-0">{star} {trans("sao")}</span>
                 <div className="flex-1 h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-amber-500 rounded-full"
@@ -222,13 +224,13 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
 
       {/* Review List */}
       <div className="space-y-6">
-        <h4 className="font-bold text-slate-800 dark:text-zinc-200 text-sm">Tất cả nhận xét ({totalCount})</h4>
+        <h4 className="font-bold text-slate-800 dark:text-zinc-200 text-sm">{trans("Tất cả nhận xét")} ({totalCount})</h4>
         
         {loading ? (
-          <div className="text-center text-slate-400 py-6 text-xs">Đang tải đánh giá...</div>
+          <div className="text-center text-slate-400 py-6 text-xs">{trans("Đang tải đánh giá...")}</div>
         ) : reviews.length === 0 ? (
           <div className="text-center text-slate-400 py-8 text-xs italic">
-            Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên nhận xét!
+            {trans("Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên nhận xét!")}
           </div>
         ) : (
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 divide-y divide-slate-50 dark:divide-zinc-800">
@@ -236,7 +238,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
               <div key={review.id} className="pt-4 first:pt-0 space-y-2 text-xs">
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-slate-700 dark:text-zinc-200">
-                    {review.user?.fullName || 'Khách hàng Haniu'}
+                    {review.user?.fullName || trans('Khách hàng Haniu')}
                   </span>
                   <span className="text-[10px] text-slate-400">
                     {new Date(review.createdAt).toLocaleDateString('vi-VN')}
@@ -272,26 +274,26 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
 
       {/* Submit Form */}
       <div className="border-t border-slate-50 dark:border-zinc-800 pt-8 space-y-4">
-        <h4 className="font-bold text-slate-800 dark:text-zinc-200 text-sm">Viết đánh giá của bạn</h4>
+        <h4 className="font-bold text-slate-800 dark:text-zinc-200 text-sm">{trans("Viết đánh giá của bạn")}</h4>
         
         {!isAuthenticated ? (
           <div className="bg-slate-50 dark:bg-zinc-800/40 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800 text-center text-xs space-y-2">
-            <p className="text-slate-500 dark:text-zinc-400">Bạn cần đăng nhập tài khoản để có thể đánh giá sản phẩm này.</p>
+            <p className="text-slate-500 dark:text-zinc-400">{trans("Bạn cần đăng nhập tài khoản để có thể đánh giá sản phẩm này.")}</p>
             <Link
               href="/auth/login"
               className="inline-block px-4 py-2 bg-rose-500 text-white font-bold rounded-lg hover:bg-rose-600 shadow-sm transition-all"
             >
-              Đăng nhập ngay
+              {trans("Đăng nhập ngay")}
             </Link>
           </div>
         ) : !isEligible ? (
           <div className="bg-slate-50 dark:bg-zinc-800 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800 text-center text-xs text-slate-500 dark:text-zinc-400 italic">
-            Chỉ khách hàng đã mua sản phẩm này và đã giao hàng thành công mới có thể gửi đánh giá. Mỗi lượt mua hàng cho phép gửi 1 đánh giá.
+            {trans("Chỉ khách hàng đã mua sản phẩm này và đã giao hàng thành công mới có thể gửi đánh giá. Mỗi lượt mua hàng cho phép gửi 1 đánh giá.")}
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">Chọn số sao:</span>
+              <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">{trans("Chọn số sao:")}</span>
               <div className="flex text-amber-500 text-xl cursor-pointer">
                 {[1, 2, 3, 4, 5].map(star => (
                   <button
@@ -309,30 +311,30 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs text-slate-500 dark:text-zinc-400 block font-semibold">Nội dung đánh giá</label>
+              <label className="text-xs text-slate-500 dark:text-zinc-400 block font-semibold">{trans("Nội dung đánh giá")}</label>
               <textarea
                 required
                 rows={4}
                 value={comment}
                 onChange={e => setComment(e.target.value)}
-                placeholder="Chia sẻ trải nghiệm thực tế của bạn về chất liệu, mức độ hoàn thiện sản phẩm..."
+                placeholder={trans("Chia sẻ trải nghiệm thực tế của bạn về chất liệu, mức độ hoàn thiện sản phẩm...")}
                 className="w-full text-base md:text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 text-slate-700 dark:text-white focus:outline-none focus:border-rose-500 transition-colors"
               />
             </div>
 
             {/* Media Upload Fields */}
             <div className="space-y-2 text-xs">
-              <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold block">Tải ảnh hoặc video đánh giá:</span>
+              <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold block">{trans("Tải ảnh hoặc video đánh giá:")}</span>
               <div className="flex flex-wrap gap-4 items-center">
                 <label className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 border border-slate-200 dark:border-zinc-700 rounded-xl cursor-pointer font-semibold transition-colors">
-                  <span>📸 Thêm ảnh</span>
+                  <span>{trans("📸 Thêm ảnh")}</span>
                   <input type="file" accept="image/*" multiple onChange={e => handleMediaUpload(e, 'image')} className="hidden" />
                 </label>
                 <label className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 border border-slate-200 dark:border-zinc-700 rounded-xl cursor-pointer font-semibold transition-colors">
-                  <span>🎥 Thêm video</span>
+                  <span>{trans("🎥 Thêm video")}</span>
                   <input type="file" accept="video/*" multiple onChange={e => handleMediaUpload(e, 'video')} className="hidden" />
                 </label>
-                {uploadingMedia && <span className="text-rose-500 animate-pulse">Đang tải tệp lên...</span>}
+                {uploadingMedia && <span className="text-rose-500 animate-pulse">{trans("Đang tải tệp lên...")}</span>}
               </div>
 
               {/* Upload Previews */}
@@ -367,7 +369,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
               disabled={submitting || !comment.trim() || uploadingMedia}
               className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-zinc-100 dark:text-zinc-950 font-bold text-xs rounded-xl shadow transition-all disabled:opacity-50 cursor-pointer animate-fade-in"
             >
-              {submitting ? 'Đang gửi...' : 'Gửi nhận xét'}
+              {submitting ? trans('Đang gửi...') : trans('Gửi nhận xét')}
             </button>
           </form>
         )}

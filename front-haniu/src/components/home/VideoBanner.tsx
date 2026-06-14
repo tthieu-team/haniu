@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useHomeLayoutStore, DEFAULT_STATE } from '@/store/homeLayout';
+import { useHomeLayoutStore } from '@/store/homeLayout';
 import { getFullImageUrl } from '@/lib/api';
+import { useTranslate } from '@/lib/translator';
 
 export default function VideoBanner() {
   const [mounted, setMounted] = useState(false);
   const config = useHomeLayoutStore((state) => state.videoBanner);
   const isVisible = useHomeLayoutStore((state) => state.visibility.videoBanner);
+  const translate = useTranslate();
 
   useEffect(() => {
     setMounted(true);
@@ -44,17 +46,17 @@ export default function VideoBanner() {
           Cinematic Experience
         </span>
         <h2 className="text-3xl font-extrabold tracking-tight sm:text-5xl text-white drop-shadow-md leading-tight">
-          {config.title}
+          {translate(config.title)}
         </h2>
         <p className="text-sm sm:text-base text-zinc-300 font-light leading-relaxed max-w-xl">
-          {config.subtitle}
+          {translate(config.subtitle)}
         </p>
         <div className="pt-4">
           <a
             href={config.buttonHref}
             className="inline-flex items-center justify-center rounded-2xl bg-white hover:bg-rose-50 text-zinc-950 font-bold px-8 py-4 text-xs tracking-wider uppercase transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
           >
-            {config.buttonText}
+            {translate(config.buttonText)}
           </a>
         </div>
       </div>

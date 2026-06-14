@@ -5,6 +5,9 @@ import ProductCard from '@/components/product/ProductCard';
 import QuickViewModal from '@/components/product/QuickViewModal';
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
+import { useLanguage } from '@/providers/LanguageProvider';
+
+import { useTranslate } from '@/lib/translator';
 
 interface Product {
   id: string;
@@ -89,8 +92,11 @@ export default function FeaturedProductsSection({
   handleLoadMore,
 }: FeaturedProductsSectionProps) {
   const isVisible = useHomeLayoutStore((state) => state.visibility.featuredProducts);
+  const featuredProducts = useHomeLayoutStore((state) => state.featuredProducts);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [localSearch, setLocalSearch] = useState(searchTerm);
+  const { t } = useLanguage();
+  const trans = useTranslate();
 
   useEffect(() => {
     setLocalSearch(searchTerm);
@@ -112,16 +118,13 @@ export default function FeaturedProductsSection({
       {/* Title */}
       <div className="text-center space-y-3 sm:space-y-5 max-w-3xl mx-auto px-3 sm:px-4">
         <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
-          <Icon name="✨" size={10} className="animate-pulse" /> BỘ SƯU TẬP ĐỘC QUYỀN
+          <Icon name="✨" size={10} className="animate-pulse" /> {trans(featuredProducts?.badge || 'Set quà bán chạy')}
         </span>
         <h2 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
-          Sản Phẩm Quà Tặng{' '}
-          <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-amber-500 to-rose-600">
-            Thiết Kế Độc Bản
-          </span>
+          {trans(featuredProducts?.title || 'Sản phẩm nổi bật')}
         </h2>
         <p className="text-[11px] sm:text-xs md:text-sm text-slate-500 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed font-light">
-          Khám phá bộ sưu tập quà tặng tinh tế hỗ trợ cá nhân hóa riêng theo thông điệp của bạn
+          {trans(featuredProducts?.subtitle || '')}
         </p>
       </div>
 
@@ -132,7 +135,7 @@ export default function FeaturedProductsSection({
           <div className="flex-1 relative group">
             <input
               type="text"
-              placeholder="Tìm quà tặng (VD: ly sứ khắc tên...)"
+              placeholder={t('home.products.search_placeholder')}
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               className="w-full pl-10 pr-9 py-3 sm:pl-12 sm:pr-10 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/80 focus:outline-none focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500 dark:border-zinc-800 dark:bg-zinc-950/40 dark:focus:ring-rose-500/5 dark:focus:border-rose-500 text-[11px] sm:text-xs md:text-sm shadow-xs transition-all duration-300 text-slate-800 dark:text-zinc-100"
@@ -166,15 +169,15 @@ export default function FeaturedProductsSection({
                 className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 sm:px-5 sm:py-3.5 rounded-xl sm:rounded-2xl border border-rose-200/60 dark:border-rose-950/30 text-rose-500 bg-rose-50/50 hover:bg-rose-50 dark:bg-rose-950/10 dark:hover:bg-rose-950/20 text-[10px] sm:text-xs font-bold transition-all duration-300 cursor-pointer active:scale-95 shadow-sm"
               >
                 <Icon name="close" size={12} />
-                Xóa bộ lọc
+                {t('home.products.clear_filters')}
               </button>
             )}
 
             {/* Display Counter */}
             <div className="inline-flex items-center gap-2 bg-white dark:bg-zinc-950/60 border border-slate-200/80 dark:border-zinc-800 px-3.5 py-2.5 sm:px-4.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs text-slate-500 dark:text-zinc-400 font-medium shadow-xs">
-              <span>Hiển thị</span>
+              <span>{t('home.products.showing')}</span>
               <span className="font-extrabold text-rose-500 bg-rose-50 dark:bg-rose-950/20 px-1.5 py-0.5 rounded-md">{products.length}</span>
-              <span>quà tặng độc đáo</span>
+              <span>{t('home.products.unique_gifts')}</span>
             </div>
           </div>
         </div>
@@ -183,7 +186,7 @@ export default function FeaturedProductsSection({
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-extrabold tracking-widest text-slate-450 dark:text-zinc-500 uppercase block whitespace-nowrap">
-              Chọn theo dịp lễ
+              {t('home.products.filter_occasion')}
             </span>
             <div className="h-[1px] flex-1 bg-slate-200/60 dark:bg-zinc-800/50" />
           </div>
@@ -214,7 +217,7 @@ export default function FeaturedProductsSection({
                   <span className={`text-[9px] sm:text-[10px] font-bold tracking-wide transition-colors text-center leading-tight line-clamp-2 ${
                     isSelected ? 'text-rose-500' : 'text-slate-500 dark:text-zinc-400 group-hover:text-rose-600 dark:group-hover:text-rose-400'
                   }`}>
-                    {occ.name === 'Tất cả dịp' || occ.name === 'Tất cả' ? 'Tất cả' : occ.name}
+                    {occ.slug === '' ? t('home.products.all_occasions') : occ.name}
                   </span>
                 </button>
               );
@@ -225,8 +228,8 @@ export default function FeaturedProductsSection({
         {/* Recipients Filters */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-extrabold tracking-widest text-slate-450 dark:text-zinc-500 uppercase block whitespace-nowrap">
-              Đối tượng nhận quà
+            <span className="text-[10px] font-extrabold tracking-widest text-slate-450 dark:text-zinc-550 uppercase block whitespace-nowrap">
+              {t('home.products.filter_recipient')}
             </span>
             <div className="h-[1px] flex-1 bg-slate-200/60 dark:bg-zinc-800/50" />
           </div>
@@ -244,7 +247,7 @@ export default function FeaturedProductsSection({
                   <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-[14px] sm:rounded-2xl flex items-center justify-center transition-all duration-300 border relative ${
                     isSelected
                       ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white border-amber-500 shadow-lg shadow-amber-500/25 scale-105 ring-4 ring-amber-500/10'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50/50 hover:text-amber-600 hover:border-amber-300/80 hover:scale-105 hover:shadow-md hover:shadow-amber-500/5 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-amber-950/20 dark:hover:text-amber-400 dark:hover:border-amber-900/40'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50/50 hover:text-amber-600 hover:border-rose-300/80 hover:scale-105 hover:shadow-md hover:shadow-amber-500/5 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-amber-950/20 dark:hover:text-amber-400 dark:hover:border-amber-900/40'
                   }`}>
                     <Icon name={getRecipientIcon(rec.slug)} size={16} className="w-4 h-4 sm:w-5 sm:h-5" />
                     {isSelected && (
@@ -257,7 +260,7 @@ export default function FeaturedProductsSection({
                   <span className={`text-[9px] sm:text-[10px] font-bold tracking-wide transition-colors text-center leading-tight line-clamp-2 ${
                     isSelected ? 'text-amber-600 dark:text-amber-500' : 'text-slate-500 dark:text-zinc-400 group-hover:text-amber-650 dark:group-hover:text-amber-500'
                   }`}>
-                    {rec.name === 'Tất cả đối tượng' || rec.name === 'Tất cả' ? 'Tất cả' : rec.name}
+                    {rec.slug === '' ? t('home.products.all_recipients') : rec.name}
                   </span>
                 </button>
               );
@@ -274,7 +277,7 @@ export default function FeaturedProductsSection({
               key={idx}
               className="bg-white dark:bg-zinc-900 rounded-2xl sm:rounded-[28px] p-3.5 sm:p-5 border border-slate-200 dark:border-zinc-800/60 space-y-3 sm:space-y-4 animate-pulse"
             >
-              <div className="bg-slate-200 dark:bg-zinc-800 aspect-square w-full rounded-xl sm:rounded-2xl" />
+              <div className="bg-slate-200 dark:bg-zinc-850 aspect-square w-full rounded-xl sm:rounded-2xl" />
               <div className="h-4 bg-slate-200 dark:bg-zinc-850 w-2/3 rounded-lg" />
               <div className="h-4 bg-slate-200 dark:bg-zinc-850 w-1/3 rounded-lg" />
             </div>
@@ -286,10 +289,10 @@ export default function FeaturedProductsSection({
             <Icon name="🎁" size={56} />
           </span>
           <h3 className="font-extrabold text-lg text-slate-700 dark:text-zinc-300">
-            Không tìm thấy sản phẩm phù hợp
+            {t('home.products.no_products')}
           </h3>
           <p className="text-xs text-slate-400 dark:text-zinc-500 max-w-sm mx-auto font-light leading-relaxed">
-            Vui lòng thử lại bằng cách chọn một dịp khác hoặc gõ từ khóa tìm kiếm mới.
+            {t('home.products.no_products_desc')}
           </p>
           <button
             onClick={() => {
@@ -299,7 +302,7 @@ export default function FeaturedProductsSection({
             }}
             className="mt-4 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 text-white font-bold py-3 px-8 rounded-2xl text-xs transition-all cursor-pointer shadow-sm active:scale-98"
           >
-            Xóa bộ lọc
+            {t('home.products.clear_filters')}
           </button>
         </div>
       ) : (
@@ -325,11 +328,11 @@ export default function FeaturedProductsSection({
                 {loadingMore ? (
                   <>
                     <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-rose-500" />
-                    Đang tải thêm...
+                    {t('home.products.loading_more')}
                   </>
                 ) : (
                   <span className="flex items-center gap-1.5">
-                    Xem thêm sản phẩm quà tặng <Icon name="⏳" size={14} />
+                    {t('home.products.load_more')} <Icon name="⏳" size={14} />
                   </span>
                 )}
               </button>

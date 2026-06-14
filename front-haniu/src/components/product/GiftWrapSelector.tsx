@@ -1,7 +1,6 @@
-'use client';
-
 import { useEffect } from 'react';
 import Icon from '@/components/common/Icons';
+import { useTranslate } from '@/lib/translator';
 
 interface GiftWrapSelectorProps {
   giftWrap: string;
@@ -41,6 +40,7 @@ export default function GiftWrapSelector({
   show = true,
   borderless = false
 }: GiftWrapSelectorProps) {
+  const trans = useTranslate();
   const giftWrapLabel = label || "Chọn ruy băng nơ / hộp gói (Miễn phí)";
   const giftWrapOptions = options && options.length > 0
     ? options
@@ -67,7 +67,7 @@ export default function GiftWrapSelector({
   return (
     <div className={borderless ? "space-y-2.5 text-xs font-semibold w-full" : "bg-gradient-to-br from-amber-500/[0.01] to-rose-500/[0.01] border border-slate-200/60 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/40 rounded-3xl p-4 sm:p-5 space-y-3 text-xs font-semibold w-full shadow-xs"}>
       <label className={borderless ? "text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-450 block mb-3" : "block text-slate-500 dark:text-zinc-400 text-[11px] font-bold uppercase tracking-wider"}>
-        {giftWrapLabel}
+        {trans(giftWrapLabel)}
       </label>
       
       {/* Beautiful Visual Cards Grid */}
@@ -140,7 +140,7 @@ export default function GiftWrapSelector({
               ) : (
                 <span className="text-xs shrink-0 p-1.5 bg-slate-50 dark:bg-zinc-800 rounded-lg">{icon}</span>
               )}
-              <span className="leading-tight break-words line-clamp-2">{displayName}</span>
+              <span className="leading-tight break-words line-clamp-2">{trans(displayName)}</span>
             </button>
           );
         })}

@@ -38,6 +38,11 @@ export async function fetchApi(path: string, options: RequestInit = {}): Promise
     'Content-Type': 'application/json',
   };
 
+  if (typeof window !== 'undefined') {
+    const lang = localStorage.getItem('haniu_lang') || 'vi';
+    headers['Accept-Language'] = lang;
+  }
+
   const token = useAuthStore.getState().token;
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -141,6 +146,9 @@ export async function fetchApi(path: string, options: RequestInit = {}): Promise
 export function getFullImageUrl(url: string | null | undefined): string | undefined {
   if (!url) return undefined;
   if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    return url;
+  }
+  if (url.startsWith('/') && !url.startsWith('/api/')) {
     return url;
   }
   return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;

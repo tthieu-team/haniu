@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { catalogService } from '@/services/catalog.service';
 import CollectionsClient from './CollectionsClient';
 
-export const revalidate = 60; // Revalidate cache every 60 seconds
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = 'Bộ Sưu Tập Quà Tặng Độc Bản | Haniu';

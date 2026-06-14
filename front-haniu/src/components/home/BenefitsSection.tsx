@@ -2,10 +2,14 @@
 
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
+import { useLanguage } from '@/providers/LanguageProvider';
+import { useTranslate } from '@/lib/translator';
 
 export default function BenefitsSection() {
   const benefits = useHomeLayoutStore((state) => state.benefits);
   const isVisible = useHomeLayoutStore((state) => state.visibility.benefits);
+  const { t } = useLanguage();
+  const trans = useTranslate();
 
   if (!isVisible) return null;
 
@@ -14,18 +18,11 @@ export default function BenefitsSection() {
       {/* Title */}
       <div className="text-center space-y-3 md:space-y-4 max-w-3xl mx-auto px-4">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
-          <Icon name="✨" size={10} className="animate-pulse" /> DỊCH VỤ TRỌN GÓI
+          <Icon name="✨" size={10} className="animate-pulse" /> {t('home.benefits.badge')}
         </span>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
-          Trải Nghiệm{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-violet-500">
-            Dịch Vụ Khác Biệt
-          </span>{' '}
-          Tại Haniu
+          {trans(benefits.title)}
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed font-light">
-          Những giá trị vượt trội tạo nên trải nghiệm mua sắm quà tặng trọn vẹn, chỉn chu và an tâm nhất dành cho bạn.
-        </p>
       </div>
 
       {/* Cards list */}
@@ -85,10 +82,10 @@ export default function BenefitsSection() {
               </span>
               <div className="space-y-1.5 sm:space-y-2 text-left">
                 <h3 className={`font-extrabold text-xs sm:text-sm md:text-base text-slate-800 dark:text-zinc-100 tracking-wide transition-colors duration-300 ${currentStyle.hoverTitle}`}>
-                  {item.title}
+                  {trans(item.title)}
                 </h3>
                 <p className="text-[10px] sm:text-xs md:text-[13px] text-slate-500 dark:text-zinc-400 leading-relaxed font-light group-hover:text-slate-600 dark:group-hover:text-zinc-300 transition-colors duration-300">
-                  {item.desc}
+                  {trans(item.desc)}
                 </p>
               </div>
             </div>

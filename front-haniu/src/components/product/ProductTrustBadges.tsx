@@ -3,6 +3,7 @@
 import React from 'react';
 import Icon from '@/components/common/Icons';
 import { useHomeLayoutStore } from '@/store/homeLayout';
+import { useTranslate } from '@/lib/translator';
 
 interface ProductTrustBadgesProps {
   product?: {
@@ -12,6 +13,7 @@ interface ProductTrustBadgesProps {
 
 export default function ProductTrustBadges({ product }: ProductTrustBadgesProps) {
   const globalTrustBadges = useHomeLayoutStore((state) => state.trustBadges);
+  const trans = useTranslate();
 
   const globalConfig = globalTrustBadges || {
     showGenuine: true,
@@ -57,7 +59,7 @@ export default function ProductTrustBadges({ product }: ProductTrustBadgesProps)
       {badges.map((badge, idx) => (
         <div key={idx} className="flex items-center gap-2 text-[10px] font-bold text-slate-650 dark:text-zinc-300">
           <Icon name={badge.icon} size={14} className="text-emerald-500 shrink-0" />
-          <span>{badge.text}</span>
+          <span>{trans(badge.text)}</span>
         </div>
       ))}
     </div>

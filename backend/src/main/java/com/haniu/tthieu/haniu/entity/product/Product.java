@@ -27,6 +27,10 @@ import java.util.UUID;
     @Index(name = "idx_products_status", columnList = "status"),
     @Index(name = "idx_products_is_featured", columnList = "is_featured"),
     @Index(name = "idx_products_is_new", columnList = "is_new"),
+    @Index(name = "idx_products_is_customizable", columnList = "is_customizable"),
+    @Index(name = "idx_products_allow_admin_chat", columnList = "allow_admin_chat"),
+    @Index(name = "idx_products_allow_photo_upload", columnList = "allow_photo_upload"),
+    @Index(name = "idx_products_allow_photobooth", columnList = "allow_photobooth"),
     @Index(name = "idx_products_created_at", columnList = "created_at")
 })
 @SQLRestriction("deleted_at IS NULL")

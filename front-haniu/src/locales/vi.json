@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "home": "Trang chủ",
+    "products": "Sản phẩm",
+    "collections": "Bộ sưu tập",
+    "blog": "Góc cảm hứng",
+    "about": "Về chúng tôi",
+    "contact": "Liên hệ",
+    "faq": "Hỏi đáp",
+    "cart": "Giỏ hàng",
+    "search": "Tìm kiếm sản phẩm...",
+    "wishlist": "Yêu thích",
+    "profile": "Tài khoản",
+    "logout": "Đăng xuất",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "story": "Câu chuyện",
+    "order_lookup": "Tra cứu đơn hàng",
+    "more": "Thêm"
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Đã xảy ra lỗi, vui lòng thử lại.",
+    "no_data": "Không có dữ liệu.",
+    "currency": "đ",
+    "add_to_cart": "Thêm vào giỏ",
+    "buy_now": "Mua ngay",
+    "out_of_stock": "Hết hàng",
+    "in_stock": "Còn hàng",
+    "customizable": "Có thể cá nhân hóa"
+  },
+  "home": {
+    "categories": {
+      "badge": "PHÂN LOẠI QUÀ TẶNG",
+      "title": "Bộ Sưu Tập Theo Dịp Lễ",
+      "special_occasion": "Dành cho dịp đặc biệt",
+      "explore": "Khám phá",
+      "selected": "Đang Chọn",
+      "gift_sets": "set quà"
+    },
+    "products": {
+      "badge": "BỘ SƯU TẬP ĐỘC QUYỀN",
+      "title_normal": "Sản Phẩm Quà Tặng",
+      "title_gradient": "Thiết Kế Độc Bản",
+      "subtitle": "Khám phá bộ sưu tập quà tặng tinh tế hỗ trợ cá nhân hóa riêng theo thông điệp của bạn",
+      "search_placeholder": "Tìm quà tặng (VD: ly sứ khắc tên...)",
+      "clear_filters": "Xóa bộ lọc",
+      "showing": "Hiển thị",
+      "unique_gifts": "quà tặng độc đáo",
+      "filter_occasion": "Chọn theo dịp lễ",
+      "filter_recipient": "Đối tượng nhận quà",
+      "all_occasions": "Tất cả",
+      "all_recipients": "Tất cả",
+      "no_products": "Không tìm thấy sản phẩm phù hợp",
+      "no_products_desc": "Vui lòng thử lại bằng cách chọn một dịp khác hoặc gõ từ khóa tìm kiếm mới.",
+      "load_more": "Xem thêm sản phẩm quà tặng",
+      "loading_more": "Đang tải thêm..."
+    },
+    "benefits": {
+      "badge": "DỊCH VỤ TRỌN GÓI",
+      "title": "Trải Nghiệm Dịch Vụ Khác Biệt Tại Haniu",
+      "subtitle": "Những giá trị vượt trội tạo nên trải nghiệm mua sắm quà tặng trọn vẹn, chỉn chu và an tâm nhất dành cho bạn."
+    },
+    "how_it_works": {
+      "badge": "QUY TRÌNH DỊCH VỤ",
+      "title": "Quy Trình Tạo Nên Món Quà Độc Bản",
+      "subtitle": "Từ ý tưởng đến món quà hoàn thiện, mỗi chi tiết đều được chăm chút để mang đến trải nghiệm trao tặng đầy ý nghĩa."
+    },
+    "reviews": {
+      "badge": "ĐÁNH GIÁ THỰC TẾ",
+      "title": "Cảm Nhận Từ Khách Hàng",
+      "subtitle": "Sự hài lòng của khách hàng là động lực lớn nhất để Haniu không ngừng sáng tạo và hoàn thiện từng hộp quà.",
+      "rating": "Đánh Giá",
+      "trust": "Tin Dùng"
+    },
+    "ugc": {
+      "badge": "INSTAGRAM MOMENTS",
+      "title": "Khoảnh Khắc Của Haniu",
+      "subtitle": "Chia sẻ khoảnh khắc nhận quà của bạn cùng hashtag #mygiftmoment để nhận ngay voucher 100.000đ"
+    },
+    "blog": {
+      "badge": "GIFT INSPIRATION",
+      "title": "Góc Chia Sẻ Kinh Nghiệm",
+      "read_more": "Đọc tiếp"
+    },
+    "faq": {
+      "subtitle": "Giải đáp nhanh những thắc mắc của bạn về sản phẩm và dịch vụ của chúng tôi"
+    },
+    "story": {
+      "title": "Nghệ Thuật Từ Những Bàn Tay Thủ Công",
+      "subtitle": "Hành trình chăm chút tỉ mỉ cho từng góc cạnh hộp quà",
+      "explore": "Khám phá câu chuyện",
+      "behind": "Xem video Behind the Scenes",
+      "error_play": "Không thể phát video",
+      "error_detail": "Không tải được tài nguyên từ máy chủ. Vui lòng kiểm tra lại đường dẫn video hoặc khởi động lại máy chủ backend.",
+      "go_back": "Quay lại"
+    },
+    "collections": {
+      "badge": "CURATED SERIES",
+      "title": "Bộ Sưu Tập Độc Quyền",
+      "buy_now": "Mua ngay",
+      "limited": "Limited",
+      "fallback_desc": "Dòng sản phẩm được thiết kế độc quyền và chế tác tinh xảo bởi Haniu."
+    }
+  },
+  "footer": {
+    "directory": "Đường Dẫn",
+    "support": "Hỗ Trợ & Thông Tin",
+    "contact": "Thông Tin Liên Hệ",
+    "about_us": "Về chúng tôi",
+    "faq": "Hỏi đáp thường gặp",
+    "contact_us": "Liên hệ",
+    "reviews": "Đánh giá từ khách hàng",
+    "order_lookup": "Tra cứu đơn hàng",
+    "privacy": "Bảo mật thông tin",
+    "terms": "Điều khoản dịch vụ",
+    "policy": "Quy chế hoạt động",
+    "tagline": "Nền tảng quà tặng cao cấp & cá nhân hóa Việt Nam."
+  }
+}
