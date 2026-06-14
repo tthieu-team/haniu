@@ -1,7 +1,6 @@
 'use client';
 
 import RegisterForm from '@/components/auth/RegisterForm';
-import SocialLogin from '@/components/auth/SocialLogin';
 import AuthFooter from '@/components/auth/AuthFooter';
 import Link from 'next/link';
 
@@ -22,10 +21,7 @@ export default function RegisterPage() {
         </Link>
       </div>
 
-      {/* 3. Social login integrations */}
-      <SocialLogin />
-
-      {/* 4. Support and policies footer */}
+      {/* 3. Support and policies footer */}
       <AuthFooter />
     </div>
   );

@@ -278,7 +278,7 @@ export default function ProductReviews({ productId, onReviewsUpdated }: ProductR
           <div className="bg-slate-50 dark:bg-zinc-800/40 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800 text-center text-xs space-y-2">
             <p className="text-slate-500 dark:text-zinc-400">Bạn cần đăng nhập tài khoản để có thể đánh giá sản phẩm này.</p>
             <Link
-              href="/login"
+              href="/auth/login"
               className="inline-block px-4 py-2 bg-rose-500 text-white font-bold rounded-lg hover:bg-rose-600 shadow-sm transition-all"
             >
               Đăng nhập ngay

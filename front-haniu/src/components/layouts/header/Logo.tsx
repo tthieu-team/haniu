@@ -1,6 +1,7 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import { useHomeLayoutStore } from "@/store/homeLayout";
 
 export default function Logo() {
@@ -9,7 +10,17 @@ export default function Logo() {
 
   return (
     <Link href="/" className="flex items-center gap-2 group">
-      <span className="text-xl lg:text-2xl font-black tracking-tight bg-gradient-to-r from-amber-600 via-rose-500 to-amber-500 bg-clip-text text-transparent transition-opacity group-hover:opacity-90">
+      <div className="relative w-8 h-8 md:w-9 md:h-9 transition-transform duration-300 group-hover:scale-105">
+        <Image
+          src="/logo/logo-transparent.png"
+          alt="Haniu Logo"
+          fill
+          sizes="(max-width: 768px) 32px, 36px"
+          className="object-contain dark:brightness-110"
+          priority
+        />
+      </div>
+      <span className="text-lg lg:text-xl font-black tracking-tight bg-gradient-to-r from-amber-600 via-rose-500 to-amber-500 bg-clip-text text-transparent transition-opacity group-hover:opacity-90">
         {logoText}
       </span>
       {logoSubtitle && (

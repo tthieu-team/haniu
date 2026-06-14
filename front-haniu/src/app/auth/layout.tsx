@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Icon from '@/components/common/Icons';
-import BrandingPanel from '@/components/auth/BrandingPanel';
 
 export default function AuthLayout({
   children,
@@ -11,57 +11,75 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen w-screen overflow-hidden bg-white dark:bg-zinc-950 font-sans flex flex-col">
-      {/* 1. Minimal Header */}
-      <header className="absolute top-0 left-0 right-0 z-30 w-full py-4 px-4 sm:px-6 lg:px-12 flex justify-between items-center bg-transparent">
-        {/* Left Side: Back Button (Always visible, glassmorphic pill on mobile) */}
-        <div>
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 px-3 py-1.5 lg:px-0 lg:py-0 rounded-full lg:rounded-none bg-slate-50/80 dark:bg-zinc-900/80 lg:bg-transparent dark:lg:bg-transparent backdrop-blur-md lg:backdrop-blur-none border border-slate-100 dark:border-zinc-800 lg:border-none text-[11px] lg:text-xs font-bold text-slate-600 dark:text-zinc-300 lg:text-slate-500 lg:dark:text-zinc-400 hover:text-rose-500 transition-colors shadow-sm lg:shadow-none"
-          >
-            <Icon name="arrow-left" size={12} />
-            <span>Trở về Cửa hàng</span>
-          </Link>
-        </div>
+    <div className="min-h-screen w-full relative flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-zinc-950 font-sans overflow-x-hidden">
+      
+      {/* 1. Dynamic Premium Mesh Gradient Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Glowing Orbs */}
+        <div className="absolute top-[-15%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-rose-400/10 dark:bg-rose-900/10 blur-[120px] animate-pulse duration-[8s]" />
+        <div className="absolute bottom-[-15%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-amber-400/10 dark:bg-amber-900/10 blur-[120px] animate-pulse duration-[10s]" />
+        <div className="absolute top-[30%] right-[20%] w-[35vw] h-[35vw] rounded-full bg-pink-400/5 dark:bg-pink-900/5 blur-[100px]" />
+        
+        {/* Subtle grid line overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000003_1px,transparent_1px),linear-gradient(to_bottom,#00000003_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff01_1px,transparent_1px),linear-gradient(to_bottom,#ffffff01_1px,transparent_1px)] bg-[size:30px_30px]" />
+      </div>
 
-        {/* Right Side: Mobile Logo & Support Link */}
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="lg:hidden">
-            <Link href="/" className="flex items-center">
-              <span className="text-lg font-black tracking-tight bg-gradient-to-r from-amber-600 via-rose-500 to-amber-500 bg-clip-text text-transparent">
-                Haniu
-              </span>
-            </Link>
-          </div>
-          <span className="text-slate-200 dark:text-zinc-800 lg:hidden">|</span>
-          <a
-            href="/support"
-            className="flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-zinc-400 hover:text-rose-500 transition-colors"
-          >
-            <Icon name="phone" size={12} className="text-slate-400 dark:text-zinc-500" />
-            <span className="hidden sm:inline">Hỗ trợ</span>
-          </a>
-        </div>
+      {/* 2. Top Minimal Bar (Float) */}
+      <header className="absolute top-0 left-0 right-0 z-20 w-full py-5 px-6 sm:px-12 flex justify-between items-center bg-transparent pointer-events-auto">
+        <Link
+          href="/"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 dark:bg-zinc-900/50 backdrop-blur-md border border-slate-100 dark:border-zinc-800/80 text-[11px] sm:text-xs font-extrabold text-slate-600 dark:text-zinc-350 hover:text-rose-500 dark:hover:text-rose-400 shadow-sm transition-all hover:-translate-y-0.5"
+        >
+          <Icon name="arrow-left" size={12} />
+          <span>Trở về Cửa hàng</span>
+        </Link>
+
+        <a
+          href="/support"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/60 dark:bg-zinc-900/50 backdrop-blur-md border border-slate-100 dark:border-zinc-800/80 text-[11px] sm:text-xs font-extrabold text-slate-600 dark:text-zinc-350 hover:text-rose-500 dark:hover:text-rose-400 shadow-sm transition-all hover:-translate-y-0.5"
+        >
+          <Icon name="phone" size={12} className="text-slate-400 dark:text-zinc-550" />
+          <span>Hỗ trợ</span>
+        </a>
       </header>
 
-      {/* 2. Main Layout Split Panel */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left: Branding Panel (Desktop Only) */}
-        <BrandingPanel />
-
-        {/* Right: Auth Card Content Form Container */}
-        <div className="relative flex-1 flex flex-col items-center px-4 py-16 bg-white dark:bg-zinc-950 overflow-y-auto scrollbar-none">
-          {/* Subtle Background Accent on Right side */}
-          <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-amber-500/5 dark:bg-amber-500/2 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-rose-500/5 dark:bg-rose-500/2 blur-3xl pointer-events-none" />
-
-          {/* Children: Login / Register card container */}
-          <div className="w-full max-w-[420px] mx-auto relative z-10 animate-fade-in my-auto">
-            {children}
+      {/* 3. Center Wrapper (Logo + Card Content) */}
+      <main className="relative z-10 w-full max-w-[440px] flex flex-col items-center justify-center my-auto pt-8">
+        
+        {/* Brand Identity Header Above Card */}
+        <div className="flex flex-col items-center gap-2.5 mb-8 animate-fade-in">
+          <div className="relative w-14 h-14 transition-transform duration-500 hover:rotate-6">
+            <Image
+              src="/logo/logo-transparent.png"
+              alt="Haniu Logo"
+              fill
+              sizes="56px"
+              className="object-contain drop-shadow-[0_4px_12px_rgba(244,63,94,0.15)] dark:brightness-110"
+              priority
+            />
+          </div>
+          <div className="text-center">
+            <span className="text-2xl font-black tracking-widest bg-gradient-to-r from-amber-600 via-rose-500 to-amber-500 bg-clip-text text-transparent uppercase">
+              Haniu
+            </span>
+            <span className="block text-[9px] font-black tracking-[0.25em] text-slate-400 dark:text-zinc-500 uppercase mt-0.5">
+              Premium Gift Shop
+            </span>
           </div>
         </div>
-      </div>
+
+        {/* Children Rendered Card */}
+        <div className="w-full">
+          {children}
+        </div>
+
+      </main>
+
+      {/* 4. Elegant Minimal Footer */}
+      <footer className="relative z-10 mt-12 text-[10px] font-medium text-slate-400 dark:text-zinc-650 text-center pointer-events-none">
+        &copy; {new Date().getFullYear()} Haniu Inc. Nền tảng quà tặng cao cấp & cá nhân hóa.
+      </footer>
+
     </div>
   );
 }

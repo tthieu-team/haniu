@@ -16,6 +16,7 @@ import com.haniu.tthieu.haniu.repository.*;
 import com.haniu.tthieu.haniu.service.CartService;
 import com.haniu.tthieu.haniu.service.OrderService;
 import com.haniu.tthieu.haniu.service.EmailService;
+import com.haniu.tthieu.haniu.service.SocketIOService;
 import com.haniu.tthieu.haniu.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final CartService cartService;
     private final EmailService emailService;
+    private final SocketIOService socketIOService;
 
 
     @Override
@@ -215,6 +217,12 @@ public class OrderServiceImpl implements OrderService {
             }
         } catch (Exception e) {
             log.error("Failed to send order confirmation email for order code: {}", responseDto.getOrderCode(), e);
+        }
+
+        try {
+            socketIOService.sendOrderNotification(responseDto);
+        } catch (Exception e) {
+            log.error("Failed to broadcast real-time order notification for code: {}", responseDto.getOrderCode(), e);
         }
 
         return responseDto;

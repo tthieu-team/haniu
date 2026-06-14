@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import Icon from '@/components/common/Icons';
 
 export default function BrandingPanel() {
@@ -33,8 +34,18 @@ export default function BrandingPanel() {
 
       {/* Header Info */}
       <div className="relative z-10">
-        <Link href="/" className="inline-flex items-center gap-2 mb-6 group">
-          <span className="text-3xl font-black tracking-tight bg-gradient-to-r from-amber-600 via-rose-500 to-amber-500 bg-clip-text text-transparent group-hover:opacity-90 transition-opacity">
+        <Link href="/" className="inline-flex items-center gap-2.5 mb-6 group">
+          <div className="relative w-7 h-7">
+            <Image
+              src="/logo/logo-transparent.png"
+              alt="Haniu Logo"
+              fill
+              sizes="28px"
+              className="object-contain dark:brightness-110"
+              priority
+            />
+          </div>
+          <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-amber-600 via-rose-500 to-amber-500 bg-clip-text text-transparent group-hover:opacity-90 transition-opacity">
             Haniu
           </span>
           <span className="text-xs font-bold tracking-widest text-slate-400 dark:text-zinc-550 uppercase">
@@ -68,21 +79,16 @@ export default function BrandingPanel() {
             {/* Inner Gold Gradient Circle */}
             <div className="absolute inset-6 rounded-[1.8rem] xl:rounded-[2rem] bg-gradient-to-tr from-rose-500/5 to-amber-500/5 border border-white/40 dark:border-zinc-800/20 flex items-center justify-center">
               
-              {/* Modern Abstract "H" Logo Icon */}
-              <div className="w-14 h-14 xl:w-16 xl:h-16 relative">
-                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_4px_12px_rgba(244,63,94,0.3)]">
-                  {/* Outer geometric shield shape */}
-                  <polygon points="50,5 93,30 93,80 50,95 7,80 7,30" className="fill-none stroke-rose-500/10 dark:stroke-amber-500/10 stroke-[2]" />
-                  {/* Dynamic H Monogram + Gift Bow curves */}
-                  <path d="M35,28 L35,72" className="stroke-rose-500 dark:stroke-rose-400 stroke-[5] stroke-linecap-round" />
-                  <path d="M65,28 L65,72" className="stroke-rose-500 dark:stroke-rose-400 stroke-[5] stroke-linecap-round" />
-                  {/* Bow tie connecting paths representing gift wrap */}
-                  <path d="M35,50 C42,42 45,42 50,50 C55,42 58,42 65,50" className="fill-none stroke-amber-500 dark:stroke-amber-400 stroke-[4] stroke-linecap-round" />
-                  <path d="M35,50 C42,58 45,58 50,50 C55,58 58,58 65,50" className="fill-none stroke-amber-500 dark:stroke-amber-400 stroke-[4] stroke-linecap-round" />
-                  {/* Floating luxury sparks/dots */}
-                  <circle cx="50" cy="22" r="3" className="fill-amber-500 dark:fill-amber-400" />
-                  <circle cx="50" cy="78" r="3" className="fill-rose-500 dark:fill-rose-400" />
-                </svg>
+              {/* Modern Abstract logo-transparent.png */}
+              <div className="w-24 h-24 xl:w-28 xl:h-28 relative">
+                <Image
+                  src="/logo/logo-transparent.png"
+                  alt="Haniu Logo Large"
+                  fill
+                  sizes="(max-width: 768px) 96px, 112px"
+                  className="object-contain drop-shadow-[0_8px_16px_rgba(244,63,94,0.25)] dark:brightness-110"
+                  priority
+                />
               </div>
 
             </div>

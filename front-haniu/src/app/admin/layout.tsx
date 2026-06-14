@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import { useThemeStore } from '@/store/theme';
+import { useRealtimeStore } from '@/store/realtime';
 import Link from 'next/link';
 import Icon from '@/components/common/Icons';
 import { authService } from '@/services/auth.service';
@@ -23,6 +24,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [collapsed, setCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+
+  const { notifications, unreadCount, initSocket, disconnectSocket, markAsRead, markAllAsRead } = useRealtimeStore();
+
+  useEffect(() => {
+    if (isInitialized && isAuthenticated && user?.role === 'ADMIN') {
+      initSocket();
+    }
+    return () => {
+      disconnectSocket();
+    };
+  }, [isInitialized, isAuthenticated, user, initSocket, disconnectSocket]);
 
   useEffect(() => {
     if (isInitialized && (!isAuthenticated || user?.role !== 'ADMIN')) {
@@ -182,23 +194,54 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className="p-2 rounded-xl text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer relative"
               >
                 <Icon name="star" size={16} />
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0.5 right-0.5 min-w-[12px] h-[12px] px-0.5 rounded-full bg-rose-500 text-[8px] font-bold text-white flex items-center justify-center animate-pulse">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
 
               {notifOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
                   <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl z-50 p-4 space-y-3">
-                    <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400">Thông báo mới</h4>
-                    <div className="space-y-2 text-xs">
-                      <div className="p-2 bg-slate-50 dark:bg-zinc-850 rounded-xl">
-                        <p className="font-semibold">Đơn hàng mới #HNU-9482</p>
-                        <p className="text-slate-400 text-[10px]">Đang chờ xác nhận thanh toán</p>
-                      </div>
-                      <div className="p-2 bg-slate-50 dark:bg-zinc-850 rounded-xl">
-                        <p className="font-semibold">Mã giảm giá HANIUNEW hết hạn</p>
-                        <p className="text-slate-400 text-[10px]">Vui lòng kiểm tra lại cấu hình</p>
-                      </div>
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400">Thông báo đơn hàng</h4>
+                      {unreadCount > 0 && (
+                        <button 
+                          onClick={() => markAllAsRead()}
+                          className="text-[10px] text-rose-500 hover:underline font-semibold cursor-pointer"
+                        >
+                          Đọc tất cả
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-2 text-xs max-h-60 overflow-y-auto scrollbar-none">
+                      {notifications.length === 0 ? (
+                        <p className="text-slate-400 text-center py-4">Chưa có thông báo đơn hàng nào</p>
+                      ) : (
+                        notifications.map((item) => (
+                          <div 
+                            key={item.id} 
+                            onClick={() => markAsRead(item.id)}
+                            className={`p-2 rounded-xl cursor-pointer transition-colors ${
+                              item.unread 
+                                ? 'bg-rose-50 dark:bg-rose-950/20 border-l-2 border-rose-500' 
+                                : 'bg-slate-50 dark:bg-zinc-850'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start">
+                              <p className="font-semibold text-slate-800 dark:text-zinc-200">Đơn hàng mới #{item.orderCode}</p>
+                              {item.unread && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0 mt-1" />}
+                            </div>
+                            <p className="text-[10px] text-slate-500 dark:text-zinc-400 mt-0.5">Khách hàng: {item.customerName}</p>
+                            <p className="text-[10px] text-slate-500 dark:text-zinc-400">Tổng tiền: {item.totalPrice.toLocaleString('vi-VN')} đ</p>
+                            <p className="text-[9px] text-slate-400 dark:text-zinc-500 mt-1">
+                              {new Date(item.orderedAt).toLocaleString('vi-VN')}
+                            </p>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </>

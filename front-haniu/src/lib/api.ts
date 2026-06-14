@@ -51,6 +51,7 @@ export async function fetchApi(path: string, options: RequestInit = {}): Promise
   }
 
   const response = await fetch(url, {
+    cache: 'no-store',
     ...options,
     headers: {
       ...headers,
