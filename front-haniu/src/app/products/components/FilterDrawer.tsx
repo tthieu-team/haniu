@@ -1,7 +1,7 @@
 'use client';
 
 import Icon from '@/components/common/Icons';
-import { Category, Brand, Collection } from '@/services/catalog.service';
+import { Category, Brand, Collection, Occasion } from '@/services/catalog.service';
 import { useTranslate } from '@/lib/translator';
 
 export interface FilterDrawerProps {
@@ -13,6 +13,8 @@ export interface FilterDrawerProps {
   setSelectedBrand: (brand: string) => void;
   selectedCollection: string;
   setSelectedCollection: (coll: string) => void;
+  selectedOccasion: string;
+  setSelectedOccasion: (occ: string) => void;
   customizableOnly: boolean;
   setCustomizableOnly: (val: boolean) => void;
   adminChatOnly: boolean;
@@ -31,6 +33,7 @@ export interface FilterDrawerProps {
   categories: Category[];
   brands: Brand[];
   collections: Collection[];
+  occasions: Occasion[];
 }
 
 export default function FilterDrawer({
@@ -42,6 +45,8 @@ export default function FilterDrawer({
   setSelectedBrand,
   selectedCollection,
   setSelectedCollection,
+  selectedOccasion,
+  setSelectedOccasion,
   customizableOnly,
   setCustomizableOnly,
   adminChatOnly,
@@ -60,6 +65,7 @@ export default function FilterDrawer({
   categories,
   brands,
   collections,
+  occasions,
 }: FilterDrawerProps) {
   const trans = useTranslate();
   if (!isOpen) return null;
@@ -159,6 +165,43 @@ export default function FilterDrawer({
               })}
             </div>
           </div>
+
+          {/* Occasions */}
+          {occasions.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-wider block">
+                {trans('Chọn theo dịp lễ')}
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  onClick={() => setSelectedOccasion('')}
+                  className={`text-[10px] px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer font-bold ${
+                    selectedOccasion === ''
+                      ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                      : 'border-slate-100 dark:border-zinc-850 text-slate-500 dark:text-zinc-450 hover:bg-slate-50 dark:hover:bg-zinc-900/60'
+                  }`}
+                >
+                  {trans('Tất cả')}
+                </button>
+                {occasions.map((occ) => {
+                  const isActive = selectedOccasion === occ.slug || selectedOccasion === occ.id;
+                  return (
+                    <button
+                      key={occ.id}
+                      onClick={() => setSelectedOccasion(occ.slug || occ.id || '')}
+                      className={`text-[10px] px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer font-bold ${
+                        isActive
+                          ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                          : 'border-slate-100 dark:border-zinc-850 text-slate-500 dark:text-zinc-450 hover:bg-slate-50 dark:hover:bg-zinc-900/60'
+                      }`}
+                    >
+                      {trans(occ.name)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* 2. Brands */}
           {brands.length > 0 && (

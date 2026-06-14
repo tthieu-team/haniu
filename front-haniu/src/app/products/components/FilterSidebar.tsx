@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Icon from '@/components/common/Icons';
-import { Category, Brand, Collection } from '@/services/catalog.service';
+import { Category, Brand, Collection, Occasion } from '@/services/catalog.service';
 import { useTranslate } from '@/lib/translator';
 
 export interface FilterSidebarProps {
@@ -12,6 +12,8 @@ export interface FilterSidebarProps {
   setSelectedBrand: (brand: string) => void;
   selectedCollection: string;
   setSelectedCollection: (coll: string) => void;
+  selectedOccasion: string;
+  setSelectedOccasion: (occ: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   customizableOnly: boolean;
@@ -33,6 +35,7 @@ export interface FilterSidebarProps {
   categories: Category[];
   brands: Brand[];
   collections: Collection[];
+  occasions: Occasion[];
 }
 
 export default function FilterSidebar({
@@ -42,6 +45,8 @@ export default function FilterSidebar({
   setSelectedBrand,
   selectedCollection,
   setSelectedCollection,
+  selectedOccasion,
+  setSelectedOccasion,
   searchQuery,
   setSearchQuery,
   customizableOnly,
@@ -63,12 +68,14 @@ export default function FilterSidebar({
   categories,
   brands,
   collections,
+  occasions,
 }: FilterSidebarProps) {
   const trans = useTranslate();
   const [expanded, setExpanded] = useState({
     categories: true,
     brands: true,
     collections: true,
+    occasions: true,
     price: true,
     service: true,
   });
@@ -81,6 +88,7 @@ export default function FilterSidebar({
     selectedCat ||
     selectedBrand ||
     selectedCollection ||
+    selectedOccasion ||
     searchQuery ||
     customizableOnly ||
     priceMin !== '' ||
@@ -217,6 +225,55 @@ export default function FilterSidebar({
           </div>
         )}
       </div>
+
+      {/* Occasions Accordion */}
+      {occasions.length > 0 && (
+        <div className="border-b border-slate-100 dark:border-zinc-800/60 pb-4">
+          <button
+            onClick={() => toggleSection('occasions')}
+            className="w-full flex items-center justify-between py-2 text-left focus:outline-none cursor-pointer"
+          >
+            <span className="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+              {trans('Chọn theo dịp lễ')} ({occasions.length})
+            </span>
+            <span className={`text-slate-455 transition-transform duration-300 ${expanded.occasions ? 'rotate-180' : ''}`}>
+              <Icon name="chevron-down" size={12} />
+            </span>
+          </button>
+          {expanded.occasions && (
+            <div className="flex flex-col gap-1 mt-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
+              <button
+                onClick={() => setSelectedOccasion('')}
+                className={`text-left text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
+                  selectedOccasion === ''
+                    ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold'
+                    : 'hover:bg-slate-50 dark:hover:bg-zinc-900/60 text-slate-650 dark:text-zinc-350 font-medium'
+                }`}
+              >
+                <span>{trans('Tất cả dịp lễ')}</span>
+                {selectedOccasion === '' && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
+              </button>
+              {occasions.map((occ) => {
+                const isActive = selectedOccasion === occ.slug || selectedOccasion === occ.id;
+                return (
+                  <button
+                    key={occ.id}
+                    onClick={() => setSelectedOccasion(occ.slug || occ.id || '')}
+                    className={`text-left text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
+                      isActive
+                        ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold'
+                        : 'hover:bg-slate-50 dark:hover:bg-zinc-900/60 text-slate-650 dark:text-zinc-350 font-medium'
+                    }`}
+                  >
+                    <span className="truncate pr-2">{trans(occ.name)}</span>
+                    {isActive && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 3. Brands Accordion */}
       {brands.length > 0 && (

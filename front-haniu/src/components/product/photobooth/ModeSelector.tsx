@@ -97,7 +97,6 @@ const MODES = [
 
 export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect }) => {
   const trans = useTranslate();
-  const [userName, setUserName] = useState('');
 
   return (
     <div className="w-full h-full bg-background flex flex-col items-center justify-start p-4 sm:p-6 overflow-y-auto relative custom-scrollbar transition-colors duration-500">
@@ -118,36 +117,6 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect }) => {
         </p>
       </motion.div>
 
-      {/* User Branding Card */}
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-md bg-card-bg border border-border-color rounded-2xl p-4 mb-5 backdrop-blur-2xl shadow-sm relative overflow-hidden group shrink-0"
-      >
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-color to-primary-color/70 opacity-60" />
-        
-        <div className="flex items-center gap-2 mb-2.5">
-          <div className="w-6 h-6 rounded-lg bg-primary-color/10 flex items-center justify-center">
-            <Icon name="user" size={12} className="text-primary-color" />
-          </div>
-          <span className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-color">{trans("Tên hiển thị trên ảnh")}</span>
-        </div>
-        
-        <input
-          type="text"
-          placeholder={trans("Ví dụ: Hieu & Vy, Happy Birthday...")}
-          value={userName}
-          maxLength={30}
-          onChange={e => setUserName(e.target.value)}
-          className="bg-background border border-border-color text-foreground placeholder:text-muted-color/60 h-10 px-3.5 rounded-xl w-full text-[11px] font-bold focus:ring-1 focus:ring-primary-color focus:outline-none"
-        />
-        
-        <div className="flex items-center justify-between mt-3.5 text-[8.5px] text-muted-color font-bold uppercase tracking-wider">
-          <div className="flex items-center gap-1"><Icon name="calendar" size={10} className="text-primary-color/40" /> {new Date().toLocaleDateString('vi-VN')}</div>
-          <div className="flex items-center gap-1"><Icon name="map-pin" size={10} className="text-primary-color/40" /> Haniu Studio</div>
-        </div>
-      </motion.div>
-
       {/* Grid List with auto-rows-fr to make all buttons exactly equal height */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl w-full z-10 pb-8 auto-rows-fr">
         {MODES.map((mode, index) => (
@@ -158,7 +127,7 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect }) => {
             transition={{ delay: index * 0.03 }}
             whileHover={{ y: -4 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => onSelect(mode.id, userName)}
+            onClick={() => onSelect(mode.id, '')}
             className="relative group bg-card-bg/45 border border-border-color rounded-2xl p-4 flex flex-col items-center justify-between text-center hover:border-primary-color/50 hover:bg-accent-color/10 transition-all duration-300 shadow-xs hover:shadow-md cursor-pointer h-full min-h-[155px]"
           >
             <div className="flex flex-col items-center w-full">

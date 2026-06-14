@@ -17,6 +17,7 @@ import { ResultView } from './ResultView';
 import { generateComposition } from './composition';
 import { DEFAULT_TEMPLATES } from './templates';
 import { playSound } from './sounds';
+import { StartModeOverlay } from './StartModeOverlay';
 
 interface PhotoboothSystemProps {
   onCapture: (file: File) => void;
@@ -35,6 +36,12 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
   const [cameraReady, setCameraReady] = useState(false);
   const [retakeIndex, setRetakeIndex] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  const [captureMode, setCaptureMode] = useState<'auto' | 'manual'>('auto');
+  const [hasSelectedCaptureMode, setHasSelectedCaptureMode] = useState(false);
+  const [waitingForNextCapture, setWaitingForNextCapture] = useState(false);
+
+
 
   const [config, setConfig] = useState<PhotoboothConfig>({
     mode: 'grid-4',
@@ -114,8 +121,11 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
     } else {
       setPhotos(prev => [...prev, newPhoto]);
       setIsCapturing(false);
+      if (captureMode === 'manual' && photos.length + 1 < config.template.slots.length) {
+        setWaitingForNextCapture(true);
+      }
     }
-  }, [retakeIndex, photos.length, config.template.slots.length]);
+  }, [retakeIndex, photos.length, config.template.slots.length, captureMode]);
 
   useEffect(() => {
     if ((step === 'countdown' || step === 'capturing') && retakeIndex === null) {
@@ -123,13 +133,15 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
         setStep('review');
         playSound('success');
       } else if (step === 'capturing') {
-        const timer = setTimeout(() => {
-          setStep('countdown');
-        }, 1500);
-        return () => clearTimeout(timer);
+        if (captureMode === 'auto') {
+          const timer = setTimeout(() => {
+            setStep('countdown');
+          }, 1500);
+          return () => clearTimeout(timer);
+        }
       }
     }
-  }, [photos.length, config.template.slots.length, step, retakeIndex]);
+  }, [photos.length, config.template.slots.length, step, retakeIndex, captureMode]);
 
   const handleFinishCountdown = () => {
     setIsCapturing(true);
@@ -210,6 +222,9 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
     setErrorMessage(null);
     setCameraReady(false);
     setStep('idle');
+    setCaptureMode('auto');
+    setHasSelectedCaptureMode(false);
+    setWaitingForNextCapture(false);
   };
 
   const handleConfirmFinal = (blob: Blob, shouldClose: boolean = true) => {
@@ -265,8 +280,50 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
               filter={config.filter}
             />
 
-            {step === 'countdown' && cameraReady && (
+            {!hasSelectedCaptureMode && cameraReady && (
+              <StartModeOverlay
+                onSelect={(mode) => {
+                  setCaptureMode(mode);
+                  setHasSelectedCaptureMode(true);
+                }}
+              />
+            )}
+
+            {step === 'countdown' && cameraReady && hasSelectedCaptureMode && !waitingForNextCapture && (
               <CountdownTimer seconds={config.countdown} onFinish={handleFinishCountdown} />
+            )}
+
+            {waitingForNextCapture && (
+              <div className="absolute inset-0 z-30 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center p-4">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="bg-card-bg border border-border-color rounded-2xl p-6 text-center flex flex-col items-center gap-4 max-w-xs shadow-xl"
+                >
+                  <div className="w-12 h-12 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center animate-bounce">
+                    <Icon name="camera" size={20} />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-foreground text-xs uppercase tracking-wider">
+                      {trans("Tấm ảnh đã sẵn sàng")}
+                    </h4>
+                    <p className="text-[9.5px] text-muted-color mt-1">
+                      {trans("Chuẩn bị tư thế và biểu cảm cho tấm tiếp theo!")}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      playSound('click');
+                      setWaitingForNextCapture(false);
+                      setStep('countdown');
+                    }}
+                    className="w-full h-9 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-95"
+                  >
+                    <Icon name="check" size={12} />
+                    {trans("Chụp tấm tiếp theo")}
+                  </button>
+                </motion.div>
+              </div>
             )}
 
             {/* Photo capture process counter indicators */}
@@ -324,72 +381,91 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
 
         {step === 'design-menu' && (
           <motion.div key="design-menu" className="w-full h-full flex flex-col items-center justify-start sm:justify-center p-4 sm:p-6 md:p-8 relative z-10 overflow-y-auto custom-scrollbar" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <div className="w-full max-w-2xl bg-card-bg border border-border-color rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center gap-6">
+            <div className="w-full max-w-4xl bg-card-bg border border-border-color rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
               
-              <div className="text-center pb-2">
-                <span className="inline-block px-3 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-450 rounded-full text-[10px] font-black uppercase tracking-wider mb-2">
-                  {trans("BƯỚC CHỈNH SỬA HÌNH ẢNH 🎨")}
-                </span>
-                <h2 className="text-xl sm:text-2xl font-black text-foreground uppercase tracking-tight font-sans">{trans("Chọn chế độ thiết kế")}</h2>
-                <p className="text-[11px] text-muted-color mt-1 max-w-md">{trans("Lựa chọn một trong các tính năng bên dưới để bắt đầu trang trí bức ảnh kỷ niệm của bạn.")}</p>
-              </div>
-
-              {/* Grid of Options */}
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-4 w-full max-w-lg px-2 sm:px-0">
-                <button
-                  onClick={() => setStep('edit-frame')}
-                  className="aspect-square rounded-2xl sm:rounded-3xl border border-dashed border-rose-300 hover:border-rose-500 hover:bg-rose-500/5 text-slate-800 dark:text-zinc-100 flex flex-col items-center justify-center gap-1.5 sm:gap-3 p-2.5 sm:p-6 text-center transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-xs w-full"
-                >
-                  <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
-                    <Icon name="palette" size={20} className="sm:scale-125" />
+              {/* Left Column: Image Preview */}
+              {resultUrl && (
+                <div className="w-full md:w-[320px] shrink-0 bg-black/5 dark:bg-black/30 rounded-2xl p-1.5 border border-border-color/60 shadow-inner overflow-y-auto max-h-[400px] custom-scrollbar flex flex-col items-center justify-start">
+                  <div className="w-full flex justify-center">
+                    <img 
+                      src={resultUrl} 
+                      alt="Composition Preview" 
+                      className="w-full h-auto object-contain rounded-lg shadow-lg border border-white/5 transition-transform duration-300 hover:scale-102"
+                    />
                   </div>
-                  <div>
-                    <p className="font-black text-[9px] sm:text-[12px] uppercase tracking-wide">{trans("Khung & Viền")}</p>
-                    <p className="text-[7.5px] sm:text-[9px] text-muted-color font-normal mt-0.5 sm:mt-1 leading-tight line-clamp-2 sm:line-clamp-none">{trans("Thay đổi màu viền, tải hình nền riêng, chữ ký.")}</p>
-                  </div>
-                </button>
+                  {/* Khoảng trống để cuộn qua phần chân ảnh */}
+                  <div className="h-36 w-full shrink-0" />
+                </div>
+              )}
 
-                <button
-                  onClick={() => setStep('editing')}
-                  className="aspect-square rounded-2xl sm:rounded-3xl border border-dashed border-rose-300 hover:border-rose-500 hover:bg-rose-500/5 text-slate-800 dark:text-zinc-100 flex flex-col items-center justify-center gap-1.5 sm:gap-3 p-2.5 sm:p-6 text-center transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-xs w-full"
-                >
-                  <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
-                    <Icon name="heart" size={20} className="sm:scale-125" />
-                  </div>
-                  <div>
-                    <p className="font-black text-[9px] sm:text-[12px] uppercase tracking-wide">{trans("Trang trí Sticker")}</p>
-                    <p className="text-[7.5px] sm:text-[9px] text-muted-color font-normal mt-0.5 sm:mt-1 leading-tight line-clamp-2 sm:line-clamp-none">{trans("Dán nhãn biểu tượng đáng yêu của Haniu hoặc emoji.")}</p>
-                  </div>
-                </button>
-              </div>
+              {/* Right Column: Controls */}
+              <div className="flex-1 flex flex-col justify-start gap-6 w-full">
+                <div className="text-center md:text-left pb-2">
+                  <span className="inline-block px-3 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-450 rounded-full text-[10px] font-black uppercase tracking-wider mb-2">
+                    {trans("BƯỚC CHỈNH SỬA HÌNH ẢNH 🎨")}
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-black text-foreground uppercase tracking-tight font-sans">{trans("Chọn chế độ thiết kế")}</h2>
+                  <p className="text-[11px] text-muted-color mt-1 max-w-md">{trans("Lựa chọn một trong các tính năng bên dưới để bắt đầu trang trí bức ảnh kỷ niệm của bạn.")}</p>
+                </div>
 
-              {/* Actions Footer */}
-              <div className="pt-2 border-t border-border-color w-full max-w-lg flex flex-col gap-2.5">
-                <button
-                  onClick={() => setStep('result')}
-                  className="w-full h-11 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-[11px] uppercase tracking-wider shadow-md shadow-rose-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98"
-                >
-                  <Icon name="check" size={14} />
-                  {trans("Xem kết quả & Hoàn tất")}
-                </button>
-
-                <div className="flex gap-2">
+                {/* Grid of Options */}
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-4 w-full px-2 sm:px-0">
                   <button
-                    onClick={() => handleConfirmFinal(resultBlob!, false)}
-                    className="flex-1 h-9 rounded-xl border border-border-color hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-350 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer"
+                    onClick={() => setStep('edit-frame')}
+                    className="aspect-square rounded-2xl sm:rounded-3xl border border-dashed border-rose-300 hover:border-rose-500 hover:bg-rose-500/5 text-slate-800 dark:text-zinc-100 flex flex-col items-center justify-center gap-1.5 sm:gap-3 p-2.5 sm:p-6 text-center transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-xs w-full"
                   >
-                    <Icon name="camera" size={12} className="text-rose-500" />
-                    {trans("Lưu & Chụp tiếp")}
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
+                      <Icon name="palette" size={20} className="sm:scale-125" />
+                    </div>
+                    <div>
+                      <p className="font-black text-[9px] sm:text-[12px] uppercase tracking-wide">{trans("Khung & Viền")}</p>
+                      <p className="text-[7.5px] sm:text-[9px] text-muted-color font-normal mt-0.5 sm:mt-1 leading-tight line-clamp-2 sm:line-clamp-none">{trans("Thay đổi màu viền, tải hình nền riêng, chữ ký.")}</p>
+                    </div>
                   </button>
 
                   <button
-                    onClick={() => setStep('review')}
-                    className="flex-1 h-9 rounded-xl border border-border-color hover:bg-slate-50 dark:hover:bg-zinc-800 text-muted-color font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer"
+                    onClick={() => setStep('editing')}
+                    className="aspect-square rounded-2xl sm:rounded-3xl border border-dashed border-rose-300 hover:border-rose-500 hover:bg-rose-500/5 text-slate-800 dark:text-zinc-100 flex flex-col items-center justify-center gap-1.5 sm:gap-3 p-2.5 sm:p-6 text-center transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-xs w-full"
                   >
-                    {trans("Quay lại Review")}
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
+                      <Icon name="heart" size={20} className="sm:scale-125" />
+                    </div>
+                    <div>
+                      <p className="font-black text-[9px] sm:text-[12px] uppercase tracking-wide">{trans("Trang trí Sticker")}</p>
+                      <p className="text-[7.5px] sm:text-[9px] text-muted-color font-normal mt-0.5 sm:mt-1 leading-tight line-clamp-2 sm:line-clamp-none">{trans("Dán nhãn biểu tượng đáng yêu của Haniu hoặc emoji.")}</p>
+                    </div>
                   </button>
                 </div>
+
+                {/* Actions Footer */}
+                <div className="pt-4 border-t border-border-color w-full flex flex-col gap-2.5">
+                  <button
+                    onClick={() => setStep('result')}
+                    className="w-full h-11 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-[11px] uppercase tracking-wider shadow-md shadow-rose-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98"
+                  >
+                    <Icon name="check" size={14} />
+                    {trans("Xem kết quả & Hoàn tất")}
+                  </button>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleConfirmFinal(resultBlob!, false)}
+                      className="flex-1 h-9 rounded-xl border border-border-color hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-350 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer"
+                    >
+                      <Icon name="camera" size={12} className="text-rose-500" />
+                      {trans("Lưu & Chụp tiếp")}
+                    </button>
+
+                    <button
+                      onClick={() => setStep('review')}
+                      className="flex-1 h-9 rounded-xl border border-border-color hover:bg-slate-50 dark:hover:bg-zinc-800 text-muted-color font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer"
+                    >
+                      {trans("Quay lại Review")}
+                    </button>
+                  </div>
+                </div>
               </div>
+
             </div>
           </motion.div>
         )}

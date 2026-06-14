@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Icon from '@/components/common/Icons';
 import { CapturedPhoto, PhotoboothConfig, Sticker } from './types';
 import { generateComposition } from './composition';
@@ -157,9 +157,9 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
       </div>
 
       {/* Live Preview Pane */}
-      <div className="flex-1 min-w-0 overflow-y-auto p-6 pt-24 flex flex-col items-center justify-start sm:justify-center custom-scrollbar">
+      <div className="flex-1 min-w-0 overflow-y-auto p-6 pt-24 pb-12 flex flex-col items-center justify-start custom-scrollbar">
         {liveUrl ? (
-          <div className="relative flex items-center justify-center select-none max-w-[75vw] sm:max-w-[340px] w-full bg-slate-100 dark:bg-zinc-900 rounded-xl shadow-2xl p-1.5 overflow-hidden">
+          <div className="relative flex flex-col items-center justify-start select-none max-w-[92vw] sm:max-w-[340px] w-full bg-slate-100 dark:bg-zinc-900 rounded-xl shadow-2xl p-1.5">
             <div 
               className="relative w-full overflow-hidden"
               style={{ aspectRatio: `${localConfig.template.canvasWidth} / ${localConfig.template.canvasHeight}` }}
@@ -167,7 +167,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
               <img
                 src={liveUrl}
                 alt="Live frame designer preview"
-                className="w-full h-full object-contain pointer-events-none select-none rounded-lg"
+                className="w-full h-auto pointer-events-none select-none rounded-lg"
               />
 
               {/* Real-time CSS Username Signature Overlay */}
@@ -204,6 +204,8 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
                 </div>
               )}
             </div>
+            {/* Khoảng trống để cuộn qua phần chân ảnh */}
+            <div className="h-36 w-full shrink-0" />
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center gap-2">
@@ -383,12 +385,12 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
           <div className="space-y-2.5">
             <div className="space-y-1">
               <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">{trans('Nội dung chữ ký')}</label>
-              <input
+            <input
                 type="text"
                 placeholder={trans('Ví dụ: HANIU STUDIO')}
                 value={localConfig.userName || ''}
                 onChange={(e) => setLocalConfig(prev => ({ ...prev, userName: e.target.value }))}
-                className="w-full bg-background border border-border-color rounded-xl px-3 h-9 text-foreground text-xs focus:outline-none focus:border-rose-500 transition-all font-sans font-bold"
+                className="w-full bg-background border border-border-color rounded-xl px-3 h-9 text-foreground text-[16px] sm:text-xs focus:outline-none focus:border-rose-500 transition-all font-sans font-bold"
               />
             </div>
 
@@ -398,7 +400,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
               <select
                 value={localConfig.userNameFont || 'cormorant-garamond'}
                 onChange={(e) => setLocalConfig(prev => ({ ...prev, userNameFont: e.target.value }))}
-                className="w-full bg-background border border-border-color rounded-xl px-2.5 h-9 text-foreground text-xs focus:outline-none focus:border-rose-500 transition-all font-bold"
+                className="w-full bg-background border border-border-color rounded-xl px-2.5 h-9 text-foreground text-[16px] sm:text-xs focus:outline-none focus:border-rose-500 transition-all font-bold"
               >
                 {AVAILABLE_FONTS.map(f => (
                   <option key={f.id} value={f.id}>{trans(f.name)}</option>
@@ -502,7 +504,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
                   <select
                     value={localConfig.dateFont || 'be-vietnam-pro'}
                     onChange={(e) => setLocalConfig(prev => ({ ...prev, dateFont: e.target.value }))}
-                    className="w-full bg-background border border-border-color rounded-xl px-2.5 h-8 text-foreground text-xs focus:outline-none focus:border-rose-500 transition-all font-bold"
+                    className="w-full bg-background border border-border-color rounded-xl px-2.5 h-8 text-foreground text-[16px] sm:text-xs focus:outline-none focus:border-rose-500 transition-all font-bold"
                   >
                     {AVAILABLE_FONTS.map(f => (
                       <option key={f.id} value={f.id}>{trans(f.name)}</option>

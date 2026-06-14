@@ -147,14 +147,16 @@ export default function Header() {
     }
   };
 
-  const rawMenuLinks = header?.menuLinks?.length ? header.menuLinks : [
+  const menuLinks = [
     { name: 'Trang chủ', href: '/' },
     { name: 'Sản phẩm', href: '/products' },
     { name: 'Bộ sưu tập', href: '/collections' },
+    { name: 'Góc cảm hứng', href: '/blog' },
     { name: 'Câu chuyện', href: '/story' },
-  ];
-  const menuLinks = [
-    ...rawMenuLinks.filter(link => link.href !== '/wishlist' && link.name !== 'Yêu thích'),
+    { name: 'Về chúng tôi', href: '/about' },
+    { name: 'Hỏi đáp thường gặp', href: '/faq' },
+    { name: 'Liên hệ', href: '/contact' },
+    { name: 'Đánh giá từ khách hàng', href: '/reviews' },
     { name: 'Tra cứu đơn hàng', href: '/orders/lookup' }
   ];
 
@@ -221,7 +223,7 @@ export default function Header() {
               <Icon name="search" size={16} className="text-slate-400 shrink-0" />
               <input
                 type="text"
-                placeholder={trans("Tìm kiếm set quà...")}
+                placeholder={trans("Tìm quà tặng (VD: ly sứ khắc tên...)")}
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
                 autoFocus
@@ -299,17 +301,12 @@ export default function Header() {
           </div>
         )}
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          {/* Left: Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center gap-4 lg:gap-5 xl:gap-7">
             <Logo />
-          </div>
-
-          {/* Center: Navigation Menu */}
-          <div className="hidden md:block">
             <Navbar isScrolled={isScrolled} menuLinks={menuLinks} />
           </div>
           {/* Right: Search, Account, Wishlist, Cart */}
-          <div className="flex items-center gap-2 sm:gap-3.5 lg:gap-5">
+          <div className="flex items-center gap-2 sm:gap-3.5 lg:gap-5 flex-nowrap shrink-0">
             <form
               ref={searchRef}
               onSubmit={handleSearchSubmit}
@@ -318,7 +315,7 @@ export default function Header() {
               <Icon name="search" size={13} className="absolute left-3 text-slate-400 dark:text-zinc-500 pointer-events-none" />
               <input
                 type="text"
-                placeholder={trans("Tìm kiếm set quà...")}
+                placeholder={trans("Tìm quà tặng (VD: ly sứ khắc tên...)")}
                 value={searchVal}
                 onChange={(e) => {
                   setSearchVal(e.target.value);
@@ -492,8 +489,8 @@ export default function Header() {
             {/* User Account / Login (Desktop Only) */}
             {isAuthenticated ? (
               <div className="hidden md:block relative group py-2">
-                <button className="flex items-center gap-1.5 text-xs font-semibold hover:text-rose-500 dark:hover:text-rose-400 cursor-pointer">
-                  <Icon name="user" size={16} /> <span className="hidden sm:inline">{user?.fullName.split(' ').slice(-1)[0]}</span>
+                <button className="flex items-center justify-center p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors cursor-pointer shrink-0" title={user?.fullName || trans('Tài khoản')}>
+                  <Icon name="user" size={16} />
                 </button>
                 <div className="absolute right-0 top-full pt-2 w-44 opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto transition-all duration-300 z-50">
                   <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl p-3 flex flex-col gap-2">
@@ -598,7 +595,7 @@ export default function Header() {
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 text-slate-700 dark:text-zinc-350">
                       <Icon name="user" size={13} />
-                      <span>{trans("Chào,")} {user?.fullName.split(' ').slice(-1)[0]}</span>
+                      <span>{trans("Chào,")} {(user?.fullName || '').split(' ').slice(-1)[0] || trans('bạn')}</span>
                     </div>
                     {user?.role === 'ADMIN' && (
                       <Link

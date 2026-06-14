@@ -27,14 +27,20 @@ export const ResultView: React.FC<ResultViewProps> = ({
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="relative bg-card-bg p-2 shadow-xl rounded-2xl border border-border-color"
+        className="relative bg-card-bg p-1.5 shadow-xl rounded-2xl border border-border-color w-full md:w-[320px] shrink-0"
       >
-        <img
-          src={imageUrl}
-          alt="Completed photobooth strip print"
-          className="max-h-[50vh] md:max-h-[68vh] w-auto object-contain rounded-lg shadow-inner block"
-        />
-        <div className="absolute -top-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-md border-2 border-white dark:border-zinc-900">
+        <div className="w-full max-h-[420px] md:max-h-[480px] overflow-y-auto custom-scrollbar flex flex-col items-center justify-start rounded-xl">
+          <div className="w-full flex justify-center">
+            <img
+              src={imageUrl}
+              alt="Completed photobooth strip print"
+              className="w-full h-auto object-contain rounded-lg shadow-inner block"
+            />
+          </div>
+          {/* Khoảng trống để cuộn qua phần chân ảnh */}
+          <div className="h-32 w-full shrink-0" />
+        </div>
+        <div className="absolute -top-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-md border-2 border-white dark:border-zinc-900 z-10">
           <Icon name="check" size={16} />
         </div>
       </motion.div>

@@ -124,7 +124,7 @@ export default function FeaturedProductsSection({
           {trans(featuredProducts?.title || 'Sản phẩm nổi bật')}
         </h2>
         <p className="text-[11px] sm:text-xs md:text-sm text-slate-500 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed font-light">
-          {trans(featuredProducts?.subtitle || '')}
+          {trans(featuredProducts?.subtitle || 'Những set quà được yêu thích nhất thiết kế chỉn chu riêng cho bạn')}
         </p>
       </div>
 

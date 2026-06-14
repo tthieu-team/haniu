@@ -7,6 +7,7 @@ import ProductCard from '@/components/product/ProductCard';
 import QuickViewModal from '@/components/product/QuickViewModal';
 import Icon from '@/components/common/Icons';
 import { useTranslate } from '@/lib/translator';
+import { useOccasionStore } from '@/store/occasion';
 
 // Modular Subcomponents
 import FilterSidebar from './components/FilterSidebar';
@@ -40,6 +41,7 @@ function ProductsContent() {
   const paramPhotobooth = searchParams.get('photobooth') === 'true';
   const paramFeatured = searchParams.get('featured') === 'true';
   const paramNew = searchParams.get('new') === 'true';
+  const paramOccasion = searchParams.get('occasion') || '';
 
   // Dynamic lists from backend
   const [categories, setCategories] = useState<Category[]>([]);
@@ -58,6 +60,7 @@ function ProductsContent() {
   const [photoboothOnly, setPhotoboothOnly] = useState(paramPhotobooth);
   const [featuredOnly, setFeaturedOnly] = useState(paramFeatured);
   const [newOnly, setNewOnly] = useState(paramNew);
+  const [selectedOccasion, setSelectedOccasion] = useState(paramOccasion);
   const [priceMin, setPriceMin] = useState<number | ''>(paramMinPrice);
   const [priceMax, setPriceMax] = useState<number | ''>(paramMaxPrice);
 
@@ -94,6 +97,8 @@ function ProductsContent() {
   }, [selectedCat, categories, catalogLoaded, trans]);
 
   // Fetch catalogs on mount
+  const { occasions, fetchOccasions } = useOccasionStore();
+
   useEffect(() => {
     const fetchCatalogs = async () => {
       try {
@@ -112,6 +117,7 @@ function ProductsContent() {
       }
     };
     fetchCatalogs();
+    if (occasions.length === 0) fetchOccasions();
   }, []);
 
   // Update states whenever URL params change
@@ -128,6 +134,7 @@ function ProductsContent() {
     setPhotoboothOnly(paramPhotobooth);
     setFeaturedOnly(paramFeatured);
     setNewOnly(paramNew);
+    setSelectedOccasion(paramOccasion);
   }, [
     paramSearch,
     paramCat,
@@ -140,7 +147,8 @@ function ProductsContent() {
     paramAdminChat,
     paramPhotobooth,
     paramFeatured,
-    paramNew
+    paramNew,
+    paramOccasion
   ]);
 
   // Function to push parameters to URL (Source of truth)
@@ -166,6 +174,12 @@ function ProductsContent() {
     }
     if (selectedCat) {
       list = list.filter(p => p.category?.slug === selectedCat || (p.category as any)?.id === selectedCat);
+    }
+    if (selectedOccasion) {
+      list = list.filter(p => {
+        const pOccs = (p as any).occasions || [];
+        return pOccs.some((o: any) => o.slug === selectedOccasion || o.id === selectedOccasion || o === selectedOccasion);
+      });
     }
     if (customizableOnly) {
       list = list.filter(p => p.isCustomizable);
@@ -200,9 +214,9 @@ function ProductsContent() {
       const targetPage = reset ? 0 : currentPage + 1;
       const cursorVal = reset ? null : nextCursor;
 
-      const catId = resolveSlugToId(selectedCat, categories);
-      const brandId = resolveSlugToId(selectedBrand, brands);
-      const collId = resolveSlugToId(selectedCollection, collections);
+      const catId = resolveSlugToId(paramCat, categories);
+      const brandId = resolveSlugToId(paramBrand, brands);
+      const collId = resolveSlugToId(paramCollection, collections);
 
       let resData: any = null;
       let newProducts: any[] = [];
@@ -224,12 +238,13 @@ function ProductsContent() {
           totalP = resData.totalPages || 1;
           hasNext = targetPage < totalP - 1;
         }
-      } else if (sortOption === 'newest') {
+      } else if (paramSort === 'newest') {
         // Mode C: Cursor Mode (default sorting newest)
         resData = await productService.getProductsCursor({
           categoryId: catId,
           brandId: brandId,
           collectionId: collId,
+          occasionSlug: paramOccasion || undefined,
           cursor: cursorVal || undefined,
           size
         });
@@ -242,13 +257,13 @@ function ProductsContent() {
         // Mode B: Standard/Offset Mode (price sorting/sales, page-based)
         let sortBy = 'createdAt';
         let sortDir = 'desc';
-        if (sortOption === 'price-asc') {
+        if (paramSort === 'price-asc') {
           sortBy = 'price';
           sortDir = 'asc';
-        } else if (sortOption === 'price-desc') {
+        } else if (paramSort === 'price-desc') {
           sortBy = 'price';
           sortDir = 'desc';
-        } else if (sortOption === 'sales') {
+        } else if (paramSort === 'sales') {
           sortBy = 'totalSold';
           sortDir = 'desc';
         }
@@ -257,6 +272,7 @@ function ProductsContent() {
           categoryId: catId,
           brandId: brandId,
           collectionId: collId,
+          occasionSlug: paramOccasion || undefined,
           page: targetPage,
           size,
           sortBy,
@@ -326,7 +342,8 @@ function ProductsContent() {
     paramAdminChat,
     paramPhotobooth,
     paramFeatured,
-    paramNew
+    paramNew,
+    paramOccasion
   ]);
 
   // Client side filters (for price and custom check tags)
@@ -358,6 +375,7 @@ function ProductsContent() {
     setSelectedCat('');
     setSelectedBrand('');
     setSelectedCollection('');
+    setSelectedOccasion('');
     setCustomizableOnly(false);
     setAdminChatOnly(false);
     setPhotoboothOnly(false);
@@ -388,6 +406,10 @@ function ProductsContent() {
     if (selectedCollection) {
       const found = collections.find(c => c.id === selectedCollection || c.slug === selectedCollection);
       list.push({ key: 'collection', label: `${trans('Bộ sưu tập')}: ${found ? trans(found.name) : selectedCollection}` });
+    }
+    if (selectedOccasion) {
+      const found = occasions.find(o => o.id === selectedOccasion || o.slug === selectedOccasion);
+      list.push({ key: 'occasion', label: `${trans('Dịp lễ')}: ${found ? trans(found.name) : selectedOccasion}` });
     }
     if (customizableOnly) {
       list.push({ key: 'customizable', label: trans('Cho phép Khắc tên / Cá nhân hóa quà') });
@@ -427,6 +449,9 @@ function ProductsContent() {
         break;
       case 'collection':
         updateUrlParams({ collection: '' });
+        break;
+      case 'occasion':
+        updateUrlParams({ occasion: '' });
         break;
       case 'customizable':
         updateUrlParams({ customizable: '' });
@@ -488,11 +513,12 @@ function ProductsContent() {
           )}
         </nav>
 
-        {/* Horizontal scrollable category pill bar on top for quick selector */}
+        {/* Horizontal scrollable occasion pill bar on top for quick selector */}
         <CategoryPillsBar
-          categories={categories}
-          selectedCat={selectedCat}
-          onSelectCategory={(cat) => updateUrlParams({ category: cat })}
+          categories={occasions}
+          selectedCat={selectedOccasion}
+          onSelectCategory={(occ) => updateUrlParams({ occasion: occ })}
+          allLabel={trans('Tất cả sản phẩm')}
         />
 
         {/* Active Filter Tags Row */}
@@ -513,6 +539,8 @@ function ProductsContent() {
             setSelectedBrand={(brand) => updateUrlParams({ brand: brand })}
             selectedCollection={selectedCollection}
             setSelectedCollection={(coll) => updateUrlParams({ collection: coll })}
+            selectedOccasion={selectedOccasion}
+            setSelectedOccasion={(occ) => updateUrlParams({ occasion: occ })}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             customizableOnly={customizableOnly}
@@ -534,6 +562,7 @@ function ProductsContent() {
             categories={categories}
             brands={brands}
             collections={collections}
+            occasions={occasions}
           />
 
           {/* Product grid list panel */}
@@ -676,6 +705,8 @@ function ProductsContent() {
         setSelectedBrand={(brand) => updateUrlParams({ brand: brand })}
         selectedCollection={selectedCollection}
         setSelectedCollection={(coll) => updateUrlParams({ collection: coll })}
+        selectedOccasion={selectedOccasion}
+        setSelectedOccasion={(occ) => updateUrlParams({ occasion: occ })}
         customizableOnly={customizableOnly}
         setCustomizableOnly={(val) => updateUrlParams({ customizable: val ? 'true' : '' })}
         adminChatOnly={adminChatOnly}
@@ -694,6 +725,7 @@ function ProductsContent() {
         categories={categories}
         brands={brands}
         collections={collections}
+        occasions={occasions}
       />
 
       {/* Quick view modal details */}

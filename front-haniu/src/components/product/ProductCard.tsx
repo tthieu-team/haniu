@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Icon from '@/components/common/Icons';
@@ -36,6 +37,17 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
     ? (product.media.find(m => m.isThumbnail)?.url || product.media[0]?.url)
     : (product.thumbnailUrl || (product as any).thumbnail_url || 'https://placehold.co/300');
   const secondaryImage = product.media?.find(m => !m.isThumbnail)?.url || product.media?.[1]?.url;
+
+  const [imgSrc, setImgSrc] = useState<string>('https://placehold.co/300?text=Haniu');
+  const [secondImgSrc, setSecondImgSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    setImgSrc(getFullImageUrl(thumbnail) || 'https://placehold.co/300?text=Haniu');
+  }, [thumbnail]);
+
+  useEffect(() => {
+    setSecondImgSrc(secondaryImage ? (getFullImageUrl(secondaryImage) || null) : null);
+  }, [secondaryImage]);
   
   const priceVal = product.salePrice || (product as any).sale_price || product.basePrice || product.price || 0;
   const originalPriceVal = (product.salePrice || (product as any).sale_price) ? (product.basePrice || product.price) : undefined;
@@ -88,19 +100,21 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
       <div className="block overflow-hidden relative aspect-square bg-slate-50 dark:bg-zinc-950 rounded-t-2xl sm:rounded-t-[28px]">
         <Link href={`/products/${product.slug}`} className="block w-full h-full relative">
           <Image
-            src={getFullImageUrl(thumbnail) || 'https://placehold.co/300'}
+            src={imgSrc}
             alt={trans(product.name)}
             fill
             className="object-cover group-hover:scale-105 transition-all duration-700 ease-out rounded-t-2xl sm:rounded-t-[28px]"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            onError={() => setImgSrc('https://placehold.co/300?text=Haniu')}
           />
-          {secondaryImage && (
+          {secondImgSrc && (
             <Image
-              src={getFullImageUrl(secondaryImage) || 'https://placehold.co/300'}
+              src={secondImgSrc}
               alt={`${trans(product.name)} alternate`}
               fill
               className="absolute inset-0 object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-105 rounded-t-2xl sm:rounded-t-[28px]"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              onError={() => setSecondImgSrc(null)}
             />
           )}
         </Link>
