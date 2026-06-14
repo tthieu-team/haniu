@@ -4,29 +4,70 @@ import React, { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '@/components/common/Icons';
 import { useTranslate } from '@/lib/translator';
+import type { FaceFilterType } from './types';
+import {
+  initFaceLandmarker,
+  destroyFaceLandmarker,
+  detectFaceLandmarks,
+  renderFaceFilter,
+} from './FaceFilterEngine';
+import type { FaceLandmarker } from '@mediapipe/tasks-vision';
 
 interface CameraViewProps {
   onCapture: (blob: Blob, dataUrl: string) => void;
   onReady?: () => void;
   isCapturing: boolean;
-  filter?: string;
   mirrored?: boolean;
+  faceFilter?: FaceFilterType;
+  onFaceFilterLoading?: (loading: boolean) => void;
+  aspectRatio?: string;
 }
 
 export const CameraView: React.FC<CameraViewProps> = ({
   onCapture,
   onReady,
   isCapturing,
-  filter = 'none',
-  mirrored = true
+  mirrored = true,
+  faceFilter = 'none',
+  onFaceFilterLoading,
+  aspectRatio = 'free',
 }) => {
   const trans = useTranslate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [containerSize, setContainerSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
 
+  // Face filter state
+  const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const lastTimestampRef = useRef<number>(0);
+  const faceFilterRef = useRef<FaceFilterType>(faceFilter);
+  const frameCountRef = useRef<number>(0);
+  const cachedLandmarksRef = useRef<any[] | null>(null);
+
+  // Keep ref in sync with prop so the render loop always reads the latest value
+  useEffect(() => {
+    faceFilterRef.current = faceFilter;
+  }, [faceFilter]);
+
+  // Track container size for crop mask
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setContainerSize({ w: width, h: height });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // ─── Camera Initialization ─────────────────────────────────
   useEffect(() => {
     let currentStream: MediaStream | null = null;
 
@@ -89,7 +130,163 @@ export const CameraView: React.FC<CameraViewProps> = ({
     }
   }, [stream]);
 
-  // Handle capture trigger from parent
+  // ─── FaceLandmarker Preload (eager) ─────────────────────────
+  // Start loading the AI model as soon as camera stream is available.
+  // This ensures zero lag when user picks a face filter.
+  useEffect(() => {
+    if (stream && !faceLandmarkerRef.current) {
+      onFaceFilterLoading?.(true);
+      initFaceLandmarker().then((landmarker) => {
+        faceLandmarkerRef.current = landmarker;
+        onFaceFilterLoading?.(false);
+      });
+    }
+  }, [stream]);
+
+  // ─── Compute object-cover crop offset ──────────────────────
+  // The video element uses object-fit: cover, which means the displayed
+  // area is a center-cropped portion of the native video. To correctly
+  // position the overlay canvas, we need to calculate the offset and
+  // scale used by the browser.
+  function getVideoCoverRect(video: HTMLVideoElement) {
+    const containerW = video.clientWidth;
+    const containerH = video.clientHeight;
+    const videoW = video.videoWidth || containerW;
+    const videoH = video.videoHeight || containerH;
+
+    const containerAspect = containerW / containerH;
+    const videoAspect = videoW / videoH;
+
+    let drawW: number, drawH: number, offsetX: number, offsetY: number;
+
+    if (videoAspect > containerAspect) {
+      // Video is wider — crop sides
+      drawH = containerH;
+      drawW = containerH * videoAspect;
+      offsetX = (containerW - drawW) / 2;
+      offsetY = 0;
+    } else {
+      // Video is taller — crop top/bottom
+      drawW = containerW;
+      drawH = containerW / videoAspect;
+      offsetX = 0;
+      offsetY = (containerH - drawH) / 2;
+    }
+
+    return { drawW, drawH, offsetX, offsetY, containerW, containerH, videoW, videoH };
+  }
+
+  // ─── Face Filter Render Loop ───────────────────────────────
+  useEffect(() => {
+    const video = videoRef.current;
+    const overlayCanvas = overlayCanvasRef.current;
+
+    if (!video || !overlayCanvas) return;
+
+    const ctx = overlayCanvas.getContext('2d');
+    if (!ctx) return;
+
+    let running = true;
+
+    const renderLoop = () => {
+      if (!running) return;
+
+      const currentFilter = faceFilterRef.current;
+
+      if (
+        currentFilter !== 'none' &&
+        faceLandmarkerRef.current &&
+        video.readyState >= 2
+      ) {
+        // Sync overlay canvas pixel size to container
+        const containerW = video.clientWidth;
+        const containerH = video.clientHeight;
+
+        if (overlayCanvas.width !== containerW || overlayCanvas.height !== containerH) {
+          overlayCanvas.width = containerW;
+          overlayCanvas.height = containerH;
+        }
+
+        ctx.clearRect(0, 0, containerW, containerH);
+
+        // Throttle detection: run every 2nd frame to reduce lag
+        frameCountRef.current++;
+        let landmarks = cachedLandmarksRef.current;
+
+        if (frameCountRef.current % 2 === 0 || !landmarks) {
+          const now = performance.now();
+          const timestamp = Math.max(now, lastTimestampRef.current + 1);
+          lastTimestampRef.current = timestamp;
+
+          const detected = detectFaceLandmarks(
+            faceLandmarkerRef.current,
+            video,
+            timestamp
+          );
+          if (detected) {
+            landmarks = detected;
+            cachedLandmarksRef.current = detected;
+          }
+        }
+
+        if (landmarks) {
+          // Calculate object-cover transform
+          const cover = getVideoCoverRect(video);
+
+          ctx.save();
+
+          // The overlay canvas has CSS scale-x-[-1] (same as video) which already
+          // mirrors the display. We do NOT apply ctx.scale(-1,1) here — that would
+          // double-mirror. Instead we just map landmarks through object-cover coords.
+          const mappedLandmarks = landmarks.map((lm: any) => ({
+            x: (cover.offsetX + lm.x * cover.drawW) / containerW,
+            y: (cover.offsetY + lm.y * cover.drawH) / containerH,
+            z: lm.z,
+          }));
+
+          renderFaceFilter(
+            ctx,
+            mappedLandmarks,
+            currentFilter,
+            containerW,
+            containerH,
+            video
+          );
+
+          ctx.restore();
+        }
+      } else if (currentFilter === 'none') {
+        // Clear when filter is off
+        if (overlayCanvas.width > 0) {
+          ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        }
+      }
+
+      animFrameRef.current = requestAnimationFrame(renderLoop);
+    };
+
+    animFrameRef.current = requestAnimationFrame(renderLoop);
+
+    return () => {
+      running = false;
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
+    };
+  }, [mirrored]); // Only depend on mirrored — faceFilter is read from ref
+
+  // ─── Cleanup FaceLandmarker on unmount ─────────────────────
+  useEffect(() => {
+    return () => {
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+      destroyFaceLandmarker();
+    };
+  }, []);
+
+  // ─── Handle Capture ────────────────────────────────────────
   useEffect(() => {
     if (isCapturing && videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -97,8 +294,32 @@ export const CameraView: React.FC<CameraViewProps> = ({
       const context = canvas.getContext('2d');
 
       if (context) {
-        canvas.width = video.videoWidth || 640;
-        canvas.height = video.videoHeight || 480;
+        const vw = video.videoWidth || 640;
+        const vh = video.videoHeight || 480;
+
+        // Calculate crop region based on aspect ratio
+        let cropX = 0, cropY = 0, cropW = vw, cropH = vh;
+        if (aspectRatio !== 'free') {
+          const [rw, rh] = aspectRatio.split(':').map(Number);
+          const targetRatio = rw / rh;
+          const videoRatio = vw / vh;
+          if (targetRatio > videoRatio) {
+            // Video is taller — crop top/bottom
+            cropW = vw;
+            cropH = vw / targetRatio;
+            cropX = 0;
+            cropY = (vh - cropH) / 2;
+          } else {
+            // Video is wider — crop sides
+            cropH = vh;
+            cropW = vh * targetRatio;
+            cropY = 0;
+            cropX = (vw - cropW) / 2;
+          }
+        }
+
+        canvas.width = Math.round(cropW);
+        canvas.height = Math.round(cropH);
 
         // Handle mirroring
         if (mirrored) {
@@ -106,23 +327,51 @@ export const CameraView: React.FC<CameraViewProps> = ({
           context.scale(-1, 1);
         }
 
-        // Apply same filter to capture (using a temp canvas to bypass browser bugs drawing filtered video directly)
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
-        const tempCtx = tempCanvas.getContext('2d');
-        
-        if (tempCtx) {
-          tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
-          
-          // Draw with filter to main canvas
-          context.filter = filter;
-          context.drawImage(tempCanvas, 0, 0);
-        }
+        // Draw cropped video frame
+        context.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
 
-        // Reset transform and filter
+        // Reset transform for face filter rendering
         context.setTransform(1, 0, 0, 1, 0, 0);
-        context.filter = 'none';
+
+        // Render face filter onto capture canvas
+        if (faceFilter !== 'none' && faceLandmarkerRef.current && video.readyState >= 2) {
+          const timestamp = performance.now();
+          const safeTs = Math.max(timestamp, lastTimestampRef.current + 1);
+          lastTimestampRef.current = safeTs;
+
+          const landmarks = detectFaceLandmarks(
+            faceLandmarkerRef.current,
+            video,
+            safeTs
+          );
+
+          if (landmarks) {
+            context.save();
+
+            if (mirrored) {
+              context.translate(canvas.width, 0);
+              context.scale(-1, 1);
+            }
+
+            // Remap landmarks from full video space to cropped canvas space
+            const mappedLandmarks = landmarks.map((lm: any) => ({
+              x: (lm.x * vw - cropX) / cropW,
+              y: (lm.y * vh - cropY) / cropH,
+              z: lm.z,
+            }));
+
+            renderFaceFilter(
+              context,
+              mappedLandmarks,
+              faceFilter,
+              canvas.width,
+              canvas.height,
+              video
+            );
+
+            context.restore();
+          }
+        }
 
         const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
         canvas.toBlob((blob) => {
@@ -130,10 +379,11 @@ export const CameraView: React.FC<CameraViewProps> = ({
         }, 'image/jpeg', 0.95);
       }
     }
-  }, [isCapturing, onCapture, mirrored, filter]);
+  }, [isCapturing, onCapture, mirrored, faceFilter, aspectRatio]);
 
   return (
     <div 
+      ref={containerRef}
       className="relative w-full h-full bg-background overflow-hidden flex items-center justify-center cursor-pointer"
       onClick={() => {
         if (videoRef.current?.paused) {
@@ -159,10 +409,54 @@ export const CameraView: React.FC<CameraViewProps> = ({
         }}
         animate={{
           scale: isCapturing ? [1, 0.98, 1] : 1,
-          filter: filter
         }}
         className={`w-full h-full object-cover transition-transform duration-300 ${mirrored ? 'scale-x-[-1]' : ''}`}
       />
+
+      {/* Face Filter Overlay Canvas — positioned to exactly overlap the video */}
+      <canvas
+        ref={overlayCanvasRef}
+        className={`absolute inset-0 w-full h-full pointer-events-none z-[5] ${mirrored ? 'scale-x-[-1]' : ''}`}
+      />
+
+      {/* Aspect Ratio Crop Mask */}
+      {aspectRatio !== 'free' && containerSize.w > 0 && (() => {
+        const [rw, rh] = aspectRatio.split(':').map(Number);
+        const targetRatio = rw / rh;
+        const cW = containerSize.w;
+        const cH = containerSize.h;
+        const containerRatio = cW / cH;
+
+        let cutW: number, cutH: number;
+        if (targetRatio > containerRatio) {
+          cutW = cW;
+          cutH = cW / targetRatio;
+        } else {
+          cutH = cH;
+          cutW = cH * targetRatio;
+        }
+
+        const cutX = (cW - cutW) / 2;
+        const cutY = (cH - cutH) / 2;
+
+        return (
+          <div className="absolute inset-0 z-[6] pointer-events-none">
+            <svg width={cW} height={cH} className="absolute inset-0">
+              <defs>
+                <mask id="crop-mask">
+                  <rect width={cW} height={cH} fill="white" />
+                  <rect x={cutX} y={cutY} width={cutW} height={cutH} fill="black" rx="2" />
+                </mask>
+              </defs>
+              <rect width={cW} height={cH} fill="rgba(0,0,0,0.55)" mask="url(#crop-mask)" />
+            </svg>
+            <div
+              className="absolute border-2 border-white/50 rounded-sm"
+              style={{ left: cutX, top: cutY, width: cutW, height: cutH }}
+            />
+          </div>
+        );
+      })()}
 
       <canvas ref={canvasRef} className="hidden" />
 

@@ -80,3 +80,21 @@ export type PhotoboothStep =
   | 'result' 
   | 'error' 
   | 'timeout';
+
+export type FaceFilterType = 
+  | 'none'
+  | 'deer-horns'
+  | 'cat-ears'
+  | 'dog-ears'
+  | 'sunglasses'
+  | 'crown'
+  | 'clown-nose'
+  | 'face-zoom'
+  | 'sparkle';
+
+export interface FaceFilterConfig {
+  id: FaceFilterType;
+  name: string;
+  icon: string;
+  category: 'accessories' | 'animal' | 'effect';
+}

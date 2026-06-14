@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Icon from '@/components/common/Icons';
 import { useTranslate } from '@/lib/translator';
 
-import { PhotoboothStep, PhotoboothMode, PhotoboothConfig, CapturedPhoto, Sticker } from './types';
+import { PhotoboothStep, PhotoboothMode, PhotoboothConfig, CapturedPhoto, Sticker, FaceFilterType } from './types';
 import { IdleState } from './IdleState';
 import { ModeSelector } from './ModeSelector';
 import { CameraView } from './CameraView';
@@ -18,6 +18,7 @@ import { generateComposition } from './composition';
 import { DEFAULT_TEMPLATES } from './templates';
 import { playSound } from './sounds';
 import { StartModeOverlay } from './StartModeOverlay';
+import { FaceFilterSelector } from './FaceFilterSelector';
 
 interface PhotoboothSystemProps {
   onCapture: (file: File) => void;
@@ -41,6 +42,13 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
   const [hasSelectedCaptureMode, setHasSelectedCaptureMode] = useState(false);
   const [waitingForNextCapture, setWaitingForNextCapture] = useState(false);
 
+  // Face Filter state
+  const [faceFilter, setFaceFilter] = useState<FaceFilterType>('none');
+  const [faceFilterLoading, setFaceFilterLoading] = useState(false);
+
+  // Aspect Ratio state
+  const [aspectRatio, setAspectRatio] = useState<string>('free');
+
 
 
   const [config, setConfig] = useState<PhotoboothConfig>({
@@ -48,7 +56,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
     template: DEFAULT_TEMPLATES['grid-4'],
     filter: 'none',
     frameStyle: 'white',
-    countdown: 3,
+    countdown: 5,
     userName: '',
     showDate: true
   });
@@ -151,6 +159,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
   const handleRetakeSingle = (index: number) => {
     playSound('click');
     setRetakeIndex(index);
+    setWaitingForNextCapture(true);
     setStep('countdown');
   };
 
@@ -225,6 +234,8 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
     setCaptureMode('auto');
     setHasSelectedCaptureMode(false);
     setWaitingForNextCapture(false);
+    setFaceFilter('none');
+    setAspectRatio('free');
   };
 
   const handleConfirmFinal = (blob: Blob, shouldClose: boolean = true) => {
@@ -277,14 +288,52 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
               isCapturing={isCapturing}
               onCapture={handleCapture}
               onReady={() => setCameraReady(true)}
-              filter={config.filter}
+              faceFilter={faceFilter}
+              onFaceFilterLoading={setFaceFilterLoading}
+              aspectRatio={aspectRatio}
             />
 
-            {!hasSelectedCaptureMode && cameraReady && (
+            {/* Face AI Loading Overlay — block interaction until model is ready */}
+            {faceFilterLoading && cameraReady && (
+              <div className="absolute inset-0 z-45 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="bg-zinc-900/90 border border-white/10 rounded-2xl p-6 flex flex-col items-center gap-4 max-w-xs shadow-2xl"
+                >
+                  <div className="relative w-14 h-14">
+                    <div className="absolute inset-0 rounded-full border-3 border-white/10" />
+                    <div className="absolute inset-0 rounded-full border-3 border-t-rose-500 animate-spin" />
+                    <div className="absolute inset-0 flex items-center justify-center text-lg">🤖</div>
+                  </div>
+                  <div className="text-center">
+                    <h4 className="text-xs font-black text-white uppercase tracking-wider">
+                      {trans('Đang tải Face AI')}
+                    </h4>
+                    <p className="text-[9px] text-zinc-400 mt-1">
+                      {trans('Mô hình nhận diện khuôn mặt đang được khởi tạo...')}
+                    </p>
+                  </div>
+                  <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-rose-500 to-pink-500 rounded-full"
+                      initial={{ width: '10%' }}
+                      animate={{ width: '90%' }}
+                      transition={{ duration: 8, ease: 'easeOut' }}
+                    />
+                  </div>
+                </motion.div>
+              </div>
+            )}
+
+            {!hasSelectedCaptureMode && cameraReady && !faceFilterLoading && (
               <StartModeOverlay
                 onSelect={(mode) => {
                   setCaptureMode(mode);
                   setHasSelectedCaptureMode(true);
+                  if (mode === 'manual') {
+                    setWaitingForNextCapture(true);
+                  }
                 }}
               />
             )}
@@ -294,34 +343,38 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
             )}
 
             {waitingForNextCapture && (
-              <div className="absolute inset-0 z-30 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center p-4">
+              <div className="absolute inset-x-0 top-0 bottom-24 z-30 flex flex-col items-center justify-center p-4 pointer-events-none">
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="bg-card-bg border border-border-color rounded-2xl p-6 text-center flex flex-col items-center gap-4 max-w-xs shadow-xl"
+                  className="flex flex-col items-center gap-5 pointer-events-auto"
                 >
-                  <div className="w-12 h-12 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center animate-bounce">
-                    <Icon name="camera" size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-black text-foreground text-xs uppercase tracking-wider">
-                      {trans("Tấm ảnh đã sẵn sàng")}
-                    </h4>
-                    <p className="text-[9.5px] text-muted-color mt-1">
-                      {trans("Chuẩn bị tư thế và biểu cảm cho tấm tiếp theo!")}
+                  {/* Photo count indicator */}
+                  <div className="px-4 py-2 bg-black/70 backdrop-blur-md rounded-full border border-white/10 shadow-lg">
+                    <p className="text-[10px] font-black text-white uppercase tracking-wider">
+                      {trans('ẢNH')} {photos.length} / {config.template.slots.length} ✓
                     </p>
                   </div>
-                  <button
+
+                  {/* Large shutter button */}
+                  <motion.button
+                    whileTap={{ scale: 0.85 }}
+                    whileHover={{ scale: 1.05 }}
                     onClick={() => {
                       playSound('click');
                       setWaitingForNextCapture(false);
                       setStep('countdown');
                     }}
-                    className="w-full h-9 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-95"
+                    className="w-20 h-20 rounded-full bg-white/90 border-4 border-rose-500 shadow-2xl shadow-rose-500/30 flex items-center justify-center cursor-pointer transition-colors hover:bg-white active:bg-rose-50"
                   >
-                    <Icon name="check" size={12} />
-                    {trans("Chụp tấm tiếp theo")}
-                  </button>
+                    <div className="w-14 h-14 rounded-full bg-rose-500 flex items-center justify-center">
+                      <Icon name="camera" size={24} className="text-white" />
+                    </div>
+                  </motion.button>
+
+                  <p className="text-[9px] font-bold text-white/60 uppercase tracking-wider text-center">
+                    {trans('Nhấn để chụp tấm tiếp theo')}
+                  </p>
                 </motion.div>
               </div>
             )}
@@ -346,23 +399,41 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
               </p>
             </div>
 
-            {/* Quick Filters */}
-            <div className="absolute bottom-6 left-6 flex gap-2">
-              {[
-                { id: 'none', filterStyle: 'none' },
-                { id: 'sepia', filterStyle: 'sepia(0.6)' },
-                { id: 'grayscale', filterStyle: 'grayscale(1)' },
-                { id: 'warm', filterStyle: 'contrast(1.1) saturate(1.2)' }
-              ].map((f, i) => (
-                <button
-                  key={i}
-                  onClick={() => setConfig(prev => ({ ...prev, filter: f.filterStyle }))}
-                  className={`w-8 h-8 rounded-full border-2 transition-all cursor-pointer ${config.filter === f.filterStyle ? 'border-primary-color scale-105 shadow-md' : 'border-white/20 hover:border-white/40'
-                    }`}
-                  style={{ filter: f.filterStyle, backgroundColor: '#333' }}
-                  title={trans("Chọn bộ lọc")}
+
+
+            {/* Bottom Controls: 2 rows */}
+            <div className="absolute bottom-4 left-4 right-4 z-40 flex flex-col gap-2.5">
+              {/* Row 1: Face Filters */}
+              <div className="flex justify-center">
+                <FaceFilterSelector
+                  activeFilter={faceFilter}
+                  onSelect={setFaceFilter}
+                  isLoading={faceFilterLoading}
                 />
-              ))}
+              </div>
+              {/* Row 2: Aspect Ratio */}
+              <div className="flex justify-center gap-1.5 flex-wrap">
+                {[
+                  { id: 'free', label: 'Tự do' },
+                  { id: '1:1', label: '1:1' },
+                  { id: '3:4', label: '3:4' },
+                  { id: '4:3', label: '4:3' },
+                  { id: '9:16', label: '9:16' },
+                  { id: '16:9', label: '16:9' },
+                ].map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => setAspectRatio(r.id)}
+                    className={`px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border ${
+                      aspectRatio === r.id
+                        ? 'bg-rose-500 text-white border-rose-400 shadow-lg shadow-rose-500/30 scale-105'
+                        : 'bg-black/50 text-white/70 border-white/10 hover:bg-black/70 hover:text-white backdrop-blur-sm'
+                    }`}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
