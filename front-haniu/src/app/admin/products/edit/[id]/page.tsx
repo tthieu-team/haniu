@@ -53,56 +53,6 @@ interface SpecInput {
   value: string;
 }
 
-const MOCK_PRODUCTS: Record<string, any> = {
-  "m1": {
-    id: "m1",
-    name: "Hộp Quà Lãng Mạn - Eternal Love Special Edition",
-    slug: "hop-qua-lang-man-eternal-love",
-    sku: "GIFT-EL-001",
-    description: "Set quà tặng cao cấp gồm hoa sáp thơm, ly sứ khắc tên, thiệp viết tay và đèn LED trang trí lãng mạn.",
-    basePrice: 590000,
-    salePrice: 490000,
-    stock: 50,
-    isFeatured: true,
-    isNew: true,
-    isCustomizable: true,
-    categoryId: "8bc6cdbb-b6cb-4b71-b0db-3cdb4b7c7b12",
-    specifications: JSON.stringify({
-      "Chất liệu hộp": "Giấy Carton cứng bọc mỹ thuật",
-      "Kích thước": "25 x 25 x 12 cm"
-    }),
-    media: [
-      { id: "md1", url: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80", type: "IMAGE", isThumbnail: true, altText: "Eternal Love", sortOrder: 1 }
-    ],
-    variants: [
-      { id: "v1_1", sku: "GIFT-EL-001-RED", name: "Hộp Quà Lãng Mạn (Hoa Hồng Đỏ)", color: "Đỏ", size: "M", price: 590000, salePrice: 490000, stock: 30 }
-    ]
-  },
-  "m2": {
-    id: "m2",
-    name: "Sổ Tay Da Thật Khắc Tên Cá Nhân Hóa",
-    slug: "so-tay-da-that-khac-ten",
-    sku: "GIFT-NB-002",
-    description: "Sổ bìa da bò thật cao cấp, giấy nhám kraft vintage, hỗ trợ khắc laze tên và lời chúc ý nghĩa theo yêu cầu.",
-    basePrice: 350000,
-    stock: 120,
-    isFeatured: true,
-    isNew: false,
-    isCustomizable: true,
-    categoryId: "a50c8b9d-472e-4b21-995a-6a56e0cfd17c",
-    specifications: JSON.stringify({
-      "Chất liệu bìa": "Da bò thật 100% nguyên tấm",
-      "Kích thước giấy": "A5 (14.8 x 21 cm)"
-    }),
-    media: [
-      { id: "md3", url: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80", type: "IMAGE", isThumbnail: true, altText: "Leather notebook", sortOrder: 1 }
-    ],
-    variants: [
-      { id: "v2_1", sku: "GIFT-NB-002-BR", name: "Sổ Tay Da Thật (Nâu Đất)", color: "Nâu Đất", price: 350000, stock: 80 }
-    ]
-  }
-};
-
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -192,10 +142,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         if (data) {
           populateFields(data);
         } else {
-          fallbackMock();
+          setErrorMsg('Không tìm thấy thông tin sản phẩm quà tặng yêu cầu.');
         }
       } catch (err) {
-        fallbackMock();
+        setErrorMsg('Không thể kết nối đến máy chủ để tải thông tin sản phẩm.');
       } finally {
         setLoading(false);
       }
@@ -269,13 +219,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         })));
       }
       if (data.variants) setVariantsList(data.variants);
-    }
-
-    function fallbackMock() {
-      const mock = MOCK_PRODUCTS[id];
-      if (mock) {
-        populateFields(mock);
-      }
     }
 
     loadProduct();

@@ -59,14 +59,16 @@ export default function CategoriesSection({ onOccasionSelect, selectedOccasion, 
     <section id="categories" className="py-6 sm:py-10 space-y-8 sm:space-y-12">
       {/* Title block */}
       <div className="text-center space-y-3 sm:space-y-4 max-w-3xl mx-auto px-3 sm:px-4">
-        <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
-          <Icon name="✨" size={10} className="animate-pulse" /> {trans(layoutCategories.badge)}
-        </span>
+        {(layoutCategories.badge || 'Chọn theo dịp lễ') && (
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] text-rose-500 bg-rose-500/10 dark:bg-rose-500/10 border border-rose-500/20">
+            <Icon name="✨" size={10} className="animate-pulse" /> {trans(layoutCategories.badge || 'Chọn theo dịp lễ')}
+          </span>
+        )}
         <h2 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-slate-800 dark:text-zinc-100 leading-tight">
-          {trans(layoutCategories.title)}
+          {trans(layoutCategories.title || 'Bộ Sưu Tập Quà Tặng Theo Dịp')}
         </h2>
         <p className="text-[11px] sm:text-xs md:text-sm text-slate-500 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed font-light">
-          {trans(layoutCategories.subtitle)}
+          {trans(layoutCategories.subtitle || 'Lựa chọn món quà hoàn hảo nhất cho những cột mốc ý nghĩa trong cuộc sống')}
         </p>
       </div>
 

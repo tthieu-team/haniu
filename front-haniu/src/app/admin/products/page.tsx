@@ -22,36 +22,6 @@ interface Product {
   includedItems?: string;
 }
 
-const MOCK_PRODUCTS: Product[] = [
-  {
-    id: "m1",
-    name: "Hộp Quà Lãng Mạn - Eternal Love Special Edition",
-    slug: "hop-qua-lang-man-eternal-love",
-    sku: "GIFT-EL-001",
-    basePrice: 590000,
-    salePrice: 490000,
-    stock: 50,
-    isFeatured: true,
-    isCustomizable: true,
-    status: "PUBLISHED",
-    category: { name: "Combo Quà Tặng" },
-    media: [{ url: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=100&auto=format&fit=crop&q=80", isThumbnail: true }]
-  },
-  {
-    id: "m2",
-    name: "Sổ Tay Da Thật Khắc Tên Cá Nhân Hóa",
-    slug: "so-tay-da-that-khac-ten",
-    sku: "GIFT-NB-002",
-    basePrice: 350000,
-    stock: 120,
-    isFeatured: true,
-    isCustomizable: true,
-    status: "PUBLISHED",
-    category: { name: "Sổ Da & Bút" },
-    media: [{ url: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=100&auto=format&fit=crop&q=80", isThumbnail: true }]
-  }
-];
-
 const getIncludedItemsCount = (jsonStr?: string) => {
   if (!jsonStr) return 0;
   try {
@@ -91,7 +61,7 @@ export default function AdminProductsPage() {
       }
     } catch (err) {
       console.error(err);
-      useProductStore.setState({ products: MOCK_PRODUCTS as any, loading: false });
+      useProductStore.setState({ products: [], loading: false });
       setHasNext(false);
       setNextCursor(null);
     }

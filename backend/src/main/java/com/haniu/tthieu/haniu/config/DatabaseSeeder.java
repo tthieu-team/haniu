@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -53,6 +54,71 @@ public class DatabaseSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        // Clean up mock products and mock orders from database
+        try {
+            List<String> mockSlugs = List.of(
+                "ly-su-khac-ten-cao-cap-haniu", 
+                "so-tay-bia-da-khac-logo", 
+                "hop-qua-hoa-hong-sap-thom-va-gau-bong", 
+                "set-qua-tang-quoc-khanh-2-9-doc-ban"
+            );
+            for (String slug : mockSlugs) {
+                productRepository.findBySlug(slug).ifPresent(product -> {
+                    log.info("Deleting mock product: {}", product.getName());
+                    UUID prodId = product.getId();
+                    
+                    // 1. Delete order items referencing variants of this product
+                    entityManager.createNativeQuery("DELETE FROM order_items WHERE product_variant_id IN (SELECT id FROM product_variants WHERE product_id = :prodId)")
+                        .setParameter("prodId", prodId)
+                        .executeUpdate();
+                        
+                    // 2. Delete cart items referencing variants of this product
+                    entityManager.createNativeQuery("DELETE FROM cart_items WHERE product_variant_id IN (SELECT id FROM product_variants WHERE product_id = :prodId)")
+                        .setParameter("prodId", prodId)
+                        .executeUpdate();
+                        
+                    // 3. Delete media
+                    entityManager.createNativeQuery("DELETE FROM product_medias WHERE product_id = :prodId")
+                        .setParameter("prodId", prodId)
+                        .executeUpdate();
+
+                    // 4. Delete attributes
+                    entityManager.createNativeQuery("DELETE FROM product_attributes WHERE product_id = :prodId")
+                        .setParameter("prodId", prodId)
+                        .executeUpdate();
+                        
+                    // 5. Delete variants
+                    entityManager.createNativeQuery("DELETE FROM product_variants WHERE product_id = :prodId")
+                        .setParameter("prodId", prodId)
+                        .executeUpdate();
+
+                    // 6. Delete reviews
+                    entityManager.createNativeQuery("DELETE FROM reviews WHERE product_id = :prodId")
+                        .setParameter("prodId", prodId)
+                        .executeUpdate();
+
+                    // 7. Delete product from occasions jointable
+                    entityManager.createNativeQuery("DELETE FROM product_occasions WHERE product_id = :prodId")
+                        .setParameter("prodId", prodId)
+                        .executeUpdate();
+
+                    // 8. Delete product from recipients jointable
+                    entityManager.createNativeQuery("DELETE FROM product_recipients WHERE product_id = :prodId")
+                        .setParameter("prodId", prodId)
+                        .executeUpdate();
+
+                    // 9. Delete the product itself (hard delete)
+                    productRepository.delete(product);
+                });
+            }
+
+            // 10. Clean up empty orders (orders that have 0 items left because they were mock orders)
+            entityManager.createNativeQuery("DELETE FROM orders WHERE id NOT IN (SELECT DISTINCT order_id FROM order_items)").executeUpdate();
+            log.info("Successfully cleaned up all mock products and their mock orders/cart references.");
+        } catch (Exception e) {
+            log.error("Failed to clean up mock products/orders: " + e.getMessage(), e);
+        }
+
         try {
             entityManager.createNativeQuery("TRUNCATE TABLE translation_caches CASCADE").executeUpdate();
             log.info(">>> [DB Check] Truncated translation_caches to clear translation cache.");
@@ -325,213 +391,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .build();
         doiTac = recipientRepository.save(doiTac);
 
-        // 6. Seed Products
-        // Product 1: Ly sứ khắc tên
-        Set<Occasion> p1Occasions = new HashSet<>(List.of(sinhNhat, nhaGiao));
-        Set<Recipient> p1Recipients = new HashSet<>(List.of(banTrai, banGai, thayCo));
-        Product p1 = Product.builder()
-                .category(lySu)
-                .brand(brand)
-                .collection(collection)
-                .occasions(p1Occasions)
-                .recipients(p1Recipients)
-                .name("Ly sứ khắc tên cao cấp Haniu")
-                .slug("ly-su-khac-ten-cao-cap-haniu")
-                .sku("LYSU-KHACTEN-01")
-                .shortDescription("Ly sứ men trắng cao cấp hỗ trợ khắc tên và in hình theo yêu cầu riêng biệt.")
-                .description("Sản phẩm được làm từ đất sét trắng chọn lọc, nung ở nhiệt độ 1300 độ C loại bỏ hoàn toàn tạp chất có hại. Công nghệ khắc laser sắc nét giúp bạn lưu giữ thông điệp và hình ảnh cá nhân hóa độc đáo trên thân cốc.")
-                .thumbnailUrl("https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=600")
-                .price(new BigDecimal("500000.00"))
-                .salePrice(new BigDecimal("100000.00"))
-                .costPrice(new BigDecimal("50000.00"))
-                .stock(100)
-                .material("Gốm sứ tráng men")
-                .color("Trắng tuyết")
-                .status(ProductStatus.PUBLISHED)
-                .isFeatured(true)
-                .isNew(true)
-                .isCustomizable(true)
-                .layoutTemplate("DEFAULT")
-                .specifications("{\"Dung tích\": \"350ml\", \"Chiều cao\": \"9.5cm\", \"Đường kính miệng\": \"8cm\"}")
-                .includedItems("{\"Cốc sứ Haniu tráng men\": \"1 chiếc\", \"Thìa inox mạ vàng\": \"1 chiếc\", \"Đế lót gỗ\": \"1 chiếc\", \"Hộp giấy quà tặng\": \"1 chiếc\"}")
-                .publishedAt(LocalDateTime.now())
-                .build();
-        p1 = productRepository.save(p1);
-
-        ProductVariant p1v1 = ProductVariant.builder()
-                .product(p1)
-                .name("Ly sứ khắc tên - 350ml")
-                .sku("LYSU-KHACTEN-01-350")
-                .price(new BigDecimal("500000.00"))
-                .salePrice(new BigDecimal("100000.00"))
-                .stock(50)
-                .isActive(true)
-                .build();
-        productVariantRepository.save(p1v1);
-
-        // Product 2: Sổ tay bìa da
-        Set<Occasion> p2Occasions = new HashSet<>(List.of(sinhNhat));
-        Set<Recipient> p2Recipients = new HashSet<>(List.of(doiTac, thayCo, boMe));
-        Product p2 = Product.builder()
-                .category(soDa)
-                .brand(brand)
-                .occasions(p2Occasions)
-                .recipients(p2Recipients)
-                .name("Sổ tay bìa da khắc logo")
-                .slug("so-tay-bia-da-khac-logo")
-                .sku("SODA-KHACLOGO-02")
-                .shortDescription("Sổ tay A5 bìa da PU cao cấp tích hợp khe cài bút và ngăn đựng card visit tiện lợi.")
-                .description("Cuốn sổ được chế tác tinh xảo với chất liệu da PU cao cấp mềm mịn, chống thấm nước tốt. Ruột sổ dùng giấy chống lóa định lượng 80gsm viết cực êm, không lem mực.")
-                .thumbnailUrl("https://images.unsplash.com/photo-1531346878377-a5be20888e57?q=80&w=600")
-                .price(new BigDecimal("250000.00"))
-                .costPrice(new BigDecimal("90000.00"))
-                .stock(200)
-                .material("Da PU, Giấy Woodfree")
-                .color("Nâu vân gỗ")
-                .status(ProductStatus.PUBLISHED)
-                .isFeatured(true)
-                .isNew(true)
-                .isCustomizable(true)
-                .layoutTemplate("DEFAULT")
-                .specifications("{\"Kích thước\": \"A5 (14.8 x 21 cm)\", \"Số trang\": \"200 trang\", \"Định lượng\": \"80gsm\"}")
-                .includedItems("{\"Sổ tay bìa da PU\": \"1 cuốn\", \"Bút ký kim loại khắc tên\": \"1 chiếc\", \"Hộp xi carton lót lụa\": \"1 chiếc\"}")
-                .publishedAt(LocalDateTime.now())
-                .build();
-        p2 = productRepository.save(p2);
-
-        ProductVariant p2v1 = ProductVariant.builder()
-                .product(p2)
-                .name("Sổ tay bìa da - Nâu vân gỗ")
-                .sku("SODA-KHACLOGO-02-BROWN")
-                .price(new BigDecimal("250000.00"))
-                .stock(100)
-                .isActive(true)
-                .build();
-        productVariantRepository.save(p2v1);
-
-        // Product 3: Hộp quà hoa sáp và gấu bông
-        Set<Occasion> p3Occasions = new HashSet<>(List.of(leTinhNhan, sinhNhat));
-        Set<Recipient> p3Recipients = new HashSet<>(List.of(banGai));
-        Product p3 = Product.builder()
-                .category(hoaSap)
-                .brand(brand)
-                .occasions(p3Occasions)
-                .recipients(p3Recipients)
-                .name("Hộp quà hoa hồng sáp thơm và gấu bông")
-                .slug("hop-qua-hoa-hong-sap-thom-va-gau-bong")
-                .sku("HOASAP-GAUBONG-03")
-                .shortDescription("Hộp quà tặng trái tim chứa hoa sáp đỏ và chú gấu bông nhỏ ngọt ngào.")
-                .description("Những bông hoa hồng được làm tỉ mỉ từ sáp thơm tự nhiên, mang hương thơm dịu nhẹ thoang thoảng và độ bền màu vĩnh cửu. Đây là món quà tuyệt vời nhất dành tặng nửa kia trong các dịp kỷ niệm.")
-                .thumbnailUrl("https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600")
-                .price(new BigDecimal("350000.00"))
-                .salePrice(new BigDecimal("299000.00"))
-                .costPrice(new BigDecimal("120000.00"))
-                .stock(80)
-                .material("Sáp tự nhiên, Hộp bìa cứng")
-                .color("Đỏ nhung")
-                .status(ProductStatus.PUBLISHED)
-                .isFeatured(true)
-                .isNew(false)
-                .isCustomizable(false)
-                .layoutTemplate("DEFAULT")
-                .specifications("{\"Kích thước hộp\": \"25x25x12cm\", \"Số lượng hoa\": \"19 bông\", \"Độ bền hương\": \"Up to 3 years\"}")
-                .includedItems("{\"Hộp đựng bìa cứng trái tim\": \"1 chiếc\", \"Hoa hồng sáp thơm\": \"19 bông\", \"Gấu bông nhỏ\": \"1 chiếc\", \"Đèn Led đom đóm\": \"1 bộ\"}")
-                .publishedAt(LocalDateTime.now())
-                .build();
-        p3 = productRepository.save(p3);
-
-        ProductVariant p3v1 = ProductVariant.builder()
-                .product(p3)
-                .name("Hộp quà hoa sáp đỏ - Gấu nâu")
-                .sku("HOASAP-GAUBONG-03-RED")
-                .price(new BigDecimal("350000.00"))
-                .salePrice(new BigDecimal("299000.00"))
-                .stock(40)
-                .isActive(true)
-                .build();
-        productVariantRepository.save(p3v1);
-
-        // Product 4: Set quà tặng Quốc Khánh 2-9
-        Set<Occasion> p4Occasions = new HashSet<>(List.of(quocKhanh));
-        Set<Recipient> p4Recipients = new HashSet<>(List.of(doiTac, boMe));
-        Product p4 = Product.builder()
-                .category(comboQua)
-                .brand(brand)
-                .collection(collection)
-                .occasions(p4Occasions)
-                .recipients(p4Recipients)
-                .name("Set quà tặng Quốc Khánh 2-9 độc bản")
-                .slug("set-qua-tang-quoc-khanh-2-9-doc-ban")
-                .sku("COMBO-QUOCKHANH-04")
-                .shortDescription("Combo quà tặng gỗ đặc biệt in hình bản đồ Việt Nam và cờ đỏ sao vàng.")
-                .description("Hộp quà tặng gỗ thông cao cấp chứa một chiếc bình giữ nhiệt vỏ tre khắc bản đồ hình chữ S, một chiếc bút gỗ khắc tên và một cuốn sổ bìa gỗ độc đáo. Thể hiện niềm tự hào dân tộc và lòng yêu nước sâu sắc.")
-                .thumbnailUrl("https://images.unsplash.com/photo-1607344645866-009c320c5ab8?q=80&w=600")
-                .price(new BigDecimal("500000.00"))
-                .salePrice(new BigDecimal("100000.00"))
-                .costPrice(new BigDecimal("180000.00"))
-                .stock(50)
-                .material("Gỗ thông tự nhiên, Tre, Inox 304")
-                .color("Vàng tre tự nhiên")
-                .status(ProductStatus.PUBLISHED)
-                .isFeatured(true)
-                .isNew(true)
-                .isCustomizable(true)
-                .layoutTemplate("DEFAULT")
-                .specifications("{\"Hộp gỗ\": \"30x22x10cm\", \"Bình tre\": \"500ml\", \"Sổ gỗ\": \"A5\"}")
-                .includedItems("{\"Hộp gỗ thông khắc laser\": \"1 chiếc\", \"Bình giữ nhiệt vỏ tre\": \"1 chiếc\", \"Sổ tay gỗ cao cấp\": \"1 cuốn\", \"Bút gỗ tre ký tên\": \"1 chiếc\"}")
-                .publishedAt(LocalDateTime.now())
-                .build();
-        p4 = productRepository.save(p4);
-
-        ProductVariant p4v1 = ProductVariant.builder()
-                .product(p4)
-                .name("Set quà tặng Quốc Khánh 2-9 - Tiêu Chuẩn")
-                .sku("COMBO-QUOCKHANH-04-STD")
-                .price(new BigDecimal("500000.00"))
-                .salePrice(new BigDecimal("100000.00"))
-                .stock(30)
-                .isActive(true)
-                .build();
-        productVariantRepository.save(p4v1);
-
-        log.info("Database successfully seeded with standard Haniu Gift Shop catalog!");
+        // 6. Seed Products (Removed mock seeding to allow clean database)
+        log.info("Database standard catalog seeding step: skipped mock products.");
     }
 
     private void updatePricesForExistingProducts() {
-        productRepository.findBySlug("ly-su-khac-ten-cao-cap-haniu").ifPresent(p1 -> {
-            p1.setPrice(new BigDecimal("500000.00"));
-            p1.setSalePrice(new BigDecimal("100000.00"));
-            p1.setIncludedItems("{\"Cốc sứ Haniu tráng men\": \"1 chiếc\", \"Thìa inox mạ vàng\": \"1 chiếc\", \"Đế lót gỗ\": \"1 chiếc\", \"Hộp giấy quà tặng\": \"1 chiếc\"}");
-            productRepository.save(p1);
-            productVariantRepository.findByProductId(p1.getId()).forEach(v -> {
-                v.setPrice(new BigDecimal("500000.00"));
-                v.setSalePrice(new BigDecimal("100000.00"));
-                productVariantRepository.save(v);
-            });
-        });
-
-        productRepository.findBySlug("so-tay-bia-da-khac-logo").ifPresent(p2 -> {
-            p2.setIncludedItems("{\"Sổ tay bìa da PU\": \"1 cuốn\", \"Bút ký kim loại khắc tên\": \"1 chiếc\", \"Hộp xi carton lót lụa\": \"1 chiếc\"}");
-            productRepository.save(p2);
-        });
-
-        productRepository.findBySlug("hop-qua-hoa-hong-sap-thom-va-gau-bong").ifPresent(p3 -> {
-            p3.setIncludedItems("{\"Hộp đựng bìa cứng trái tim\": \"1 chiếc\", \"Hoa hồng sáp thơm\": \"19 bông\", \"Gấu bông nhỏ\": \"1 chiếc\", \"Đèn Led đom đóm\": \"1 bộ\"}");
-            productRepository.save(p3);
-        });
-
-        productRepository.findBySlug("set-qua-tang-quoc-khanh-2-9-doc-ban").ifPresent(p4 -> {
-            p4.setPrice(new BigDecimal("500000.00"));
-            p4.setSalePrice(new BigDecimal("100000.00"));
-            p4.setIncludedItems("{\"Hộp gỗ thông khắc laser\": \"1 chiếc\", \"Bình giữ nhiệt vỏ tre\": \"1 chiếc\", \"Sổ tay gỗ cao cấp\": \"1 cuốn\", \"Bút gỗ tre ký tên\": \"1 chiếc\"}");
-            productRepository.save(p4);
-            productVariantRepository.findByProductId(p4.getId()).forEach(v -> {
-                v.setPrice(new BigDecimal("500000.00"));
-                v.setSalePrice(new BigDecimal("100000.00"));
-                productVariantRepository.save(v);
-            });
-        });
-
         systemConfigRepository.findByConfigKey("HOME_LAYOUT").ifPresent(config -> {
             String val = config.getConfigValue();
             if (val != null) {

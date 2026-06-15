@@ -59,11 +59,10 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
           return (
             <div
               key={slide.id || idx}
-              className={`absolute inset-0 w-full h-full transition-all duration-1000 ease-in-out ${
-                isActive
-                  ? 'opacity-100 scale-100 z-10 pointer-events-auto visible'
-                  : 'opacity-0 scale-[1.02] z-0 pointer-events-none invisible'
-              }`}
+              className={`absolute inset-0 w-full h-full transition-all duration-1000 ease-in-out ${isActive
+                ? 'opacity-100 scale-100 z-10 pointer-events-auto visible'
+                : 'opacity-0 scale-[1.02] z-0 pointer-events-none invisible'
+                }`}
             >
               {/* Background Image Container */}
               <div className="absolute inset-0">
@@ -80,44 +79,67 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(253,244,245,0.4),transparent_60%)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(254,243,199,0.2),transparent_50%)]" />
 
+                {/* Base dark mode screen dimmer to darken bright images globally in dark mode */}
+                <div className="absolute inset-0 bg-transparent dark:bg-black/45 z-[1]" />
+
                 {/* Gradient direction based on text alignment to protect readability */}
-                <div className={`absolute inset-0 bg-[#FAF5F2]/92 dark:bg-zinc-950/90 sm:bg-transparent dark:sm:bg-transparent ${
-                  slide.textLayout === 'left'
-                    ? 'sm:bg-gradient-to-r sm:from-[#FAF5F2] sm:via-[#FAF5F2]/95 sm:to-transparent dark:sm:from-zinc-950/80 dark:sm:via-zinc-950/40 dark:sm:to-transparent'
-                    : slide.textLayout === 'right'
-                    ? 'sm:bg-gradient-to-l sm:from-[#FAF5F2] sm:via-[#FAF5F2]/95 sm:to-transparent dark:sm:from-zinc-950/80 dark:sm:via-zinc-950/40 dark:sm:to-transparent'
-                    : 'bg-[#FAF5F2]/85 sm:bg-[#FAF5F2]/75 dark:bg-zinc-950/75 dark:sm:bg-zinc-950/50'
-                }`} />
+                <div className={`absolute inset-0 z-[2] bg-[#FAF5F2]/15 dark:bg-zinc-950/20 sm:bg-transparent ${slide.textLayout === 'left'
+                  ? 'sm:bg-gradient-to-r sm:from-[#FAF5F2]/35 sm:via-[#FAF5F2]/10 sm:to-transparent dark:sm:from-zinc-950/80 dark:sm:via-zinc-950/45 dark:sm:to-transparent'
+                  : slide.textLayout === 'right'
+                    ? 'sm:bg-gradient-to-l sm:from-[#FAF5F2]/35 sm:via-[#FAF5F2]/10 sm:to-transparent dark:sm:from-zinc-950/80 dark:sm:via-zinc-950/45 dark:sm:to-transparent'
+                    : 'bg-[#FAF5F2]/15 sm:bg-[#FAF5F2]/10 dark:bg-zinc-950/40 dark:sm:bg-zinc-950/30'
+                  }`} />
               </div>
 
               {/* Foreground content grid */}
               <div className="relative z-10 h-full max-w-screen-2xl mx-auto px-16 sm:px-20 lg:px-28 xl:px-36 2xl:px-44 w-full flex items-center">
-                <div className={`w-full flex justify-center ${
-                  slide.textLayout === 'left'
-                    ? 'sm:justify-start'
-                    : slide.textLayout === 'right'
+                <div className={`w-full flex justify-center ${slide.textLayout === 'left'
+                  ? 'sm:justify-start'
+                  : slide.textLayout === 'right'
                     ? 'sm:justify-end'
                     : 'sm:justify-center'
-                }`}>
+                  }`}>
                   {/* Content card */}
-                  <div className={`relative max-w-[520px] space-y-5 md:space-y-6 text-center ${
-                    slide.textLayout === 'left'
-                      ? 'sm:text-left'
-                      : slide.textLayout === 'right'
+                  <div className={`relative max-w-[540px] space-y-5 md:space-y-6 text-center p-8 sm:p-10 md:p-12 rounded-3xl bg-white/25 dark:bg-black/35 backdrop-blur-2xl backdrop-saturate-[1.6] shadow-[0_20px_50px_rgba(179,146,95,0.12)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] ${slide.textLayout === 'left'
+                    ? 'sm:text-left'
+                    : slide.textLayout === 'right'
                       ? 'sm:text-right'
                       : 'sm:text-center'
-                  }`}>
+                    }`}>
+                    {/* Floating stamp in the top-right corner of the card to prevent overlap */}
+                    {slide.circleBadgeText && (
+                      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 pointer-events-none hidden sm:block drop-shadow-[0_2px_4px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                          {/* Rotating SVG */}
+                          <svg viewBox="0 0 100 100" className="w-full h-full animate-spin-slow">
+                            <path
+                              id={`circlePath-${idx}`}
+                              d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
+                              fill="transparent"
+                            />
+                            <text className="text-[8.5px] font-extrabold fill-[#B3925F] dark:fill-[#E8D3B3] tracking-[0.15em] uppercase font-sans">
+                              <textPath href={`#circlePath-${idx}`} startOffset="0%">
+                                {translate(slide.circleBadgeText)}
+                              </textPath>
+                            </text>
+                          </svg>
+                          {/* Central Heart */}
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Icon name="heart" size={10} className="fill-[#B3925F] text-[#B3925F] dark:fill-[#E8D3B3] dark:text-[#E8D3B3]" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     {/* Badge */}
                     {slide.badgeText && (
-                      <div className={`flex justify-center ${
-                        slide.textLayout === 'left'
-                          ? 'sm:justify-start'
-                          : slide.textLayout === 'right'
+                      <div className={`flex justify-center ${slide.textLayout === 'left'
+                        ? 'sm:justify-start'
+                        : slide.textLayout === 'right'
                           ? 'sm:justify-end'
                           : 'sm:justify-center'
-                      }`}>
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEBEA] dark:bg-rose-950/40 border border-[#F5D0CD] dark:border-rose-900/30 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#C67B71] dark:text-rose-300 shadow-xs">
-                          <Icon name="heart" size={10} className="fill-[#C67B71] text-[#C67B71] dark:fill-rose-300 dark:text-rose-300" />
+                        }`}>
+                        <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11.5px] font-extrabold uppercase tracking-[0.25em] text-[#B3925F] dark:text-[#E8D3B3] drop-shadow-[0_1px_3px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
+                          <Icon name="heart" size={11} className="fill-[#B3925F] text-[#B3925F] dark:fill-[#E8D3B3] dark:text-[#E8D3B3] animate-pulse" />
                           {translate(slide.badgeText)}
                         </span>
                       </div>
@@ -125,63 +147,37 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
 
                     {/* Heading Typography combination */}
                     <div className="relative">
-                      <h1 className="leading-tight sm:leading-none text-[#3A2312] dark:text-zinc-100 select-none">
+                      <h1 className="leading-tight sm:leading-none text-[#2C2520] dark:text-white select-none drop-shadow-[0_2px_10px_rgba(255,255,255,0.95)] dark:drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
                         {slide.scriptTitle && (
-                          <span className="block font-script text-3xl sm:text-5xl md:text-6xl text-[#C67B71] dark:text-rose-400 italic font-normal tracking-wide leading-normal mb-1 sm:mb-[-0.1em] ml-1">
+                          <span className="block font-script text-3xl sm:text-5xl md:text-6xl text-[#B3925F] dark:text-[#E8D3B3] italic font-semibold tracking-wide leading-normal mb-1 sm:mb-[-0.1em] ml-1 drop-shadow-[0_1.5px_4px_rgba(255,255,255,0.6)] dark:drop-shadow-[0_1.5px_4px_rgba(0,0,0,0.6)]">
                             {translate(slide.scriptTitle)}
                           </span>
                         )}
                         {slide.boldTitle && (
-                          <span className="block font-serif text-3xl sm:text-6xl md:text-7xl font-bold uppercase tracking-[0.05em] leading-tight mt-1">
+                          <span className="block font-serif text-3xl sm:text-6xl md:text-7xl font-extrabold uppercase tracking-[0.05em] leading-tight mt-1 text-[#2C2520] dark:text-white">
                             {translate(slide.boldTitle)}
                           </span>
                         )}
                       </h1>
-
-                      {/* Floating stamp inside text box to anchor the design */}
-                      {slide.circleBadgeText && (
-                        <div className="absolute -top-6 right-2 sm:-right-8 md:-right-12 z-20 pointer-events-none hidden sm:block">
-                          <div className="relative w-24 h-24 sm:w-26 sm:h-26 flex items-center justify-center">
-                            {/* Rotating SVG */}
-                            <svg viewBox="0 0 100 100" className="w-full h-full animate-spin-slow">
-                              <path
-                                id={`circlePath-${idx}`}
-                                d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
-                                fill="transparent"
-                              />
-                              <text className="text-[7px] font-bold fill-[#C67B71]/70 tracking-[0.14em] uppercase font-sans">
-                                <textPath href={`#circlePath-${idx}`} startOffset="0%">
-                                  {translate(slide.circleBadgeText)}
-                                </textPath>
-                              </text>
-                            </svg>
-                            {/* Central Heart */}
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-[#C67B71] text-xs">❤️</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     {/* Subtitle / Message */}
-                    <p className="text-xs sm:text-sm md:text-base text-[#5E4E43] dark:text-zinc-300 font-light leading-relaxed max-w-sm sm:max-w-md mx-auto sm:mx-0">
+                    <p className="text-xs sm:text-sm md:text-base text-[#5F554E] dark:text-[#E2DED9] font-medium leading-relaxed max-w-sm sm:max-w-md mx-auto sm:mx-0 drop-shadow-[0_1.5px_6px_rgba(255,255,255,0.95)] dark:drop-shadow-[0_1.5px_6px_rgba(0,0,0,0.95)]">
                       {translate(slide.subtitle)}
                     </p>
 
                     {/* Call to Action */}
-                    <div className={`pt-2 flex justify-center ${
-                      slide.textLayout === 'left'
-                        ? 'sm:justify-start'
-                        : slide.textLayout === 'right'
+                    <div className={`pt-2 flex justify-center ${slide.textLayout === 'left'
+                      ? 'sm:justify-start'
+                      : slide.textLayout === 'right'
                         ? 'sm:justify-end'
                         : 'sm:justify-center'
-                    }`}>
+                      }`}>
                       <a
                         href={slide.ctaHref}
-                        className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#E07A7C] to-[#C67B71] px-7 py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#C67B71]/25 hover:shadow-xl hover:shadow-[#C67B71]/40 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 transition-all duration-300 cursor-pointer"
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-[#B3925F] text-[#B3925F] bg-transparent dark:border-[#E8D3B3] dark:text-[#E8D3B3] hover:bg-[#B3925F] hover:text-white dark:hover:bg-[#E8D3B3] dark:hover:text-[#1A1510] px-8 py-3.5 text-sm sm:text-base font-extrabold shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-[1.04] hover:-translate-y-0.5 active:scale-95"
                       >
-                        <Icon name="gift" size={13} className="text-white" />
+                        <Icon name="gift" size={15} className="text-current" />
                         <span>{translate(slide.ctaText)}</span>
                       </a>
                     </div>
@@ -191,19 +187,18 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
 
               {/* Floating organic card tag in the bottom corner */}
               {slide.cardTitle && (
-                <div className={`absolute bottom-6 sm:bottom-8 z-20 hidden md:flex flex-col items-center justify-center bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xs p-4 sm:p-5 rounded-[22px] border border-dashed border-[#F5D0CD] dark:border-zinc-800 shadow-md max-w-[190px] transition-all duration-500 hover:rotate-0 hover:scale-105 ${
-                  slide.textLayout === 'right'
-                    ? 'left-8 sm:left-12 -rotate-3'
-                    : 'right-8 sm:right-12 rotate-3'
-                }`}>
+                <div className={`absolute bottom-6 sm:bottom-8 z-20 hidden md:flex flex-col items-center justify-center bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xs p-4 sm:p-5 rounded-[22px] border border-dashed border-[#F5D0CD] dark:border-zinc-800 shadow-md max-w-[190px] transition-all duration-500 hover:rotate-0 hover:scale-105 ${slide.textLayout === 'right'
+                  ? 'left-8 sm:left-12 -rotate-3'
+                  : 'right-8 sm:right-12 rotate-3'
+                  }`}>
                   <div className="w-9 h-9 rounded-full bg-[#FCEBEA] dark:bg-rose-950/40 flex items-center justify-center mb-2">
-                    <Icon name="gift" size={16} className="text-[#C67B71] dark:text-rose-400" />
+                    <Icon name="gift" size={16} className="text-[#A64F43] dark:text-rose-300" />
                   </div>
                   <div className="text-center">
-                    <h4 className="text-[10px] font-bold text-[#3A2312] dark:text-zinc-200 tracking-wider uppercase mb-0.5">
+                    <h4 className="text-[10px] font-bold text-[#1C0F06] dark:text-white tracking-wider uppercase mb-0.5">
                       {translate(slide.cardTitle)}
                     </h4>
-                    <p className="font-script text-xs sm:text-sm text-[#C67B71] dark:text-rose-400 leading-tight">
+                    <p className="font-script text-xs sm:text-sm text-[#A64F43] dark:text-rose-350 leading-tight">
                       {translate(slide.cardSubtitle)}
                     </p>
                   </div>
@@ -219,14 +214,14 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
         <>
           <button
             onClick={handlePrev}
-            className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/40 dark:bg-zinc-900/40 hover:bg-white/80 dark:hover:bg-zinc-800/80 border border-white/40 dark:border-zinc-700/40 text-[#C67B71] dark:text-rose-400 backdrop-blur-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 shadow-md cursor-pointer hover:scale-105 active:scale-95"
+            className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/40 dark:bg-zinc-900/40 hover:bg-white/80 dark:hover:bg-zinc-800/80 border border-white/40 dark:border-zinc-700/40 text-[#A64F43] dark:text-rose-300 backdrop-blur-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 shadow-md cursor-pointer hover:scale-105 active:scale-95"
             aria-label="Previous slide"
           >
             <Icon name="arrow-left" size={16} />
           </button>
           <button
             onClick={handleNext}
-            className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/40 dark:bg-zinc-900/40 hover:bg-white/80 dark:hover:bg-zinc-800/80 border border-white/40 dark:border-zinc-700/40 text-[#C67B71] dark:text-rose-400 backdrop-blur-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 shadow-md cursor-pointer hover:scale-105 active:scale-95"
+            className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/40 dark:bg-zinc-900/40 hover:bg-white/80 dark:hover:bg-zinc-800/80 border border-white/40 dark:border-zinc-700/40 text-[#A64F43] dark:text-rose-300 backdrop-blur-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 shadow-md cursor-pointer hover:scale-105 active:scale-95"
             aria-label="Next slide"
           >
             <Icon name="arrow-right" size={16} />
@@ -241,11 +236,10 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`h-2 rounded-full cursor-pointer transition-all duration-350 ${
-                idx === currentIndex
-                  ? 'bg-[#C67B71] dark:bg-rose-400 w-6'
-                  : 'bg-[#C67B71]/40 dark:bg-rose-400/30 w-2 hover:bg-[#C67B71]/70 dark:hover:bg-rose-400/60'
-              }`}
+              className={`h-2 rounded-full cursor-pointer transition-all duration-350 ${idx === currentIndex
+                ? 'bg-[#C67B71] dark:bg-rose-400 w-6'
+                : 'bg-[#C67B71]/40 dark:bg-rose-400/30 w-2 hover:bg-[#C67B71]/70 dark:hover:bg-rose-400/60'
+                }`}
               aria-label={`Go to slide ${idx + 1}`}
             />
           ))}

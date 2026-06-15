@@ -98,11 +98,10 @@ export default function BannerCard({ slide, isMain }: BannerCardProps) {
                 </span>
               )}
               {slide.boldTitle && (
-                <span className={`block font-serif font-bold uppercase tracking-wide leading-snug ${
-                  isMain
+                <span className={`block font-serif font-bold uppercase tracking-wide leading-snug ${isMain
                     ? 'text-2xl sm:text-3xl md:text-4xl'
                     : 'text-lg sm:text-xl md:text-2xl'
-                }`}>
+                  }`}>
                   {slide.boldTitle}
                 </span>
               )}

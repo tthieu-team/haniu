@@ -850,9 +850,20 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
           const res = await systemConfigService.getConfig('HOME_LAYOUT');
           if (res && res.configValue) {
             const parsed = typeof res.configValue === 'string' ? JSON.parse(res.configValue) : res.configValue;
+            // Deep merge: ensure each section config preserves defaults for missing fields
+            const deepMerged: Record<string, any> = {};
+            for (const key of Object.keys(parsed)) {
+              const defaultVal = (DEFAULT_STATE as any)[key];
+              const parsedVal = parsed[key];
+              if (defaultVal && typeof defaultVal === 'object' && !Array.isArray(defaultVal) && typeof parsedVal === 'object' && !Array.isArray(parsedVal)) {
+                deepMerged[key] = { ...defaultVal, ...parsedVal };
+              } else {
+                deepMerged[key] = parsedVal;
+              }
+            }
             set((state) => ({
               ...state,
-              ...parsed,
+              ...deepMerged,
               isLoading: false,
             }));
           } else {
