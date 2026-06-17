@@ -90,7 +90,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
 
             {/* === Dropdown: Sản phẩm theo dịp lễ === */}
             {isShopMenu && activeDropdown === 'shop' && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 z-50 w-[560px] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl grid grid-cols-2 gap-6 animate-fade-in text-slate-800 dark:text-zinc-100 before:absolute before:-top-2 before:left-0 before:right-0 before:h-2 before:content-['']">
+              <div className="absolute top-full left-0 mt-1.5 z-50 w-[560px] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl grid grid-cols-2 gap-6 animate-fade-in text-slate-800 dark:text-zinc-100 before:absolute before:-top-2 before:left-0 before:right-0 before:h-2 before:content-['']">
                 {/* Left: Occasions list */}
                 <div className="space-y-3">
                   <span className="text-[10px] font-extrabold tracking-widest text-rose-500 uppercase flex items-center gap-1">
@@ -194,7 +194,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
 
             {/* === Dropdown: Bộ sưu tập === */}
             {isCollectionsMenu && activeDropdown === 'collections' && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 z-50 w-[560px] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl grid grid-cols-2 gap-6 animate-fade-in text-slate-800 dark:text-zinc-100 before:absolute before:-top-2 before:left-0 before:right-0 before:h-2 before:content-['']">
+              <div className="absolute top-full left-0 mt-1.5 z-50 w-[560px] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl grid grid-cols-2 gap-6 animate-fade-in text-slate-800 dark:text-zinc-100 before:absolute before:-top-2 before:left-0 before:right-0 before:h-2 before:content-['']">
                 {/* Left: Collections list */}
                 <div className="space-y-3">
                   <span className="text-[10px] font-extrabold tracking-widest text-rose-500 uppercase flex items-center gap-1">

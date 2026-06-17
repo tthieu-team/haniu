@@ -53,6 +53,7 @@ public class CouponServiceImpl implements CouponService {
         coupon.setStartDate(couponDetails.getStartDate());
         coupon.setEndDate(couponDetails.getEndDate());
         coupon.setActive(couponDetails.isActive());
+        coupon.setShowInBanner(couponDetails.isShowInBanner());
 
         return couponRepository.save(coupon);
     }

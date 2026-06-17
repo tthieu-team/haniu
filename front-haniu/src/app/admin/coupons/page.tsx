@@ -17,7 +17,8 @@ export default function AdminCouponsPage() {
     minOrderValue: 0,
     maxDiscount: 0,
     usageLimit: 100,
-    active: true
+    active: true,
+    showInBanner: false
   });
 
   const loadCoupons = async () => {
@@ -46,7 +47,10 @@ export default function AdminCouponsPage() {
   };
 
   const handleEdit = (coupon: CouponPayload) => {
-    setCurrentCoupon(coupon);
+    setCurrentCoupon({
+      ...coupon,
+      showInBanner: coupon.showInBanner || false
+    });
     setIsEditing(true);
   };
 
@@ -70,7 +74,8 @@ export default function AdminCouponsPage() {
       minOrderValue: 0,
       maxDiscount: 0,
       usageLimit: 100,
-      active: true
+      active: true,
+      showInBanner: false
     });
     setIsEditing(true);
   };
@@ -172,17 +177,31 @@ export default function AdminCouponsPage() {
                 className="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 text-slate-700 dark:text-white"
               />
             </div>
-            <div className="flex items-center gap-2 pt-6">
-              <input
-                type="checkbox"
-                id="active"
-                checked={currentCoupon.active}
-                onChange={e => setCurrentCoupon({ ...currentCoupon, active: e.target.checked })}
-                className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
-              />
-              <label htmlFor="active" className="text-xs text-slate-700 dark:text-zinc-300 font-semibold">
-                Kích hoạt hoạt động
-              </label>
+            <div className="flex flex-col sm:flex-row gap-4 pt-6">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="active"
+                  checked={currentCoupon.active}
+                  onChange={e => setCurrentCoupon({ ...currentCoupon, active: e.target.checked })}
+                  className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
+                />
+                <label htmlFor="active" className="text-xs text-slate-700 dark:text-zinc-300 font-semibold">
+                  Kích hoạt hoạt động
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="showInBanner"
+                  checked={currentCoupon.showInBanner || false}
+                  onChange={e => setCurrentCoupon({ ...currentCoupon, showInBanner: e.target.checked })}
+                  className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
+                />
+                <label htmlFor="showInBanner" className="text-xs text-slate-700 dark:text-zinc-300 font-semibold text-rose-550">
+                  Hiển thị ở Banner / Popup
+                </label>
+              </div>
             </div>
             <div className="md:col-span-2 flex justify-end gap-2 pt-4">
               <button
@@ -219,8 +238,8 @@ export default function AdminCouponsPage() {
                   <th className="p-4">Loại giảm</th>
                   <th className="p-4">Giá trị giảm</th>
                   <th className="p-4">Đơn tối thiểu</th>
-                  <th className="p-4">Giới hạn sử dụng</th>
                   <th className="p-4">Trạng thái</th>
+                  <th className="p-4">Hiện Popup Banner</th>
                   <th className="p-4 text-center">Hành động</th>
                 </tr>
               </thead>
@@ -236,12 +255,18 @@ export default function AdminCouponsPage() {
                         : `${coupon.discountValue.toLocaleString()}đ`}
                     </td>
                     <td className="p-4">{(coupon.minOrderValue || 0).toLocaleString()}đ</td>
-                    <td className="p-4">{coupon.usageLimit || 'Không giới hạn'}</td>
                     <td className="p-4">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                         coupon.active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'
                       }`}>
                         {coupon.active ? 'Đang chạy' : 'Tạm dừng'}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        coupon.showInBanner ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {coupon.showInBanner ? 'Hiển thị' : 'Ẩn'}
                       </span>
                     </td>
                     <td className="p-4 text-center space-x-2">

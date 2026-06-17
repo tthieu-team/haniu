@@ -190,6 +190,19 @@ function CheckoutForm() {
         ...formData
       });
 
+      if (formData.couponCode && typeof window !== 'undefined') {
+        try {
+          const used = localStorage.getItem('haniu_used_coupons');
+          const usedList = used ? JSON.parse(used) : [];
+          if (!usedList.includes(formData.couponCode)) {
+            usedList.push(formData.couponCode);
+            localStorage.setItem('haniu_used_coupons', JSON.stringify(usedList));
+          }
+        } catch (e) {
+          console.error('Lỗi khi lưu mã giảm giá đã dùng:', e);
+        }
+      }
+
       clearCartState();
 
       if (formData.paymentMethod === 'COD') {

@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { Suspense } from 'react';
 import { useHomeLayoutStore, DEFAULT_STATE } from '@/store/homeLayout';
 import WelcomeSplash from '@/components/common/WelcomeSplash';
+import PromoPopup from '@/components/common/PromoPopup';
 import ScrollToTop from '@/components/common/ScrollToTop';
 
 export default function SiteLayout({
@@ -60,6 +61,7 @@ export default function SiteLayout({
     <div className="flex flex-col min-h-screen">
       <ScrollToTop />
       <WelcomeSplash />
+      <PromoPopup />
       <Suspense fallback={<div className="h-20 bg-white dark:bg-zinc-950" />} >
         <Header />
       </Suspense>

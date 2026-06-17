@@ -24,6 +24,7 @@ const normalizeCoupon = (c: any): CouponPayload => {
     ...c,
     active: activeVal,
     isActive: activeVal,
+    showInBanner: c.showInBanner !== undefined ? c.showInBanner : false,
   };
 };
 
@@ -33,6 +34,7 @@ const preparePayload = (payload: CouponPayload): CouponPayload => {
     ...payload,
     active: activeVal,
     isActive: activeVal,
+    showInBanner: payload.showInBanner !== undefined ? payload.showInBanner : false,
   };
 };
 
@@ -72,6 +74,15 @@ export const useCouponStore = create<CouponState>((set, get) => ({
   applyCoupon: async (code, subtotal) => {
     set({ loading: true, error: null });
     try {
+      if (typeof window !== 'undefined') {
+        const used = localStorage.getItem('haniu_used_coupons');
+        const usedList = used ? JSON.parse(used) : [];
+        if (usedList.includes(code)) {
+          set({ error: 'Mã giảm giá này đã được bạn sử dụng rồi', loading: false });
+          return null;
+        }
+      }
+
       const coupon = await couponService.getCouponByCode(code);
       const normalized = normalizeCoupon(coupon);
       if (!normalized || !normalized.active) {

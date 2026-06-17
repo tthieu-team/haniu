@@ -14,6 +14,7 @@ export interface CouponPayload {
   endDate?: string;
   active: boolean;
   isActive?: boolean;
+  showInBanner?: boolean;
 }
 
 export const couponService = {

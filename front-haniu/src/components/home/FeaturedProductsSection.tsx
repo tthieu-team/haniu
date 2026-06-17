@@ -138,7 +138,7 @@ export default function FeaturedProductsSection({
               placeholder={t('home.products.search_placeholder')}
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              className="w-full pl-10 pr-9 py-3 sm:pl-12 sm:pr-10 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/80 focus:outline-none focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500 dark:border-zinc-800 dark:bg-zinc-950/40 dark:focus:ring-rose-500/5 dark:focus:border-rose-500 text-[11px] sm:text-xs md:text-sm shadow-xs transition-all duration-300 text-slate-800 dark:text-zinc-100"
+              className="w-full pl-10 pr-9 py-3 sm:pl-12 sm:pr-10 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/80 focus:outline-none focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500 dark:border-zinc-800 dark:bg-zinc-950/40 dark:focus:ring-rose-500/5 dark:focus:border-rose-500 text-base md:text-sm shadow-xs transition-all duration-300 text-slate-800 dark:text-zinc-100"
             />
             <span className="absolute left-3.5 top-[13px] sm:left-4.5 sm:top-[17px] text-slate-400 dark:text-zinc-500 transition-colors group-focus-within:text-rose-500">
               <Icon name="Search" size={16} />

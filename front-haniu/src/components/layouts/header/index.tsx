@@ -209,9 +209,9 @@ export default function Header() {
 
       <header
         className={`w-full transition-all duration-300 relative z-50 ${isScrolled
-            ? 'bg-white/90 dark:bg-zinc-950/90 shadow-md backdrop-blur-md border-b border-slate-200/60 dark:border-zinc-900/80 py-2.5 text-slate-800 dark:text-zinc-100'
-            : `bg-transparent py-3.5 text-slate-800 dark:text-zinc-100 border-b ${isHome ? 'border-transparent' : 'border-slate-200/50 dark:border-zinc-900/40'
-            }`
+          ? 'bg-white/90 dark:bg-zinc-950/90 shadow-md backdrop-blur-md border-b border-slate-200/60 dark:border-zinc-900/80 py-2.5 text-slate-800 dark:text-zinc-100'
+          : `bg-transparent py-3.5 text-slate-800 dark:text-zinc-100 border-b ${isHome ? 'border-transparent' : 'border-slate-200/50 dark:border-zinc-900/40'
+          }`
           }`}
       >
         {/* Mobile Search Overlay (Beautiful animation and search suggestions) */}
@@ -223,7 +223,7 @@ export default function Header() {
               <Icon name="search" size={16} className="text-slate-400 shrink-0" />
               <input
                 type="text"
-                placeholder={trans("Tìm quà tặng (VD: ly sứ khắc tên...)")}
+                placeholder={trans("Tìm quà tặng")}
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
                 autoFocus
@@ -315,7 +315,7 @@ export default function Header() {
               <Icon name="search" size={13} className="absolute left-3 text-slate-400 dark:text-zinc-500 pointer-events-none" />
               <input
                 type="text"
-                placeholder={trans("Tìm quà tặng (VD: ly sứ khắc tên...)")}
+                placeholder={trans("Tìm quà tặng")}
                 value={searchVal}
                 onChange={(e) => {
                   setSearchVal(e.target.value);
@@ -374,7 +374,7 @@ export default function Header() {
                                   src={getFullImageUrl(product.thumbnailUrl || product.media?.find((m: any) => m.isThumbnail)?.url || product.media?.[0]?.url || 'https://placehold.co/100')}
                                   alt={product.name}
                                   className="w-full h-full object-cover"
-                                  />
+                                />
                                 {isOutOfStock && (
                                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[7px] text-white font-bold uppercase">
                                     {trans("Hết hàng")}

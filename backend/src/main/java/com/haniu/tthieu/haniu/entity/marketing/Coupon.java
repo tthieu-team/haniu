@@ -66,6 +66,10 @@ public class Coupon {
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private boolean isActive = true;
+ 
+    @Column(name = "show_in_banner", nullable = false)
+    @Builder.Default
+    private boolean showInBanner = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
