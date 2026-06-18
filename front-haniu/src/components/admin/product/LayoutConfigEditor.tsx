@@ -196,7 +196,7 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
         }
       },
       trustBadges: {
-        useGlobalConfig: parsed.trustBadges?.useGlobalConfig ?? true,
+        useGlobalConfig: parsed.trustBadges?.useGlobalConfig ?? false,
         showGenuine: parsed.trustBadges?.showGenuine ?? true,
         showReturns: parsed.trustBadges?.showReturns ?? true,
         showShipping: parsed.trustBadges?.showShipping ?? true,
@@ -204,7 +204,7 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
         showSupport: parsed.trustBadges?.showSupport ?? true,
       },
       promotionsConfig: {
-        useGlobalConfig: parsed.promotionsConfig?.useGlobalConfig ?? true,
+        useGlobalConfig: parsed.promotionsConfig?.useGlobalConfig ?? false,
         show: parsed.promotionsConfig?.show ?? true,
         list: parsed.promotionsConfig?.list || [
           "Miễn phí ship cho đơn từ 499k",
@@ -214,7 +214,7 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
         ]
       },
       whyChooseUsConfig: {
-        useGlobalConfig: parsed.whyChooseUsConfig?.useGlobalConfig ?? true,
+        useGlobalConfig: parsed.whyChooseUsConfig?.useGlobalConfig ?? false,
         show: parsed.whyChooseUsConfig?.show ?? true,
         list: parsed.whyChooseUsConfig?.list || [
           { icon: "🌹", text: "Hoa sáp thơm giữ màu tới 3 năm" },
@@ -225,7 +225,7 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
         ]
       },
       deliveryPolicyConfig: {
-        useGlobalConfig: parsed.deliveryPolicyConfig?.useGlobalConfig ?? true,
+        useGlobalConfig: parsed.deliveryPolicyConfig?.useGlobalConfig ?? false,
         show: parsed.deliveryPolicyConfig?.show ?? true,
         list: parsed.deliveryPolicyConfig?.list || {
           lines: [
@@ -239,7 +239,7 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
         }
       },
       brandCommitmentConfig: {
-        useGlobalConfig: parsed.brandCommitmentConfig?.useGlobalConfig ?? true,
+        useGlobalConfig: parsed.brandCommitmentConfig?.useGlobalConfig ?? false,
         show: parsed.brandCommitmentConfig?.show ?? true,
         list: parsed.brandCommitmentConfig?.list || [
           "Hình ảnh sản phẩm thật 100% tự chụp",
@@ -702,7 +702,7 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
                     type="text"
                     value={config.policies.faq.title}
                     onChange={(e) => handleFaqTitleChange(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-850 dark:bg-zinc-800 shadow-xs font-semibold"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-855 dark:bg-zinc-800 shadow-xs font-semibold"
                   />
                 </div>
 
@@ -757,201 +757,248 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
 
         {activeTab === 'badges' && config.trustBadges && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <label className="text-slate-500 font-semibold">
-                Sử dụng cấu hình huy hiệu toàn cục
-              </label>
-              <button
-                type="button"
-                onClick={() => handleTrustBadgeChange('useGlobalConfig', !config.trustBadges?.useGlobalConfig)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${config.trustBadges.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                  }`}
-              >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${config.trustBadges.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
-                  }`} />
-              </button>
-            </div>
-
-            {!config.trustBadges.useGlobalConfig && (
-              <div className="space-y-4 border-t border-slate-50 dark:border-zinc-800 pt-4">
-                <p className="text-[10px] text-slate-400">
-                  Cấu hình hiển thị các huy hiệu tin cậy cho riêng sản phẩm này.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { id: 'showGenuine', label: 'Chính hãng' },
-                    { id: 'showReturns', label: 'Đổi trả 7 ngày' },
-                    { id: 'showShipping', label: 'Giao hàng toàn quốc' },
-                    { id: 'showPayment', label: 'Thanh toán an toàn' },
-                    { id: 'showSupport', label: 'Hỗ trợ 24/7' },
-                  ].map((badge) => (
-                    <div key={badge.id} className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/30">
-                      <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">{badge.label}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleTrustBadgeChange(badge.id, !config.trustBadges?.[badge.id as keyof typeof config.trustBadges])}
-                        className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${config.trustBadges?.[badge.id as keyof typeof config.trustBadges] ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
-                          }`}
-                      >
-                        <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${config.trustBadges?.[badge.id as keyof typeof config.trustBadges] ? 'translate-x-4' : 'translate-x-0'
-                          }`} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+            <div className="space-y-4">
+              <p className="text-[10px] text-slate-400">
+                Cấu hình hiển thị các huy hiệu tin cậy cho riêng sản phẩm này.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { id: 'showGenuine', label: 'Chính hãng' },
+                  { id: 'showReturns', label: 'Đổi trả 7 ngày' },
+                  { id: 'showShipping', label: 'Giao hàng toàn quốc' },
+                  { id: 'showPayment', label: 'Thanh toán an toàn' },
+                  { id: 'showSupport', label: 'Hỗ trợ 24/7' },
+                ].map((badge) => (
+                  <div key={badge.id} className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/30">
+                    <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">{badge.label}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleTrustBadgeChange(badge.id, !config.trustBadges?.[badge.id as keyof typeof config.trustBadges])}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${config.trustBadges?.[badge.id as keyof typeof config.trustBadges] ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+                        }`}
+                    >
+                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${config.trustBadges?.[badge.id as keyof typeof config.trustBadges] ? 'translate-x-4' : 'translate-x-0'
+                        }`} />
+                    </button>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
           </div>
         )}
 
         {/* Promotions Tab Editor */}
         {activeTab === 'promotions' && promotionsConfig && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <label className="text-slate-500 font-semibold">Sử dụng cấu hình Ưu đãi toàn cục</label>
-              <button
-                type="button"
-                onClick={() => handlePromotionsChange('useGlobalConfig', !promotionsConfig?.useGlobalConfig)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${promotionsConfig.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                  }`}
-              >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${promotionsConfig.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
-                  }`} />
-              </button>
-            </div>
-
-            {!promotionsConfig.useGlobalConfig && (
-              <div className="space-y-4 border-t border-slate-50 dark:border-zinc-800 pt-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-slate-500 font-semibold">Hiển thị khối Ưu đãi sản phẩm</label>
-                  <button
-                    type="button"
-                    onClick={() => handlePromotionsChange('show', !promotionsConfig?.show)}
-                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${promotionsConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
-                      }`}
-                  >
-                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${promotionsConfig.show ? 'translate-x-4' : 'translate-x-0'
-                      }`} />
-                  </button>
-                </div>
-
-                {promotionsConfig.show && (
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      {promotionsConfig.list.map((promo, idx) => (
-                        <div key={idx} className="flex gap-2 items-center">
-                          <input
-                            type="text"
-                            value={promo}
-                            onChange={(e) => {
-                              const list = [...promotionsConfig.list];
-                              list[idx] = e.target.value;
-                              handlePromotionsChange('list', list);
-                            }}
-                            className="flex-1 bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const list = promotionsConfig.list.filter((_, i) => i !== idx);
-                              handlePromotionsChange('list', list);
-                            }}
-                            className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all"
-                          >
-                            <Icon name="trash" size={14} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex gap-2 pt-2">
-                      <input
-                        type="text"
-                        value={newPromo}
-                        onChange={(e) => setNewPromo(e.target.value)}
-                        placeholder="Thêm ưu đãi mới cho sản phẩm này..."
-                        className="flex-1 bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!newPromo.trim()) return;
-                          handlePromotionsChange('list', [...promotionsConfig.list, newPromo.trim()]);
-                          setNewPromo('');
-                        }}
-                        className="px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold"
-                      >
-                        Thêm
-                      </button>
-                    </div>
-                  </div>
-                )}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-slate-500 font-semibold">Hiển thị khối Ưu đãi sản phẩm</label>
+                <button
+                  type="button"
+                  onClick={() => handlePromotionsChange('show', !promotionsConfig?.show)}
+                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${promotionsConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+                    }`}
+                >
+                  <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${promotionsConfig.show ? 'translate-x-4' : 'translate-x-0'
+                    }`} />
+                </button>
               </div>
-            )}
+
+              {promotionsConfig.show && (
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    {promotionsConfig.list.map((promo, idx) => (
+                      <div key={idx} className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          value={promo}
+                          onChange={(e) => {
+                            const list = [...promotionsConfig.list];
+                            list[idx] = e.target.value;
+                            handlePromotionsChange('list', list);
+                          }}
+                          className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const list = promotionsConfig.list.filter((_, i) => i !== idx);
+                            handlePromotionsChange('list', list);
+                          }}
+                          className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all"
+                        >
+                          <Icon name="trash" size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <input
+                      type="text"
+                      value={newPromo}
+                      onChange={(e) => setNewPromo(e.target.value)}
+                      placeholder="Thêm ưu đãi mới cho sản phẩm này..."
+                      className="flex-1 bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newPromo.trim()) return;
+                        handlePromotionsChange('list', [...promotionsConfig.list, newPromo.trim()]);
+                        setNewPromo('');
+                      }}
+                      className="px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold"
+                    >
+                      Thêm
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* Why Choose Us Tab Editor */}
         {activeTab === 'whyChooseUs' && whyChooseUsConfig && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <label className="text-slate-500 font-semibold">Sử dụng Lý do chọn Haniu toàn cục</label>
-              <button
-                type="button"
-                onClick={() => handleWhyChooseUsChange('useGlobalConfig', !whyChooseUsConfig?.useGlobalConfig)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${whyChooseUsConfig.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                  }`}
-              >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${whyChooseUsConfig.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
-                  }`} />
-              </button>
-            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-slate-500 font-semibold">Hiển thị khối Lý do chọn Haniu</label>
+                <button
+                  type="button"
+                  onClick={() => handleWhyChooseUsChange('show', !whyChooseUsConfig?.show)}
+                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${whyChooseUsConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+                    }`}
+                >
+                  <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${whyChooseUsConfig.show ? 'translate-x-4' : 'translate-x-0'
+                    }`} />
+                </button>
+              </div>
 
-            {!whyChooseUsConfig.useGlobalConfig && (
-              <div className="space-y-4 border-t border-slate-50 dark:border-zinc-800 pt-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-slate-500 font-semibold">Hiển thị khối Lý do chọn Haniu</label>
-                  <button
-                    type="button"
-                    onClick={() => handleWhyChooseUsChange('show', !whyChooseUsConfig?.show)}
-                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${whyChooseUsConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
-                      }`}
-                  >
-                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${whyChooseUsConfig.show ? 'translate-x-4' : 'translate-x-0'
-                      }`} />
-                  </button>
-                </div>
-
-                {whyChooseUsConfig.show && (
+              {whyChooseUsConfig.show && (
+                <div className="space-y-3">
                   <div className="space-y-3">
-                    <div className="space-y-3">
-                      {whyChooseUsConfig.list.map((item, idx) => (
+                    {whyChooseUsConfig.list.map((item, idx) => (
+                      <div key={idx} className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          value={item.icon}
+                          onChange={(e) => {
+                            const list = [...whyChooseUsConfig.list];
+                            list[idx] = { ...list[idx], icon: e.target.value };
+                            handleWhyChooseUsChange('list', list);
+                          }}
+                          className="w-12 text-center bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-2 py-1.5"
+                        />
+                        <input
+                          type="text"
+                          value={item.text}
+                          onChange={(e) => {
+                            const list = [...whyChooseUsConfig.list];
+                            list[idx] = { ...list[idx], text: e.target.value };
+                            handleWhyChooseUsChange('list', list);
+                          }}
+                          className="flex-1 bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const list = whyChooseUsConfig.list.filter((_, i) => i !== idx);
+                            handleWhyChooseUsChange('list', list);
+                          }}
+                          className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all"
+                        >
+                          <Icon name="trash" size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <input
+                      type="text"
+                      value={newWhyIcon}
+                      onChange={(e) => setNewWhyIcon(e.target.value)}
+                      placeholder="Icon (🌹)"
+                      className="w-20 text-center bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-2 py-1.5"
+                    />
+                    <input
+                      type="text"
+                      value={newWhyText}
+                      onChange={(e) => setNewWhyText(e.target.value)}
+                      placeholder="Lý do riêng cho sản phẩm này..."
+                      className="flex-1 bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newWhyText.trim()) return;
+                        handleWhyChooseUsChange('list', [...whyChooseUsConfig.list, { icon: newWhyIcon, text: newWhyText.trim() }]);
+                        setNewWhyText('');
+                      }}
+                      className="px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold"
+                    >
+                      Thêm
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Delivery Policy Tab Editor */}
+        {activeTab === 'delivery' && deliveryPolicyConfig && (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-slate-500 font-semibold">Hiển thị khối Giao hàng</label>
+                <button
+                  type="button"
+                  onClick={() => handleDeliveryPolicyChange('show', !deliveryPolicyConfig?.show)}
+                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${deliveryPolicyConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+                    }`}
+                >
+                  <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${deliveryPolicyConfig.show ? 'translate-x-4' : 'translate-x-0'
+                    }`} />
+                </button>
+              </div>
+
+              {deliveryPolicyConfig.show && (
+                <div className="space-y-4">
+                  {/* Lines */}
+                  <div className="space-y-3">
+                    <span className="text-[10px] font-bold text-slate-450 block border-b pb-1">Thời gian vận chuyển riêng</span>
+
+                    <div className="space-y-2">
+                      {deliveryPolicyConfig.list.lines.map((line, idx) => (
                         <div key={idx} className="flex gap-2 items-center">
                           <input
                             type="text"
-                            value={item.icon}
+                            value={line.label}
                             onChange={(e) => {
-                              const list = [...whyChooseUsConfig.list];
-                              list[idx] = { ...list[idx], icon: e.target.value };
-                              handleWhyChooseUsChange('list', list);
+                              const list = [...deliveryPolicyConfig.list.lines];
+                              list[idx].label = e.target.value;
+                              handleDeliveryPolicyChange('list', { ...deliveryPolicyConfig.list, lines: list });
                             }}
-                            className="w-12 text-center bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-2 py-1.5"
+                            className="w-1/3 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
                           />
                           <input
                             type="text"
-                            value={item.text}
+                            value={line.value}
                             onChange={(e) => {
-                              const list = [...whyChooseUsConfig.list];
-                              list[idx] = { ...list[idx], text: e.target.value };
-                              handleWhyChooseUsChange('list', list);
+                              const list = [...deliveryPolicyConfig.list.lines];
+                              list[idx].value = e.target.value;
+                              handleDeliveryPolicyChange('list', { ...deliveryPolicyConfig.list, lines: list });
                             }}
-                            className="flex-1 bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
+                            className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
                           />
                           <button
                             type="button"
                             onClick={() => {
-                              const list = whyChooseUsConfig.list.filter((_, i) => i !== idx);
-                              handleWhyChooseUsChange('list', list);
+                              const list = deliveryPolicyConfig.list.lines.filter((_, i) => i !== idx);
+                              handleDeliveryPolicyChange('list', { ...deliveryPolicyConfig.list, lines: list });
                             }}
                             className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all"
                           >
@@ -961,241 +1008,118 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
                       ))}
                     </div>
 
-                    <div className="flex gap-2 pt-2">
+                    <div className="flex gap-2">
                       <input
                         type="text"
-                        value={newWhyIcon}
-                        onChange={(e) => setNewWhyIcon(e.target.value)}
-                        placeholder="Icon (🌹)"
-                        className="w-20 text-center bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-2 py-1.5"
+                        value={newDelivLabel}
+                        onChange={(e) => setNewDelivLabel(e.target.value)}
+                        placeholder="Khu vực..."
+                        className="w-1/3 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
                       />
                       <input
                         type="text"
-                        value={newWhyText}
-                        onChange={(e) => setNewWhyText(e.target.value)}
-                        placeholder="Lý do riêng cho sản phẩm này..."
-                        className="flex-1 bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
+                        value={newDelivVal}
+                        onChange={(e) => setNewDelivVal(e.target.value)}
+                        placeholder="Thời gian..."
+                        className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
                       />
                       <button
                         type="button"
                         onClick={() => {
-                          if (!newWhyText.trim()) return;
-                          handleWhyChooseUsChange('list', [...whyChooseUsConfig.list, { icon: newWhyIcon, text: newWhyText.trim() }]);
-                          setNewWhyText('');
+                          if (!newDelivLabel.trim() || !newDelivVal.trim()) return;
+                          handleDeliveryPolicyChange('list', {
+                            ...deliveryPolicyConfig.list,
+                            lines: [...deliveryPolicyConfig.list.lines, { label: newDelivLabel, value: newDelivVal }]
+                          });
+                          setNewDelivLabel('');
+                          setNewDelivVal('');
                         }}
                         className="px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold"
                       >
-                        Thêm
+                        Thêm dòng
                       </button>
                     </div>
                   </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
 
-        {/* Delivery Policy Tab Editor */}
-        {activeTab === 'delivery' && deliveryPolicyConfig && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <label className="text-slate-500 font-semibold">Sử dụng Giao hàng toàn cục</label>
-              <button
-                type="button"
-                onClick={() => handleDeliveryPolicyChange('useGlobalConfig', !deliveryPolicyConfig?.useGlobalConfig)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${deliveryPolicyConfig.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                  }`}
-              >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${deliveryPolicyConfig.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
-                  }`} />
-              </button>
-            </div>
+                  {/* Bullet Points */}
+                  <div className="space-y-3">
+                    <span className="text-[10px] font-bold text-slate-450 block border-b pb-1">Các lưu ý riêng</span>
 
-            {!deliveryPolicyConfig.useGlobalConfig && (
-              <div className="space-y-4 border-t border-slate-50 dark:border-zinc-800 pt-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-slate-500 font-semibold">Hiển thị khối Giao hàng</label>
-                  <button
-                    type="button"
-                    onClick={() => handleDeliveryPolicyChange('show', !deliveryPolicyConfig?.show)}
-                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${deliveryPolicyConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
-                      }`}
-                  >
-                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${deliveryPolicyConfig.show ? 'translate-x-4' : 'translate-x-0'
-                      }`} />
-                  </button>
-                </div>
-
-                {deliveryPolicyConfig.show && (
-                  <div className="space-y-4">
-                    {/* Lines */}
-                    <div className="space-y-3">
-                      <span className="text-[10px] font-bold text-slate-450 block border-b pb-1">Thời gian vận chuyển riêng</span>
-
-                      <div className="space-y-2">
-                        {deliveryPolicyConfig.list.lines.map((line, idx) => (
-                          <div key={idx} className="flex gap-2 items-center">
-                            <input
-                              type="text"
-                              value={line.label}
-                              onChange={(e) => {
-                                const list = [...deliveryPolicyConfig.list.lines];
-                                list[idx].label = e.target.value;
-                                handleDeliveryPolicyChange('list', { ...deliveryPolicyConfig.list, lines: list });
-                              }}
-                              className="w-1/3 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
-                            />
-                            <input
-                              type="text"
-                              value={line.value}
-                              onChange={(e) => {
-                                const list = [...deliveryPolicyConfig.list.lines];
-                                list[idx].value = e.target.value;
-                                handleDeliveryPolicyChange('list', { ...deliveryPolicyConfig.list, lines: list });
-                              }}
-                              className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const list = deliveryPolicyConfig.list.lines.filter((_, i) => i !== idx);
-                                handleDeliveryPolicyChange('list', { ...deliveryPolicyConfig.list, lines: list });
-                              }}
-                              className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all"
-                            >
-                              <Icon name="trash" size={14} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newDelivLabel}
-                          onChange={(e) => setNewDelivLabel(e.target.value)}
-                          placeholder="Khu vực..."
-                          className="w-1/3 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
-                        />
-                        <input
-                          type="text"
-                          value={newDelivVal}
-                          onChange={(e) => setNewDelivVal(e.target.value)}
-                          placeholder="Thời gian..."
-                          className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!newDelivLabel.trim() || !newDelivVal.trim()) return;
-                            handleDeliveryPolicyChange('list', {
-                              ...deliveryPolicyConfig.list,
-                              lines: [...deliveryPolicyConfig.list.lines, { label: newDelivLabel, value: newDelivVal }]
-                            });
-                            setNewDelivLabel('');
-                            setNewDelivVal('');
-                          }}
-                          className="px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold"
-                        >
-                          Thêm dòng
-                        </button>
-                      </div>
+                    <div className="space-y-2">
+                      {deliveryPolicyConfig.list.bulletPoints.map((point, idx) => (
+                        <div key={idx} className="flex gap-2 items-center">
+                          <input
+                            type="text"
+                            value={point}
+                            onChange={(e) => {
+                              const list = [...deliveryPolicyConfig.list.bulletPoints];
+                              list[idx] = e.target.value;
+                              handleDeliveryPolicyChange('list', { ...deliveryPolicyConfig.list, bulletPoints: list });
+                            }}
+                            className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const list = deliveryPolicyConfig.list.bulletPoints.filter((_, i) => i !== idx);
+                              handleDeliveryPolicyChange('list', { ...deliveryPolicyConfig.list, bulletPoints: list });
+                            }}
+                            className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all"
+                          >
+                            <Icon name="trash" size={14} />
+                          </button>
+                        </div>
+                      ))}
                     </div>
 
-                    {/* Bullet Points */}
-                    <div className="space-y-3">
-                      <span className="text-[10px] font-bold text-slate-450 block border-b pb-1">Các lưu ý riêng</span>
-
-                      <div className="space-y-2">
-                        {deliveryPolicyConfig.list.bulletPoints.map((point, idx) => (
-                          <div key={idx} className="flex gap-2 items-center">
-                            <input
-                              type="text"
-                              value={point}
-                              onChange={(e) => {
-                                const list = [...deliveryPolicyConfig.list.bulletPoints];
-                                list[idx] = e.target.value;
-                                handleDeliveryPolicyChange('list', { ...deliveryPolicyConfig.list, bulletPoints: list });
-                              }}
-                              className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const list = deliveryPolicyConfig.list.bulletPoints.filter((_, i) => i !== idx);
-                                handleDeliveryPolicyChange('list', { ...deliveryPolicyConfig.list, bulletPoints: list });
-                              }}
-                              className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all"
-                            >
-                              <Icon name="trash" size={14} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newDelivBullet}
-                          onChange={(e) => setNewDelivBullet(e.target.value)}
-                          placeholder="Lưu ý riêng..."
-                          className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!newDelivBullet.trim()) return;
-                            handleDeliveryPolicyChange('list', {
-                              ...deliveryPolicyConfig.list,
-                              bulletPoints: [...deliveryPolicyConfig.list.bulletPoints, newDelivBullet.trim()]
-                            });
-                            setNewDelivBullet('');
-                          }}
-                          className="px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold"
-                        >
-                          Thêm lưu ý
-                        </button>
-                      </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newDelivBullet}
+                        onChange={(e) => setNewDelivBullet(e.target.value)}
+                        placeholder="Lưu ý riêng..."
+                        className="flex-1 bg-white dark:bg-zinc-855 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!newDelivBullet.trim()) return;
+                          handleDeliveryPolicyChange('list', {
+                            ...deliveryPolicyConfig.list,
+                            bulletPoints: [...deliveryPolicyConfig.list.bulletPoints, newDelivBullet.trim()]
+                          });
+                          setNewDelivBullet('');
+                        }}
+                        className="px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold"
+                      >
+                        Thêm lưu ý
+                      </button>
                     </div>
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* Brand Commitment Tab Editor */}
         {activeTab === 'commitment' && brandCommitmentConfig && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <label className="text-slate-500 font-semibold">Sử dụng Cam kết toàn cục</label>
-              <button
-                type="button"
-                onClick={() => handleBrandCommitmentChange('useGlobalConfig', !brandCommitmentConfig.useGlobalConfig)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${brandCommitmentConfig.useGlobalConfig ? 'bg-rose-500' : 'bg-slate-200 dark:bg-zinc-800'
-                  }`}
-              >
-                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${brandCommitmentConfig.useGlobalConfig ? 'translate-x-5' : 'translate-x-0'
-                  }`} />
-              </button>
-            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-slate-500 font-semibold">Hiển thị khối Cam kết Haniu</label>
+                <button
+                  type="button"
+                  onClick={() => handleBrandCommitmentChange('show', !brandCommitmentConfig.show)}
+                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${brandCommitmentConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
+                    }`}
+                >
+                  <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${brandCommitmentConfig.show ? 'translate-x-4' : 'translate-x-0'
+                    }`} />
+                </button>
+              </div>
 
-            {!brandCommitmentConfig.useGlobalConfig && (
-              <div className="space-y-4 border-t border-slate-50 dark:border-zinc-800 pt-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-slate-500 font-semibold">Hiển thị khối Cam kết Haniu</label>
-                  <button
-                    type="button"
-                    onClick={() => handleBrandCommitmentChange('show', !brandCommitmentConfig.show)}
-                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${brandCommitmentConfig.show ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
-                      }`}
-                  >
-                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${brandCommitmentConfig.show ? 'translate-x-4' : 'translate-x-0'
-                      }`} />
-                  </button>
-                </div>
-
-                 {brandCommitmentConfig.show && (
+               {brandCommitmentConfig.show && (
                   <div className="space-y-3">
                     <div className="space-y-2">
                       {brandCommitmentConfig.list.map((comm, idx) => (
@@ -1246,8 +1170,7 @@ Hỗ trợ bảo trì trọn đời (làm mới đồ da, tra dầu gỗ) với 
                     </div>
                   </div>
                 )}
-              </div>
-            )}
+            </div>
           </div>
         )}
       </div>

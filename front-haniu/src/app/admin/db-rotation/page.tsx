@@ -22,12 +22,24 @@ export default function AdminDbRotationPage() {
   const [rotateLoading, setRotateLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedSyncDbId, setSelectedSyncDbId] = useState<string>('');
   const [currentDb, setCurrentDb] = useState<NeonDatabase>({
     name: '',
     connectionUrl: '',
     isActive: false,
     sortOrder: 0
   });
+
+  useEffect(() => {
+    if (databases.length > 0 && !selectedSyncDbId) {
+      const activeDb = databases.find(db => db.isActive);
+      if (activeDb && activeDb.id) {
+        setSelectedSyncDbId(activeDb.id);
+      } else if (databases[0].id) {
+        setSelectedSyncDbId(databases[0].id);
+      }
+    }
+  }, [databases, selectedSyncDbId]);
 
   const loadDatabases = async () => {
     setLoading(true);
@@ -105,11 +117,19 @@ export default function AdminDbRotationPage() {
   };
 
   const handleSyncCurrent = async () => {
-    if (!confirm('⚠️ CẢNH BÁO MẤT DỮ LIỆU:\n\nHành động này sẽ XÓA SẠCH toàn bộ dữ liệu đang có ở database hoạt động để đồng bộ lại toàn bộ dữ liệu mới từ local sang.\n\nBạn có chắc chắn muốn tiếp tục?')) return;
+    if (!selectedSyncDbId) {
+      showToast('error', 'Vui lòng chọn database để đồng bộ!');
+      return;
+    }
+    const targetDb = databases.find(db => db.id === selectedSyncDbId);
+    const dbName = targetDb ? targetDb.name : 'được chọn';
+
+    if (!confirm(`⚠️ CẢNH BÁO MẤT DỮ LIỆU:\n\nHành động này sẽ XÓA SẠCH toàn bộ dữ liệu đang có ở database "${dbName}" để đồng bộ lại toàn bộ dữ liệu mới từ local sang.\n\nBạn có chắc chắn muốn tiếp tục?`)) return;
     setSyncLoading(true);
     try {
       const res = await fetchApi('/api/v1/admin/db-rotation/sync-current', {
-        method: 'POST'
+        method: 'POST',
+        body: JSON.stringify({ targetDbId: selectedSyncDbId })
       });
       showToast('success', `Đồng bộ dữ liệu thành công lên database: ${res?.activeDb || 'Mặc định'}`);
       loadDatabases();
@@ -150,18 +170,32 @@ export default function AdminDbRotationPage() {
             )}
             Xoay Vòng DB Ngay
           </button>
-          <button
-            onClick={handleSyncCurrent}
-            disabled={syncLoading}
-            className="px-4 py-2.5 text-xs font-bold rounded-xl border border-emerald-200 dark:border-emerald-950/30 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-          >
-            {syncLoading ? (
-              <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-emerald-600" />
-            ) : (
-              <Icon name="refresh" size={13} />
-            )}
-            Đồng Bộ DB Hiện Tại
-          </button>
+          <div className="flex items-center gap-2">
+            <select
+              value={selectedSyncDbId}
+              onChange={(e) => setSelectedSyncDbId(e.target.value)}
+              className="px-3 py-2 text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500 font-semibold cursor-pointer shadow-xs"
+            >
+              <option value="">-- Chọn DB để đồng bộ --</option>
+              {databases.map((db) => (
+                <option key={db.id} value={db.id}>
+                  {db.name} {db.isActive ? '(Đang hoạt động)' : ''}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={handleSyncCurrent}
+              disabled={syncLoading || !selectedSyncDbId}
+              className="px-4 py-2.5 text-xs font-bold rounded-xl border border-emerald-200 dark:border-emerald-950/30 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              {syncLoading ? (
+                <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-emerald-600" />
+              ) : (
+                <Icon name="refresh" size={13} />
+              )}
+              Đồng Bộ DB Hiện Tại
+            </button>
+          </div>
           <button
             onClick={handleCreateNew}
             className="px-4 py-2.5 text-xs font-semibold rounded-xl bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/10 transition-all cursor-pointer"

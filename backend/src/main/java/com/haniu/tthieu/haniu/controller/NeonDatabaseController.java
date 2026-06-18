@@ -119,26 +119,49 @@ public class NeonDatabaseController {
     }
 
     @PostMapping("/sync-current")
-    public ResponseEntity<Map<String, Object>> syncCurrent() {
-        List<NeonDatabase> list = repository.findAllByOrderBySortOrderAsc();
-        NeonDatabase currentActive = list.stream()
-                .filter(NeonDatabase::isActive)
-                .findFirst()
-                .orElse(null);
-
+    public ResponseEntity<Map<String, Object>> syncCurrent(@RequestBody(required = false) Map<String, String> body) {
         String connectionUrl = null;
-        if (currentActive != null) {
-            connectionUrl = currentActive.getConnectionUrl();
-        } else {
-            // Fallback to bootstrap connection URL
-            connectionUrl = System.getProperty("DATABASE_URL_POSTGRE");
-            if (connectionUrl == null) {
-                connectionUrl = System.getenv("DATABASE_URL_POSTGRE");
+        String activeDbName = "Local/Mặc định";
+        NeonDatabase targetDb = null;
+
+        if (body != null && body.containsKey("targetDbId")) {
+            String targetDbIdStr = body.get("targetDbId");
+            if (targetDbIdStr != null && !targetDbIdStr.trim().isEmpty()) {
+                try {
+                    UUID targetDbId = UUID.fromString(targetDbIdStr);
+                    targetDb = repository.findById(targetDbId).orElse(null);
+                    if (targetDb != null) {
+                        connectionUrl = targetDb.getConnectionUrl();
+                        activeDbName = targetDb.getName();
+                    }
+                } catch (IllegalArgumentException e) {
+                    // Ignore and fallback
+                }
+            }
+        }
+
+        if (connectionUrl == null) {
+            List<NeonDatabase> list = repository.findAllByOrderBySortOrderAsc();
+            NeonDatabase currentActive = list.stream()
+                    .filter(NeonDatabase::isActive)
+                    .findFirst()
+                    .orElse(null);
+
+            if (currentActive != null) {
+                connectionUrl = currentActive.getConnectionUrl();
+                activeDbName = currentActive.getName();
+                targetDb = currentActive;
+            } else {
+                // Fallback to bootstrap connection URL
+                connectionUrl = System.getProperty("DATABASE_URL_POSTGRE");
+                if (connectionUrl == null) {
+                    connectionUrl = System.getenv("DATABASE_URL_POSTGRE");
+                }
             }
         }
 
         if (connectionUrl == null || connectionUrl.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Không tìm thấy URL kết nối database đang hoạt động"));
+            return ResponseEntity.badRequest().body(Map.of("message", "Không tìm thấy URL kết nối database đích"));
         }
 
         // Fetch source connection URL (usually local db URL) to copy from
@@ -160,9 +183,17 @@ public class NeonDatabaseController {
 
         triggerRotationIfProduction(connectionUrl);
 
+        // Update active database in database configurations
+        if (targetDb != null && !targetDb.isActive()) {
+            deactivateAll();
+            targetDb.setActive(true);
+            targetDb.setLastSwitchedAt(LocalDateTime.now());
+            repository.save(targetDb);
+        }
+
         return ResponseEntity.ok(Map.of(
-            "message", "Đồng bộ cấu trúc bảng và toàn bộ dữ liệu thành công lên database đang hoạt động!",
-            "activeDb", currentActive != null ? currentActive.getName() : "Local/Mặc định",
+            "message", "Đồng bộ cấu trúc bảng và toàn bộ dữ liệu thành công lên database: " + activeDbName,
+            "activeDb", activeDbName,
             "connectionUrl", connectionUrl
         ));
     }
@@ -172,18 +203,9 @@ public class NeonDatabaseController {
             return;
         }
 
-        System.out.println(">>> [DB Rotation] Starting data copy from: " + sourceUrl + " to: " + targetUrl);
+        System.out.println(">>> [DB Rotation] Starting DYNAMIC data copy from: " + sourceUrl + " to: " + targetUrl);
         var sourceInfo = new com.haniu.tthieu.haniu.config.DatabaseConfig.DbConnectionInfo(sourceUrl);
         var targetInfo = new com.haniu.tthieu.haniu.config.DatabaseConfig.DbConnectionInfo(targetUrl);
-
-        String[] tables = {
-            "system_configurations", "translation_caches", "brands", "collections",
-            "attribute_definitions", "categories", "occasions", "recipients",
-            "products", "product_variants", "product_medias", "product_attributes",
-            "product_occasions", "product_recipients", "carts", "cart_items",
-            "users", "orders", "order_items", "reviews", "testimonials",
-            "posts", "stories", "ugc_items", "neon_databases"
-        };
 
         java.util.Properties sourceProps = new java.util.Properties();
         if (sourceInfo.username != null) sourceProps.setProperty("user", sourceInfo.username);
@@ -198,6 +220,16 @@ public class NeonDatabaseController {
 
             srcConn.setAutoCommit(false);
             destConn.setAutoCommit(false);
+
+            // Fetch list of all tables dynamically from source database schema
+            List<String> tables = new java.util.ArrayList<>();
+            try (java.sql.Statement stmt = srcConn.createStatement();
+                 java.sql.ResultSet rs = stmt.executeQuery("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'")) {
+                while (rs.next()) {
+                    tables.add(rs.getString("table_name"));
+                }
+            }
+            System.out.println(">>> [DB Rotation] Found " + tables.size() + " tables to copy dynamically: " + tables);
 
             // 1. Create target tables if they do not exist
             boolean tablesExist = false;
@@ -228,29 +260,28 @@ public class NeonDatabaseController {
                 }
             }
 
-            // 2. Truncate target tables to ensure clean copy
+            // 2. Disable constraints during copy to allow bulk inserts in any order (PostgreSQL specific)
             try (java.sql.Statement destStmt = destConn.createStatement()) {
-                System.out.println(">>> [DB Rotation] Truncating target tables...");
-                destStmt.execute("TRUNCATE TABLE reviews, order_items, orders, cart_items, carts, product_variants, products, categories, occasions, recipients, testimonials, posts, stories, ugc_items, product_medias, product_attributes, brands, collections, attribute_definitions, system_configurations, translation_caches, product_occasions, product_recipients, neon_databases CASCADE");
+                System.out.println(">>> [DB Rotation] Temporarily disabling foreign key constraint checks on target connection...");
+                destStmt.execute("SET session_replication_role = 'replica'");
                 destConn.commit();
-            } catch (Exception truncateEx) {
-                System.err.println("Failed to truncate target tables: " + truncateEx.getMessage());
             }
 
-            // 3. Copy row by row for each table
-            for (String table : tables) {
-                // Verify source table exists
-                try {
-                    java.sql.DatabaseMetaData dbmd = srcConn.getMetaData();
-                    try (java.sql.ResultSet rs = dbmd.getTables(null, null, table, null)) {
-                        if (!rs.next()) {
-                            continue;
-                        }
+            // 3. Truncate target tables in any order
+            try (java.sql.Statement destStmt = destConn.createStatement()) {
+                System.out.println(">>> [DB Rotation] Truncating target tables...");
+                for (String table : tables) {
+                    try {
+                        destStmt.execute("TRUNCATE TABLE " + table + " CASCADE");
+                    } catch (Exception e) {
+                        System.err.println("Failed to truncate table " + table + ": " + e.getMessage());
                     }
-                } catch (Exception e) {
-                    // Ignore metadata error and proceed
                 }
+                destConn.commit();
+            }
 
+            // 4. Copy row by row for each table dynamically
+            for (String table : tables) {
                 String selectSql = "SELECT * FROM " + table;
                 try (java.sql.Statement srcStmt = srcConn.createStatement();
                      java.sql.ResultSet srcRs = srcStmt.executeQuery(selectSql)) {
@@ -295,10 +326,16 @@ public class NeonDatabaseController {
                 }
             }
 
-            // 4. Reset sequences for tables with serial/numeric primary keys
+            // 5. Re-enable constraint checks
             try (java.sql.Statement destStmt = destConn.createStatement()) {
-                String[] tablesWithSerial = {"orders", "order_items", "translation_caches", "reviews"};
-                for (String table : tablesWithSerial) {
+                System.out.println(">>> [DB Rotation] Re-enabling constraint checks on target connection...");
+                destStmt.execute("SET session_replication_role = 'origin'");
+                destConn.commit();
+            }
+
+            // 6. Reset sequences for tables with serial/numeric primary keys
+            try (java.sql.Statement destStmt = destConn.createStatement()) {
+                for (String table : tables) {
                     try {
                         destStmt.execute("SELECT setval(pg_get_serial_sequence('" + table + "', 'id'), coalesce(max(id), 1)) FROM " + table);
                     } catch (Exception seqEx) {
