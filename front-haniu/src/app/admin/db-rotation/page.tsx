@@ -18,6 +18,7 @@ export default function AdminDbRotationPage() {
   const [databases, setDatabases] = useState<NeonDatabase[]>([]);
   const [loading, setLoading] = useState(false);
   const [rotateLoading, setRotateLoading] = useState(false);
+  const [syncLoading, setSyncLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentDb, setCurrentDb] = useState<NeonDatabase>({
     name: '',
@@ -52,18 +53,16 @@ export default function AdminDbRotationPage() {
           method: 'PUT',
           body: JSON.stringify(currentDb)
         });
-        alert('Cập nhật cấu hình database thành công!');
       } else {
         await fetchApi('/api/v1/admin/db-rotation', {
           method: 'POST',
           body: JSON.stringify(currentDb)
         });
-        alert('Thêm cấu hình database thành công!');
       }
       setIsEditing(false);
       loadDatabases();
     } catch (err: any) {
-      alert(err.message || 'Lỗi khi lưu cấu hình database!');
+      console.error('Lỗi khi lưu cấu hình database:', err);
     }
   };
 
@@ -80,25 +79,37 @@ export default function AdminDbRotationPage() {
       });
       loadDatabases();
     } catch (err: any) {
-      alert(err.message || 'Lỗi khi xóa cấu hình database!');
+      console.error('Lỗi khi xóa cấu hình database:', err);
     }
   };
 
   const handleRotate = async () => {
-    if (!confirm('Hệ thống sẽ chuyển quyền kết nối hoạt động sang database tiếp theo và cấu hình. Bạn có chắc muốn xoay vòng ngay?')) return;
+    if (!confirm('⚠️ CẢNH BÁO MẤT DỮ LIỆU:\n\nHệ thống sẽ tiến hành xoay vòng database. Toàn bộ dữ liệu hiện tại ở database đích (database tiếp theo) sẽ bị XÓA SẠCH để đồng bộ dữ liệu mới sang.\n\nBạn có chắc chắn muốn xoay vòng ngay?')) return;
     setRotateLoading(true);
     try {
-      const res = await fetchApi('/api/v1/admin/db-rotation/rotate', {
+      await fetchApi('/api/v1/admin/db-rotation/rotate', {
         method: 'POST'
       });
-      if (res && res.message) {
-        alert(`🎉 ${res.message}\nTừ: ${res.oldActive}\nSang: ${res.newActive}`);
-      }
       loadDatabases();
     } catch (err: any) {
-      alert(err.message || 'Lỗi khi xoay vòng database!');
+      console.error('Lỗi khi xoay vòng database:', err);
     } finally {
       setRotateLoading(false);
+    }
+  };
+
+  const handleSyncCurrent = async () => {
+    if (!confirm('⚠️ CẢNH BÁO MẤT DỮ LIỆU:\n\nHành động này sẽ XÓA SẠCH toàn bộ dữ liệu đang có ở database hoạt động để đồng bộ lại toàn bộ dữ liệu mới từ local sang.\n\nBạn có chắc chắn muốn tiếp tục?')) return;
+    setSyncLoading(true);
+    try {
+      await fetchApi('/api/v1/admin/db-rotation/sync-current', {
+        method: 'POST'
+      });
+      loadDatabases();
+    } catch (err: any) {
+      console.error('Lỗi khi đồng bộ database hiện tại:', err);
+    } finally {
+      setSyncLoading(false);
     }
   };
 
@@ -131,6 +142,18 @@ export default function AdminDbRotationPage() {
               <Icon name="settings" size={13} />
             )}
             Xoay Vòng DB Ngay
+          </button>
+          <button
+            onClick={handleSyncCurrent}
+            disabled={syncLoading}
+            className="px-4 py-2.5 text-xs font-bold rounded-xl border border-emerald-200 dark:border-emerald-950/30 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+          >
+            {syncLoading ? (
+              <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-emerald-600" />
+            ) : (
+              <Icon name="refresh" size={13} />
+            )}
+            Đồng Bộ DB Hiện Tại
           </button>
           <button
             onClick={handleCreateNew}

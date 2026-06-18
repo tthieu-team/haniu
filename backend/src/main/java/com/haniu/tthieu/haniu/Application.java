@@ -41,6 +41,10 @@ public class Application {
 			}
 			if (dbUrl != null) {
 				System.out.println("Using Neon Database as requested (USE_LOCAL_DB=false)");
+				String activeRotatedUrl = fetchActiveNeonDbUrl(dbUrl);
+				if (activeRotatedUrl != null) {
+					dbUrl = activeRotatedUrl;
+				}
 			}
 		}
 
@@ -64,36 +68,54 @@ public class Application {
 			} else if (dbUrl.startsWith("'") && dbUrl.endsWith("'")) {
 				dbUrl = dbUrl.substring(1, dbUrl.length() - 1);
 			}
-			
-			String cleanUrl = dbUrl;
-			if (cleanUrl.startsWith("jdbc:")) {
-				cleanUrl = cleanUrl.substring(5);
-			}
-			
-			if (cleanUrl.startsWith("postgresql://") || cleanUrl.startsWith("postgres://")) {
-				int schemeIdx = cleanUrl.indexOf("://");
-				String remainder = cleanUrl.substring(schemeIdx + 3);
-				int atIdx = remainder.lastIndexOf('@');
-				if (atIdx != -1) {
-					String credentials = remainder.substring(0, atIdx);
-					String hostDb = remainder.substring(atIdx + 1);
-					
-					int colonIdx = credentials.indexOf(':');
-					String username = colonIdx != -1 ? credentials.substring(0, colonIdx) : credentials;
-					String password = colonIdx != -1 ? credentials.substring(colonIdx + 1) : "";
-					
-					System.setProperty("spring.datasource.username", username);
-					System.setProperty("spring.datasource.password", password);
-					
-					dbUrl = "jdbc:postgresql://" + hostDb;
-				} else {
-					dbUrl = "jdbc:postgresql://" + remainder;
-				}
-			}
 			System.setProperty("DATABASE_URL_POSTGRE", dbUrl);
 			System.out.println("Normalized database connection URL: " + dbUrl);
 		}
 	}
+
+	private static String fetchActiveNeonDbUrl(String bootstrapUrl) {
+		if (bootstrapUrl == null) {
+			return null;
+		}
+		try {
+			com.haniu.tthieu.haniu.config.DatabaseConfig.DbConnectionInfo info = 
+				new com.haniu.tthieu.haniu.config.DatabaseConfig.DbConnectionInfo(bootstrapUrl);
+			
+			Class.forName("org.postgresql.Driver");
+			
+			java.util.Properties props = new java.util.Properties();
+			if (info.username != null) {
+				props.setProperty("user", info.username);
+			}
+			if (info.password != null) {
+				props.setProperty("password", info.password);
+			}
+			props.setProperty("connectTimeout", "5");
+			
+			try (java.sql.Connection conn = java.sql.DriverManager.getConnection(info.jdbcUrl, props);
+				 java.sql.Statement stmt = conn.createStatement()) {
+				
+				java.sql.ResultSet tables = conn.getMetaData().getTables(null, null, "neon_databases", null);
+				if (tables.next()) {
+					try (java.sql.ResultSet rs = stmt.executeQuery("SELECT connection_url FROM neon_databases WHERE is_active = true LIMIT 1")) {
+						if (rs.next()) {
+							String activeUrl = rs.getString("connection_url");
+							if (activeUrl != null && !activeUrl.trim().isEmpty()) {
+								System.out.println("Found active rotated database URL from neon_databases: " + activeUrl);
+								return activeUrl;
+							}
+						}
+					}
+				} else {
+					System.out.println("Table neon_databases not found in bootstrap database.");
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("Could not fetch active rotated database URL from bootstrap database (table might not exist yet or connection failed): " + e.getMessage());
+		}
+		return null;
+	}
+
 
 	private static void loadEnv() {
 		File envFile = null;
