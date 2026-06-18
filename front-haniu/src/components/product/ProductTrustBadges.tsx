@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Icon from '@/components/common/Icons';
-import { useHomeLayoutStore } from '@/store/homeLayout';
 import { useTranslate } from '@/lib/translator';
 
 interface ProductTrustBadgesProps {
@@ -12,10 +11,9 @@ interface ProductTrustBadgesProps {
 }
 
 export default function ProductTrustBadges({ product }: ProductTrustBadgesProps) {
-  const globalTrustBadges = useHomeLayoutStore((state) => state.trustBadges);
   const trans = useTranslate();
 
-  const globalConfig = globalTrustBadges || {
+  const defaultLocalConfig = {
     showGenuine: true,
     showReturns: true,
     showShipping: true,
@@ -23,12 +21,12 @@ export default function ProductTrustBadges({ product }: ProductTrustBadgesProps)
     showSupport: true,
   };
 
-  let finalConfig = { ...globalConfig };
+  let finalConfig = { ...defaultLocalConfig };
 
   if (product?.layoutConfig) {
     try {
-      const parsed = JSON.parse(product.layoutConfig);
-      if (parsed.trustBadges && parsed.trustBadges.useGlobalConfig === false) {
+      const parsed = typeof product.layoutConfig === 'string' ? JSON.parse(product.layoutConfig) : product.layoutConfig;
+      if (parsed.trustBadges) {
         finalConfig = {
           showGenuine: parsed.trustBadges.showGenuine ?? true,
           showReturns: parsed.trustBadges.showReturns ?? true,

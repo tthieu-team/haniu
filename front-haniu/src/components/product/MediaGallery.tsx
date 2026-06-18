@@ -31,6 +31,22 @@ export default function MediaGallery({ mediaList, name }: MediaGalleryProps) {
     }
   }, [mediaList]);
 
+  // Auto-slide effect
+  useEffect(() => {
+    if (!mediaList || mediaList.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setActiveImage(current => {
+        const currentIndex = mediaList.findIndex(m => m.url === current);
+        if (currentIndex === -1) return mediaList[0].url;
+        const nextIndex = (currentIndex + 1) % mediaList.length;
+        return mediaList[nextIndex].url;
+      });
+    }, 4000); // transition every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [mediaList, activeImage]);
+
   if (!mediaList || mediaList.length === 0) {
     return (
       <div className="aspect-square bg-slate-100 dark:bg-zinc-800 rounded-3xl overflow-hidden flex items-center justify-center text-slate-400">

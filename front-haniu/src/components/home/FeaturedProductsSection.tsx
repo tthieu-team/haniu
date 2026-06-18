@@ -1,8 +1,8 @@
 'use client';
 
+// React hooks
 import { useState, useEffect } from 'react';
 import ProductCard from '@/components/product/ProductCard';
-import QuickViewModal from '@/components/product/QuickViewModal';
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
 import { useLanguage } from '@/providers/LanguageProvider';
@@ -93,7 +93,6 @@ export default function FeaturedProductsSection({
 }: FeaturedProductsSectionProps) {
   const isVisible = useHomeLayoutStore((state) => state.visibility.featuredProducts);
   const featuredProducts = useHomeLayoutStore((state) => state.featuredProducts);
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [localSearch, setLocalSearch] = useState(searchTerm);
   const { t } = useLanguage();
   const trans = useTranslate();
@@ -312,7 +311,6 @@ export default function FeaturedProductsSection({
               <ProductCard 
                 key={product.id} 
                 product={product} 
-                onQuickView={(p) => setQuickViewProduct(p)} 
               />
             ))}
           </div>
@@ -341,12 +339,7 @@ export default function FeaturedProductsSection({
         </div>
       )}
 
-      {/* Quick View Modal */}
-      <QuickViewModal
-        product={quickViewProduct}
-        isOpen={!!quickViewProduct}
-        onClose={() => setQuickViewProduct(null)}
-      />
+
     </section>
   );
 }

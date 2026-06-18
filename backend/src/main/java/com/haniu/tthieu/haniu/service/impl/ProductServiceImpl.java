@@ -92,6 +92,7 @@ public class ProductServiceImpl implements ProductService {
                 .layoutConfig(request.getLayoutConfig())
                 .specifications(request.getSpecifications())
                 .includedItems(request.getIncludedItems())
+                .videoUrl(request.getVideoUrl())
                 .seoTitle(request.getSeoTitle())
                 .seoDescription(request.getSeoDescription())
                 .seoKeywords(request.getSeoKeywords())
@@ -204,6 +205,7 @@ public class ProductServiceImpl implements ProductService {
         product.setLayoutConfig(request.getLayoutConfig());
         product.setSpecifications(request.getSpecifications());
         product.setIncludedItems(request.getIncludedItems());
+        product.setVideoUrl(request.getVideoUrl());
         product.setSeoTitle(request.getSeoTitle());
         product.setSeoDescription(request.getSeoDescription());
         product.setSeoKeywords(request.getSeoKeywords());
@@ -482,6 +484,7 @@ public class ProductServiceImpl implements ProductService {
                 .sku(product.getSku())
                 .description(product.getDescription())
                 .thumbnailUrl(thumbnail)
+                .videoUrl(product.getVideoUrl())
                 .price(product.getPrice())
                 .salePrice(product.getSalePrice())
                 .stock(product.getStock())
@@ -605,6 +608,7 @@ public class ProductServiceImpl implements ProductService {
                 .description(product.getDescription())
                 .shortDescription(product.getShortDescription())
                 .thumbnailUrl(product.getThumbnailUrl())
+                .videoUrl(product.getVideoUrl())
                 .category(catInfo)
                 .brand(brandInfo)
                 .collection(collInfo)

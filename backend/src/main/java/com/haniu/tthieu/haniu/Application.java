@@ -22,9 +22,33 @@ public class Application {
 	}
 
 	private static void normalizeEnv() {
-		String dbUrl = System.getProperty("DATABASE_URL_POSTGRE");
+		String useLocalDb = System.getProperty("USE_LOCAL_DB");
+		if (useLocalDb == null) {
+			useLocalDb = System.getenv("USE_LOCAL_DB");
+		}
+		
+		String dbUrl = null;
+		if ("true".equalsIgnoreCase(useLocalDb)) {
+			dbUrl = System.getProperty("DATABASE_URL_LOCAL");
+			if (dbUrl == null) {
+				dbUrl = System.getenv("DATABASE_URL_LOCAL");
+			}
+			System.out.println("Using Local Database as requested (USE_LOCAL_DB=true)");
+		} else {
+			dbUrl = System.getProperty("DATABASE_URL_NEON");
+			if (dbUrl == null) {
+				dbUrl = System.getenv("DATABASE_URL_NEON");
+			}
+			if (dbUrl != null) {
+				System.out.println("Using Neon Database as requested (USE_LOCAL_DB=false)");
+			}
+		}
+
 		if (dbUrl == null) {
-			dbUrl = System.getenv("DATABASE_URL_POSTGRE");
+			dbUrl = System.getProperty("DATABASE_URL_POSTGRE");
+			if (dbUrl == null) {
+				dbUrl = System.getenv("DATABASE_URL_POSTGRE");
+			}
 		}
 		if (dbUrl == null) {
 			dbUrl = System.getProperty("DATABASE_URL");

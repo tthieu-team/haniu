@@ -22,6 +22,7 @@ public class ProductResponseDto {
     private String description;
     private String shortDescription;
     private String thumbnailUrl;
+    private String videoUrl;
     
     private CategoryInfo category;
     private BrandInfo brand;

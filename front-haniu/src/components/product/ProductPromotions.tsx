@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Icon from '@/components/common/Icons';
-import { useHomeLayoutStore } from '@/store/homeLayout';
 import { useTranslate } from '@/lib/translator';
 
 interface ProductPromotionsProps {
@@ -12,10 +11,9 @@ interface ProductPromotionsProps {
 }
 
 export default function ProductPromotions({ product }: ProductPromotionsProps) {
-  const globalProductDetails = useHomeLayoutStore((state) => state.productDetails);
   const trans = useTranslate();
 
-  const globalConfig = globalProductDetails || {
+  const defaultLocalConfig = {
     showPromotions: true,
     promotions: [
       "Miễn phí ship cho đơn từ 499k",
@@ -26,14 +24,14 @@ export default function ProductPromotions({ product }: ProductPromotionsProps) {
   };
 
   let finalConfig = {
-    show: globalConfig.showPromotions,
-    list: globalConfig.promotions
+    show: defaultLocalConfig.showPromotions,
+    list: defaultLocalConfig.promotions
   };
 
   if (product?.layoutConfig) {
     try {
       const parsed = typeof product.layoutConfig === 'string' ? JSON.parse(product.layoutConfig) : product.layoutConfig;
-      if (parsed.promotionsConfig && parsed.promotionsConfig.useGlobalConfig === false) {
+      if (parsed.promotionsConfig) {
         finalConfig = {
           show: parsed.promotionsConfig.show !== false,
           list: parsed.promotionsConfig.list || []

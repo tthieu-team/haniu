@@ -97,6 +97,9 @@ public class Product {
     @Column(name = "thumbnail_url", columnDefinition = "TEXT")
     private String thumbnailUrl;
 
+    @Column(name = "video_url", columnDefinition = "TEXT")
+    private String videoUrl;
+
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 

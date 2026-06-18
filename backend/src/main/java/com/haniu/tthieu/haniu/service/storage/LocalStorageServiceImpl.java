@@ -32,6 +32,11 @@ public class LocalStorageServiceImpl implements StorageService {
 
     @Override
     public String store(MultipartFile file) {
+        return store(file, "");
+    }
+
+    @Override
+    public String store(MultipartFile file, String subfolder) {
         try {
             if (file.isEmpty()) {
                 throw new RuntimeException("Failed to store empty file.");
@@ -44,10 +49,16 @@ public class LocalStorageServiceImpl implements StorageService {
             }
 
             String newFilename = UUID.randomUUID().toString() + extension;
-            Path destinationFile = this.rootLocation.resolve(Paths.get(newFilename))
+            Path targetLocation = this.rootLocation;
+            if (subfolder != null && !subfolder.isEmpty()) {
+                targetLocation = this.rootLocation.resolve(subfolder).normalize();
+                Files.createDirectories(targetLocation);
+            }
+
+            Path destinationFile = targetLocation.resolve(Paths.get(newFilename))
                     .normalize().toAbsolutePath();
 
-            if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
+            if (!destinationFile.startsWith(this.rootLocation.toAbsolutePath())) {
                 // Security check
                 throw new RuntimeException("Cannot store file outside current directory.");
             }
@@ -56,8 +67,9 @@ public class LocalStorageServiceImpl implements StorageService {
                 Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            // Return relative URL that can be mapped by a controller/resource handler
-            return "/api/v1/uploads/files/" + newFilename;
+            // Return relative URL with forward slashes for the controller mapping
+            String relativeUrlPath = (subfolder != null && !subfolder.isEmpty()) ? (subfolder + "/" + newFilename) : newFilename;
+            return "/api/v1/uploads/files/" + relativeUrlPath.replace("\\", "/");
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file.", e);
         }
@@ -69,9 +81,11 @@ public class LocalStorageServiceImpl implements StorageService {
             if (fileUrl == null || !fileUrl.contains("/api/v1/uploads/files/")) {
                 return;
             }
-            String filename = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
-            Path file = this.rootLocation.resolve(filename).normalize().toAbsolutePath();
-            Files.deleteIfExists(file);
+            String relativePath = fileUrl.substring(fileUrl.indexOf("/api/v1/uploads/files/") + "/api/v1/uploads/files/".length());
+            Path file = this.rootLocation.resolve(relativePath).normalize().toAbsolutePath();
+            if (file.startsWith(this.rootLocation.toAbsolutePath())) {
+                Files.deleteIfExists(file);
+            }
         } catch (IOException e) {
             throw new RuntimeException("Failed to delete file.", e);
         }

@@ -9,6 +9,11 @@ public interface StorageService {
     String store(MultipartFile file);
 
     /**
+     * Stores a file in a specific subfolder and returns its public URL/URI.
+     */
+    String store(MultipartFile file, String subfolder);
+
+    /**
      * Deletes a file given its URL/URI.
      */
     void delete(String fileUrl);

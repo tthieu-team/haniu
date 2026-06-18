@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { catalogService, Collection } from '@/services/catalog.service';
 import { productService } from '@/services/product.service';
 import ProductCard from '@/components/product/ProductCard';
-import QuickViewModal from '@/components/product/QuickViewModal';
 import Icon from '@/components/common/Icons';
 import { getFullImageUrl } from '@/lib/api';
 
@@ -24,7 +23,6 @@ export default function CollectionDetailClient({ slug, initialCollection, initia
   // Filter & Sort States
   const [sortOption, setSortOption] = useState('newest');
   const [customizableOnly, setCustomizableOnly] = useState(false);
-  const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
 
   // Fetch Collection and its products when sort option changes
   useEffect(() => {
@@ -227,19 +225,13 @@ export default function CollectionDetailClient({ slug, initialCollection, initia
                   ...product,
                   basePrice: product.basePrice || product.price
                 }}
-                onQuickView={setQuickViewProduct}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* Quick view modal details */}
-      <QuickViewModal
-        product={quickViewProduct}
-        isOpen={quickViewProduct !== null}
-        onClose={() => setQuickViewProduct(null)}
-      />
+
 
     </div>
   );

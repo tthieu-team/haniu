@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -38,10 +39,37 @@ public class FileUploadController {
         ));
     }
 
-    @GetMapping("/files/{filename:.+}")
-    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
+    @PostMapping("/products/images")
+    public ResponseEntity<Map<String, String>> uploadProductImage(@RequestParam("file") MultipartFile file) {
+        String fileUrl = storageService.store(file, "products/images");
+        return ResponseEntity.ok(Map.of(
+            "url", fileUrl,
+            "name", file.getOriginalFilename()
+        ));
+    }
+
+    @PostMapping("/products/videos")
+    public ResponseEntity<Map<String, String>> uploadProductVideo(@RequestParam("file") MultipartFile file) {
+        String fileUrl = storageService.store(file, "products/videos");
+        return ResponseEntity.ok(Map.of(
+            "url", fileUrl,
+            "name", file.getOriginalFilename()
+        ));
+    }
+
+    @GetMapping("/files/**")
+    public ResponseEntity<Resource> serveFile(HttpServletRequest request) {
         try {
-            Path file = Paths.get(uploadDir).resolve(filename).normalize().toAbsolutePath();
+            String uri = request.getRequestURI();
+            String path = uri.split("/api/v1/uploads/files/")[1];
+            Path file = Paths.get(uploadDir).resolve(path).normalize().toAbsolutePath();
+
+            // Security check
+            Path absoluteUploadDir = Paths.get(uploadDir).toAbsolutePath().normalize();
+            if (!file.startsWith(absoluteUploadDir)) {
+                return ResponseEntity.badRequest().build();
+            }
+
             Resource resource = new UrlResource(file.toUri());
 
             if (resource.exists() || resource.isReadable()) {
@@ -57,7 +85,7 @@ public class FileUploadController {
             } else {
                 return ResponseEntity.notFound().build();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }

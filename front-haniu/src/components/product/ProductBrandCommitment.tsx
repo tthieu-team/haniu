@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Icon from '@/components/common/Icons';
-import { useHomeLayoutStore } from '@/store/homeLayout';
 import { useTranslate } from '@/lib/translator';
 
 interface ProductBrandCommitmentProps {
@@ -12,10 +11,9 @@ interface ProductBrandCommitmentProps {
 }
 
 export default function ProductBrandCommitment({ product }: ProductBrandCommitmentProps) {
-  const globalProductDetails = useHomeLayoutStore((state) => state.productDetails);
   const trans = useTranslate();
 
-  const globalConfig = globalProductDetails || {
+  const defaultLocalConfig = {
     showBrandCommitment: true,
     brandCommitment: [
       "Hình ảnh sản phẩm thật 100% tự chụp",
@@ -25,14 +23,14 @@ export default function ProductBrandCommitment({ product }: ProductBrandCommitme
   };
 
   let finalConfig = {
-    show: globalConfig.showBrandCommitment,
-    list: globalConfig.brandCommitment
+    show: defaultLocalConfig.showBrandCommitment,
+    list: defaultLocalConfig.brandCommitment
   };
 
   if (product?.layoutConfig) {
     try {
       const parsed = typeof product.layoutConfig === 'string' ? JSON.parse(product.layoutConfig) : product.layoutConfig;
-      if (parsed.brandCommitmentConfig && parsed.brandCommitmentConfig.useGlobalConfig === false) {
+      if (parsed.brandCommitmentConfig) {
         finalConfig = {
           show: parsed.brandCommitmentConfig.show !== false,
           list: parsed.brandCommitmentConfig.list || []

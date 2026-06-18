@@ -25,10 +25,9 @@ interface ProductCardProps {
     media?: Array<{ url: string; isThumbnail: boolean }>;
     thumbnailUrl?: string;
   };
-  onQuickView?: (product: any) => void;
 }
 
-export default function ProductCard({ product, onQuickView }: ProductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
   const trans = useTranslate();
   const { toggleWishlist, isInWishlist } = useWishlistStore();
   const isLiked = isInWishlist(product.id);
@@ -118,22 +117,6 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
             />
           )}
         </Link>
-
-        {/* Quick View slide-up overlay */}
-        {onQuickView && (
-          <div className="hidden md:flex absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10 justify-center">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onQuickView(product);
-              }}
-              className="w-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md text-slate-700 dark:text-zinc-200 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 font-bold py-2.5 px-4 rounded-2xl text-[10px] transition-all shadow-lg active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              <Icon name="eye" size={14} /> {trans("Xem nhanh")}
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Content details */}

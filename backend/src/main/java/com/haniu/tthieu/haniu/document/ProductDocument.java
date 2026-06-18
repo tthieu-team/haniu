@@ -63,6 +63,9 @@ public class ProductDocument {
     @Field(type = FieldType.Keyword, name = "thumbnail_url")
     private String thumbnailUrl;
 
+    @Field(type = FieldType.Keyword, name = "video_url")
+    private String videoUrl;
+
     @Field(type = FieldType.Double)
     private BigDecimal price;
 

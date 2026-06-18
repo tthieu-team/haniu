@@ -23,6 +23,7 @@ export interface ProductRequestPayload {
   recipients?: string[];
   variants?: any[];
   media?: any[];
+  videoUrl?: string | null;
 }
 
 export const productService = {
@@ -132,13 +133,29 @@ export const productService = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/uploads`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/uploads/products/images`, {
       method: 'POST',
       body: formData,
     });
 
     if (!response.ok) {
       throw new Error('Tải tập tin lên thất bại.');
+    }
+
+    return response.json();
+  },
+
+  uploadVideo: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/uploads/products/videos`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Tải video lên thất bại.');
     }
 
     return response.json();

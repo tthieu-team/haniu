@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Icon from '@/components/common/Icons';
-import { useHomeLayoutStore } from '@/store/homeLayout';
 import { useTranslate } from '@/lib/translator';
 
 interface WhyChooseUsItem {
@@ -17,10 +16,9 @@ interface ProductWhyChooseUsProps {
 }
 
 export default function ProductWhyChooseUs({ product }: ProductWhyChooseUsProps) {
-  const globalProductDetails = useHomeLayoutStore((state) => state.productDetails);
   const trans = useTranslate();
 
-  const globalConfig = globalProductDetails || {
+  const defaultLocalConfig = {
     showWhyChooseUs: true,
     whyChooseUs: [
       { icon: "🌹", text: "Hoa sáp thơm giữ màu tới 3 năm" },
@@ -32,14 +30,14 @@ export default function ProductWhyChooseUs({ product }: ProductWhyChooseUsProps)
   };
 
   let finalConfig = {
-    show: globalConfig.showWhyChooseUs,
-    list: globalConfig.whyChooseUs
+    show: defaultLocalConfig.showWhyChooseUs,
+    list: defaultLocalConfig.whyChooseUs
   };
 
   if (product?.layoutConfig) {
     try {
       const parsed = typeof product.layoutConfig === 'string' ? JSON.parse(product.layoutConfig) : product.layoutConfig;
-      if (parsed.whyChooseUsConfig && parsed.whyChooseUsConfig.useGlobalConfig === false) {
+      if (parsed.whyChooseUsConfig) {
         finalConfig = {
           show: parsed.whyChooseUsConfig.show !== false,
           list: parsed.whyChooseUsConfig.list || []

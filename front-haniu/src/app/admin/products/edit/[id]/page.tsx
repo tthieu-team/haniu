@@ -100,6 +100,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   // Nested Lists
   const [mediaList, setMediaList] = useState<MediaInput[]>([]);
   const [variantsList, setVariantsList] = useState<VariantInput[]>([]);
+  const [videoUrl, setVideoUrl] = useState('');
 
   const [categories, setCategories] = useState<any[]>(DEFAULT_CATEGORIES);
   const [brands, setBrands] = useState<any[]>([]);
@@ -174,6 +175,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       setSeoTitle(data.seoTitle || '');
       setSeoDescription(data.seoDescription || '');
       setSeoKeywords(data.seoKeywords || '');
+      setVideoUrl(data.videoUrl || '');
 
       if (data.occasions) {
         setSelectedOccasions(data.occasions.map((o: any) => o.id));
@@ -292,6 +294,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           thumbnail: m.isThumbnail ?? false,
           sortOrder: m.sortOrder
         })),
+        videoUrl: videoUrl || null,
         attributes: Object.entries(attributes).map(([name, value]) => ({ name, value })),
       };
 
@@ -319,7 +322,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     allowAdminChat, allowPhotoUpload, allowPhotobooth, status,
     layoutTemplate, layoutConfig, seoTitle, seoDescription, seoKeywords,
     selectedOccasions, selectedRecipients, specs, includedItems,
-    mediaList, variantsList, attributes, id, loading
+    mediaList, variantsList, attributes, id, loading, videoUrl
   ]);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -374,6 +377,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         thumbnail: m.isThumbnail ?? false, // Send both keys for Jackson compatibility
         sortOrder: m.sortOrder
       })),
+      videoUrl: videoUrl || null,
       attributes: Object.entries(attributes).map(([name, value]) => ({ name, value })),
     };
 
@@ -439,6 +443,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     attributes: attributes,
     media: mediaList,
     variants: variantsList,
+    videoUrl: videoUrl,
     layoutConfig: layoutConfig,
   };
 
@@ -559,6 +564,64 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             setSuccessMsg={setSuccessMsg}
             setErrorMsg={setErrorMsg}
           />
+
+          {/* Product Video Manager */}
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6 text-xs font-semibold">
+            <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400 border-b border-slate-50 dark:border-zinc-800 pb-2">
+              Video sản phẩm
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl p-8 text-center bg-slate-50/50 dark:bg-zinc-950/20 relative">
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={async (e) => {
+                    const files = e.target.files;
+                    if (!files || files.length === 0) return;
+                    const file = files[0];
+                    try {
+                      setSaveLoading(true);
+                      setErrorMsg('');
+                      const data = await productService.uploadVideo(file);
+                      if (data && data.url) {
+                        setVideoUrl(data.url);
+                        setSuccessMsg('🎉 Tải video lên thành công!');
+                        setTimeout(() => setSuccessMsg(''), 3000);
+                      }
+                    } catch (err) {
+                      setErrorMsg('Tải video lên thất bại.');
+                    } finally {
+                      setSaveLoading(false);
+                    }
+                  }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <span className="text-xl flex justify-center text-slate-400">
+                  <Icon name="video" size={24} />
+                </span>
+                <p className="text-xs text-slate-500 mt-2 font-semibold">
+                  Tải lên video giới thiệu sản phẩm
+                </p>
+              </div>
+
+              {videoUrl && (
+                <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 bg-slate-50 p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-slate-400"><Icon name="video" size={20} /></span>
+                    <span className="text-slate-700 dark:text-zinc-300 font-semibold truncate max-w-xs">{videoUrl}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setVideoUrl('')}
+                    className="bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold hover:bg-red-650 shadow transition-all active:scale-90"
+                  >
+                    <Icon name="close" size={10} />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Variations */}
           <VariantManager variantsList={variantsList} setVariantsList={setVariantsList} basePrice={basePrice} />

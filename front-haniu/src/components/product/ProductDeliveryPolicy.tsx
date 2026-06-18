@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Icon from '@/components/common/Icons';
-import { useHomeLayoutStore } from '@/store/homeLayout';
 import { useTranslate } from '@/lib/translator';
 
 interface ProductDeliveryPolicyProps {
@@ -12,10 +11,9 @@ interface ProductDeliveryPolicyProps {
 }
 
 export default function ProductDeliveryPolicy({ product }: ProductDeliveryPolicyProps) {
-  const globalProductDetails = useHomeLayoutStore((state) => state.productDetails);
   const trans = useTranslate();
 
-  const globalConfig = globalProductDetails || {
+  const defaultLocalConfig = {
     showDeliveryPolicy: true,
     deliveryPolicy: {
       lines: [
@@ -30,15 +28,15 @@ export default function ProductDeliveryPolicy({ product }: ProductDeliveryPolicy
   };
 
   let finalConfig = {
-    show: globalConfig.showDeliveryPolicy,
-    lines: globalConfig.deliveryPolicy?.lines || [],
-    bulletPoints: globalConfig.deliveryPolicy?.bulletPoints || []
+    show: defaultLocalConfig.showDeliveryPolicy,
+    lines: defaultLocalConfig.deliveryPolicy?.lines || [],
+    bulletPoints: defaultLocalConfig.deliveryPolicy?.bulletPoints || []
   };
 
   if (product?.layoutConfig) {
     try {
       const parsed = typeof product.layoutConfig === 'string' ? JSON.parse(product.layoutConfig) : product.layoutConfig;
-      if (parsed.deliveryPolicyConfig && parsed.deliveryPolicyConfig.useGlobalConfig === false) {
+      if (parsed.deliveryPolicyConfig) {
         finalConfig = {
           show: parsed.deliveryPolicyConfig.show !== false,
           lines: parsed.deliveryPolicyConfig.lines || [],

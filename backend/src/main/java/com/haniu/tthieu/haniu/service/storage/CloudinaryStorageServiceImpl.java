@@ -38,11 +38,20 @@ public class CloudinaryStorageServiceImpl implements StorageService {
 
     @Override
     public String store(MultipartFile file) {
+        return store(file, "");
+    }
+
+    @Override
+    public String store(MultipartFile file, String subfolder) {
         try {
             if (file.isEmpty()) {
                 throw new RuntimeException("Failed to store empty file.");
             }
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
+            Map uploadParams = new java.util.HashMap(ObjectUtils.asMap("resource_type", "auto"));
+            if (subfolder != null && !subfolder.isEmpty()) {
+                uploadParams.put("folder", subfolder);
+            }
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
             return (String) uploadResult.get("secure_url");
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file to Cloudinary", e);

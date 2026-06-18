@@ -19,6 +19,7 @@ public class ProductRequestDto {
     private String slug;
     private String sku;
     private String description;
+    private String videoUrl;
     private UUID categoryId;
     private UUID brandId;
     private UUID collectionId;

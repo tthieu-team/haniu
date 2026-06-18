@@ -66,7 +66,7 @@ export const useRealtimeStore = create<RealtimeState>((set, get) => ({
     };
 
     ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.warn('WebSocket connection error (will retry if still active):', error);
     };
 
     ws.onmessage = (event) => {
@@ -87,6 +87,10 @@ export const useRealtimeStore = create<RealtimeState>((set, get) => ({
   disconnectSocket: () => {
     const { socket } = get();
     if (socket) {
+      socket.onopen = null;
+      socket.onclose = null;
+      socket.onerror = null;
+      socket.onmessage = null;
       socket.close();
       set({ socket: null, connected: false, reconnectAttempts: 0 });
     }

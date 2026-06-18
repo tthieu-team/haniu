@@ -3,22 +3,13 @@
 import { useState } from 'react';
 import { useWishlistStore } from '@/store/wishlist';
 import ProductCard from '@/components/product/ProductCard';
-import QuickViewModal from '@/components/product/QuickViewModal';
+
 import Link from 'next/link';
 import Icon from '@/components/common/Icons';
 
 export default function WishlistPage() {
   const { items, clearWishlist } = useWishlistStore();
-  const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
 
-  // Map wishlist items to support the QuickViewModal structure
-  const handleQuickView = (product: any) => {
-    setQuickViewProduct({
-      ...product,
-      stock: product.stock ?? 99, // default stock if missing
-      category: product.category || { name: 'Quà tặng', slug: 'qua-tang' }
-    });
-  };
 
   return (
     <div className="space-y-8 pb-16 font-sans">
@@ -60,7 +51,7 @@ export default function WishlistPage() {
             <Icon name="sparkles" size={16} className="animate-pulse" />
           </span>
           <div className="text-xs leading-relaxed font-light">
-            <strong className="font-bold text-slate-700 dark:text-zinc-200">💡 Hướng dẫn nhanh:</strong> Nhấp vào nút <strong className="font-bold text-rose-500">Xem nhanh</strong> bên dưới mỗi sản phẩm để mở bảng tùy biến cá nhân hóa (khắc laser thông điệp riêng, chọn mẫu thiệp viết tay miễn phí) và thêm vào giỏ hàng ngay mà không cần chuyển trang.
+            <strong className="font-bold text-slate-700 dark:text-zinc-200">💡 Hướng dẫn nhanh:</strong> Nhấp vào nút <strong className="font-bold text-rose-500">Chi tiết</strong> bên dưới mỗi sản phẩm để mở trang chi tiết tùy biến cá nhân hóa (khắc laser thông điệp riêng, chọn mẫu thiệp viết tay miễn phí) và thêm vào giỏ hàng.
           </div>
         </div>
       )}
@@ -130,7 +121,7 @@ export default function WishlistPage() {
                 </div>
                 <h4 className="text-xs font-bold text-slate-700 dark:text-zinc-300">Tùy Biến & Đặt Hàng</h4>
                 <p className="text-[11px] text-slate-500 dark:text-zinc-400 font-light leading-relaxed">
-                  Bật Xem nhanh để tùy chọn khắc tên laser lên cốc/gỗ, gửi gắm lời chúc ý nghĩa trên thiệp viết tay.
+                  Xem chi tiết để tùy chọn khắc tên laser lên cốc/gỗ, gửi gắm lời chúc ý nghĩa trên thiệp viết tay.
                 </p>
               </div>
             </div>
@@ -142,18 +133,12 @@ export default function WishlistPage() {
             <ProductCard
               key={product.id}
               product={product}
-              onQuickView={handleQuickView}
             />
           ))}
         </div>
       )}
 
-      {/* Quick View Modal */}
-      <QuickViewModal
-        product={quickViewProduct}
-        isOpen={!!quickViewProduct}
-        onClose={() => setQuickViewProduct(null)}
-      />
+
     </div>
   );
 }

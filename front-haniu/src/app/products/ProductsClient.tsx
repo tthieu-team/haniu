@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import ProductCard from '@/components/product/ProductCard';
-import QuickViewModal from '@/components/product/QuickViewModal';
 import Icon from '@/components/common/Icons';
 import { useTranslate } from '@/lib/translator';
 import { useOccasionStore } from '@/store/occasion';
@@ -70,7 +69,6 @@ function ProductsContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
 
   // Pagination cursor and page states
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -635,13 +633,6 @@ function ProductsContent() {
                           )}
                         </div>
                         <div className="flex gap-2">
-                          <button
-                            onClick={() => setQuickViewProduct(product)}
-                            className="bg-slate-50 dark:bg-zinc-900 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-slate-655 dark:text-zinc-300 dark:hover:text-rose-400 p-2.5 rounded-xl border border-slate-200/40 dark:border-zinc-800 transition-all cursor-pointer"
-                            title={trans('Xem nhanh')}
-                          >
-                            <Icon name="eye" size={13} />
-                          </button>
                           <Link
                             href={`/products/${product.slug}`}
                             className="bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all active:scale-98"
@@ -665,7 +656,6 @@ function ProductsContent() {
                       // Adapt schema differences
                       basePrice: product.basePrice || product.price
                     }}
-                    onQuickView={setQuickViewProduct}
                   />
                 ))}
               </div>
@@ -728,12 +718,7 @@ function ProductsContent() {
         occasions={occasions}
       />
 
-      {/* Quick view modal details */}
-      <QuickViewModal
-        product={quickViewProduct}
-        isOpen={quickViewProduct !== null}
-        onClose={() => setQuickViewProduct(null)}
-      />
+
     </div>
   );
 }
