@@ -3,6 +3,7 @@ import { Be_Vietnam_Pro, Geist_Mono, Dancing_Script, Cormorant_Garamond, Patrick
 import "./globals.css";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { LanguageProvider } from "@/providers/LanguageProvider";
+import { ToastProvider } from "@/providers/ToastProvider";
 import SiteLayout from "@/components/layouts/SiteLayout";
 import { cookies } from 'next/headers';
 
@@ -158,7 +159,9 @@ export default async function RootLayout({
       <body className="min-h-full bg-slate-50 text-slate-800 dark:bg-zinc-950 dark:text-zinc-100 font-sans">
         <AuthProvider>
           <LanguageProvider>
-            <SiteLayout>{children}</SiteLayout>
+            <ToastProvider>
+              <SiteLayout>{children}</SiteLayout>
+            </ToastProvider>
           </LanguageProvider>
         </AuthProvider>
       </body>
