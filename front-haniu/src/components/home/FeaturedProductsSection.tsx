@@ -201,8 +201,8 @@ export default function FeaturedProductsSection({
                 >
                   {/* Circle Icon Container */}
                   <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-[14px] sm:rounded-2xl flex items-center justify-center transition-all duration-300 border relative ${isSelected
-                      ? 'bg-gradient-to-br from-rose-500 to-pink-500 text-white border-rose-500 shadow-lg shadow-rose-500/25 scale-105 ring-4 ring-rose-500/10'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-rose-50/50 hover:text-rose-600 hover:border-rose-300/80 hover:scale-105 hover:shadow-md hover:shadow-rose-500/5 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-rose-950/20 dark:hover:text-rose-400 dark:hover:border-rose-900/40'
+                    ? 'bg-gradient-to-br from-rose-500 to-pink-500 text-white border-rose-500 shadow-lg shadow-rose-500/25 scale-105 ring-4 ring-rose-500/10'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-rose-50/50 hover:text-rose-600 hover:border-rose-300/80 hover:scale-105 hover:shadow-md hover:shadow-rose-500/5 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-rose-950/20 dark:hover:text-rose-400 dark:hover:border-rose-900/40'
                     }`}>
                     <Icon name={getOccasionIcon(occ.slug)} size={16} className="w-4 h-4 sm:w-5 sm:h-5" />
                     {isSelected && (
@@ -214,7 +214,7 @@ export default function FeaturedProductsSection({
                   {/* Text Label */}
                   <span className={`text-[9px] sm:text-[10px] font-bold tracking-wide transition-colors text-center leading-tight line-clamp-2 ${isSelected ? 'text-rose-500' : 'text-slate-500 dark:text-zinc-400 group-hover:text-rose-600 dark:group-hover:text-rose-400'
                     }`}>
-                    {occ.slug === '' ? t('home.products.all_occasions') : trans(occ.name)}
+                    {occ.slug === '' ? t('home.products.all_occasions') : occ.name}
                   </span>
                 </button>
               );
@@ -242,8 +242,8 @@ export default function FeaturedProductsSection({
                 >
                   {/* Circle Icon Container */}
                   <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-[14px] sm:rounded-2xl flex items-center justify-center transition-all duration-300 border relative ${isSelected
-                      ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white border-amber-500 shadow-lg shadow-amber-500/25 scale-105 ring-4 ring-amber-500/10'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50/50 hover:text-amber-600 hover:border-rose-300/80 hover:scale-105 hover:shadow-md hover:shadow-amber-500/5 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-amber-950/20 dark:hover:text-amber-400 dark:hover:border-amber-900/40'
+                    ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white border-amber-500 shadow-lg shadow-amber-500/25 scale-105 ring-4 ring-amber-500/10'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50/50 hover:text-amber-600 hover:border-rose-300/80 hover:scale-105 hover:shadow-md hover:shadow-amber-500/5 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-amber-950/20 dark:hover:text-amber-400 dark:hover:border-amber-900/40'
                     }`}>
                     <Icon name={getRecipientIcon(rec.slug)} size={16} className="w-4 h-4 sm:w-5 sm:h-5" />
                     {isSelected && (
@@ -255,7 +255,7 @@ export default function FeaturedProductsSection({
                   {/* Text Label */}
                   <span className={`text-[9px] sm:text-[10px] font-bold tracking-wide transition-colors text-center leading-tight line-clamp-2 ${isSelected ? 'text-amber-600 dark:text-amber-500' : 'text-slate-500 dark:text-zinc-400 group-hover:text-amber-650 dark:group-hover:text-amber-500'
                     }`}>
-                    {rec.slug === '' ? t('home.products.all_recipients') : trans(rec.name)}
+                    {rec.slug === '' ? t('home.products.all_recipients') : rec.name}
                   </span>
                 </button>
               );

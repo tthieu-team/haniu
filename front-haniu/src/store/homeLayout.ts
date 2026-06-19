@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { systemConfigService } from '@/services/systemConfig.service';
 
 export interface HeaderConfig {
@@ -319,6 +318,8 @@ export interface HomeLayoutState {
   updateHeroSlide: (slideId: string, config: Partial<HeroSlide>) => void;
   addHeroSlide: (slide: HeroSlide) => void;
   deleteHeroSlide: (slideId: string) => void;
+  moveHeroSlide: (index: number, direction: 'up' | 'down') => void;
+  updateHeroSlidesOrder: (slides: HeroSlide[]) => void;
   updateGridFeatureCard: (cardId: string, config: Partial<GridFeatureCard>) => void;
   updateTrustBar: (config: Partial<TrustBarConfig>) => void;
   updateBrandIntro: (config: Partial<BrandIntroConfig>) => void;
@@ -339,10 +340,14 @@ export interface HomeLayoutState {
   updateTrustBadges: (config: Partial<TrustBadgesConfig>) => void;
   updateProductDetails: (config: Partial<ProductDetailsSectionConfig>) => void;
   resetAll: () => void;
+  resetSections: () => void;
+  resetHero: () => void;
+  resetVisibility: () => void;
+  isDirty: boolean;
   isLoading: boolean;
   isSaving: boolean;
   fetchConfigFromServer: () => Promise<void>;
-  saveConfigToServer: () => Promise<void>;
+  saveConfigToServer: (options?: RequestInit) => Promise<void>;
 }
 
 export const DEFAULT_STATE = {
@@ -377,7 +382,7 @@ export const DEFAULT_STATE = {
     isSticky: true,
   },
   announcementBar: {
-    text: "🚚 Miễn phí vận chuyển toàn quốc cho tất cả đơn hàng từ 499k",
+    text: "💖 Mỗi món quà là một câu chuyện • 🌷 Hoa handmade • 📸 Photobooth • 🧸 Gấu bông • ✨ Được chuẩn bị bằng cả sự tận tâm",
     linkText: "Mua ngay",
     linkHref: "/#products",
     isEnabled: true,
@@ -507,7 +512,7 @@ export const DEFAULT_STATE = {
     items: [
       {
         title: "Summer Breeze Collection",
-        subtitle: "Tông xanh bạc hà mát lạnh, ly sứ kèm thìa mạ vàng tinh tế",
+        subtitle: "Tông xanh bạc hạ mát lạnh, ly sứ kèm thìa mạ vàng tinh tế",
         image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80",
         href: "/?category=combo-qua-tang"
       },
@@ -526,14 +531,16 @@ export const DEFAULT_STATE = {
     ]
   },
   socialProof: {
-    title: "Cảm Nhận Từ Khách Hàng",
+    title: "Khách Hàng Nói Gì Về Haniu?",
     ratingScore: "4.9",
     reviewsCount: "1.250+",
-    badge: "Khách hàng nói gì về Haniu",
+    badge: "Hơn 1.250+ Khách Hàng Tin Tưởng",
     reviews: [
-      { id: "r1", name: "Nguyễn Thu Trang", role: "Khách mua Quà Sinh Nhật", content: "Mình rất bất ngờ về chất lượng khắc tên trên ly sứ. Rất sắc nét và tinh tế! Bạn gái mình nhận quà thích lắm, khóc luôn vì xúc động.", rating: 5, avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80" },
-      { id: "r2", name: "Trần Anh Tuấn", role: "Giám đốc nhân sự TechCorp", content: "Đặt 200 set quà doanh nghiệp khắc logo công ty cho đối tác dịp lễ, Haniu làm siêu nhanh, đóng gói sang trọng, đối tác ai cũng khen chu đáo.", rating: 5, avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&auto=format&fit=crop&q=80" },
-      { id: "r3", name: "Lê Minh Thảo", role: "Khách mua Quà Kỷ Niệm", content: "Sổ tay da thật sờ rất sướng tay, thơm mùi da tự nhiên. Dịch vụ khắc laser miễn phí rất chuyên nghiệp. Hộp quà đóng gói siêu đẹp và chắc chắn.", rating: 5, avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" },
+      { id: "r1", name: "Nguyễn Thu Trang", role: "Khách mua Quà Sinh Nhật", content: "Mình đặt một set quà gồm gấu bông và ảnh photobooth cho bạn thân. Khi mở hộp quà ra, bạn ấy đã rất bất ngờ và xúc động. Mọi thứ được đóng gói cực kỳ dễ thương và chỉn chu.", rating: 5, avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80" },
+      { id: "r2", name: "Trần Anh Tuấn", role: "Khách mua Quà Kỷ Niệm", content: "Dải ảnh photobooth được in rất đẹp, màu sắc rõ nét và giữ được cảm giác như những tấm ảnh Hàn Quốc. Đây là món quà kỷ niệm ý nghĩa nhất mà mình từng tặng cho người yêu.", rating: 5, avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&auto=format&fit=crop&q=80" },
+      { id: "r3", name: "Lê Minh Thảo", role: "Khách mua Hoa Handmade", content: "Bó hoa len handmade ngoài đời còn đẹp hơn ảnh. Từng chi tiết được làm rất cẩn thận, màu sắc xinh xắn và đặc biệt là có thể lưu giữ lâu dài như một kỷ niệm đáng nhớ.", rating: 5, avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" },
+      { id: "r4", name: "Phạm Gia Hân", role: "Khách mua Quà Lễ Tình Nhân", content: "Mình đặt combo gấu bông, hoa handmade và photobooth cho dịp Valentine. Hộp quà được trang trí rất đẹp, nhận hàng đúng như mong đợi. Người nhận thích đến mức chụp ảnh đăng story ngay.", rating: 5, avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80" },
+      { id: "r5", name: "Đỗ Hoàng Nam", role: "Khách mua Quà Tặng Bạn Gái", content: "Dịch vụ tư vấn rất nhiệt tình, giúp mình chọn được món quà phù hợp dù không biết nên tặng gì. Sản phẩm đẹp, giao hàng nhanh và mang lại cảm giác rất đặc biệt khi trao tặng.", rating: 5, avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&auto=format&fit=crop&q=80" }
     ],
   },
   howItWorks: {
@@ -619,13 +626,11 @@ export const DEFAULT_STATE = {
   faq: {
     title: "Những Câu Hỏi Thường Gặp",
     items: [
-      { question: "Thời gian khắc laser cá nhân hóa mất bao lâu?", answer: "Haniu sử dụng máy khắc laser công nghệ cao thế hệ mới, quy trình khắc tên thông thường chỉ mất từ 15-30 phút. Do đó, đơn hàng hỏa tốc 2 giờ vẫn được đảm bảo giao đúng hẹn." },
-      { question: "Tôi có thể xem trước thiết kế khắc laser trước khi thực hiện không?", answer: "Có, sau khi bạn đặt hàng, bộ phận thiết kế của Haniu sẽ thiết kế layout chữ/hình ảnh và gửi ảnh phác thảo (mockup) qua Zalo/Email để bạn duyệt. Haniu chỉ tiến hành khắc khi bạn đã hoàn toàn đồng ý." },
-      { question: "Haniu có chính sách đổi trả như thế nào đối với quà cá nhân hóa?", answer: "Đối với sản phẩm có khắc tên/cá nhân hóa, Haniu cam kết 1 đổi 1 miễn phí nếu có lỗi từ phía sản xuất (sai chính tả so với bản duyệt, trầy xước, nứt vỡ do vận chuyển). Với các sản phẩm không cá nhân hóa, bạn được đổi trả trong vòng 7 ngày." },
-      { question: "Hộp quà của Haniu đã bao gồm những gì?", answer: "Tất cả các set combo quà tặng tại Haniu đều được đóng gói tiêu chuẩn bao gồm: Hộp cứng cao cấp lót rơm giấy, ruy băng lụa thắt nơ nghệ thuật, thiệp viết tay theo yêu cầu và túi giấy sang trọng đi kèm để bạn tiện đem tặng." },
-      { question: "Hoa hồng sáp thơm tại Haniu để được bao lâu?", answer: "Hoa sáp thơm của Haniu được chế tác từ xà phòng thiên nhiên cao cấp, có độ bền màu từ 3-5 năm. Bạn chỉ cần bảo quản ở nơi khô ráo, thoáng mát, tránh tiếp xúc trực tiếp với nước và ánh nắng gay gắt." },
-      { question: "Haniu có hỗ trợ viết thiệp hộ và giao quà giấu tên không?", answer: "Có, Haniu hỗ trợ viết thiệp tay miễn phí theo nội dung yêu cầu. Chúng tôi cũng cung cấp dịch vụ giao quà ẩn danh (không hiển thị thông tin người gửi trên vận đơn) để tạo bất ngờ tuyệt đối cho người nhận." },
-      { question: "Hợp đồng số lượng lớn cho doanh nghiệp có ưu đãi gì không?", answer: "Với các đơn hàng số lượng lớn cho doanh nghiệp hoặc sự kiện, Haniu chiết khấu hấp dẫn từ 10% - 30%. Đồng thời miễn phí khắc logo thương hiệu, hỗ trợ giao hàng nhiều điểm và xuất hóa đơn VAT đầy đủ." }
+      { question: "Thời gian chuẩn bị và giao đơn hàng mất bao lâu?", answer: "Các sản phẩm có sẵn thường được chuẩn bị trong vòng 24 giờ. Đối với các set quà được thiết kế theo yêu cầu hoặc cần đóng gói đặc biệt, thời gian xử lý có thể từ 1 - 3 ngày làm việc. Haniu luôn cố gắng giao hàng nhanh nhất để bạn kịp trao gửi yêu thương." },
+      { question: "Tôi có thể tự chọn các sản phẩm để tạo thành một set quà không?", answer: "Có. Bạn có thể kết hợp gấu bông, hoa handmade, ảnh photobooth và các phụ kiện khác để tạo thành một set quà mang dấu ấn riêng. Đội ngũ Haniu sẽ hỗ trợ tư vấn để món quà phù hợp với dịp tặng và người nhận." },
+      { question: "Ảnh photobooth được in trên chất liệu gì?", answer: "Ảnh photobooth được in trên giấy ảnh chất lượng cao với màu sắc sắc nét, độ bền tốt và khả năng lưu giữ lâu dài. Đây là món quà nhỏ nhưng chứa đựng những kỷ niệm đáng nhớ dành cho người thân, bạn bè hoặc người yêu." },
+      { question: "Haniu có hỗ trợ viết thiệp và gói quà không?", answer: "Có. Hầu hết các đơn hàng đều được hỗ trợ gói quà cẩn thận. Bạn cũng có thể gửi lời nhắn để Haniu chuẩn bị thiệp đính kèm, giúp món quà trở nên ý nghĩa và trọn vẹn hơn khi trao tặng." },
+      { question: "Nếu sản phẩm bị lỗi hoặc hư hỏng khi nhận hàng thì sao?", answer: "Trong trường hợp sản phẩm bị lỗi, thiếu phụ kiện hoặc hư hỏng do quá trình vận chuyển, vui lòng liên hệ với Haniu trong vòng 48 giờ kể từ khi nhận hàng. Chúng tôi sẽ hỗ trợ đổi mới hoặc tìm phương án xử lý phù hợp để đảm bảo trải nghiệm tốt nhất cho bạn." }
     ],
   },
   footer: {
@@ -640,8 +645,8 @@ export const DEFAULT_STATE = {
   welcomeScreen: {
     isEnabled: true,
     welcomeText: "HANIU GIFT SHOP",
-    welcomeSubtitle: "Thiết kế độc bản - Trọn vẹn yêu thương",
-    durationMs: 2500,
+    welcomeSubtitle: "Trao Một Món Quà, Gửi Ngàn Yêu Thương",
+    durationMs: 3500,
   },
   trustBadges: {
     showGenuine: true,
@@ -688,233 +693,313 @@ export const DEFAULT_STATE = {
 
 export const useHomeLayoutStore = create<HomeLayoutState>()(
   // persist(
-    (set, get) => ({
-      ...DEFAULT_STATE,
-      isLoading: false,
-      isSaving: false,
-
-      toggleVisibility: (section) =>
-        set((state) => ({
-          visibility: {
-            ...state.visibility,
-            [section]: !state.visibility[section],
-          },
-        })),
-
-      updateHeader: (config) =>
-        set((state) => ({
-          header: { ...state.header, ...config },
-        })),
-
-      updateAnnouncementBar: (config) =>
-        set((state) => ({
-          announcementBar: { ...state.announcementBar, ...config },
-        })),
-
-      updateHero: (config) =>
-        set((state) => ({
-          hero: { ...state.hero, ...config },
-        })),
-
-      updateHeroSlide: (slideId, config) =>
-        set((state) => ({
-          hero: {
-            ...state.hero,
-            slides: state.hero.slides.map((s) =>
-              s.id === slideId ? { ...s, ...config } : s
-            ),
-          },
-        })),
-
-      addHeroSlide: (slide) =>
-        set((state) => ({
-          hero: {
-            ...state.hero,
-            slides: [...state.hero.slides, slide],
-          },
-        })),
-
-      deleteHeroSlide: (slideId) =>
-        set((state) => ({
-          hero: {
-            ...state.hero,
-            slides: state.hero.slides.filter((s) => s.id !== slideId),
-          },
-        })),
-
-      updateGridFeatureCard: (cardId, config) =>
-        set((state) => ({
-          hero: {
-            ...state.hero,
-            gridFeatures: state.hero.gridFeatures.map((card) =>
-              card.id === cardId ? { ...card, ...config } : card
-            ),
-          },
-        })),
-
-      updateTrustBar: (config) =>
-        set((state) => ({
-          trustBar: { ...state.trustBar, ...config },
-        })),
-
-      updateBrandIntro: (config) =>
-        set((state) => ({
-          brandIntro: { ...state.brandIntro, ...config },
-        })),
-
-      updateCategories: (config) =>
-        set((state) => ({
-          categories: { ...state.categories, ...config },
-        })),
-
-      updateFeaturedProducts: (config) =>
-        set((state) => ({
-          featuredProducts: { ...state.featuredProducts, ...config },
-        })),
-
-      updateBenefits: (config) =>
-        set((state) => ({
-          benefits: { ...state.benefits, ...config },
-        })),
-
-      updateVideoBanner: (config) =>
-        set((state) => ({
-          videoBanner: { ...state.videoBanner, ...config },
-        })),
-
-      updateCollections: (config) =>
-        set((state) => ({
-          collections: { ...state.collections, ...config },
-        })),
-
-      updateSocialProof: (config) =>
-        set((state) => ({
-          socialProof: { ...state.socialProof, ...config },
-        })),
-
-      updateHowItWorks: (config) =>
-        set((state) => ({
-          howItWorks: { ...state.howItWorks, ...config },
-        })),
-
-      updateUgcFeed: (config) =>
-        set((state) => ({
-          ugcFeed: { ...state.ugcFeed, ...config },
-        })),
-
-      updateBlog: (config) =>
-        set((state) => ({
-          blog: { ...state.blog, ...config },
-        })),
-
-      updateStory: (config) =>
-        set((state) => ({
-          story: { ...state.story, ...config },
-        })),
-
-      updateCta: (config) =>
-        set((state) => ({
-          cta: { ...state.cta, ...config },
-        })),
-
-      updateFaq: (config) =>
-        set((state) => ({
-          faq: { ...state.faq, ...config },
-        })),
-
-      updateFooter: (config) =>
-        set((state) => ({
-          footer: { ...state.footer, ...config },
-        })),
-
-      updateWelcomeScreen: (config) =>
-        set((state) => ({
-          welcomeScreen: { ...state.welcomeScreen, ...config },
-        })),
-
-      updateTrustBadges: (config) =>
-        set((state) => ({
-          trustBadges: { ...state.trustBadges, ...config },
-        })),
-
-      updateProductDetails: (config) =>
-        set((state) => ({
-          productDetails: { ...state.productDetails, ...config },
-        })),
-
-      resetAll: () => set(DEFAULT_STATE),
-
-      fetchConfigFromServer: async () => {
-        set({ isLoading: true });
-        try {
-          const res = await systemConfigService.getConfig('HOME_LAYOUT');
-          if (res && res.configValue) {
-            const parsed = typeof res.configValue === 'string' ? JSON.parse(res.configValue) : res.configValue;
-            // Deep merge: ensure each section config preserves defaults for missing fields
-            const deepMerged: Record<string, any> = {};
-            for (const key of Object.keys(parsed)) {
-              const defaultVal = (DEFAULT_STATE as any)[key];
-              const parsedVal = parsed[key];
-              if (defaultVal && typeof defaultVal === 'object' && !Array.isArray(defaultVal) && typeof parsedVal === 'object' && !Array.isArray(parsedVal)) {
-                deepMerged[key] = { ...defaultVal, ...parsedVal };
-              } else {
-                deepMerged[key] = parsedVal;
-              }
+    (realSet, get) => {
+      const set = (
+        nextStateOrCreator:
+          | Partial<HomeLayoutState>
+          | ((state: HomeLayoutState) => Partial<HomeLayoutState> | HomeLayoutState)
+      ) => {
+        realSet((state: HomeLayoutState) => {
+          const nextState = typeof nextStateOrCreator === 'function'
+            ? nextStateOrCreator(state)
+            : nextStateOrCreator;
+          let nextDirty = state.isDirty;
+          if (nextState && typeof nextState === 'object' && 'isDirty' in nextState) {
+            nextDirty = (nextState as any).isDirty ?? state.isDirty;
+          } else if (nextState && typeof nextState === 'object') {
+            const keys = Object.keys(nextState);
+            const updatesConfig = keys.some(key => !['isSaving', 'isLoading', 'isDirty'].includes(key));
+            if (updatesConfig) {
+              nextDirty = true;
             }
-            set((state) => ({
-              ...state,
-              ...deepMerged,
-              isLoading: false,
-            }));
-          } else {
+          }
+          return {
+            ...nextState,
+            isDirty: nextDirty
+          };
+        });
+      };
+
+      return {
+        ...DEFAULT_STATE,
+        isDirty: false,
+        isLoading: false,
+        isSaving: false,
+
+        toggleVisibility: (section) =>
+          set((state) => ({
+            visibility: {
+              ...state.visibility,
+              [section]: !state.visibility[section],
+            },
+          })),
+
+        updateHeader: (config) =>
+          set((state) => ({
+            header: { ...state.header, ...config },
+          })),
+
+        updateAnnouncementBar: (config) =>
+          set((state) => ({
+            announcementBar: { ...state.announcementBar, ...config },
+          })),
+
+        updateHero: (config) =>
+          set((state) => ({
+            hero: { ...state.hero, ...config },
+          })),
+
+        updateHeroSlide: (slideId, config) =>
+          set((state) => ({
+            hero: {
+              ...state.hero,
+              slides: state.hero.slides.map((s) =>
+                s.id === slideId ? { ...s, ...config } : s
+              ),
+            },
+          })),
+
+        addHeroSlide: (slide) =>
+          set((state) => ({
+            hero: {
+              ...state.hero,
+              slides: [...state.hero.slides, slide],
+            },
+          })),
+
+        deleteHeroSlide: (slideId) =>
+          set((state) => ({
+            hero: {
+              ...state.hero,
+              slides: state.hero.slides.filter((s) => s.id !== slideId),
+            },
+          })),
+
+        moveHeroSlide: (index, direction) =>
+          set((state) => {
+            const slides = [...state.hero.slides];
+            const targetIndex = direction === 'up' ? index - 1 : index + 1;
+            if (targetIndex < 0 || targetIndex >= slides.length) return {};
+            const temp = slides[index];
+            slides[index] = slides[targetIndex];
+            slides[targetIndex] = temp;
+            return {
+              hero: {
+                ...state.hero,
+                slides,
+              },
+            };
+          }),
+
+        updateHeroSlidesOrder: (slides) =>
+          set((state) => ({
+            hero: {
+              ...state.hero,
+              slides,
+            },
+          })),
+
+        updateGridFeatureCard: (cardId, config) =>
+          set((state) => ({
+            hero: {
+              ...state.hero,
+              gridFeatures: state.hero.gridFeatures.map((card) =>
+                card.id === cardId ? { ...card, ...config } : card
+              ),
+            },
+          })),
+
+        updateTrustBar: (config) =>
+          set((state) => ({
+            trustBar: { ...state.trustBar, ...config },
+          })),
+
+        updateBrandIntro: (config) =>
+          set((state) => ({
+            brandIntro: { ...state.brandIntro, ...config },
+          })),
+
+        updateCategories: (config) =>
+          set((state) => ({
+            categories: { ...state.categories, ...config },
+          })),
+
+        updateFeaturedProducts: (config) =>
+          set((state) => ({
+            featuredProducts: { ...state.featuredProducts, ...config },
+          })),
+
+        updateBenefits: (config) =>
+          set((state) => ({
+            benefits: { ...state.benefits, ...config },
+          })),
+
+        updateVideoBanner: (config) =>
+          set((state) => ({
+            videoBanner: { ...state.videoBanner, ...config },
+          })),
+
+        updateCollections: (config) =>
+          set((state) => ({
+            collections: { ...state.collections, ...config },
+          })),
+
+        updateSocialProof: (config) =>
+          set((state) => ({
+            socialProof: { ...state.socialProof, ...config },
+          })),
+
+        updateHowItWorks: (config) =>
+          set((state) => ({
+            howItWorks: { ...state.howItWorks, ...config },
+          })),
+
+        updateUgcFeed: (config) =>
+          set((state) => ({
+            ugcFeed: { ...state.ugcFeed, ...config },
+          })),
+
+        updateBlog: (config) =>
+          set((state) => ({
+            blog: { ...state.blog, ...config },
+          })),
+
+        updateStory: (config) =>
+          set((state) => ({
+            story: { ...state.story, ...config },
+          })),
+
+        updateCta: (config) =>
+          set((state) => ({
+            cta: { ...state.cta, ...config },
+          })),
+
+        updateFaq: (config) =>
+          set((state) => ({
+            faq: { ...state.faq, ...config },
+          })),
+
+        updateFooter: (config) =>
+          set((state) => ({
+            footer: { ...state.footer, ...config },
+          })),
+
+        updateWelcomeScreen: (config) =>
+          set((state) => ({
+            welcomeScreen: { ...state.welcomeScreen, ...config },
+          })),
+
+        updateTrustBadges: (config) =>
+          set((state) => ({
+            trustBadges: { ...state.trustBadges, ...config },
+          })),
+
+        updateProductDetails: (config) =>
+          set((state) => ({
+            productDetails: { ...state.productDetails, ...config },
+          })),
+
+        resetAll: () => set({ ...DEFAULT_STATE, isDirty: false }),
+
+        resetSections: () => set((state) => ({
+          announcementBar: DEFAULT_STATE.announcementBar,
+          welcomeScreen: DEFAULT_STATE.welcomeScreen,
+          brandIntro: DEFAULT_STATE.brandIntro,
+          categories: DEFAULT_STATE.categories,
+          featuredProducts: DEFAULT_STATE.featuredProducts,
+          benefits: DEFAULT_STATE.benefits,
+          videoBanner: DEFAULT_STATE.videoBanner,
+          collections: DEFAULT_STATE.collections,
+          socialProof: DEFAULT_STATE.socialProof,
+          howItWorks: DEFAULT_STATE.howItWorks,
+          ugcFeed: DEFAULT_STATE.ugcFeed,
+          blog: DEFAULT_STATE.blog,
+          story: DEFAULT_STATE.story,
+          cta: DEFAULT_STATE.cta,
+          faq: DEFAULT_STATE.faq,
+          footer: DEFAULT_STATE.footer,
+          isDirty: true,
+        })),
+
+        resetHero: () => set((state) => ({
+          hero: DEFAULT_STATE.hero,
+          isDirty: true,
+        })),
+
+        resetVisibility: () => set((state) => ({
+          visibility: DEFAULT_STATE.visibility,
+          isDirty: true,
+        })),
+
+        fetchConfigFromServer: async () => {
+          set({ isLoading: true });
+          try {
+            const res = await systemConfigService.getConfig('HOME_LAYOUT');
+            if (res && res.configValue) {
+              const parsed = typeof res.configValue === 'string' ? JSON.parse(res.configValue) : res.configValue;
+              // Deep merge: ensure each section config preserves defaults for missing fields
+              const deepMerged: Record<string, any> = {};
+              for (const key of Object.keys(parsed)) {
+                const defaultVal = (DEFAULT_STATE as any)[key];
+                const parsedVal = parsed[key];
+                if (defaultVal && typeof defaultVal === 'object' && !Array.isArray(defaultVal) && typeof parsedVal === 'object' && !Array.isArray(parsedVal)) {
+                  deepMerged[key] = { ...defaultVal, ...parsedVal };
+                } else {
+                  deepMerged[key] = parsedVal;
+                }
+              }
+              set((state) => ({
+                ...state,
+                ...deepMerged,
+                isLoading: false,
+                isDirty: false,
+              }));
+            } else {
+              set({ isLoading: false });
+            }
+          } catch (err) {
+            console.error('Failed to fetch home layout config from server:', err);
             set({ isLoading: false });
           }
-        } catch (err) {
-          console.error('Failed to fetch home layout config from server:', err);
-          set({ isLoading: false });
-        }
-      },
+        },
 
-      saveConfigToServer: async () => {
-        set({ isSaving: true });
-        try {
-          const state = get();
-          const dataToSave = {
-            visibility: state.visibility,
-            header: state.header,
-            announcementBar: state.announcementBar,
-            hero: state.hero,
-            trustBar: state.trustBar,
-            brandIntro: state.brandIntro,
-            categories: state.categories,
-            featuredProducts: state.featuredProducts,
-            benefits: state.benefits,
-            videoBanner: state.videoBanner,
-            collections: state.collections,
-            socialProof: state.socialProof,
-            howItWorks: state.howItWorks,
-            ugcFeed: state.ugcFeed,
-            blog: state.blog,
-            story: state.story,
-            cta: state.cta,
-            faq: state.faq,
-            footer: state.footer,
-            welcomeScreen: state.welcomeScreen,
-            trustBadges: state.trustBadges,
-            productDetails: state.productDetails,
-          };
-          await systemConfigService.updateConfig('HOME_LAYOUT', dataToSave);
-          set({ isSaving: false });
-        } catch (err) {
-          console.error('Failed to save home layout config to server:', err);
-          set({ isSaving: false });
-          throw err;
-        }
-      },
-    }),
-    // {
-    //   name: 'haniu-home-layout-config-v11',
-    //   skipHydration: true,
-    // }
+        saveConfigToServer: async (options?: RequestInit) => {
+          set({ isSaving: true });
+          try {
+            const state = get();
+            const dataToSave = {
+              visibility: state.visibility,
+              header: state.header,
+              announcementBar: state.announcementBar,
+              hero: state.hero,
+              trustBar: state.trustBar,
+              brandIntro: state.brandIntro,
+              categories: state.categories,
+              featuredProducts: state.featuredProducts,
+              benefits: state.benefits,
+              videoBanner: state.videoBanner,
+              collections: state.collections,
+              socialProof: state.socialProof,
+              howItWorks: state.howItWorks,
+              ugcFeed: state.ugcFeed,
+              blog: state.blog,
+              story: state.story,
+              cta: state.cta,
+              faq: state.faq,
+              footer: state.footer,
+              welcomeScreen: state.welcomeScreen,
+              trustBadges: state.trustBadges,
+              productDetails: state.productDetails,
+            };
+            await systemConfigService.updateConfig('HOME_LAYOUT', dataToSave, options);
+            set({ isSaving: false, isDirty: false });
+          } catch (err) {
+            console.error('Failed to save home layout config to server:', err);
+            set({ isSaving: false });
+            throw err;
+          }
+        },
+      };
+    }
   // )
 );

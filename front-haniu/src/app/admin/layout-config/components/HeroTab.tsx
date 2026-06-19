@@ -13,10 +13,36 @@ export function HeroTab() {
     updateHeroSlide,
     addHeroSlide,
     deleteHeroSlide,
+    moveHeroSlide,
+    updateHeroSlidesOrder,
   } = useHomeLayoutStore();
 
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const [expandedSlides, setExpandedSlides] = useState<Record<string, boolean>>({});
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const newSlides = [...hero.slides];
+    const draggedItem = newSlides[draggedIndex];
+    newSlides.splice(draggedIndex, 1);
+    newSlides.splice(index, 0, draggedItem);
+
+    updateHeroSlidesOrder(newSlides);
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
 
   const toggleExpandSlide = (id: string) => {
     setExpandedSlides(prev => ({
@@ -167,16 +193,37 @@ export function HeroTab() {
           {(hero.slides || []).map((slide, index) => {
             const open = isExpanded(slide.id, index);
             return (
-              <div key={slide.id} className="bg-slate-50/50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800/80 transition-all duration-200 overflow-hidden">
+              <div 
+                key={slide.id} 
+                draggable
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragEnd={handleDragEnd}
+                className={`bg-slate-50/50 dark:bg-zinc-850 rounded-2xl border transition-all duration-200 overflow-hidden ${
+                  draggedIndex === index 
+                    ? 'opacity-40 border-dashed border-rose-500 scale-[0.99] shadow-inner' 
+                    : 'border-slate-200 dark:border-zinc-800/80'
+                }`}
+              >
                 {/* Accordion Header */}
                 <div 
                   onClick={() => toggleExpandSlide(slide.id)}
                   className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-100/50 dark:hover:bg-zinc-800/30 transition-colors select-none"
                 >
                   <div className="flex items-center gap-3">
+                    {/* Drag Handle */}
+                    <div 
+                      className="text-slate-400 hover:text-rose-500 dark:text-zinc-600 dark:hover:text-rose-400 cursor-grab active:cursor-grabbing p-1.5"
+                      title="Kéo thả để sắp xếp vị trí slide"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Icon name="menu" size={14} />
+                    </div>
+
                     <div className="text-slate-400 dark:text-zinc-500">
                       <Icon name={open ? 'chevron-up' : 'chevron-down'} size={14} />
                     </div>
+
                     <div>
                       <span className="text-xs font-bold text-rose-500 uppercase tracking-widest block">
                         Slide {index + 1}: {slide.boldTitle || 'Chưa đặt tên'}
@@ -190,6 +237,28 @@ export function HeroTab() {
                   </div>
 
                   <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    {/* Sort buttons */}
+                    <div className="flex items-center gap-1 border-r border-slate-205 dark:border-zinc-800 pr-2 mr-1">
+                      <button
+                        type="button"
+                        disabled={index === 0}
+                        onClick={() => moveHeroSlide(index, 'up')}
+                        className="p-1 rounded bg-white dark:bg-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-700 text-slate-500 hover:text-rose-500 disabled:opacity-30 disabled:hover:text-slate-500 active:scale-90 transition-all cursor-pointer disabled:cursor-not-allowed"
+                        title="Di chuyển lên trên"
+                      >
+                        <span className="text-[10px]">▲</span>
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === hero.slides.length - 1}
+                        onClick={() => moveHeroSlide(index, 'down')}
+                        className="p-1 rounded bg-white dark:bg-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-700 text-slate-500 hover:text-rose-500 disabled:opacity-30 disabled:hover:text-slate-500 active:scale-90 transition-all cursor-pointer disabled:cursor-not-allowed"
+                        title="Di chuyển xuống dưới"
+                      >
+                        <span className="text-[10px]">▼</span>
+                      </button>
+                    </div>
+
                     {hero.slides.length > 1 && (
                       <button
                         onClick={() => {

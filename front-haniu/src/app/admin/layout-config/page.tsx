@@ -12,6 +12,7 @@ type TabType = 'hero' | 'visibility' | 'sections' | 'payment-methods';
 
 export default function AdminLayoutConfigPage() {
   const {
+    isDirty,
     isSaving,
     isLoading,
     resetAll,
@@ -38,6 +39,21 @@ export default function AdminLayoutConfigPage() {
     init();
   }, [fetchConfigFromServer]);
 
+  // Warn user before refreshing/closing tab if they have unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = 'Bạn có thay đổi chưa lưu. Bạn có chắc chắn muốn rời khỏi trang?';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isDirty]);
+
   const activeTabRef = useRef(activeTab);
   useEffect(() => {
     activeTabRef.current = activeTab;
@@ -51,8 +67,9 @@ export default function AdminLayoutConfigPage() {
   // Auto-save when navigating away / page unmounts
   useEffect(() => {
     return () => {
-      if (hasLoadedRef.current && activeTabRef.current !== 'payment-methods') {
-        useHomeLayoutStore.getState().saveConfigToServer().catch((err) => {
+      const store = useHomeLayoutStore.getState();
+      if (hasLoadedRef.current && activeTabRef.current !== 'payment-methods' && store.isDirty) {
+        store.saveConfigToServer({ keepalive: true }).catch((err) => {
           console.error('Lỗi tự động lưu khi rời trang:', err);
         });
       }
@@ -87,14 +104,24 @@ export default function AdminLayoutConfigPage() {
   };
 
   const handleReset = () => {
-    if (
-      confirm(
-        'Bạn có chắc chắn muốn khôi phục toàn bộ giao diện và nội dung về mặc định? Mọi thay đổi chưa lưu sẽ bị ghi đè.'
-      )
-    ) {
-      resetAll();
-      setSuccessMsg('Đã khôi phục về mặc định thành công!');
-      setTimeout(() => setSuccessMsg(''), 3000);
+    let confirmMsg = 'Bạn có chắc chắn muốn khôi phục toàn bộ giao diện và nội dung về mặc định? Mọi thay đổi chưa lưu sẽ bị ghi đè.';
+    let resetFn = resetAll;
+
+    if (activeTab === 'sections') {
+      confirmMsg = 'Bạn có chắc chắn muốn khôi phục Cấu hình chi tiết các khối về mặc định? Mọi thay đổi chưa lưu ở tab này sẽ bị ghi đè.';
+      resetFn = useHomeLayoutStore.getState().resetSections;
+    } else if (activeTab === 'hero') {
+      confirmMsg = 'Bạn có chắc chắn muốn khôi phục Hero Banner & Slideshow về mặc định? Mọi thay đổi chưa lưu ở tab này sẽ bị ghi đè.';
+      resetFn = useHomeLayoutStore.getState().resetHero;
+    } else if (activeTab === 'visibility') {
+      confirmMsg = 'Bạn có chắc chắn muốn khôi phục Trạng thái hiển thị về mặc định? Mọi thay đổi chưa lưu ở tab này sẽ bị ghi đè.';
+      resetFn = useHomeLayoutStore.getState().resetVisibility;
+    }
+
+    if (confirm(confirmMsg)) {
+      resetFn();
+      setSuccessMsg('Đã khôi phục phần hiện tại về mặc định thành công! Nhấp "Lưu cấu hình lên Server" để hoàn thành.');
+      setTimeout(() => setSuccessMsg(''), 4500);
     }
   };
 
@@ -181,6 +208,12 @@ export default function AdminLayoutConfigPage() {
         <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs rounded-xl font-semibold flex items-center gap-2 animate-fade-in">
           <Icon name="close" size={16} />
           <span>{errorMsg}</span>
+        </div>
+      )}
+      {isDirty && !successMsg && !errorMsg && (
+        <div className="p-4 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs rounded-xl font-semibold flex items-center gap-2 animate-pulse">
+          <span className="text-base">⚠️</span>
+          <span>Bạn có thay đổi chưa được lưu. Hãy bấm nút &quot;Lưu cấu hình lên Server&quot; để tránh mất dữ liệu khi tải lại trang!</span>
         </div>
       )}
 
