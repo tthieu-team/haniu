@@ -9,8 +9,22 @@ interface FileUploadInputProps {
   onChange: (url: string) => void;
   label?: string;
   accept?: string;
-  type?: 'image' | 'video';
+  type?: 'image' | 'video' | 'auto';
   placeholder?: string;
+}
+
+function isVideoUrl(url: string) {
+  if (!url) return false;
+  const cleanUrl = url.split('?')[0].split('#')[0].toLowerCase();
+  return (
+    cleanUrl.endsWith('.mp4') ||
+    cleanUrl.endsWith('.webm') ||
+    cleanUrl.endsWith('.ogg') ||
+    cleanUrl.endsWith('.mov') ||
+    url.includes('/uploads/products/videos') ||
+    url.includes('/uploads/files/products/videos') ||
+    url.includes('video')
+  );
 }
 
 export function FileUploadInput({
@@ -32,7 +46,10 @@ export function FileUploadInput({
     setError('');
 
     try {
-      const res = await productService.uploadImage(file);
+      const isVideoFile = file.type.startsWith('video/');
+      const res = isVideoFile 
+        ? await productService.uploadVideo(file)
+        : await productService.uploadImage(file);
       if (res && res.url) {
         onChange(res.url);
       } else {
@@ -112,13 +129,13 @@ export function FileUploadInput({
       {/* Preview container */}
       {value && (
         <div className="mt-2 inline-block">
-          {type === 'image' ? (
-            <img
+          {(type === 'video' || (type === 'auto' && isVideoUrl(value))) ? (
+            <video
               src={value}
-              alt="Preview"
               className="max-h-24 max-w-[240px] rounded-xl object-cover border border-slate-200 dark:border-zinc-800 shadow-xs"
+              controls
               onError={(e) => {
-                const target = e.target as HTMLImageElement;
+                const target = e.target as HTMLVideoElement;
                 if (!target.src.startsWith('http') && !target.src.startsWith('data:')) {
                   const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
                   target.src = `${API_BASE}${value.startsWith('/') ? '' : '/'}${value}`;
@@ -126,12 +143,12 @@ export function FileUploadInput({
               }}
             />
           ) : (
-            <video
+            <img
               src={value}
+              alt="Preview"
               className="max-h-24 max-w-[240px] rounded-xl object-cover border border-slate-200 dark:border-zinc-800 shadow-xs"
-              controls
               onError={(e) => {
-                const target = e.target as HTMLVideoElement;
+                const target = e.target as HTMLImageElement;
                 if (!target.src.startsWith('http') && !target.src.startsWith('data:')) {
                   const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
                   target.src = `${API_BASE}${value.startsWith('/') ? '' : '/'}${value}`;

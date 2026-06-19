@@ -20,21 +20,18 @@ export default function BlogSection() {
     }
   }, [isVisible, fetchActivePosts]);
 
-  if (!isVisible) return null;
+  if (!isVisible || activePosts.length === 0) return null;
 
   const dateLocale = language === 'ja' ? 'ja-JP' : language === 'en' ? 'en-US' : 'vi-VN';
 
-  // Prefer backend database articles, fallback to config mock items if empty
-  const displayPosts = activePosts.length > 0
-    ? activePosts.map((p) => ({
-        id: p.id || '',
-        title: p.title,
-        summary: p.summary || '',
-        image: p.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80',
-        date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' }) : '---',
-        href: `/blog/${p.slug}`
-      }))
-    : blog.items;
+  const displayPosts = activePosts.map((p) => ({
+    id: p.id || '',
+    title: p.title,
+    summary: p.summary || '',
+    image: p.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80',
+    date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' }) : '---',
+    href: `/blog/${p.slug}`
+  }));
 
   return (
     <section id="blog" className="py-6 sm:py-12 bg-slate-50/50 dark:bg-zinc-900/10 border-y border-slate-200 dark:border-zinc-800/80 scroll-mt-20">

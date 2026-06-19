@@ -209,13 +209,15 @@ export function HeroTab() {
                 {open && (
                   <div className="p-6 border-t border-slate-200 dark:border-zinc-800 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Background image file uploader */}
+                      {/* Background image/video file uploader */}
                       <div className="md:col-span-2">
                         <FileUploadInput
-                          label="Ảnh nền Banner (Background Image)"
+                          label="Ảnh/Video nền Banner (Background Image/Video)"
                           value={slide.backgroundImage}
                           onChange={(url) => updateHeroSlide(slide.id, { backgroundImage: url })}
-                          placeholder="Tải lên tệp ảnh hoặc điền đường dẫn ảnh..."
+                          accept="image/*,video/*"
+                          type="auto"
+                          placeholder="Tải lên tệp ảnh/video hoặc điền đường dẫn..."
                         />
                       </div>
 

@@ -92,20 +92,105 @@ export default function AboutPage() {
 
         {/* Stats Section */}
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-            {activeIntro.stats?.map((stat, idx) => (
-              <div 
-                key={idx} 
-                className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-xs text-center space-y-2 hover:-translate-y-1 transition-all duration-300 group"
-              >
-                <span className="text-3xl sm:text-4xl font-black bg-gradient-to-br from-amber-500 to-rose-500 bg-clip-text text-transparent block group-hover:scale-105 transition-transform duration-300">
-                  {stat.value}
-                </span>
-                <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider block">
-                  {stat.label}
-                </span>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {activeIntro.stats?.map((stat, idx) => {
+              const parts = stat.value.trim().split(' ');
+              const hasEmoji = parts.length > 1 && (parts[0].length <= 4 || /[\p{Emoji}]/u.test(parts[0]));
+              const numberVal = hasEmoji ? parts.slice(1).join(' ') : stat.value;
+
+              // Map stats to matching clean Lucide icons for maximum consistency
+              const iconNames = ['users', 'camera', 'gift', 'heart'];
+              const iconName = iconNames[idx % iconNames.length];
+
+              // Premium matching brand themes with high-conversion micro-badges
+              const themes = [
+                {
+                  bg: 'bg-rose-500/10 dark:bg-rose-500/20',
+                  text: 'text-rose-500 dark:text-rose-400',
+                  border: 'group-hover:border-rose-200 dark:group-hover:border-rose-900/30',
+                  gradient: 'from-rose-500 via-rose-400 to-pink-500',
+                  bar: 'from-rose-500 to-pink-500',
+                  badge: '★ 99% Hài lòng'
+                },
+                {
+                  bg: 'bg-indigo-500/10 dark:bg-indigo-500/20',
+                  text: 'text-indigo-500 dark:text-indigo-400',
+                  border: 'group-hover:border-indigo-200 dark:group-hover:border-indigo-900/30',
+                  gradient: 'from-indigo-500 via-purple-500 to-pink-500',
+                  bar: 'from-indigo-500 to-purple-500',
+                  badge: 'Ảnh feedback thật'
+                },
+                {
+                  bg: 'bg-amber-500/10 dark:bg-amber-500/20',
+                  text: 'text-amber-600 dark:text-amber-400',
+                  border: 'group-hover:border-amber-200 dark:group-hover:border-amber-900/30',
+                  gradient: 'from-amber-500 via-orange-500 to-rose-500',
+                  bar: 'from-amber-500 to-rose-500',
+                  badge: 'Độc bản & Thủ công'
+                },
+                {
+                  bg: 'bg-rose-500/10 dark:bg-rose-500/20',
+                  text: 'text-rose-600 dark:text-rose-400',
+                  border: 'group-hover:border-rose-200 dark:group-hover:border-rose-900/30',
+                  gradient: 'from-rose-600 via-pink-500 to-amber-500',
+                  bar: 'from-rose-600 to-amber-500',
+                  badge: 'Gửi trọn yêu thương'
+                },
+              ];
+              const theme = themes[idx % themes.length];
+
+              const isEven = idx % 2 === 0;
+
+              return (
+                <div
+                  key={idx}
+                  className={`relative overflow-hidden p-5 pl-6 rounded-[24px] border border-slate-200/80 dark:border-zinc-800/80 bg-white/40 dark:bg-zinc-900/20 backdrop-blur-xl hover:-translate-y-2 hover:shadow-2xl hover:shadow-rose-500/[0.04] transition-all duration-500 group ${theme.border} ${!isEven ? 'sm:translate-y-3' : ''}`}
+                >
+                  {/* Inline Style Injection for safe, direct keyframes rendering */}
+                  <style>{`
+                    @keyframes float-slow-coords-${idx} {
+                      0% { right: -24px; bottom: -24px; }
+                      50% { right: -12px; bottom: -12px; }
+                      100% { right: -24px; bottom: -24px; }
+                    }
+                  `}</style>
+                  {/* Ambient glow bubbles inside card */}
+                  <div
+                    className={`absolute w-16 h-16 rounded-full bg-gradient-to-br ${theme.gradient} opacity-5 group-hover:opacity-20 blur-xl transition-all duration-700 group-hover:scale-150`}
+                    style={{
+                      right: '-24px',
+                      bottom: '-24px',
+                      animation: `float-slow-coords-${idx} ${6 + (idx * 1.5)}s ease-in-out infinite`
+                    }}
+                  />
+
+                  {/* Vertical gradient indicator strip */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${theme.bar} opacity-60 group-hover:opacity-100 transition-opacity`} />
+
+                  <div className="flex flex-col gap-3 w-full">
+                    {/* Row 1: Standalone Icon */}
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ring-2 ring-transparent group-hover:ring-offset-2 dark:group-hover:ring-offset-zinc-900 group-hover:ring-rose-500/20 transition-all duration-300 ${theme.bg} ${theme.text}`}>
+                      <Icon name={iconName} size={16} className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                    </div>
+
+                    {/* Row 2, 3, 4: Value, Label, and Badge stacked below */}
+                    <div className="flex flex-col gap-1.5 pl-0.5 w-full">
+                      <span className={`text-xl sm:text-2xl font-extrabold bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent tracking-tight leading-tight whitespace-nowrap`}>
+                        {numberVal}
+                      </span>
+                      <span className="block text-[11px] sm:text-xs font-bold text-slate-800 dark:text-zinc-200 tracking-wide leading-tight">
+                        {stat.label}
+                      </span>
+                      <div className="pt-0.5">
+                        <span className={`inline-block text-[9px] font-medium px-1.5 py-0.5 rounded-sm ${theme.bg} ${theme.text} scale-95 origin-left whitespace-nowrap`}>
+                          {theme.badge}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -123,7 +208,7 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {coreValues.map((value, idx) => (
-              <div 
+              <div
                 key={idx}
                 className="bg-white dark:bg-zinc-900 p-8 rounded-[36px] border border-slate-200 dark:border-zinc-800 shadow-xs flex gap-5 hover:border-rose-500/10 dark:hover:border-rose-500/10 transition-colors animate-fade-in"
               >

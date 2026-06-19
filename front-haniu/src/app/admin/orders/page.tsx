@@ -77,71 +77,6 @@ export default function AdminOrdersPage() {
     await fetchAllOrders();
   };
 
-  const handleLoadMockData = () => {
-    useOrderStore.setState({
-      orders: [
-        {
-          id: "ord-1",
-          orderCode: "HN-1716301234567",
-          customerName: "Nguyễn Văn A",
-          customerPhone: "0901234567",
-          customerEmail: "vana@gmail.com",
-          subtotalPrice: 490000,
-          shippingFee: 30000,
-          discountAmount: 0,
-          totalPrice: 520000,
-          paymentMethod: "MOMO",
-          paymentStatus: "PENDING",
-          orderStatus: "PENDING",
-          orderedAt: "2026-05-21T10:00:00",
-          shippingProvince: "Hà Nội",
-          shippingDistrict: "Cầu Giấy",
-          shippingWard: "Dịch Vọng",
-          shippingAddressLine: "Số 15 Ngõ 20 Trần Thái Tông",
-          note: "Gói quà cẩn thận giúp mình nhé",
-          items: [
-            {
-              id: "item-1",
-              productName: "Hộp Quà Lãng Mạn - Eternal Love",
-              variantName: "Standard",
-              quantity: 1,
-              unitPrice: 490000,
-              totalPrice: 490000,
-              customizationInfo: '{"text":"Chúc mừng sinh nhật Trang","card":"Merry Christmas"}'
-            }
-          ]
-        },
-        {
-          id: "ord-2",
-          orderCode: "HN-1716309876543",
-          customerName: "Trần Thị B",
-          customerPhone: "0987654321",
-          customerEmail: "thib@gmail.com",
-          subtotalPrice: 180000,
-          shippingFee: 30000,
-          discountAmount: 30000,
-          totalPrice: 180000,
-          paymentMethod: "COD",
-          paymentStatus: "PAID",
-          orderStatus: "DELIVERED",
-          orderedAt: "2026-05-20T14:30:00",
-          shippingProvince: "Hồ Chí Minh",
-          shippingDistrict: "Quận 1",
-          shippingWard: "Bến Nghé",
-          shippingAddressLine: "120 Lê Lợi",
-          items: [
-            {
-              id: "item-2",
-              productName: "Ly Sứ Cao Cấp Men Hỏa Biến",
-              quantity: 1,
-              unitPrice: 180000,
-              totalPrice: 180000
-            }
-          ]
-        }
-      ]
-    });
-  };
 
   useEffect(() => {
     loadOrders();
@@ -250,14 +185,8 @@ export default function AdminOrdersPage() {
               </button>
             </div>
           ) : filteredOrders.length === 0 ? (
-            <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl text-center text-slate-400 space-y-3">
+            <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl text-center text-slate-400 py-12">
               <p className="text-xs font-semibold">Không tìm thấy đơn hàng nào.</p>
-              <button 
-                onClick={handleLoadMockData}
-                className="px-3 py-1.5 text-[10px] font-bold rounded-lg border border-slate-200 hover:bg-slate-50 dark:border-zinc-800 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"
-              >
-                Nạp dữ liệu mẫu để thử nghiệm (Demo)
-              </button>
             </div>
           ) : (
             filteredOrders.map(order => (

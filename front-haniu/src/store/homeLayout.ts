@@ -454,14 +454,14 @@ export const DEFAULT_STATE = {
     ],
   },
   brandIntro: {
-    title: "Kiến Tạo Những Kỷ Niệm Vô Giá",
+    title: "Nơi Những Món Quà Kể Câu Chuyện",
     subtitle: "VỀ HANIU",
-    description: "Được thành lập từ năm 2020, Haniu mang sứ mệnh biến những món quà bình thường thành những kỷ vật vô giá. Chúng tôi tin rằng mỗi món quà trao đi là một thông điệp yêu thương được gửi gắm trọn vẹn, được chế tác thủ công tinh xảo bởi những nghệ nhân lành nghề cùng công nghệ cá nhân hóa laser hiện đại.",
+    description: "Tại Haniu, mỗi món quà không chỉ là một vật phẩm, mà còn là cách lưu giữ những cảm xúc đẹp nhất. Chúng tôi tuyển chọn và tạo nên những sản phẩm quà tặng mang phong cách trẻ trung, tinh tế và giàu cảm xúc như gấu bông, photobooth, hoa handmade và các set quà cá nhân hóa.\n\nMỗi chi tiết đều được chăm chút với sự tỉ mỉ và tình yêu dành cho nghệ thuật quà tặng, giúp bạn dễ dàng gửi trao lời yêu thương, lời cảm ơn hay lời chúc mừng theo cách đặc biệt nhất.\n\nHaniu mong muốn trở thành người bạn đồng hành trong mọi cột mốc đáng nhớ của bạn và những người thân yêu.",
     stats: [
-      { value: "2020", label: "Năm thành lập" },
-      { value: "50.000+", label: "Khách hàng tin chọn" },
-      { value: "100%", label: "Chế tác thủ công" },
-      { value: "24/7", label: "Tư vấn thiết kế" }
+      { value: "🧸 500+", label: "Khách hàng tin chọn" },
+      { value: "📸 2.000+", label: "Khoảnh khắc được lưu giữ" },
+      { value: "🎁 100+", label: "Mẫu quà tặng độc đáo" },
+      { value: "❤️ Hàng ngàn", label: "Lời yêu thương được trao gửi" }
     ]
   },
   categories: {

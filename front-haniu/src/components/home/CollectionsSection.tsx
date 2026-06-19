@@ -29,17 +29,14 @@ export default function CollectionsSection() {
     loadCollections();
   }, []);
 
-  if (!isVisible) return null;
+  if (!isVisible || dbCollections.length === 0) return null;
 
-  const hasDbCollections = dbCollections.length > 0;
-  const displayItems = hasDbCollections
-    ? dbCollections.map(c => ({
-      title: c.name,
-      subtitle: c.description || t('home.collections.fallback_desc'),
-      image: getFullImageUrl(c.imageUrl) || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80',
-      href: `/collections/${c.slug}`
-    }))
-    : layoutCollections.items;
+  const displayItems = dbCollections.map(c => ({
+    title: c.name,
+    subtitle: c.description || t('home.collections.fallback_desc'),
+    image: getFullImageUrl(c.imageUrl) || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80',
+    href: `/collections/${c.slug}`
+  }));
 
   return (
     <section id="collections" className="py-6 md:py-12 space-y-10 sm:space-y-16 scroll-mt-20">

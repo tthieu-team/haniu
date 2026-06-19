@@ -173,7 +173,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         seedUgcItems();
         seedUsers();
 
-        if (categoryRepository.count() > 0) {
+        if (brandRepository.count() > 0) {
             log.info("Database already seeded. Updating existing product prices if needed.");
             updatePricesForExistingProducts();
             return;
@@ -190,209 +190,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .build();
         brand = brandRepository.save(brand);
 
-        // 2. Seed Collection
-        Collection collection = Collection.builder()
-                .name("Bộ sưu tập quà tặng gỗ khắc tên")
-                .slug("bst-qua-tang-go-khac-ten")
-                .description("Các sản phẩm quà tặng gỗ tự nhiên, hỗ trợ khắc tên và thông điệp cá nhân hóa.")
-                .isActive(true)
-                .build();
-        collection = collectionRepository.save(collection);
-
-        // 3. Seed Categories
-        Category lySu = Category.builder()
-                .name("Ly sứ")
-                .slug("ly-su")
-                .description("Các mẫu ly cốc sứ cao cấp, in hình và khắc chữ theo yêu cầu")
-                .isActive(true)
-                .isFeatured(true)
-                .sortOrder(1)
-                .build();
-        lySu = categoryRepository.save(lySu);
-
-        Category soDa = Category.builder()
-                .name("Sổ da")
-                .slug("so-da")
-                .description("Sổ tay bìa da thật, thiết kế sang trọng, thích hợp làm quà tặng doanh nghiệp")
-                .isActive(true)
-                .isFeatured(true)
-                .sortOrder(2)
-                .build();
-        soDa = categoryRepository.save(soDa);
-
-        Category hoaSap = Category.builder()
-                .name("Hoa sáp")
-                .slug("hoa-sap")
-                .description("Hộp quà hoa hồng sáp thơm vĩnh cửu tinh tế, lãng mạn")
-                .isActive(true)
-                .isFeatured(true)
-                .sortOrder(3)
-                .build();
-        hoaSap = categoryRepository.save(hoaSap);
-
-        Category comboQua = Category.builder()
-                .name("Combo quà tặng")
-                .slug("combo-qua-tang")
-                .description("Các set quà phối sẵn sang trọng cho mọi dịp đặc biệt")
-                .isActive(true)
-                .isFeatured(true)
-                .sortOrder(4)
-                .build();
-        comboQua = categoryRepository.save(comboQua);
-
-        // Seed Attribute Definitions
-        if (attributeDefinitionRepository.count() == 0) {
-            log.info("Seeding dynamic Attribute Definitions...");
-            
-            // Global Attributes
-            AttributeDefinition xuatXu = AttributeDefinition.builder()
-                    .name("Xuất xứ")
-                    .code("xuat_xu")
-                    .type(com.haniu.tthieu.haniu.entity.enums.AttributeType.TEXT)
-                    .isRequired(false)
-                    .isFilterable(true)
-                    .build();
-            attributeDefinitionRepository.save(xuatXu);
-
-            AttributeDefinition baoHanh = AttributeDefinition.builder()
-                    .name("Thời gian bảo hành")
-                    .code("bao_hanh")
-                    .type(com.haniu.tthieu.haniu.entity.enums.AttributeType.SELECT)
-                    .options("[\"Không bảo hành\", \"3 tháng\", \"6 tháng\", \"12 tháng\"]")
-                    .isRequired(false)
-                    .isFilterable(false)
-                    .build();
-            attributeDefinitionRepository.save(baoHanh);
-
-            // Category Specific: Sổ da (soDa)
-            AttributeDefinition chatLieuBia = AttributeDefinition.builder()
-                    .category(soDa)
-                    .name("Chất liệu bìa")
-                    .code("chat_lieu_bia")
-                    .type(com.haniu.tthieu.haniu.entity.enums.AttributeType.SELECT)
-                    .options("[\"Da PU cao cấp\", \"Da bò thật 100%\", \"Da Simili\", \"Da Microfiber\"]")
-                    .isRequired(true)
-                    .isFilterable(true)
-                    .build();
-            attributeDefinitionRepository.save(chatLieuBia);
-
-            AttributeDefinition soTrang = AttributeDefinition.builder()
-                    .category(soDa)
-                    .name("Số trang")
-                    .code("so_trang")
-                    .type(com.haniu.tthieu.haniu.entity.enums.AttributeType.NUMBER)
-                    .isRequired(false)
-                    .isFilterable(false)
-                    .build();
-            attributeDefinitionRepository.save(soTrang);
-
-            // Category Specific: Ly sứ (lySu)
-            AttributeDefinition dungTich = AttributeDefinition.builder()
-                    .category(lySu)
-                    .name("Dung tích ly")
-                    .code("dung_tich")
-                    .type(com.haniu.tthieu.haniu.entity.enums.AttributeType.SELECT)
-                    .options("[\"250ml\", \"350ml\", \"450ml\", \"500ml\"]")
-                    .isRequired(true)
-                    .isFilterable(true)
-                    .build();
-            attributeDefinitionRepository.save(dungTich);
-
-            AttributeDefinition coNap = AttributeDefinition.builder()
-                    .category(lySu)
-                    .name("Có nắp đậy")
-                    .code("nap_day")
-                    .type(com.haniu.tthieu.haniu.entity.enums.AttributeType.BOOLEAN)
-                    .isRequired(false)
-                    .isFilterable(true)
-                    .build();
-            attributeDefinitionRepository.save(coNap);
-        }
-
-        // 4. Seed Occasions
-        Occasion sinhNhat = Occasion.builder()
-                .name("Sinh nhật")
-                .slug("sinh-nhat")
-                .description("Quà tặng sinh nhật ý nghĩa cho bạn bè và người thân")
-                .startDate("01-01")
-                .endDate("12-31")
-                .isActive(true)
-                .build();
-        sinhNhat = occasionRepository.save(sinhNhat);
-
-        Occasion leTinhNhan = Occasion.builder()
-                .name("Lễ tình nhân")
-                .slug("le-tinh-nhan")
-                .description("Quà tặng Valentine lãng mạn và ngọt ngào")
-                .startDate("02-14")
-                .endDate("02-14")
-                .isActive(true)
-                .build();
-        leTinhNhan = occasionRepository.save(leTinhNhan);
-
-        Occasion quocKhanh = Occasion.builder()
-                .name("Quốc khánh 2-9")
-                .slug("quoc-khanh-2-9")
-                .description("Quà lưu niệm yêu nước nhân dịp Quốc khánh nước Cộng hòa Xã hội Chủ nghĩa Việt Nam")
-                .startDate("09-02")
-                .endDate("09-02")
-                .isActive(true)
-                .build();
-        quocKhanh = occasionRepository.save(quocKhanh);
-
-        Occasion nhaGiao = Occasion.builder()
-                .name("Ngày nhà giáo 20-11")
-                .slug("ngay-nha-giao-20-11")
-                .description("Quà tri ân thầy cô giáo nhân ngày 20-11")
-                .startDate("11-20")
-                .endDate("11-20")
-                .isActive(true)
-                .build();
-        nhaGiao = occasionRepository.save(nhaGiao);
-
-        // 5. Seed Recipients
-        Recipient banTrai = Recipient.builder()
-                .name("Bạn trai")
-                .slug("ban-trai")
-                .description("Quà tặng nam tính, độc đáo cho bạn trai")
-                .isActive(true)
-                .build();
-        banTrai = recipientRepository.save(banTrai);
-
-        Recipient banGai = Recipient.builder()
-                .name("Bạn gái")
-                .slug("ban-gai")
-                .description("Quà tặng tinh tế, lãng mạn cho bạn gái")
-                .isActive(true)
-                .build();
-        banGai = recipientRepository.save(banGai);
-
-        Recipient thayCo = Recipient.builder()
-                .name("Thầy cô")
-                .slug("thay-co")
-                .description("Quà tặng trang trọng tri ân thầy cô giáo")
-                .isActive(true)
-                .build();
-        thayCo = recipientRepository.save(thayCo);
-
-        Recipient boMe = Recipient.builder()
-                .name("Bố mẹ")
-                .slug("bo-me")
-                .description("Quà tặng sức khỏe, hiếu kính dành cho đấng sinh thành")
-                .isActive(true)
-                .build();
-        boMe = recipientRepository.save(boMe);
-
-        Recipient doiTac = Recipient.builder()
-                .name("Đối tác")
-                .slug("doi-tac")
-                .description("Quà tặng sang trọng cho doanh nghiệp và khách hàng đối tác")
-                .isActive(true)
-                .build();
-        doiTac = recipientRepository.save(doiTac);
-
-        // 6. Seed Products (Removed mock seeding to allow clean database)
-        log.info("Database standard catalog seeding step: skipped mock products.");
+        log.info("Database standard catalog seeding step: skipped mock categories, collections, occasions and recipients.");
     }
 
     private void updatePricesForExistingProducts() {
@@ -400,10 +198,63 @@ public class DatabaseSeeder implements CommandLineRunner {
             String val = config.getConfigValue();
             if (val != null) {
                 String newVal = val.replace("/#story", "/story").replace("/#collections", "/collections");
+                try {
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    com.fasterxml.jackson.databind.JsonNode rootNode = mapper.readTree(newVal);
+                    if (rootNode instanceof com.fasterxml.jackson.databind.node.ObjectNode) {
+                        com.fasterxml.jackson.databind.node.ObjectNode root = (com.fasterxml.jackson.databind.node.ObjectNode) rootNode;
+                        if (root.has("brandIntro")) {
+                            com.fasterxml.jackson.databind.node.ObjectNode brandIntro = (com.fasterxml.jackson.databind.node.ObjectNode) root.get("brandIntro");
+                            
+                            // Check if it needs updating (e.g. still has old title or old stats format)
+                            boolean needsUpdate = false;
+                            if (!brandIntro.has("title") || !brandIntro.get("title").asText().equals("Nơi Những Món Quà Kể Câu Chuyện")) {
+                                brandIntro.put("title", "Nơi Những Món Quà Kể Câu Chuyện");
+                                needsUpdate = true;
+                            }
+                            if (!brandIntro.has("subtitle") || !brandIntro.get("subtitle").asText().equals("VỀ HANIU")) {
+                                brandIntro.put("subtitle", "VỀ HANIU");
+                                needsUpdate = true;
+                            }
+                            if (!brandIntro.has("description") || !brandIntro.get("description").asText().contains("Tại Haniu, mỗi món quà")) {
+                                brandIntro.put("description", "Tại Haniu, mỗi món quà không chỉ là một vật phẩm, mà còn là cách lưu giữ những cảm xúc đẹp nhất. Chúng tôi tuyển chọn và tạo nên những sản phẩm quà tặng mang phong cách trẻ trung, tinh tế và giàu cảm xúc như gấu bông, photobooth, hoa handmade và các set quà cá nhân hóa.\n\nMỗi chi tiết đều được chăm chút với sự tỉ mỉ và tình yêu dành cho nghệ thuật quà tặng, giúp bạn dễ dàng gửi trao lời yêu thương, lời cảm ơn hay lời chúc mừng theo cách đặc biệt nhất.\n\nHaniu mong muốn trở thành người bạn đồng hành trong mọi cột mốc đáng nhớ của bạn và những người thân yêu.");
+                                needsUpdate = true;
+                            }
+                            
+                            // Check if stats are the old ones
+                            boolean statsUpdated = false;
+                            if (brandIntro.has("stats") && brandIntro.get("stats").isArray()) {
+                                com.fasterxml.jackson.databind.node.ArrayNode stats = (com.fasterxml.jackson.databind.node.ArrayNode) brandIntro.get("stats");
+                                if (stats.size() > 0 && stats.get(0).has("value") && stats.get(0).get("value").asText().equals("2020")) {
+                                    statsUpdated = true;
+                                }
+                            } else {
+                                statsUpdated = true;
+                            }
+
+                            if (statsUpdated) {
+                                com.fasterxml.jackson.databind.node.ArrayNode statsNode = mapper.createArrayNode();
+                                statsNode.add(mapper.createObjectNode().put("value", "🧸 500+").put("label", "Khách hàng tin chọn"));
+                                statsNode.add(mapper.createObjectNode().put("value", "📸 2.000+").put("label", "Khoảnh khắc được lưu giữ"));
+                                statsNode.add(mapper.createObjectNode().put("value", "🎁 100+").put("label", "Mẫu quà tặng độc đáo"));
+                                statsNode.add(mapper.createObjectNode().put("value", "❤️ Hàng ngàn").put("label", "Lời yêu thương được trao gửi"));
+                                brandIntro.set("stats", statsNode);
+                                needsUpdate = true;
+                            }
+
+                            if (needsUpdate) {
+                                newVal = mapper.writeValueAsString(root);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to migrate HOME_LAYOUT brandIntro in database: " + e.getMessage());
+                }
+
                 if (!newVal.equals(val)) {
                     config.setConfigValue(newVal);
                     systemConfigRepository.save(config);
-                    log.info("Updated HOME_LAYOUT config links to /story and /collections in database.");
+                    log.info("Updated HOME_LAYOUT config links and brandIntro text in database.");
                 }
             }
         });
@@ -559,14 +410,14 @@ public class DatabaseSeeder implements CommandLineRunner {
                 ]
               },
               "brandIntro": {
-                "title": "Kiến Tạo Những Kỷ Niệm Vô Giá",
+                "title": "Nơi Những Món Quà Kể Câu Chuyện",
                 "subtitle": "VỀ HANIU",
-                "description": "Được thành lập từ năm 2020, Haniu mang sứ mệnh biến những món quà bình thường thành những kỷ vật vô giá. Chúng tôi tin rằng mỗi món quà trao đi là một thông điệp yêu thương được gửi gắm trọn vẹn, được chế tác thủ công tinh xảo bởi những nghệ nhân lành nghề cùng công nghệ cá nhân hóa laser hiện đại.",
+                "description": "Tại Haniu, mỗi món quà không chỉ là một vật phẩm, mà còn là cách lưu giữ những cảm xúc đẹp nhất. Chúng tôi tuyển chọn và tạo nên những sản phẩm quà tặng mang phong cách trẻ trung, tinh tế và giàu cảm xúc như gấu bông, photobooth, hoa handmade và các set quà cá nhân hóa.\\n\\nMỗi chi tiết đều được chăm chút với sự tỉ mỉ và tình yêu dành cho nghệ thuật quà tặng, giúp bạn dễ dàng gửi trao lời yêu thương, lời cảm ơn hay lời chúc mừng theo cách đặc biệt nhất.\\n\\nHaniu mong muốn trở thành người bạn đồng hành trong mọi cột mốc đáng nhớ của bạn và những người thân yêu.",
                 "stats": [
-                  { "value": "2020", "label": "Năm thành lập" },
-                  { "value": "50.000+", "label": "Khách hàng tin chọn" },
-                  { "value": "100%", "label": "Chế tác thủ công" },
-                  { "value": "24/7", "label": "Tư vấn thiết kế" }
+                  { "value": "🧸 500+", "label": "Khách hàng tin chọn" },
+                  { "value": "📸 2.000+", "label": "Khoảnh khắc được lưu giữ" },
+                  { "value": "🎁 100+", "label": "Mẫu quà tặng độc đáo" },
+                  { "value": "❤️ Hàng ngàn", "label": "Lời yêu thương được trao gửi" }
                 ]
               },
               "categories": {
@@ -943,44 +794,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     }
 
     private void seedPosts() {
-        if (postRepository.count() == 0) {
-            log.info("Seeding initial blog posts...");
-            
-            Post post1 = Post.builder()
-                    .title("Top 10 món quà tốt nghiệp ý nghĩa lưu giữ kỷ niệm tuổi học trò")
-                    .slug("top-10-mon-qua-tot-nghiep-y-nghia")
-                    .summary("Ngày tốt nghiệp là bước ngoặt lớn của cuộc đời. Cùng Haniu điểm qua những set quà lưu niệm độc bản tinh tế thích hợp tặng bạn bè, thầy cô.")
-                    .content("<p>Ngày tốt nghiệp đánh dấu một cột mốc quan trọng, khép lại những năm tháng học trò mơ mộng để mở ra cánh cổng tương lai tươi sáng. Nhằm lưu giữ những kỷ niệm đẹp đẽ ấy, Haniu xin gợi ý cho bạn 10 món quà tốt nghiệp vô cùng ý nghĩa và có thể cá nhân hóa khắc tên riêng.</p><p>Sổ tay gỗ tự nhiên khắc hình chân dung và lời nhắn gửi chúc mừng là một lựa chọn vô cùng trang trọng.</p>")
-                    .imageUrl("https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=500&auto=format&fit=crop&q=80")
-                    .active(true)
-                    .publishedAt(LocalDateTime.now())
-                    .build();
-            postRepository.save(post1);
-
-            Post post2 = Post.builder()
-                    .title("Nghệ thuật tặng quà cho đối tác doanh nghiệp nâng tầm thương hiệu")
-                    .slug("nghe-thuat-tang-qua-doi-tac-doanh-nghiep")
-                    .summary("Quà tặng doanh nghiệp không chỉ là phép lịch sự, mà là đại diện cho uy tín. Cách chọn chất liệu hộp gỗ cao cấp và lời chúc tinh tế.")
-                    .content("<p>Trong kinh doanh, mối quan hệ đối tác luôn là yếu tố sống còn. Một món quà tinh tế, chỉn chu được khắc logo thương hiệu không chỉ thể hiện tấm lòng tri ân sâu sắc, mà còn là công cụ Marketing tinh tế giúp ghi dấu ấn đậm nét trong tâm trí đối tác.</p>")
-                    .imageUrl("https://images.unsplash.com/photo-1512909006721-3d6018887383?w=500&auto=format&fit=crop&q=80")
-                    .active(true)
-                    .publishedAt(LocalDateTime.now())
-                    .build();
-            postRepository.save(post2);
-
-            Post post3 = Post.builder()
-                    .title("Cách ghi lời chúc khắc laser cá nhân hóa đầy cảm xúc cho người thương")
-                    .slug("cach-ghi-loi-chuc-khac-laser-ca-nhan-hoa")
-                    .summary("Ý tưởng chọn câu trích dẫn, ngày kỷ niệm hay lời nhắn ngọt ngào để khắc lên sổ tay da và bình giữ nhiệt gỗ tre tặng người yêu.")
-                    .content("<p>Cá nhân hóa quà tặng bằng công nghệ khắc laser là xu hướng được ưa chuộng nhất hiện nay. Haniu sẽ giúp bạn tuyển tập những lời chúc, câu trích dẫn ngắn và cách ghi ngày kỷ niệm lãng mạn nhất để gửi gắm tình yêu ngọt ngào.</p>")
-                    .imageUrl("https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500&auto=format&fit=crop&q=80")
-                    .active(true)
-                    .publishedAt(LocalDateTime.now())
-                    .build();
-            postRepository.save(post3);
-
-            log.info("Initial blog posts seeded successfully!");
-        }
+        log.info("Database standard catalog seeding step: skipped mock posts.");
     }
 
     private void seedStories() {

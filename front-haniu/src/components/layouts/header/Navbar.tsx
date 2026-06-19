@@ -109,7 +109,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                             {occ.imageUrl ? (
                               <img
                                 src={getFullImageUrl(occ.imageUrl) || occ.imageUrl}
-                                alt={occ.name}
+                                alt={getTranslatedName(occ.name)}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).src = 'https://placehold.co/100?text=Haniu';
@@ -121,7 +121,7 @@ export default function Navbar({ isScrolled, menuLinks }: NavbarProps) {
                           </span>
                           <div className="min-w-0">
                             <h4 className="text-xs font-bold text-slate-700 dark:text-zinc-300 group-hover/item:text-rose-500 dark:group-hover/item:text-rose-400 transition-colors truncate">
-                              {occ.name}
+                              {getTranslatedName(occ.name)}
                             </h4>
                           </div>
                         </Link>

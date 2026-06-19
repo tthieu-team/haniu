@@ -41,19 +41,16 @@ export default function CategoriesSection({ onOccasionSelect, selectedOccasion, 
     }
   }, [occasions]);
 
-  if (!isVisible) return null;
+  if (!isVisible || dbOccasions.length === 0) return null;
 
-  const hasDbOccasions = dbOccasions.length > 0;
-  const displayItems = hasDbOccasions
-    ? dbOccasions.map(o => ({
-      name: o.name,
-      slug: o.slug,
-      image: getFullImageUrl(o.imageUrl) || 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=500&auto=format&fit=crop&q=80',
-      count: (o as any).productCount !== undefined && (o as any).productCount > 0
-        ? `${(o as any).productCount}+ ${t('home.categories.gift_sets')}`
-        : `24+ ${t('home.categories.gift_sets')}`
-    }))
-    : layoutCategories.items;
+  const displayItems = dbOccasions.map(o => ({
+    name: o.name,
+    slug: o.slug,
+    image: getFullImageUrl(o.imageUrl) || 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=500&auto=format&fit=crop&q=80',
+    count: (o as any).productCount !== undefined && (o as any).productCount > 0
+      ? `${(o as any).productCount}+ ${t('home.categories.gift_sets')}`
+      : `24+ ${t('home.categories.gift_sets')}`
+  }));
 
   return (
     <section id="categories" className="py-6 sm:py-10 space-y-8 sm:space-y-12">

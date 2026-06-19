@@ -13,6 +13,20 @@ interface SliderHeroProps {
   isAnnouncementBar: boolean;
 }
 
+function isVideoUrl(url: string) {
+  if (!url) return false;
+  const cleanUrl = url.split('?')[0].split('#')[0].toLowerCase();
+  return (
+    cleanUrl.endsWith('.mp4') ||
+    cleanUrl.endsWith('.webm') ||
+    cleanUrl.endsWith('.ogg') ||
+    cleanUrl.endsWith('.mov') ||
+    url.includes('/uploads/products/videos') ||
+    url.includes('/uploads/files/products/videos') ||
+    url.includes('video')
+  );
+}
+
 export default function SliderHero({ hero, isSticky, isAnnouncementBar }: SliderHeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -64,16 +78,27 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar }: Slider
                 : 'opacity-0 scale-[1.02] z-0 pointer-events-none invisible'
                 }`}
             >
-              {/* Background Image Container */}
+              {/* Background Image/Video Container */}
               <div className="absolute inset-0">
-                <Image
-                  src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
-                  alt={translate(slide.boldTitle) || 'Banner image'}
-                  fill
-                  priority={idx === 0}
-                  className="object-cover object-center"
-                  sizes="100vw"
-                />
+                {isVideoUrl(slide.backgroundImage) ? (
+                  <video
+                    src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover object-center"
+                  />
+                ) : (
+                  <Image
+                    src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
+                    alt={translate(slide.boldTitle) || 'Banner image'}
+                    fill
+                    priority={idx === 0}
+                    className="object-cover object-center"
+                    sizes="100vw"
+                  />
+                )}
 
                 {/* Visual Enhancers / Aesthetic Overlays */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(253,244,245,0.4),transparent_60%)]" />

@@ -9,6 +9,20 @@ interface BannerCardProps {
   isMain: boolean;
 }
 
+function isVideoUrl(url: string) {
+  if (!url) return false;
+  const cleanUrl = url.split('?')[0].split('#')[0].toLowerCase();
+  return (
+    cleanUrl.endsWith('.mp4') ||
+    cleanUrl.endsWith('.webm') ||
+    cleanUrl.endsWith('.ogg') ||
+    cleanUrl.endsWith('.mov') ||
+    url.includes('/uploads/products/videos') ||
+    url.includes('/uploads/files/products/videos') ||
+    url.includes('video')
+  );
+}
+
 export default function BannerCard({ slide, isMain }: BannerCardProps) {
   if (!slide) return null;
   const isRight = slide.textLayout === 'right';
@@ -19,11 +33,22 @@ export default function BannerCard({ slide, isMain }: BannerCardProps) {
       {isCenter ? (
         <>
           <div className="absolute inset-0">
-            <img
-              src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
-              alt={slide.boldTitle || 'Banner'}
-              className="w-full h-full object-cover object-center"
-            />
+            {isVideoUrl(slide.backgroundImage) ? (
+              <video
+                src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover object-center"
+              />
+            ) : (
+              <img
+                src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
+                alt={slide.boldTitle || 'Banner'}
+                className="w-full h-full object-cover object-center"
+              />
+            )}
             <div className="absolute inset-0 bg-[#FAF5F2]/80 dark:bg-zinc-900/80 backdrop-blur-[1px]" />
           </div>
           <div className="relative z-10 w-full h-full flex flex-col justify-center items-center text-center p-6 sm:p-8 space-y-4">
@@ -61,13 +86,24 @@ export default function BannerCard({ slide, isMain }: BannerCardProps) {
         </>
       ) : (
         <div className={`w-full h-full flex flex-col ${isRight ? 'sm:flex-row' : 'sm:flex-row-reverse'}`}>
-          {/* Image Pane */}
+          {/* Image/Video Pane */}
           <div className="w-full sm:w-1/2 relative h-48 sm:h-full overflow-hidden shrink-0">
-            <img
-              src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
-              alt={slide.boldTitle || 'Banner'}
-              className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
-            />
+            {isVideoUrl(slide.backgroundImage) ? (
+              <video
+                src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover object-center"
+              />
+            ) : (
+              <img
+                src={getFullImageUrl(slide.backgroundImage) || slide.backgroundImage}
+                alt={slide.boldTitle || 'Banner'}
+                className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
 
             {slide.cardTitle && (
