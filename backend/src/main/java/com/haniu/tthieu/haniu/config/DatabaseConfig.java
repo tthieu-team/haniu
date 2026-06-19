@@ -13,6 +13,11 @@ import javax.sql.DataSource;
 public class DatabaseConfig {
 
     private static DynamicDataSource dynamicDataSourceInstance;
+    private static String currentActiveUrl;
+
+    public static String getCurrentActiveUrl() {
+        return currentActiveUrl;
+    }
 
     public static class DbConnectionInfo {
         public String jdbcUrl;
@@ -53,6 +58,7 @@ public class DatabaseConfig {
     }
 
     public static class DynamicDataSource extends DelegatingDataSource {
+        private final java.util.Map<String, HikariDataSource> dataSourceCache = new java.util.concurrent.ConcurrentHashMap<>();
         private HikariDataSource currentHikariDataSource;
 
         public DynamicDataSource(DataSource initialDataSource) {
@@ -64,46 +70,42 @@ public class DatabaseConfig {
 
         public synchronized void switchDataSource(String newRawUrl) {
             System.out.println("Switching database connection URL to: " + newRawUrl);
-            DbConnectionInfo info = new DbConnectionInfo(newRawUrl);
+            currentActiveUrl = newRawUrl;
+            
+            HikariDataSource newDs = dataSourceCache.get(newRawUrl);
+            if (newDs == null) {
+                DbConnectionInfo info = new DbConnectionInfo(newRawUrl);
 
-            HikariConfig config = new HikariConfig();
-            config.setJdbcUrl(info.jdbcUrl);
-            if (info.username != null) {
-                config.setUsername(info.username);
+                HikariConfig config = new HikariConfig();
+                config.setJdbcUrl(info.jdbcUrl);
+                if (info.username != null) {
+                    config.setUsername(info.username);
+                }
+                if (info.password != null) {
+                    config.setPassword(info.password);
+                }
+                config.setDriverClassName("org.postgresql.Driver");
+
+                // Copy key HikariCP pool optimizations
+                config.setMaximumPoolSize(10);
+                config.setMinimumIdle(5);
+                config.setIdleTimeout(300000);
+                config.setMaxLifetime(1800000);
+                config.setConnectionTimeout(20000);
+
+                newDs = new HikariDataSource(config);
+                dataSourceCache.put(newRawUrl, newDs);
             }
-            if (info.password != null) {
-                config.setPassword(info.password);
-            }
-            config.setDriverClassName("org.postgresql.Driver");
-
-            // Copy key HikariCP pool optimizations
-            config.setMaximumPoolSize(10);
-            config.setMinimumIdle(5);
-            config.setIdleTimeout(300000);
-            config.setMaxLifetime(1800000);
-            config.setConnectionTimeout(20000);
-
-            HikariDataSource newDs = new HikariDataSource(config);
 
             // Set the target data source
             setTargetDataSource(newDs);
             afterPropertiesSet();
 
-            // Safely close the old datasource
-            HikariDataSource oldDs = this.currentHikariDataSource;
             this.currentHikariDataSource = newDs;
+        }
 
-            if (oldDs != null) {
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(5000); // Wait 5 seconds for in-flight requests to complete
-                        oldDs.close();
-                        System.out.println("Closed old HikariDataSource successfully.");
-                    } catch (Exception e) {
-                        System.err.println("Error closing old HikariDataSource: " + e.getMessage());
-                    }
-                }).start();
-            }
+        public void cacheDataSource(String url, HikariDataSource ds) {
+            dataSourceCache.put(url, ds);
         }
     }
 
@@ -141,7 +143,9 @@ public class DatabaseConfig {
         config.setConnectionTimeout(20000);
 
         HikariDataSource initialDs = new HikariDataSource(config);
+        currentActiveUrl = dbUrl;
         DynamicDataSource dynamicDs = new DynamicDataSource(initialDs);
+        dynamicDs.cacheDataSource(dbUrl, initialDs);
         dynamicDataSourceInstance = dynamicDs;
 
         return dynamicDs;

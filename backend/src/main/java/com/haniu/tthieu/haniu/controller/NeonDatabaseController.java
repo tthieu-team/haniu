@@ -105,7 +105,16 @@ public class NeonDatabaseController {
 
         // Copy data from old active connection to the next active connection
         if (oldUrl != null && !oldUrl.equals(nextActive.getConnectionUrl())) {
-            copyDataBetweenDatabases(oldUrl, nextActive.getConnectionUrl());
+            try {
+                copyDataBetweenDatabases(oldUrl, nextActive.getConnectionUrl());
+            } catch (Exception e) {
+                System.err.println(">>> [DB Rotation] Failed to copy data during rotation: " + e.getMessage());
+                e.printStackTrace();
+                return ResponseEntity.status(500).body(Map.of(
+                    "message", "Xoay vòng thất bại khi đồng bộ dữ liệu: " + e.getMessage(),
+                    "error", e.toString()
+                ));
+            }
         }
 
         triggerRotationIfProduction(nextActive.getConnectionUrl());
@@ -164,21 +173,81 @@ public class NeonDatabaseController {
             return ResponseEntity.badRequest().body(Map.of("message", "Không tìm thấy URL kết nối database đích"));
         }
 
-        // Fetch source connection URL (usually local db URL) to copy from
-        String sourceUrl = System.getProperty("DATABASE_URL_LOCAL");
-        if (sourceUrl == null) {
-            sourceUrl = System.getenv("DATABASE_URL_LOCAL");
+        // Determine the local database URL
+        String localDbUrl = System.getProperty("DATABASE_URL_LOCAL");
+        if (localDbUrl == null) {
+            localDbUrl = System.getenv("DATABASE_URL_LOCAL");
         }
-        if (sourceUrl == null) {
-            sourceUrl = System.getProperty("DATABASE_URL_POSTGRE");
-            if (sourceUrl == null) {
-                sourceUrl = System.getenv("DATABASE_URL_POSTGRE");
+        if (localDbUrl == null) {
+            String postgreUrl = System.getProperty("DATABASE_URL_POSTGRE");
+            if (postgreUrl == null) {
+                postgreUrl = System.getenv("DATABASE_URL_POSTGRE");
+            }
+            if (postgreUrl != null && (postgreUrl.contains("localhost") || postgreUrl.contains("127.0.0.1"))) {
+                localDbUrl = postgreUrl;
             }
         }
+        if (localDbUrl == null) {
+            localDbUrl = "postgresql://localhost:5432/haniu?schema=public&sslmode=disable";
+        }
 
-        // Copy all data from source database (local) to the active database (Neon)
-        if (sourceUrl != null && !sourceUrl.equals(connectionUrl)) {
-            copyDataBetweenDatabases(sourceUrl, connectionUrl);
+        String sourceUrl = null;
+        String targetUrl = connectionUrl;
+
+        // Smart direction resolution:
+        // If the selected target database is Neon, user wants to upload: local -> Neon.
+        if (targetUrl != null && targetUrl.contains("neon.tech")) {
+            sourceUrl = localDbUrl;
+        } else {
+            // If selected target database is local, user wants to pull: Neon -> local.
+            String neonUrl = System.getProperty("DATABASE_URL_NEON");
+            if (neonUrl == null) {
+                neonUrl = System.getenv("DATABASE_URL_NEON");
+            }
+            if (neonUrl == null) {
+                String postgreUrl = System.getProperty("DATABASE_URL_POSTGRE");
+                if (postgreUrl == null) {
+                    postgreUrl = System.getenv("DATABASE_URL_POSTGRE");
+                }
+                if (postgreUrl != null && postgreUrl.contains("neon.tech")) {
+                    neonUrl = postgreUrl;
+                }
+            }
+            if (neonUrl == null) {
+                List<NeonDatabase> list = repository.findAll();
+                for (NeonDatabase db : list) {
+                    if (db.getConnectionUrl() != null && db.getConnectionUrl().contains("neon.tech")) {
+                        neonUrl = db.getConnectionUrl();
+                        break;
+                    }
+                }
+            }
+            sourceUrl = neonUrl;
+        }
+
+        System.out.println(">>> [DB Sync] Resolving databases...");
+        System.out.println(">>> [DB Sync] targetUrl (connectionUrl): " + targetUrl);
+        System.out.println(">>> [DB Sync] localDbUrl resolved: " + localDbUrl);
+        System.out.println(">>> [DB Sync] sourceUrl resolved: " + sourceUrl);
+
+        // Copy all data from source database to the target database
+        if (sourceUrl != null && targetUrl != null && !sourceUrl.equals(targetUrl)) {
+            try {
+                System.out.println(">>> [DB Sync] Executing copyDataBetweenDatabases from " + sourceUrl + " to " + targetUrl);
+                copyDataBetweenDatabases(sourceUrl, targetUrl);
+                System.out.println(">>> [DB Sync] Copy completed successfully.");
+            } catch (Exception e) {
+                System.err.println(">>> [DB Sync] FATAL ERROR during sync: " + e.getMessage());
+                e.printStackTrace();
+                return ResponseEntity.status(500).body(Map.of(
+                    "message", "Đồng bộ cơ sở dữ liệu thất bại: " + e.getMessage(),
+                    "sourceUrl", sourceUrl,
+                    "targetUrl", targetUrl,
+                    "error", e.toString()
+                ));
+            }
+        } else {
+            System.out.println(">>> [DB Sync] Skipped copy (source and target are same, or null).");
         }
 
         triggerRotationIfProduction(connectionUrl);
@@ -198,7 +267,7 @@ public class NeonDatabaseController {
         ));
     }
 
-    private void copyDataBetweenDatabases(String sourceUrl, String targetUrl) {
+    private void copyDataBetweenDatabases(String sourceUrl, String targetUrl) throws Exception {
         if (sourceUrl == null || targetUrl == null || sourceUrl.trim().equals(targetUrl.trim())) {
             return;
         }
@@ -231,58 +300,72 @@ public class NeonDatabaseController {
             }
             System.out.println(">>> [DB Rotation] Found " + tables.size() + " tables to copy dynamically: " + tables);
 
-            // 1. Create target tables if they do not exist
-            boolean tablesExist = false;
+            // 1. Drop existing tables on the target database to ensure a clean slate
+            System.out.println(">>> [DB Rotation] Dropping all existing tables on target database...");
+            List<String> targetTables = new java.util.ArrayList<>();
             try {
                 java.sql.DatabaseMetaData dbmd = destConn.getMetaData();
-                try (java.sql.ResultSet rs = dbmd.getTables(null, null, "users", null)) {
-                    if (rs.next()) {
-                        tablesExist = true;
+                try (java.sql.ResultSet rs = dbmd.getTables(null, null, null, new String[]{"TABLE"})) {
+                    while (rs.next()) {
+                        String schema = rs.getString("TABLE_SCHEM");
+                        if ("public".equalsIgnoreCase(schema)) {
+                            targetTables.add(rs.getString("TABLE_NAME"));
+                        }
                     }
                 }
             } catch (Exception e) {
-                System.err.println("Failed to verify target tables existence: " + e.getMessage());
+                System.err.println("Failed to fetch target tables for dropping: " + e.getMessage());
             }
 
-            if (!tablesExist) {
-                System.out.println(">>> [DB Rotation] Creating database schema on target database first...");
-                try {
-                    org.hibernate.SessionFactory sessionFactory = entityManagerFactory.unwrap(org.hibernate.SessionFactory.class);
-                    // Temporarily set active connection to target to initialize it
-                    var dynamicDs = com.haniu.tthieu.haniu.config.DatabaseConfig.getDynamicDataSourceInstance();
-                    dynamicDs.switchDataSource(targetUrl);
-                    sessionFactory.getSchemaManager().create(true);
-                    // Revert connection to source for copying
-                    dynamicDs.switchDataSource(sourceUrl);
-                    System.out.println(">>> [DB Rotation] Target schema created successfully.");
-                } catch (Exception schemaEx) {
-                    System.err.println("Failed to initialize target schema: " + schemaEx.getMessage());
-                }
-            }
-
-            // 2. Disable constraints during copy to allow bulk inserts in any order (PostgreSQL specific)
             try (java.sql.Statement destStmt = destConn.createStatement()) {
-                System.out.println(">>> [DB Rotation] Temporarily disabling foreign key constraint checks on target connection...");
-                destStmt.execute("SET session_replication_role = 'replica'");
-                destConn.commit();
-            }
-
-            // 3. Truncate target tables in any order
-            try (java.sql.Statement destStmt = destConn.createStatement()) {
-                System.out.println(">>> [DB Rotation] Truncating target tables...");
-                for (String table : tables) {
+                for (String table : targetTables) {
                     try {
-                        destStmt.execute("TRUNCATE TABLE " + table + " CASCADE");
+                        destStmt.execute("DROP TABLE IF EXISTS " + table + " CASCADE");
                     } catch (Exception e) {
-                        System.err.println("Failed to truncate table " + table + ": " + e.getMessage());
+                        System.err.println("Failed to drop table " + table + ": " + e.getMessage());
                     }
                 }
                 destConn.commit();
             }
 
-            // 4. Copy row by row for each table dynamically
-            for (String table : tables) {
+            // 2. Re-create schema on target database
+            System.out.println(">>> [DB Rotation] Creating fresh database schema on target database...");
+            try {
+                org.hibernate.SessionFactory sessionFactory = entityManagerFactory.unwrap(org.hibernate.SessionFactory.class);
+                var dynamicDs = com.haniu.tthieu.haniu.config.DatabaseConfig.getDynamicDataSourceInstance();
+                dynamicDs.switchDataSource(targetUrl);
+                sessionFactory.getSchemaManager().create(true);
+                dynamicDs.switchDataSource(sourceUrl);
+                System.out.println(">>> [DB Rotation] Target schema re-created successfully.");
+            } catch (Exception schemaEx) {
+                System.err.println("Failed to initialize target schema: " + schemaEx.getMessage());
+            }
+
+            // 3. Copy row by row for each table dynamically (handling foreign key dependencies via retry queue)
+            java.util.List<String> queue = new java.util.ArrayList<>(tables);
+            int lastQueueSize = -1;
+            int consecutiveFailures = 0;
+            java.util.Map<String, Exception> tableErrors = new java.util.HashMap<>();
+
+            System.out.println(">>> [DB Rotation] Copying " + queue.size() + " tables dynamically resolving dependencies...");
+
+            while (!queue.isEmpty()) {
+                if (queue.size() == lastQueueSize) {
+                    consecutiveFailures++;
+                    if (consecutiveFailures > 3) {
+                        // Failed to progress, throw the errors
+                        String failedTables = String.join(", ", queue);
+                        Exception firstError = tableErrors.get(queue.get(0));
+                        throw new RuntimeException("Cannot resolve foreign key dependencies for tables: [" + failedTables + "]. First error: " + (firstError != null ? firstError.getMessage() : "unknown"), firstError);
+                    }
+                } else {
+                    lastQueueSize = queue.size();
+                    consecutiveFailures = 0;
+                }
+
+                String table = queue.remove(0);
                 String selectSql = "SELECT * FROM " + table;
+                
                 try (java.sql.Statement srcStmt = srcConn.createStatement();
                      java.sql.ResultSet srcRs = srcStmt.executeQuery(selectSql)) {
 
@@ -319,21 +402,30 @@ public class NeonDatabaseController {
                         }
                         destConn.commit();
                         System.out.println(">>> [DB Rotation] Copied " + batchCount + " rows for table: " + table);
+                        tableErrors.remove(table);
                     }
                 } catch (Exception tableEx) {
-                    System.err.println("Failed to copy table " + table + ": " + tableEx.getMessage());
                     destConn.rollback();
+                    
+                    String sqlState = "";
+                    if (tableEx instanceof java.sql.SQLException) {
+                        sqlState = ((java.sql.SQLException) tableEx).getSQLState();
+                    }
+                    
+                    // SQLState 23503 is foreign key violation in PostgreSQL
+                    if ("23503".equals(sqlState)) {
+                        System.out.println(">>> [DB Rotation] Table " + table + " has foreign key violations. Retrying in next pass...");
+                        queue.add(table);
+                        tableErrors.put(table, tableEx);
+                    } else {
+                        System.err.println("Failed to copy table " + table + ": " + tableEx.getMessage());
+                        tableEx.printStackTrace();
+                        throw tableEx;
+                    }
                 }
             }
 
-            // 5. Re-enable constraint checks
-            try (java.sql.Statement destStmt = destConn.createStatement()) {
-                System.out.println(">>> [DB Rotation] Re-enabling constraint checks on target connection...");
-                destStmt.execute("SET session_replication_role = 'origin'");
-                destConn.commit();
-            }
-
-            // 6. Reset sequences for tables with serial/numeric primary keys
+            // 4. Reset sequences for tables with serial/numeric primary keys
             try (java.sql.Statement destStmt = destConn.createStatement()) {
                 for (String table : tables) {
                     try {
@@ -349,6 +441,7 @@ public class NeonDatabaseController {
         } catch (Exception e) {
             System.err.println(">>> [DB Rotation] Error during programmatic data copy: " + e.getMessage());
             e.printStackTrace();
+            throw e;
         }
     }
 
