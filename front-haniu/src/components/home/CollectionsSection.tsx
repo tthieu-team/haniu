@@ -9,6 +9,8 @@ import { getFullImageUrl } from '@/lib/api';
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useTranslate } from '@/lib/translator';
 
+import PremiumCardOverlay from '@/components/common/PremiumCardOverlay';
+
 export default function CollectionsSection() {
   const layoutCollections = useHomeLayoutStore((state) => state.collections);
   const isVisible = useHomeLayoutStore((state) => state.visibility.collections);
@@ -71,29 +73,29 @@ export default function CollectionsSection() {
               <img
                 src={item.image}
                 alt={item.title}
-                className="w-full h-full object-cover opacity-80 dark:opacity-75 group-hover:opacity-60 dark:group-hover:opacity-55 group-hover:scale-110 transition-all duration-700 ease-out"
+                className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ease-out"
               />
             </div>
 
-            {/* Visual gradient overlays for high readability in both light & dark themes */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent opacity-95 transition-opacity duration-300 group-hover:opacity-100" />
+            {/* Shared Gradient Overlay component */}
+            <PremiumCardOverlay />
 
             {/* Info details */}
             <div className="relative z-10 space-y-2 sm:space-y-4 text-left">
-              <span className="text-[9px] font-black uppercase tracking-widest text-primary-color bg-primary-color/5 dark:bg-primary-color/10 px-2 py-0.5 rounded-md border border-primary-color/20 inline-block">
+              <span className="text-[9px] font-black uppercase tracking-widest text-rose-400 bg-rose-500/20 px-2 py-0.5 rounded-md border border-rose-500/20 inline-block">
                 Haniu Select
               </span>
               <div className="space-y-1 sm:space-y-2">
-                <h3 className="text-base sm:text-lg md:text-xl font-black text-foreground group-hover:text-primary-color transition-colors tracking-wide leading-snug">
+                <h3 className="text-base sm:text-lg md:text-xl font-black text-white group-hover:text-rose-400 transition-colors tracking-wide leading-snug">
                   {trans(item.title)}
                 </h3>
-                <p className="text-[10px] sm:text-xs text-muted-color leading-relaxed font-light line-clamp-2">
+                <p className="text-[10px] sm:text-xs text-zinc-300 leading-relaxed font-light line-clamp-2">
                   {trans(item.subtitle)}
                 </p>
               </div>
               <div className="pt-1 sm:pt-2">
                 <div
-                  className="inline-flex items-center text-[10px] sm:text-xs font-bold text-foreground group-hover:text-primary-color transition-all duration-300 group-hover:gap-2 gap-1"
+                  className="inline-flex items-center text-[10px] sm:text-xs font-bold text-zinc-200 group-hover:text-rose-400 transition-all duration-300 group-hover:gap-2 gap-1"
                 >
                   {trans(layoutCollections.buyNowText || 'Mua ngay')} <Icon name="→" size={14} className="group-hover:translate-x-1.5 transition-transform duration-300" />
                 </div>

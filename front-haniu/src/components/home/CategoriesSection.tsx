@@ -8,6 +8,8 @@ import Icon from '@/components/common/Icons';
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useTranslate } from '@/lib/translator';
 
+import PremiumCardOverlay from '@/components/common/PremiumCardOverlay';
+
 interface CategoriesSectionProps {
   onOccasionSelect?: (slug: string) => void;
   selectedOccasion?: string;
@@ -108,11 +110,8 @@ export default function CategoriesSection({ onOccasionSelect, selectedOccasion, 
                 />
               </div>
 
-              {/* Gradient Overlay for high readability in both light & dark themes */}
-              <div className={`absolute inset-0 z-10 transition-all duration-300 ${isActive
-                ? 'bg-gradient-to-t from-rose-500/10 via-background/80 to-transparent dark:from-rose-950/40 dark:via-background/85'
-                : 'bg-gradient-to-t from-background/95 via-background/50 to-transparent dark:from-background/95 dark:via-background/45'
-                }`} />
+              {/* Shared Gradient Overlay component */}
+              <PremiumCardOverlay isActive={isActive} />
 
               {/* Status Badge */}
               {isActive && (
@@ -122,25 +121,25 @@ export default function CategoriesSection({ onOccasionSelect, selectedOccasion, 
               )}
 
               {/* Category Occasion Badge */}
-              <span className="absolute top-4 right-4 z-20 bg-slate-50/10 dark:bg-white/10 text-slate-800 dark:text-white backdrop-blur-md text-[9px] font-black tracking-widest px-2 py-1.5 rounded-lg border border-slate-500/20 dark:border-white/10 uppercase">
+              <span className="absolute top-4 right-4 z-20 bg-black/40 text-white backdrop-blur-md text-[9px] font-black tracking-widest px-2 py-1.5 rounded-lg border border-white/10 uppercase">
                 {getSymbol(item.slug)} Series
               </span>
 
               {/* Info details */}
               <div className="relative z-20 space-y-2 text-left">
-                <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400">
+                <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-rose-400">
                   {t('home.categories.special_occasion')}
                 </span>
 
-                <h3 className="text-sm sm:text-base md:text-lg font-black text-foreground group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors tracking-wide leading-tight line-clamp-1">
+                <h3 className="text-sm sm:text-base md:text-lg font-black text-white group-hover:text-rose-400 transition-colors tracking-wide leading-tight line-clamp-1">
                   {formattedName}
                 </h3>
 
-                <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-zinc-800/80">
-                  <span className="font-bold text-[8px] sm:text-[9px] text-rose-600 dark:text-rose-300 bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/10 dark:border-rose-400/10">
+                <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                  <span className="font-bold text-[8px] sm:text-[9px] text-rose-300 bg-rose-500/25 px-2 py-0.5 rounded-md border border-rose-400/20">
                     {item.count}
                   </span>
-                  <span className="text-[9px] sm:text-[10px] font-extrabold text-foreground/90 group-hover:text-rose-600 dark:group-hover:text-rose-400 flex items-center gap-1 transition-colors">
+                  <span className="text-[9px] sm:text-[10px] font-extrabold text-zinc-200 group-hover:text-rose-400 flex items-center gap-1 transition-colors">
                     {t('home.categories.explore')} <Icon name="→" size={10} className="w-2.5 h-2.5 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </div>

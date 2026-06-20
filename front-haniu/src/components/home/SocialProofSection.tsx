@@ -1,8 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
-import { useTestimonialStore } from '@/store/testimonial';
 import Icon from '@/components/common/Icons';
 import { useLanguage } from '@/providers/LanguageProvider';
 
@@ -11,20 +9,12 @@ import { useTranslate } from '@/lib/translator';
 export default function SocialProofSection() {
   const proof = useHomeLayoutStore((state) => state.socialProof);
   const isVisible = useHomeLayoutStore((state) => state.visibility.socialProof);
-  const { activeTestimonials, fetchActiveTestimonials } = useTestimonialStore();
   const { t } = useLanguage();
   const trans = useTranslate();
 
-  useEffect(() => {
-    if (isVisible) {
-      fetchActiveTestimonials();
-    }
-  }, [isVisible, fetchActiveTestimonials]);
-
   if (!isVisible) return null;
 
-  // Fallback to layout configs if database testimonials table is empty
-  const displayReviews = activeTestimonials.length > 0 ? activeTestimonials : proof.reviews;
+  const displayReviews = proof.reviews || [];
 
   return (
     <section className="py-8 sm:py-12 space-y-12">

@@ -31,17 +31,22 @@ export default function VideoBanner() {
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-60"
+          className="absolute inset-0 w-full h-full object-cover opacity-85"
           poster={placeholderImage}
           src={videoUrl}
         />
       )}
 
-      {/* Dark overlay with gradients */}
-      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-zinc-950/70" />
+      {/* Dark overlay with gradients - softened to let video show through clearly */}
+      <div
+        style={{
+          backgroundImage: 'linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.15) 50%, rgba(0, 0, 0, 0.3) 100%)'
+        }}
+        className="absolute inset-0 z-10 pointer-events-none"
+      />
 
-      {/* Content wrapper */}
-      <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-6 max-w-3xl mx-auto space-y-6">
+      {/* Content wrapper - explicitly z-20 to sit above the z-10 overlay */}
+      <div className="absolute inset-0 z-20 flex flex-col justify-center items-center text-center px-6 max-w-3xl mx-auto space-y-6">
         <span className="text-[10px] font-bold tracking-widest text-amber-300 uppercase bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 backdrop-blur-xs">
           Cinematic Experience
         </span>
