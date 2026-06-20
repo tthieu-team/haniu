@@ -22,6 +22,7 @@ export default function HeroSection({ onOccasionSelect }: HeroSectionProps) {
         hero={hero}
         isSticky={isSticky}
         isAnnouncementBar={isAnnouncementBar}
+        onOccasionSelect={onOccasionSelect}
       />
     );
   }
@@ -31,6 +32,7 @@ export default function HeroSection({ onOccasionSelect }: HeroSectionProps) {
       hero={hero}
       isSticky={isSticky}
       isAnnouncementBar={isAnnouncementBar}
+      onOccasionSelect={onOccasionSelect}
     />
   );
 }

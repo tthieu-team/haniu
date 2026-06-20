@@ -8,9 +8,10 @@ interface SplitGridHeroProps {
   hero: HeroConfig;
   isSticky: boolean;
   isAnnouncementBar: boolean;
+  onOccasionSelect?: (slug: string) => void;
 }
 
-export default function SplitGridHero({ hero, isSticky, isAnnouncementBar }: SplitGridHeroProps) {
+export default function SplitGridHero({ hero, isSticky, isAnnouncementBar, onOccasionSelect }: SplitGridHeroProps) {
   const slides = hero.slides || [];
   const mainSlide = slides.find(s => s.id === hero.gridMainSlideId) || slides[0];
   const subSlide = slides.find(s => s.id === hero.gridSubSlideId) || slides[1] || slides[0];
@@ -28,14 +29,14 @@ export default function SplitGridHero({ hero, isSticky, isAnnouncementBar }: Spl
         <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:h-[600px] xl:h-[700px] 2xl:h-[780px]">
           {/* Left Block (Main Banner) */}
           <div className="lg:col-span-7 xl:col-span-8 h-[400px] sm:h-[500px] lg:h-full">
-            <BannerCard slide={mainSlide} isMain={true} />
+            <BannerCard slide={mainSlide} isMain={true} onOccasionSelect={onOccasionSelect} />
           </div>
 
           {/* Right Block (Column Container) */}
           <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-6 h-auto lg:h-full">
             {/* Top-Right (Sub Banner) */}
             <div className="flex-grow flex-shrink min-h-[220px] lg:h-auto">
-              <BannerCard slide={subSlide} isMain={false} />
+              <BannerCard slide={subSlide} isMain={false} onOccasionSelect={onOccasionSelect} />
             </div>
 
             {/* Bottom-Right (3 Feature Cards) */}
