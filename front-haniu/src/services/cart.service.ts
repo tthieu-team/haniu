@@ -47,5 +47,12 @@ export const cartService = {
 
   getCartById: async (cartId: string) => {
     return fetchApi(`/api/v1/carts/${cartId}`);
+  },
+
+  updateCustomizationInfo: async (itemId: string, customizationInfo: string) => {
+    return fetchApi(`/api/v1/carts/items/${itemId}/customization`, {
+      method: 'PUT',
+      body: JSON.stringify({ customizationInfo }),
+    });
   }
 };

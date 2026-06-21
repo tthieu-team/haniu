@@ -8,6 +8,12 @@ import { useThemeStore } from '@/store/theme';
 import { useTranslate } from '@/lib/translator';
 import PhotoboothSystem from './photobooth/PhotoboothSystem';
 
+// Services
+import { productService } from '@/services/product.service';
+import { photoboothService } from '@/services/photobooth.service';
+
+import { getFullImageUrl } from '@/lib/api';
+
 interface StudioPhotoboothProps {
   photoboothPhotoUrls: string[];
   setPhotoboothPhotoUrls: Dispatch<SetStateAction<string[]>>;
@@ -69,18 +75,40 @@ export default function StudioPhotobooth({
     );
   };
 
-  const handleCaptureComplete = async (file: File) => {
-    const localUrl = URL.createObjectURL(file);
-    setPhotoboothPhotoUrls(prev => [...prev, localUrl]);
+  const resolvePhotoUrl = (url: string) => {
+    if (url && url.startsWith('local_pb_') && typeof window !== 'undefined') {
+      return localStorage.getItem(`haniu_pb_${url}`) || '';
+    }
+    return getFullImageUrl(url) || '';
+  };
+
+  const uploadAndLogSession = async (file: File, templateName: string) => {
+    const localId = `local_pb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      const base64data = reader.result as string;
+      try {
+        localStorage.setItem(`haniu_pb_${localId}`, base64data);
+      } catch (e) {
+        console.warn('LocalStorage full, could not cache Base64 photobooth image:', e);
+      }
+    };
+
+    setPhotoboothPhotoUrls(prev => [...prev, localId]);
     onPhotoSelected(file);
+  };
+
+
+  const handleCaptureComplete = async (file: File) => {
+    await uploadAndLogSession(file, 'Khung ảnh ghép Haniu');
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const localUrl = URL.createObjectURL(file);
-      setPhotoboothPhotoUrls(prev => [...prev, localUrl]);
-      onPhotoSelected(file);
+      await uploadAndLogSession(file, 'Ảnh tải lên từ thiết bị');
     }
   };
 
@@ -131,7 +159,7 @@ export default function StudioPhotobooth({
                   }}
                   className="cursor-pointer w-full h-full border-2 border-white dark:border-zinc-850 shadow-md rounded-2xl overflow-hidden bg-slate-50 dark:bg-zinc-900 transition-all hover:scale-[1.03] active:scale-98 relative"
                 >
-                  <img src={url} className="w-full h-full object-cover" alt={`Photobooth print ${idx + 1}`} />
+                  <img src={resolvePhotoUrl(url)} className="w-full h-full object-cover" alt={`Photobooth print ${idx + 1}`} />
                   <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white">
                     <Icon name="search" size={16} />
                   </div>
@@ -297,7 +325,7 @@ export default function StudioPhotobooth({
 
           <div className="relative w-full h-full flex items-center justify-center p-4 sm:p-12" onClick={e => e.stopPropagation()}>
             <img 
-              src={photoboothPhotoUrls[selectedPhotoIndex]} 
+              src={resolvePhotoUrl(photoboothPhotoUrls[selectedPhotoIndex])} 
               className="max-w-[95vw] max-h-[85vh] object-contain transition-all duration-300 cursor-default rounded-xl shadow-2xl" 
               alt="Full size photobooth composite" 
             />

@@ -78,4 +78,15 @@ public class CartController {
     public ResponseEntity<CartDto> createBuyNowCart(@RequestBody CartItemRequestDto request) {
         return ResponseEntity.ok(cartService.createBuyNowCart(request));
     }
+
+    @PutMapping("/items/{itemId}/customization")
+    public ResponseEntity<CartDto> updateCustomizationInfo(
+            Principal principal,
+            @RequestHeader(value = "X-Session-ID", required = false) String sessionId,
+            @PathVariable UUID itemId,
+            @RequestBody Map<String, String> body) {
+        String customizationInfo = body.get("customizationInfo");
+        String email = principal != null ? principal.getName() : null;
+        return ResponseEntity.ok(cartService.updateCustomizationInfo(email, sessionId, itemId, customizationInfo));
+    }
 }

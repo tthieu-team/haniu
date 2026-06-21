@@ -325,4 +325,19 @@ public class CartServiceImpl implements CartService {
                 .items(itemDtos)
                 .build();
     }
+
+    @Override
+    public CartDto updateCustomizationInfo(String email, String sessionId, UUID itemId, String customizationInfo) {
+        Cart cart = getOrCreateCart(email, sessionId);
+        CartItem item = cartItemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+
+        if (!item.getCart().getId().equals(cart.getId())) {
+            throw new RuntimeException("Unauthorized cart modification");
+        }
+
+        item.setCustomizationInfo(customizationInfo);
+        cartItemRepository.save(item);
+        return convertToDto(cart);
+    }
 }

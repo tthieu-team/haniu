@@ -172,6 +172,9 @@ export default function Header() {
   ];
 
 
+  const isCheckoutOrOrderPage = pathname === '/checkout' || pathname?.startsWith('/checkout/') || pathname?.startsWith('/orders');
+  const showAnnouncementBar = announcementBar.isEnabled && !isCheckoutOrOrderPage;
+
   return (
     <div className={`w-full z-50 transition-all duration-300 mobile-landscape-hide-sticky ${header.isSticky ? 'fixed top-0 left-0 right-0' : 'relative'
       } ${isScrolled ? 'is-scrolled' : ''}`}>
@@ -193,7 +196,7 @@ export default function Header() {
         />
       )}
       {/* 2. ANNOUNCEMENT BAR */}
-      {announcementBar.isEnabled && (
+      {showAnnouncementBar && (
         <div className="w-full bg-rose-600 text-white text-[10px] sm:text-[11px] py-2 sm:py-2.5 px-2 sm:px-4 text-center font-semibold tracking-wide transition-all duration-350 shadow-sm">
           <a
             href={announcementBar.linkHref || '#products'}

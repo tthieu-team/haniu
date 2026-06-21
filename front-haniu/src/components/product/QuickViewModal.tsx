@@ -127,14 +127,32 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
 
   const handleAddToCart = async () => {
     setAdding(true);
+
+    let showEngraving = false;
+    let showCardMessage = true;
+    let showGiftWrap = true;
+    if (product.layoutConfig) {
+      try {
+        const parsedLayout = typeof product.layoutConfig === 'string'
+          ? JSON.parse(product.layoutConfig)
+          : product.layoutConfig;
+        const custConfig = parsedLayout?.customizationConfig;
+        if (custConfig) {
+          if (custConfig.showEngraving !== undefined) showEngraving = custConfig.showEngraving;
+          if (custConfig.showCardMessage !== undefined) showCardMessage = custConfig.showCardMessage;
+          if (custConfig.showGiftWrap !== undefined) showGiftWrap = custConfig.showGiftWrap;
+        }
+      } catch (e) {}
+    }
+
     const payload = {
       productId: product.id,
       variantId: selectedVariant?.id || undefined,
       quantity,
       customizationInfo: product.isCustomizable ? JSON.stringify({
-        engravingText,
-        cardMessage,
-        giftWrap
+        ...(showEngraving ? { engravingText } : {}),
+        ...(showCardMessage ? { cardMessage } : {}),
+        ...(showGiftWrap ? { giftWrap } : {})
       }) : undefined
     };
 

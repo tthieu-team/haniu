@@ -19,6 +19,10 @@ import { DEFAULT_TEMPLATES } from './templates';
 import { playSound } from './sounds';
 import { StartModeOverlay } from './StartModeOverlay';
 import { FaceFilterSelector } from './FaceFilterSelector';
+import { photoboothService } from '@/services/photobooth.service';
+import { usePhotoboothStore } from '@/store/photobooth';
+import { PhotoboothTemplate } from './types';
+
 
 interface PhotoboothSystemProps {
   onCapture: (file: File) => void;
@@ -51,6 +55,8 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
 
 
 
+  const { activeTemplates, settings, fetchPhotoboothData } = usePhotoboothStore();
+
   const [config, setConfig] = useState<PhotoboothConfig>({
     mode: 'grid-4',
     template: DEFAULT_TEMPLATES['grid-4'],
@@ -60,6 +66,23 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
     userName: '',
     showDate: true
   });
+
+  useEffect(() => {
+    fetchPhotoboothData();
+  }, [fetchPhotoboothData]);
+
+  useEffect(() => {
+    if (settings) {
+      setConfig(prev => ({
+        ...prev,
+        countdown: settings.countdown,
+        frameColor: settings.defaultFrameColor,
+        userName: settings.watermarkText,
+        showDate: settings.showDate
+      }));
+    }
+  }, [settings]);
+
 
   // Cleanup Result URLs on unmount
   const resultUrlRef = useRef(resultUrl);
@@ -105,13 +128,22 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
     setStep('select-mode');
   };
 
-  const handleModeSelect = (mode: PhotoboothMode, userName: string) => {
+  const handleModeSelect = (mode: string, userName: string) => {
     playSound('click');
-    const template = DEFAULT_TEMPLATES[mode] || DEFAULT_TEMPLATES['grid-4'];
-    setConfig(prev => ({ ...prev, mode, template, userName }));
+    const customTpl = activeTemplates.find(t => t.id === mode);
+    let template: PhotoboothTemplate;
+    
+    if (customTpl) {
+      template = customTpl;
+    } else {
+      template = DEFAULT_TEMPLATES[mode] || DEFAULT_TEMPLATES['grid-4'];
+    }
+
+    setConfig(prev => ({ ...prev, mode: mode as any, template, userName: userName || prev.userName }));
     setPhotos([]);
     setStep('countdown');
   };
+
 
   const handleCapture = useCallback((blob: Blob, url: string) => {
     if (photos.length >= config.template.slots.length && retakeIndex === null) return;
@@ -278,7 +310,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
 
         {step === 'select-mode' && (
           <motion.div key="mode" className="w-full h-full relative z-10" initial={{ x: 300, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -300, opacity: 0 }}>
-            <ModeSelector onSelect={handleModeSelect} />
+            <ModeSelector onSelect={handleModeSelect} customTemplates={activeTemplates} />
           </motion.div>
         )}
 

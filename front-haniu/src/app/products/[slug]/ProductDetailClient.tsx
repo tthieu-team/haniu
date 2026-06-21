@@ -153,56 +153,40 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
     }
   }, [initialProduct]);
 
-  const uploadPhotoboothFiles = async (): Promise<string> => {
-    const uploadedUrls = photoboothPhotoUrls.filter(url => !url.startsWith('blob:'));
-    if (photoboothPhotoFiles.length === 0) {
-      return uploadedUrls.join(',');
-    }
-
-    setSuccessMsg(`⏳ Đang tải lên ${photoboothPhotoFiles.length} hình ảnh photobooth...`);
-    const newUrls: string[] = [];
-    for (let i = 0; i < photoboothPhotoFiles.length; i++) {
-      const file = photoboothPhotoFiles[i];
-      try {
-        const data = await productService.uploadImage(file);
-        if (data && data.url) {
-          newUrls.push(data.url);
-        }
-      } catch (err) {
-        console.error(`Failed to upload photobooth image ${i + 1}:`, err);
-        throw new Error("Không thể tải lên toàn bộ hình ảnh photobooth. Vui lòng thử lại!");
-      }
-    }
-
-    const finalUrls = [...uploadedUrls, ...newUrls];
-    setPhotoboothPhotoUrls(finalUrls);
-    setPhotoboothPhotoFiles([]);
-    return finalUrls.join(',');
-  };
-
   const handleAddToCart = async () => {
     if (!product) return;
 
-    let finalPhotoUrl = '';
-    try {
-      finalPhotoUrl = await uploadPhotoboothFiles();
-    } catch (err: any) {
-      setSuccessMsg(`❌ ${err.message || 'Gặp lỗi khi tải lên hình ảnh photobooth.'}`);
-      setTimeout(() => setSuccessMsg(''), 5000);
-      return;
+    let showEngraving = false;
+    let showCardMessage = true;
+    let showGiftWrap = true;
+    if (product.layoutConfig) {
+      try {
+        const parsedLayout = typeof product.layoutConfig === 'string'
+          ? JSON.parse(product.layoutConfig)
+          : product.layoutConfig;
+        const custConfig = parsedLayout?.customizationConfig;
+        if (custConfig) {
+          if (custConfig.showEngraving !== undefined) showEngraving = custConfig.showEngraving;
+          if (custConfig.showCardMessage !== undefined) showCardMessage = custConfig.showCardMessage;
+          if (custConfig.showGiftWrap !== undefined) showGiftWrap = custConfig.showGiftWrap;
+        }
+      } catch (e) {}
     }
 
+    const finalPhotoUrl = photoboothPhotoUrls.join(',');
     const payload = {
       productId: product.id,
       variantId: selectedVariant?.id || undefined,
       quantity: 1,
       customizationInfo: product.isCustomizable ? JSON.stringify({
-        engravingText,
-        cardMessage,
-        giftWrap,
-        designPhotoUrl,
-        photoboothPhotoUrl: finalPhotoUrl,
-        photoboothPhotoUrls: finalPhotoUrl ? finalPhotoUrl.split(',') : []
+        ...(showEngraving ? { engravingText } : {}),
+        ...(showCardMessage ? { cardMessage } : {}),
+        ...(showGiftWrap ? { giftWrap } : {}),
+        ...(designPhotoUrl ? { designPhotoUrl } : {}),
+        ...(photoboothPhotoUrls.length > 0 ? {
+          photoboothPhotoUrl: finalPhotoUrl,
+          photoboothPhotoUrls: photoboothPhotoUrls
+        } : {})
       }) : undefined
     };
 
@@ -220,26 +204,37 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
   const handleBuyNow = async () => {
     if (!product) return;
 
-    let finalPhotoUrl = '';
-    try {
-      finalPhotoUrl = await uploadPhotoboothFiles();
-    } catch (err: any) {
-      setSuccessMsg(`❌ ${err.message || 'Gặp lỗi khi tải lên hình ảnh photobooth.'}`);
-      setTimeout(() => setSuccessMsg(''), 5000);
-      return;
+    let showEngraving = false;
+    let showCardMessage = true;
+    let showGiftWrap = true;
+    if (product.layoutConfig) {
+      try {
+        const parsedLayout = typeof product.layoutConfig === 'string'
+          ? JSON.parse(product.layoutConfig)
+          : product.layoutConfig;
+        const custConfig = parsedLayout?.customizationConfig;
+        if (custConfig) {
+          if (custConfig.showEngraving !== undefined) showEngraving = custConfig.showEngraving;
+          if (custConfig.showCardMessage !== undefined) showCardMessage = custConfig.showCardMessage;
+          if (custConfig.showGiftWrap !== undefined) showGiftWrap = custConfig.showGiftWrap;
+        }
+      } catch (e) {}
     }
 
+    const finalPhotoUrl = photoboothPhotoUrls.join(',');
     const payload = {
       productId: product.id,
       variantId: selectedVariant?.id || undefined,
       quantity: 1,
       customizationInfo: product.isCustomizable ? JSON.stringify({
-        engravingText,
-        cardMessage,
-        giftWrap,
-        designPhotoUrl,
-        photoboothPhotoUrl: finalPhotoUrl,
-        photoboothPhotoUrls: finalPhotoUrl ? finalPhotoUrl.split(',') : []
+        ...(showEngraving ? { engravingText } : {}),
+        ...(showCardMessage ? { cardMessage } : {}),
+        ...(showGiftWrap ? { giftWrap } : {}),
+        ...(designPhotoUrl ? { designPhotoUrl } : {}),
+        ...(photoboothPhotoUrls.length > 0 ? {
+          photoboothPhotoUrl: finalPhotoUrl,
+          photoboothPhotoUrls: photoboothPhotoUrls
+        } : {})
       }) : undefined
     };
 

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Icon from '@/components/common/Icons';
 import OrderTimeline from './OrderTimeline';
+import CustomizationInfo from '@/app/cart/components/CustomizationInfo';
 
 export interface OrderItem {
   id: string;
@@ -194,12 +195,8 @@ export default function OrderLookupCard({ order, isExpanded, onToggle }: OrderLo
                       </div>
                       <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">
                         {item.variantName && <span>Phân loại: {item.variantName}</span>}
-                        {item.customizationInfo && (
-                          <span className="text-rose-500 bg-rose-50 dark:bg-rose-950/20 px-1 py-0.2 rounded border border-rose-100/10">
-                            Ghi chú: {item.customizationInfo}
-                          </span>
-                        )}
                       </div>
+                      <CustomizationInfo info={item.customizationInfo || ''} />
                     </div>
                   </div>
                   <div className="text-right pl-3 shrink-0">

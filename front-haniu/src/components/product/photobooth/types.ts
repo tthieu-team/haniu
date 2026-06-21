@@ -19,6 +19,7 @@ export interface PhotoboothTemplate {
   canvasHeight: number;
   background: string;
   slots: PhotoboothSlot[];
+  layers?: any[];
 }
 
 export type PhotoboothMode = 

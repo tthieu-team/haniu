@@ -14,4 +14,5 @@ public interface CartService {
     void clearCart(UUID cartId);
     CartDto getCartById(UUID cartId);
     CartDto createBuyNowCart(CartItemRequestDto request);
+    CartDto updateCustomizationInfo(String email, String sessionId, UUID itemId, String customizationInfo);
 }

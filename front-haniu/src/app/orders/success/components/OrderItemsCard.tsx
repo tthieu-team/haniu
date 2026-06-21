@@ -1,4 +1,5 @@
 import Icon from '@/components/common/Icons';
+import CustomizationInfo from '@/app/cart/components/CustomizationInfo';
 
 export interface OrderItem {
   id: string;
@@ -43,11 +44,7 @@ export default function OrderItemsCard({ items }: OrderItemsCardProps) {
                   Phân loại: <span className="font-medium">{item.variantName}</span>
                 </p>
               )}
-              {item.customizationInfo && (
-                <p className="text-[10px] text-rose-500 font-medium inline-block bg-rose-50/60 dark:bg-rose-950/20 px-2 py-0.5 rounded border border-rose-100/30 dark:border-rose-900/10">
-                  Khắc/Ghi chú: {item.customizationInfo}
-                </p>
-              )}
+              <CustomizationInfo info={item.customizationInfo || ''} />
               <div className="flex justify-between items-center text-[10px] text-slate-400 mt-1">
                 <span>x{item.quantity}</span>
                 <span className="font-bold text-slate-700 dark:text-zinc-300">

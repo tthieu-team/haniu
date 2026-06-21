@@ -20,16 +20,36 @@ export const generateComposition = async (
     templateBackground: template.background
   });
 
+  // Helper to resolve font families
+  const resolveFont = (fontKey?: string) => {
+    switch (fontKey) {
+      case 'dancing-script': return '"Dancing Script", cursive';
+      case 'patrick-hand': return '"Patrick Hand", cursive';
+      case 'mali': return '"Mali", cursive';
+      case 'cormorant-garamond': return '"Cormorant Garamond", serif';
+      case 'be-vietnam-pro': return '"Be Vietnam Pro", sans-serif';
+      default: return fontKey || '"Be Vietnam Pro", sans-serif';
+    }
+  };
+
   // 1. Draw Background
-  ctx.fillStyle = config.frameColor || template.background;
+  const isImageUrl = (src?: string) => src && (src.startsWith('http') || src.startsWith('/') || src.startsWith('data:'));
+  
+  let bgFillColor = template.background || '#ffffff';
+  if (config.frameColor && config.frameColor !== '#ffffff') {
+    bgFillColor = config.frameColor;
+  }
+  
+  ctx.fillStyle = bgFillColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  if (config.backgroundImage) {
+  const bgSource = config.backgroundImage || (isImageUrl(template.background) ? template.background : null);
+  if (bgSource) {
     const bgImg = await new Promise<HTMLImageElement>((resolve) => {
       const img = new Image();
       img.onload = () => resolve(img);
       img.onerror = () => resolve(new Image());
-      img.src = config.backgroundImage!;
+      img.src = bgSource;
     });
     if (bgImg.complete && bgImg.naturalWidth > 0) {
       ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
@@ -51,39 +71,207 @@ export const generateComposition = async (
     })
   );
 
-  const inset = config.borderSize !== undefined ? config.borderSize : 15;
-  const minX = template.slots.length > 0 ? Math.min(...template.slots.map(s => s.x)) : 40;
-  const offset = inset < 15 ? (inset - 15) * (minX / 15) : (inset - 15) * 2.67;
-  
-  template.slots.forEach((slot, index) => {
-    if (photoImages[index]) {
-      const img = photoImages[index];
-      // Adjust slots dynamically based on borderSize slider
-      const slotX = Math.max(0, slot.x + offset);
-      const slotY = Math.max(0, slot.y + offset);
-      const slotW = slot.width - offset * 2;
-      const slotH = slot.height - offset * 2;
+  // 3. Draw Design Layers or default slots
+  if (template.layers && template.layers.length > 0) {
+    const frameLayers = template.layers.filter((l: any) => l.type === 'frame');
+    // Custom template drawing
+    for (let layer of template.layers) {
+      if (layer.visible === false) continue;
+      
+      const posX = (layer.x / 100) * canvas.width;
+      const posY = (layer.y / 100) * canvas.height;
+      const rectW = (layer.width / 100) * canvas.width;
+      const rectH = (layer.height / 100) * canvas.height;
 
-      ctx.save();
-      // Create clipping region for the slot
-      ctx.beginPath();
-      ctx.rect(slotX, slotY, slotW, slotH);
-      ctx.clip();
+      if (layer.type === 'frame') {
+        const frameIndex = frameLayers.indexOf(layer);
+        if (frameIndex !== -1 && photoImages[frameIndex]) {
+          const img = photoImages[frameIndex];
+          ctx.save();
+          ctx.beginPath();
+          const radius = layer.cornerRadius ?? 8;
+          if (radius > 0) {
+            ctx.roundRect(posX, posY, rectW, rectH, radius);
+          } else {
+            ctx.rect(posX, posY, rectW, rectH);
+          }
+          ctx.clip();
 
-      // Cover logic
-      const scale = Math.max(slotW / img.width, slotH / img.height);
-      const x = slotX + (slotW - img.width * scale) / 2;
-      const y = slotY + (slotH - img.height * scale) / 2;
+          const scale = Math.max(rectW / img.width, rectH / img.height);
+          const x = posX + (rectW - img.width * scale) / 2;
+          const y = posY + (rectH - img.height * scale) / 2;
 
-      // Apply Filter if any
-      if (config.filter !== 'none') {
-        ctx.filter = config.filter;
+          if (config.filter !== 'none') {
+            ctx.filter = config.filter;
+          }
+
+          ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+          ctx.restore();
+
+          // Draw Frame border
+          const borderWidth = layer.borderSize ?? 4;
+          if (borderWidth > 0) {
+            ctx.save();
+            ctx.strokeStyle = layer.borderColor || '#ffffff';
+            ctx.lineWidth = borderWidth;
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            if (radius > 0) {
+              ctx.roundRect(posX + borderWidth/2, posY + borderWidth/2, rectW - borderWidth, rectH - borderWidth, radius);
+            } else {
+              ctx.rect(posX + borderWidth/2, posY + borderWidth/2, rectW - borderWidth, rectH - borderWidth);
+            }
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+      } else if (layer.type === 'text') {
+        ctx.save();
+        if (layer.rotation) {
+          ctx.translate(posX + rectW / 2, posY + rectH / 2);
+          ctx.rotate((layer.rotation * Math.PI) / 180);
+          ctx.translate(-(posX + rectW / 2), -(posY + rectH / 2));
+        }
+        ctx.globalAlpha = (layer.opacity ?? 100) / 100;
+        const uFont = resolveFont(layer.fontFamily);
+        ctx.fillStyle = layer.fontColor || '#1e293b';
+        const scaledFontSize = (layer.fontSize || 24) * (canvas.width / 400);
+        ctx.font = `${layer.fontStyle || 'normal'} ${layer.fontWeight || 'bold'} ${scaledFontSize}px ${uFont}`;
+        ctx.textAlign = (layer.align || 'center') as CanvasTextAlign;
+        ctx.textBaseline = 'middle';
+
+        if (layer.shadowColor) {
+          ctx.shadowColor = layer.shadowColor;
+          ctx.shadowBlur = layer.shadowBlur || 0;
+          ctx.shadowOffsetX = layer.shadowOffsetX || 0;
+          ctx.shadowOffsetY = layer.shadowOffsetY || 0;
+        }
+
+        const strokeSize = layer.strokeSize || 0;
+        const strokeColor = layer.strokeColor || '#ffffff';
+        const textX = layer.align === 'left' ? posX : (layer.align === 'right' ? posX + rectW : posX + rectW / 2);
+        const textY = posY + rectH / 2;
+
+        if (strokeSize > 0) {
+          ctx.strokeStyle = strokeColor;
+          ctx.lineWidth = strokeSize * (canvas.width / 400);
+          ctx.strokeText(layer.text || '', textX, textY);
+        }
+        ctx.fillText(layer.text || '', textX, textY);
+        ctx.restore();
+      } else if ((layer.type === 'sticker' || layer.type === 'logo') && layer.url) {
+        const img = await new Promise<HTMLImageElement>((resolve) => {
+          const i = new Image();
+          i.crossOrigin = "anonymous";
+          i.onload = () => resolve(i);
+          i.onerror = () => resolve(new Image());
+          i.src = layer.url;
+        });
+        if (img.complete && img.naturalWidth > 0) {
+          ctx.save();
+          ctx.translate(posX + rectW / 2, posY + rectH / 2);
+          if (layer.rotation) {
+            ctx.rotate((layer.rotation * Math.PI) / 180);
+          }
+          if (layer.flipX || layer.flipY) {
+            ctx.scale(layer.flipX ? -1 : 1, layer.flipY ? -1 : 1);
+          }
+          ctx.globalAlpha = (layer.opacity ?? 100) / 100;
+          ctx.drawImage(img, -rectW / 2, -rectH / 2, rectW, rectH);
+          ctx.restore();
+        }
+      } else if (layer.type === 'logo' && !layer.url) {
+        ctx.save();
+        ctx.globalAlpha = (layer.opacity ?? 100) / 100;
+        const scaledSize = (layer.size || 20) * (canvas.width / 400);
+        ctx.font = `bold ${scaledSize}px ${resolveFont('be-vietnam-pro')}`;
+        ctx.fillStyle = layer.color || '#475569';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(layer.logoText || '', posX + rectW / 2, posY + rectH / 2);
+        ctx.restore();
+      } else if (layer.type === 'shape') {
+        ctx.save();
+        ctx.translate(posX + rectW / 2, posY + rectH / 2);
+        if (layer.rotation) {
+          ctx.rotate((layer.rotation * Math.PI) / 180);
+        }
+        ctx.globalAlpha = (layer.opacity ?? 100) / 100;
+        ctx.fillStyle = layer.fillColor || '#fda4af';
+
+        const drawShapePath = () => {
+          ctx.beginPath();
+          if (layer.shapeType === 'circle') {
+            ctx.arc(0, 0, Math.min(rectW, rectH) / 2, 0, Math.PI * 2);
+          } else if (layer.shapeType === 'triangle') {
+            ctx.moveTo(0, -rectH / 2);
+            ctx.lineTo(-rectW / 2, rectH / 2);
+            ctx.lineTo(rectW / 2, rectH / 2);
+            ctx.closePath();
+          } else if (layer.shapeType === 'heart') {
+            ctx.font = `${Math.min(rectW, rectH)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = layer.fillColor || '#f43f5e';
+            ctx.fillText('❤️', 0, 0);
+          } else if (layer.shapeType === 'star') {
+            ctx.font = `${Math.min(rectW, rectH)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = layer.fillColor || '#f59e0b';
+            ctx.fillText('⭐', 0, 0);
+          } else {
+            const radius = layer.cornerRadius ?? 8;
+            ctx.roundRect(-rectW / 2, -rectH / 2, rectW, rectH, radius);
+          }
+        };
+
+        if (layer.shapeType !== 'heart' && layer.shapeType !== 'star') {
+          drawShapePath();
+          ctx.fill();
+          if (layer.borderSize > 0) {
+            ctx.strokeStyle = layer.borderColor || '#f43f5e';
+            ctx.lineWidth = layer.borderSize * (canvas.width / 400);
+            ctx.stroke();
+          }
+        } else {
+          drawShapePath();
+        }
+        ctx.restore();
       }
-
-      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-      ctx.restore();
     }
-  });
+  } else {
+    // Default fallback drawing of slots
+    const inset = config.borderSize !== undefined ? config.borderSize : 15;
+    const minX = template.slots.length > 0 ? Math.min(...template.slots.map(s => s.x)) : 40;
+    const offset = inset < 15 ? (inset - 15) * (minX / 15) : (inset - 15) * 2.67;
+
+    template.slots.forEach((slot, index) => {
+      if (photoImages[index]) {
+        const img = photoImages[index];
+        const slotX = Math.max(0, slot.x + offset);
+        const slotY = Math.max(0, slot.y + offset);
+        const slotW = slot.width - offset * 2;
+        const slotH = slot.height - offset * 2;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(slotX, slotY, slotW, slotH);
+        ctx.clip();
+
+        const scale = Math.max(slotW / img.width, slotH / img.height);
+        const x = slotX + (slotW - img.width * scale) / 2;
+        const y = slotY + (slotH - img.height * scale) / 2;
+
+        if (config.filter !== 'none') {
+          ctx.filter = config.filter;
+        }
+
+        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+        ctx.restore();
+      }
+    });
+  }
 
   const ICON_SVGS: Record<string, string> = {
     heart: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`,
@@ -167,17 +355,6 @@ export const generateComposition = async (
   ctx.save();
   const bottomY = canvas.height - 80;
 
-  const resolveFont = (fontKey?: string) => {
-    switch (fontKey) {
-      case 'dancing-script': return '"Dancing Script", cursive';
-      case 'patrick-hand': return '"Patrick Hand", cursive';
-      case 'mali': return '"Mali", cursive';
-      case 'cormorant-garamond': return '"Cormorant Garamond", serif';
-      case 'be-vietnam-pro': return '"Be Vietnam Pro", sans-serif';
-      default: return '"Be Vietnam Pro", sans-serif';
-    }
-  };
-  
   // Subtle Divider (Draw only if custom positions aren't overriding it entirely)
   const isCustomized = config.userNameX !== undefined || config.userNameY !== undefined || config.dateX !== undefined || config.dateY !== undefined;
   if (!isCustomized) {
@@ -228,6 +405,6 @@ export const generateComposition = async (
       } else {
         reject(new Error('Canvas toBlob failed'));
       }
-    }, 'image/png');
+    }, 'image/jpeg', 0.85);
   });
 };

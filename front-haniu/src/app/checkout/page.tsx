@@ -10,6 +10,9 @@ import Icon from '@/components/common/Icons';
 import { fetchApi } from '@/lib/api';
 import AddressPicker from '@/components/common/AddressPicker';
 import { cartService } from '@/services/cart.service';
+import { productService } from '@/services/product.service';
+import CustomizationInfo from '@/app/cart/components/CustomizationInfo';
+
 
 interface PaymentMethodConfig {
   code: string;
@@ -29,7 +32,7 @@ const ALL_PAYMENT_METHODS: PaymentMethodConfig[] = [
 function CheckoutForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { cart, fetchCart, clearCartState } = useCartStore();
+  const { cart, fetchCart, clearCartState, syncGuestCartToBackend } = useCartStore();
   const { appliedCoupon, discountAmount, applyCoupon } = useCouponStore();
   const { user, isAuthenticated } = useAuthStore();
 
@@ -60,6 +63,24 @@ function CheckoutForm() {
   const { createOrder, createPaymentLink, loading } = useOrderStore();
   const [error, setError] = useState('');
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodConfig[]>(ALL_PAYMENT_METHODS);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [tempFormData, setTempFormData] = useState({
+    customerName: '',
+    customerPhone: '',
+    customerEmail: '',
+    shippingProvince: '',
+    shippingDistrict: '',
+    shippingWard: '',
+    shippingAddressLine: '',
+    note: ''
+  });
+
+  const isAddressFilled = formData.customerName.trim() !== '' &&
+    formData.customerPhone.trim() !== '' &&
+    formData.shippingProvince.trim() !== '' &&
+    formData.shippingDistrict.trim() !== '' &&
+    formData.shippingWard.trim() !== '' &&
+    formData.shippingAddressLine.trim() !== '';
 
   const subtotal = activeCart?.totalPrice || 0;
 
@@ -91,19 +112,34 @@ function CheckoutForm() {
   };
 
   useEffect(() => {
-    if (paramCartId) {
-      cartService.getCartById(paramCartId)
-        .then((data) => {
+    const initCheckoutCart = async () => {
+      if (paramCartId) {
+        try {
+          const data = await cartService.getCartById(paramCartId);
           setCheckoutCart(data);
-        })
-        .catch((err) => {
+        } catch (err) {
           console.error("Failed to fetch checkout cart:", err);
           fetchCart();
-        });
-    } else {
-      fetchCart();
-    }
-  }, [paramCartId, fetchCart]);
+        }
+      } else {
+        if (!isAuthenticated) {
+          try {
+            const synced = await syncGuestCartToBackend();
+            if (synced) {
+              setCheckoutCart(synced);
+            } else {
+              fetchCart();
+            }
+          } catch (e) {
+            fetchCart();
+          }
+        } else {
+          fetchCart();
+        }
+      }
+    };
+    initCheckoutCart();
+  }, [paramCartId, isAuthenticated, fetchCart, syncGuestCartToBackend]);
 
   useEffect(() => {
     // Fetch enabled payment methods from system config
@@ -184,11 +220,73 @@ function CheckoutForm() {
 
     try {
       setError('');
+
+      // Upload local photobooth images if any
+      const itemsToUpload = (activeCart?.items || []).filter(item => {
+        if (!item.customizationInfo) return false;
+        try {
+          const parsed = JSON.parse(item.customizationInfo);
+          return parsed.photoboothPhotoUrls && parsed.photoboothPhotoUrls.some((url: string) => url.startsWith('local_pb_'));
+        } catch {
+          return false;
+        }
+      });
+
+      if (itemsToUpload.length > 0) {
+        setError('⏳ Đang tải lên ảnh photobooth thiết kế của bạn...');
+        for (const item of itemsToUpload) {
+          const parsed = JSON.parse(item.customizationInfo!);
+          const urls = parsed.photoboothPhotoUrls || [];
+          const uploadedUrls: string[] = [];
+
+          for (const url of urls) {
+            if (url.startsWith('local_pb_')) {
+              const base64 = localStorage.getItem(`haniu_pb_${url}`);
+              if (base64) {
+                // Convert Base64 back to file
+                const file = (() => {
+                  const arr = base64.split(',');
+                  const mime = arr[0].match(/:(.*?);/)![1];
+                  const bstr = atob(arr[1]);
+                  let n = bstr.length;
+                  const u8arr = new Uint8Array(n);
+                  while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                  }
+                  return new File([u8arr], `photobooth_${url}.png`, { type: mime });
+                })();
+
+                const uploadRes = await productService.uploadImage(file);
+                if (uploadRes && uploadRes.url) {
+                  uploadedUrls.push(uploadRes.url);
+                  // Clean up local storage to free space
+                  try { localStorage.removeItem(`haniu_pb_${url}`); } catch {}
+                } else {
+                  throw new Error('Không nhận được URL từ máy chủ khi tải ảnh photobooth.');
+                }
+              }
+            } else {
+              uploadedUrls.push(url);
+            }
+          }
+
+          // Update customization info on backend
+          const updatedCustomInfo = JSON.stringify({
+            ...parsed,
+            photoboothPhotoUrl: uploadedUrls.join(','),
+            photoboothPhotoUrls: uploadedUrls
+          });
+          await cartService.updateCustomizationInfo(item.id, updatedCustomInfo);
+        }
+        setError(''); // clear uploading indicator
+      }
+
       const order = await createOrder({
         cartId,
         shippingMethod,
         ...formData
       });
+
 
       if (formData.couponCode && typeof window !== 'undefined') {
         try {
@@ -230,7 +328,7 @@ function CheckoutForm() {
   };
 
   return (
-    <div className="w-full space-y-10">
+    <div className="w-full space-y-10 pt-6 sm:pt-0">
       <div>
         <h1 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Thông tin đặt hàng</h1>
         <p className="text-slate-500 dark:text-zinc-400 text-sm mt-1.5">Vui lòng điền địa chỉ giao hàng và thông tin liên hệ để hoàn tất đơn quà tặng</p>
@@ -247,12 +345,78 @@ function CheckoutForm() {
         <div className="lg:col-span-2 space-y-6 bg-white dark:bg-zinc-900 p-4 sm:p-6 rounded-3xl border border-slate-100 dark:border-zinc-800">
           <h2 className="font-bold text-slate-800 dark:text-white text-base pb-3 border-b border-slate-100 dark:border-zinc-800">Thông tin giao hàng</h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Mobile Address Summary Card */}
+          <div className="block md:hidden">
+            {isAddressFilled ? (
+              <div className="bg-slate-50 dark:bg-zinc-800/40 border border-slate-200/50 dark:border-zinc-800/50 p-4 rounded-2xl relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTempFormData({
+                      customerName: formData.customerName,
+                      customerPhone: formData.customerPhone,
+                      customerEmail: formData.customerEmail,
+                      shippingProvince: formData.shippingProvince,
+                      shippingDistrict: formData.shippingDistrict,
+                      shippingWard: formData.shippingWard,
+                      shippingAddressLine: formData.shippingAddressLine,
+                      note: formData.note
+                    });
+                    setIsAddressModalOpen(true);
+                  }}
+                  className="absolute top-4 right-4 text-xs font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1 cursor-pointer"
+                >
+                  <Icon name="edit" size={12} /> Sửa
+                </button>
+                <div className="space-y-1.5 text-slate-800 dark:text-zinc-200">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-sm">{formData.customerName}</span>
+                    <span className="text-slate-350 dark:text-zinc-600 font-normal">|</span>
+                    <span className="font-semibold text-xs">{formData.customerPhone}</span>
+                  </div>
+                  {formData.customerEmail && (
+                    <div className="text-[11px] text-slate-500 dark:text-zinc-400">{formData.customerEmail}</div>
+                  )}
+                  <div className="text-xs text-slate-650 dark:text-zinc-350 leading-relaxed pr-12 pt-1 font-medium">
+                    📍 {formData.shippingAddressLine}, {formData.shippingWard}, {formData.shippingDistrict}, {formData.shippingProvince}
+                  </div>
+                  {formData.note && (
+                    <div className="text-[11px] text-slate-450 dark:text-zinc-500 pt-1 border-t border-slate-100 dark:border-zinc-800/50 mt-1 italic">
+                      Ghi chú: “{formData.note}”
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setTempFormData({
+                    customerName: formData.customerName,
+                    customerPhone: formData.customerPhone,
+                    customerEmail: formData.customerEmail,
+                    shippingProvince: formData.shippingProvince,
+                    shippingDistrict: formData.shippingDistrict,
+                    shippingWard: formData.shippingWard,
+                    shippingAddressLine: formData.shippingAddressLine,
+                    note: formData.note
+                  });
+                  setIsAddressModalOpen(true);
+                }}
+                className="w-full py-6 border-2 border-dashed border-rose-300 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center gap-2 text-rose-500 dark:text-rose-455 font-bold transition-all cursor-pointer shadow-xs active:scale-[0.99]"
+              >
+                <Icon name="plus" size={18} />
+                <span className="text-xs uppercase tracking-wider">Nhập địa chỉ giao hàng</span>
+              </button>
+            )}
+          </div>
+
+          {/* Desktop Form Inputs */}
+          <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs text-slate-400 block mb-1">Họ tên người nhận</label>
               <input
                 type="text"
-                required
                 value={formData.customerName}
                 onChange={e => setFormData({ ...formData, customerName: e.target.value })}
                 className="w-full text-base md:text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
@@ -262,7 +426,6 @@ function CheckoutForm() {
               <label className="text-xs text-slate-400 block mb-1">Số điện thoại</label>
               <input
                 type="tel"
-                required
                 value={formData.customerPhone}
                 onChange={e => setFormData({ ...formData, customerPhone: e.target.value })}
                 className="w-full text-base md:text-sm bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-slate-700 dark:text-white"
@@ -344,13 +507,13 @@ function CheckoutForm() {
               </div>
 
               {/* Item List */}
-              <div className="space-y-3 max-h-[200px] overflow-y-auto pr-1">
+              <div className="space-y-3 max-h-[380px] sm:max-h-[450px] overflow-y-auto pr-1 custom-scrollbar">
                 {activeCart.items.map(item => (
-                  <div key={item.id} className="flex gap-3 items-center text-xs">
+                  <div key={item.id} className="flex gap-3 items-start text-xs pb-3 border-b border-slate-50 dark:border-zinc-800 last:border-0">
                     <img
                       src={item.imageUrl || "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=100&q=80"}
                       alt={item.productName}
-                      className="w-12 h-12 rounded-lg object-cover bg-slate-50 border border-slate-100 dark:border-zinc-850 animate-fade-in"
+                      className="w-12 h-12 rounded-lg object-cover bg-slate-50 border border-slate-100 dark:border-zinc-850 animate-fade-in shrink-0"
                     />
                     <div className="flex-1 min-w-0 space-y-0.5">
                       <h4 className="font-bold text-slate-800 dark:text-zinc-200 truncate">{item.productName}</h4>
@@ -360,6 +523,7 @@ function CheckoutForm() {
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="text-[10px] text-slate-400">SL: {item.quantity} x {item.unitPrice.toLocaleString()}đ</span>
                       </div>
+                      <CustomizationInfo info={item.customizationInfo || ''} />
                     </div>
                     <span className="font-bold text-slate-700 dark:text-zinc-200">{(item.totalPrice).toLocaleString()}đ</span>
                   </div>
@@ -447,6 +611,122 @@ function CheckoutForm() {
           </button>
         </div>
       </form>
+
+      {/* Mobile Address Modal */}
+      {isAddressModalOpen && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/75 backdrop-blur-sm p-0 md:hidden">
+          <div className="bg-white dark:bg-zinc-950 w-full h-full flex flex-col">
+            {/* Modal Header */}
+            <div className="pt-[calc(1.25rem+env(safe-area-inset-top))] pb-5 px-5 border-b border-slate-100 dark:border-zinc-850 flex justify-between items-center shrink-0">
+              <h3 className="font-extrabold text-slate-800 dark:text-white text-base">Địa chỉ nhận hàng</h3>
+              <button
+                type="button"
+                onClick={() => setIsAddressModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-500 hover:text-slate-850 dark:text-zinc-400 dark:hover:text-zinc-200 flex items-center justify-center transition-all cursor-pointer"
+              >
+                <Icon name="close" size={14} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
+              <div>
+                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Họ tên người nhận</label>
+                <input
+                  type="text"
+                  value={tempFormData.customerName}
+                  onChange={e => setTempFormData({ ...tempFormData, customerName: e.target.value })}
+                  className="w-full text-base bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-slate-700 dark:text-white font-medium"
+                  placeholder="Nhập họ tên người nhận"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Số điện thoại</label>
+                <input
+                  type="tel"
+                  value={tempFormData.customerPhone}
+                  onChange={e => setTempFormData({ ...tempFormData, customerPhone: e.target.value })}
+                  className="w-full text-base bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-slate-700 dark:text-white font-mono font-medium"
+                  placeholder="Nhập số điện thoại nhận hàng"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Địa chỉ Email (Không bắt buộc)</label>
+                <input
+                  type="email"
+                  value={tempFormData.customerEmail}
+                  onChange={e => setTempFormData({ ...tempFormData, customerEmail: e.target.value })}
+                  className="w-full text-base bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-slate-700 dark:text-white font-medium"
+                  placeholder="Nhập email để nhận hóa đơn"
+                />
+              </div>
+              <AddressPicker
+                province={tempFormData.shippingProvince}
+                district={tempFormData.shippingDistrict}
+                ward={tempFormData.shippingWard}
+                addressLine={tempFormData.shippingAddressLine}
+                onChange={(fields) => setTempFormData((prev) => ({
+                  ...prev,
+                  ...(fields.province !== undefined && { shippingProvince: fields.province }),
+                  ...(fields.district !== undefined && { shippingDistrict: fields.district }),
+                  ...(fields.ward !== undefined && { shippingWard: fields.ward }),
+                  ...(fields.addressLine !== undefined && { shippingAddressLine: fields.addressLine }),
+                }))}
+              />
+              <div>
+                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Ghi chú giao hàng (Không bắt buộc)</label>
+                <textarea
+                  value={tempFormData.note}
+                  onChange={e => setTempFormData({ ...tempFormData, note: e.target.value })}
+                  className="w-full text-base bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-slate-700 dark:text-white h-20 font-medium"
+                  placeholder="Ghi chú cho người vận chuyển (VD: Giao giờ hành chính, gọi trước khi đến...)"
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-5 border-t border-slate-100 dark:border-zinc-850 flex gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsAddressModalOpen(false)}
+                className="flex-1 py-3 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 font-bold text-xs rounded-xl hover:bg-slate-50 transition-all cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!tempFormData.customerName.trim()) {
+                    alert('Vui lòng điền họ tên người nhận.');
+                    return;
+                  }
+                  if (!tempFormData.customerPhone.trim()) {
+                    alert('Vui lòng điền số điện thoại.');
+                    return;
+                  }
+                  const phoneRegex = /^(0|84)(3|5|7|8|9)[0-9]{8}$/;
+                  if (!phoneRegex.test(tempFormData.customerPhone.trim())) {
+                    alert('Số điện thoại không đúng định dạng.');
+                    return;
+                  }
+                  if (!tempFormData.shippingProvince.trim() || !tempFormData.shippingDistrict.trim() || !tempFormData.shippingWard.trim() || !tempFormData.shippingAddressLine.trim()) {
+                    alert('Vui lòng điền đầy đủ thông tin địa chỉ.');
+                    return;
+                  }
+                  setFormData(prev => ({
+                    ...prev,
+                    ...tempFormData
+                  }));
+                  setIsAddressModalOpen(false);
+                }}
+                className="flex-1 py-3 bg-rose-500 text-white font-bold text-xs rounded-xl hover:bg-rose-600 transition-all cursor-pointer shadow-md shadow-rose-500/10"
+              >
+                Lưu địa chỉ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

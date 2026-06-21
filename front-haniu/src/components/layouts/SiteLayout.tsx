@@ -28,7 +28,8 @@ export default function SiteLayout({
   const storeIsAnnouncementBar = useHomeLayoutStore((state) => state.announcementBar.isEnabled);
 
   const isSticky = isMounted ? storeIsSticky : DEFAULT_STATE.header.isSticky;
-  const isAnnouncementBar = isMounted ? storeIsAnnouncementBar : DEFAULT_STATE.announcementBar.isEnabled;
+  const isCheckoutOrOrderPage = pathname === '/checkout' || pathname?.startsWith('/checkout/') || pathname?.startsWith('/orders');
+  const isAnnouncementBar = (isMounted ? storeIsAnnouncementBar : DEFAULT_STATE.announcementBar.isEnabled) && !isCheckoutOrOrderPage;
 
   const isFullWidth = isHome || 
     pathname?.startsWith('/collections') || 

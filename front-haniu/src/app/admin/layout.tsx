@@ -78,6 +78,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Đánh giá KH', href: '/admin/testimonials', icon: 'star' },
     { name: 'Thư liên hệ', href: '/admin/contacts', icon: 'mail' },
     { name: 'Instagram Feed', href: '/admin/ugc', icon: 'camera' },
+    { name: 'Quản lý Photobooth', href: '/admin/photobooth', icon: 'camera' },
     { name: 'Cấu hình giao diện', href: '/admin/layout-config', icon: 'palette' },
     { name: 'Xoay vòng Database', href: '/admin/db-rotation', icon: 'settings' },
   ];
