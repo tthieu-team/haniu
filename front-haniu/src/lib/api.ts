@@ -45,7 +45,7 @@ export async function fetchApi(path: string, options: RequestInit = {}): Promise
     try {
       // Dynamic require to prevent client-side build errors
       const { cookies } = require('next/headers');
-      const cookieStore = cookies();
+      const cookieStore = await cookies();
       const lang = cookieStore.get('haniu_lang')?.value || 'vi';
       headers['Accept-Language'] = lang;
     } catch (e) {
