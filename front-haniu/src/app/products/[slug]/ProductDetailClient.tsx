@@ -81,6 +81,7 @@ interface Product {
   seoKeywords?: string | null;
   variants?: Variant[];
   media?: Media[];
+  videoUrl?: string | null;
   totalSold?: number;
   averageRating?: number;
 }
@@ -294,7 +295,8 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
       "🎀 Ruy băng Đỏ Lãng Mạn",
       "✨ Ruy băng Vàng Hoàng Gia",
       "📦 Gói bọc giấy Kraft Hoài Cổ"
-    ]
+    ],
+    variantsLabel: "Chọn mẫu hộp quà / màu sắc"
   };
 
   if (product && product.layoutConfig) {
@@ -320,11 +322,11 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
         <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-rose-500 transition-colors">
           <Icon name="arrow-left" size={14} /> {trans('Trở lại danh sách sản phẩm')}
         </Link>
-
+ 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
           {/* Left Column: Media gallery (Sticky) */}
           <div className="lg:col-span-7 lg:sticky lg:top-28">
-            <MediaGallery mediaList={product.media} name={product.name} />
+            <MediaGallery mediaList={product.media} name={product.name} videoUrl={product.videoUrl} />
           </div>
 
           {/* Right Column: Buy options, Personalization Form & Live Mockup */}
@@ -344,6 +346,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
               giftWrapOptions={customizationConfig.giftWrapOptions}
               giftWrapLabel={customizationConfig.giftWrapLabel}
               showGiftWrap={customizationConfig.showGiftWrap}
+              variantsLabel={customizationConfig.variantsLabel}
             />
 
             {/* Personalization Inputs */}

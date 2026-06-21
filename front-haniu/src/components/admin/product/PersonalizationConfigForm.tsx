@@ -71,82 +71,6 @@ export default function PersonalizationConfigForm({
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        {/* 1. Engraving Field */}
-        <div className="bg-slate-50/50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-4">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-700 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1">
-              ✍️ Trường Khắc chữ / Tên
-            </label>
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] text-slate-450 dark:text-zinc-500 font-semibold">Bật/Tắt trường:</span>
-              <button
-                type="button"
-                onClick={() => handleCustomizationChange('showEngraving', !customizationConfig.showEngraving)}
-                className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                  customizationConfig.showEngraving ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
-                }`}
-              >
-                <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  customizationConfig.showEngraving ? 'translate-x-4' : 'translate-x-0'
-                }`} />
-              </button>
-            </div>
-          </div>
-
-          {customizationConfig.showEngraving && (
-            <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-zinc-800">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-                <div className="md:col-span-8 space-y-1">
-                  <label className="text-[10px] text-slate-400">Tiêu đề trường (Label)</label>
-                  <input
-                    type="text"
-                    value={customizationConfig.engravingLabel}
-                    onChange={(e) => handleCustomizationChange('engravingLabel', e.target.value)}
-                    className="w-full bg-white dark:bg-zinc-850 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
-                  />
-                </div>
-                <div className="md:col-span-4 space-y-1">
-                  <label className="text-[10px] text-slate-400">Ký tự tối đa (Max length)</label>
-                  <input
-                    type="number"
-                    value={customizationConfig.engravingMaxLength}
-                    onChange={(e) => handleCustomizationChange('engravingMaxLength', parseInt(e.target.value) || 50)}
-                    className="w-full bg-white dark:bg-zinc-855 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
-                  />
-                </div>
-                <div className="md:col-span-12 space-y-1">
-                  <label className="text-[10px] text-slate-400">Gợi ý nhập liệu (Placeholder)</label>
-                  <input
-                    type="text"
-                    value={customizationConfig.engravingPlaceholder}
-                    onChange={(e) => handleCustomizationChange('engravingPlaceholder', e.target.value)}
-                    className="w-full bg-white dark:bg-zinc-850 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
-                  />
-                </div>
-              </div>
-
-              {/* Real-time laser simulation toggle inside engraving settings */}
-              <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
-                <div className="space-y-0.5">
-                  <span className="text-xs font-semibold text-slate-700 dark:text-zinc-350 block">🔥 Mô phỏng Xem khắc Laser Realtime</span>
-                  <span className="text-[9px] text-slate-450 dark:text-zinc-500 block">Hiển thị tab "Xem khắc Laser" trong khu vực mô phỏng</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleCustomizationChange('showEngravingMockup', customizationConfig.showEngravingMockup !== false ? false : true)}
-                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                    customizationConfig.showEngravingMockup !== false ? 'bg-amber-500' : 'bg-slate-200 dark:bg-zinc-800'
-                  }`}
-                >
-                  <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    customizationConfig.showEngravingMockup !== false ? 'translate-x-4' : 'translate-x-0'
-                  }`} />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* 2. Card Message Field */}
         <div className="bg-slate-50/50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-4">
           <div className="flex items-center justify-between">
@@ -403,6 +327,27 @@ export default function PersonalizationConfigForm({
               </div>
             </div>
           )}
+        </div>
+
+        {/* 4. Variants Label Field */}
+        <div className="bg-slate-50/50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800 space-y-4">
+          <label className="text-xs font-bold text-slate-700 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1">
+            🎨 Tiêu đề Chọn biến thể sản phẩm (Mẫu hộp quà / Màu sắc)
+          </label>
+          <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-zinc-800">
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-400">Tiêu đề trường hiển thị (Label)</label>
+              <input
+                type="text"
+                value={customizationConfig.variantsLabel || "Chọn mẫu hộp quà / màu sắc"}
+                onChange={(e) => handleCustomizationChange('variantsLabel', e.target.value)}
+                className="w-full bg-white dark:bg-zinc-850 text-slate-850 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 font-medium text-xs"
+              />
+              <p className="text-[9px] text-slate-450 dark:text-zinc-500 font-normal">
+                Thay đổi tiêu đề hiển thị phía trên danh sách biến thể (ví dụ: "Chọn kích thước sổ da", "Chọn màu ly sứ").
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

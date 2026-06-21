@@ -606,18 +606,27 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               </div>
 
               {videoUrl && (
-                <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 bg-slate-50 p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-slate-400"><Icon name="video" size={20} /></span>
-                    <span className="text-slate-700 dark:text-zinc-300 font-semibold truncate max-w-xs">{videoUrl}</span>
+                <div className="space-y-3">
+                  <div className="relative aspect-video max-w-md mx-auto rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 bg-black shadow-sm group">
+                    <video
+                      src={getFullImageUrl(videoUrl)}
+                      controls
+                      className="w-full h-full object-contain"
+                    />
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setVideoUrl('')}
-                    className="bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold hover:bg-red-650 shadow transition-all active:scale-90"
-                  >
-                    <Icon name="close" size={10} />
-                  </button>
+                  <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-slate-400"><Icon name="video" size={20} /></span>
+                      <span className="text-slate-700 dark:text-zinc-300 font-semibold truncate max-w-xs">{videoUrl}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setVideoUrl('')}
+                      className="bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold hover:bg-red-600 shadow transition-all active:scale-90"
+                    >
+                      <Icon name="close" size={10} />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

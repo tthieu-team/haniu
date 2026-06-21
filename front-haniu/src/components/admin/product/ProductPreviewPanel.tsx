@@ -43,6 +43,7 @@ interface PreviewProduct {
   attributes: Record<string, string>; // parsed category/global attributes
   media: Media[];
   variants: Variant[];
+  videoUrl?: string | null;
   layoutConfig?: string;
 }
 
@@ -108,7 +109,7 @@ export default function ProductPreviewPanel({ product }: ProductPreviewPanelProp
 
       {/* Media Gallery */}
       <div className="w-full">
-        <MediaGallery mediaList={product.media} name={product.name} />
+        <MediaGallery mediaList={product.media} name={product.name} videoUrl={product.videoUrl} />
       </div>
 
       {/* Price Box */}

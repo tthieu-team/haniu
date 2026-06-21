@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Icon from '@/components/common/Icons';
 import { productService } from '@/services/product.service';
 
@@ -20,27 +21,192 @@ interface VariantManagerProps {
   variantsList: VariantInput[];
   setVariantsList: (list: VariantInput[]) => void;
   basePrice: number;
+  productName?: string;
+  categoryName?: string;
+  productDescription?: string;
 }
 
-export default function VariantManager({ variantsList, setVariantsList, basePrice }: VariantManagerProps) {
+export default function VariantManager({
+  variantsList,
+  setVariantsList,
+  basePrice,
+  productName = '',
+  categoryName = '',
+  productDescription = ''
+}: VariantManagerProps) {
+
+
+  // AI states
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [aiError, setAiError] = useState('');
+  const [aiCustomPrompt, setAiCustomPrompt] = useState('');
+
   const addVariant = () => setVariantsList([...variantsList, {
-    sku: '', name: '', color: '', size: '', material: '', price: basePrice, stock: 10
+    sku: `SKU-VAR-${Math.floor(1000 + Math.random() * 9000)}`, name: '', color: '', size: '', material: '', price: basePrice, stock: 10
   }]);
+
   const removeVariant = (idx: number) => setVariantsList(variantsList.filter((_, i) => i !== idx));
+
+  const clearAllVariants = () => {
+    if (confirm('Bạn có chắc chắn muốn xóa toàn bộ biến thể hiện tại?')) {
+      setVariantsList([]);
+    }
+  };
+
+  // Generate SKU helper
+  const createSku = (pName: string, color: string, size: string) => {
+    const clean = (str: string) => str.toLowerCase()
+      .replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a")
+      .replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e")
+      .replace(/ì|í|ị|ỉ|ĩ/g, "i")
+      .replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o")
+      .replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u")
+      .replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y")
+      .replace(/đ/g, "d")
+      .replace(/[^a-z0-9]/g, "");
+
+    const baseSku = clean(pName || 'GIFT').substring(0, 4).toUpperCase();
+    const cSku = color ? clean(color).substring(0, 3).toUpperCase() : '';
+    const sSku = size ? clean(size).substring(0, 2).toUpperCase() : '';
+    const rand = Math.floor(100 + Math.random() * 900);
+    return `HNU-${baseSku}${cSku ? `-${cSku}` : ''}${sSku ? `-${sSku}` : ''}-${rand}`;
+  };
+
+
+
+  // Generate variations using Groq AI
+  const handleGenerateAiVariants = async () => {
+    if (!productName.trim()) {
+      alert('Vui lòng điền "Tên sản phẩm" ở phần thông tin cơ bản trước khi sử dụng AI.');
+      return;
+    }
+
+    try {
+      setIsAiGenerating(true);
+      setAiError('');
+
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate_variants',
+          name: productName,
+          categoryName,
+          description: productDescription,
+          basePrice,
+          customPrompt: aiCustomPrompt
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to generate variants');
+      }
+
+      const data = await res.json();
+
+      if (data && Array.isArray(data.variants)) {
+        // Map elements to ensure all required fields are present
+        const generated: VariantInput[] = data.variants.map((v: any) => ({
+          sku: v.sku || createSku(productName, v.color || '', v.size || ''),
+          name: v.name || `${v.color || ''} ${v.size || ''}`.trim() || 'Biến thể mới',
+          color: v.color || '',
+          size: v.size || '',
+          material: v.material || '',
+          price: typeof v.price === 'number' ? v.price : basePrice,
+          stock: typeof v.stock === 'number' ? v.stock : 10,
+          weight: v.weight,
+          imageUrl: v.imageUrl
+        }));
+        setVariantsList([...variantsList, ...generated]);
+      } else {
+        throw new Error('Dữ liệu trả về từ AI không đúng cấu trúc variants.');
+      }
+
+    } catch (err: any) {
+      console.error(err);
+      setAiError(err.message || 'Lỗi khi gọi AI');
+    } finally {
+      setIsAiGenerating(false);
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6 text-xs font-semibold">
       <div className="flex justify-between items-center border-b border-slate-50 dark:border-zinc-800 pb-2">
         <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400">Các biến thể sản phẩm</h3>
-        <button
-          type="button"
-          onClick={addVariant}
-          className="text-xs text-rose-500 font-bold hover:underline flex items-center gap-1"
-        >
-          <Icon name="plus" size={12} /> Thêm biến thể mới
-        </button>
+        <div className="flex gap-4">
+          {variantsList.length > 0 && (
+            <button
+              type="button"
+              onClick={clearAllVariants}
+              className="text-xs text-rose-500 font-bold hover:underline flex items-center gap-1"
+            >
+              <Icon name="trash" size={12} /> Xóa tất cả
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={addVariant}
+            className="text-xs text-indigo-500 font-bold hover:underline flex items-center gap-1"
+          >
+            <Icon name="plus" size={12} /> Thêm thủ công
+          </button>
+        </div>
       </div>
 
+      {/* Generator Tools Card */}
+      <div className="bg-slate-50/50 dark:bg-zinc-950/20 p-5 rounded-2xl border border-slate-150/40 dark:border-zinc-800/80 space-y-5">
+        <h4 className="font-bold text-xs text-slate-600 dark:text-zinc-350 flex items-center gap-1.5 border-b border-slate-100 dark:border-zinc-800 pb-2">
+          🛠️ Công cụ tạo biến thể nhanh
+        </h4>
+
+
+
+        {/* Section 3: AI Assistant Generator */}
+        <div className="space-y-3">
+          <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-350 block">
+            ✨ Cách 3: Gợi ý biến thể bằng AI (Đọc thông tin sản phẩm và tự tạo)
+          </span>
+          <div className="space-y-1.5">
+            <label className="text-[10px] text-slate-450 dark:text-zinc-500 block">Yêu cầu/Hướng dẫn cho AI (Tùy chọn)</label>
+            <textarea
+              placeholder="VD: Chỉ tạo các biến thể bằng chất liệu Gỗ, màu Đỏ và Vàng. Hoặc tự tạo các biến thể bán chạy nhất cho bình giữ nhiệt..."
+              value={aiCustomPrompt}
+              onChange={(e) => setAiCustomPrompt(e.target.value)}
+              rows={2}
+              className="w-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold leading-relaxed"
+            />
+          </div>
+          <div className="flex justify-end pt-1">
+            <button
+              type="button"
+              disabled={isAiGenerating}
+              onClick={handleGenerateAiVariants}
+              className="px-4 py-2 bg-gradient-to-r from-purple-650 to-indigo-650 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl active:scale-95 transition-all text-[11px] flex items-center gap-1.5 shadow-md shadow-indigo-500/10 cursor-pointer disabled:opacity-50"
+            >
+              {isAiGenerating ? (
+                <>
+                  <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
+                  Đang gợi ý...
+                </>
+              ) : (
+                <>
+                  <Icon name="sparkles" size={12} /> Sinh biến thể bằng AI ✨
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {aiError && (
+          <p className="text-[11px] text-red-500 font-bold bg-red-500/10 p-2.5 rounded-xl border border-red-500/20">
+            ⚠️ {aiError}
+          </p>
+        )}
+      </div>
+
+      {/* Variants list */}
       <div className="space-y-4">
         {variantsList.map((item, idx) => (
           <div key={idx} className="p-4 border border-slate-200 dark:border-zinc-800 rounded-2xl bg-slate-50/50 dark:bg-zinc-950/10 space-y-4 relative">
@@ -65,7 +231,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                     list[idx].name = e.target.value;
                     setVariantsList(list);
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-850 font-medium"
                 />
               </div>
 
@@ -81,7 +247,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                     list[idx].sku = e.target.value;
                     setVariantsList(list);
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-855 font-medium"
                 />
               </div>
 
@@ -96,7 +262,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                     list[idx].size = e.target.value;
                     setVariantsList(list);
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-850 font-medium"
                 />
               </div>
 
@@ -111,7 +277,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                     list[idx].color = e.target.value;
                     setVariantsList(list);
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-855 font-medium"
                 />
               </div>
             </div>
@@ -128,7 +294,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                     list[idx].material = e.target.value;
                     setVariantsList(list);
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-850 font-medium"
                 />
               </div>
 
@@ -144,7 +310,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                     list[idx].weight = e.target.value ? parseFloat(e.target.value) : undefined;
                     setVariantsList(list);
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-855 font-medium"
                 />
               </div>
 
@@ -160,7 +326,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                       list[idx].imageUrl = e.target.value;
                       setVariantsList(list);
                     }}
-                    className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                    className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-850 font-medium"
                   />
                   <div className="relative shrink-0">
                     <input
@@ -206,7 +372,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                     list[idx].price = parseFloat(e.target.value);
                     setVariantsList(list);
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800 font-semibold text-rose-500"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-850 font-semibold text-rose-500"
                 />
               </div>
 
@@ -220,7 +386,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                     list[idx].salePrice = e.target.value ? parseFloat(e.target.value) : undefined;
                     setVariantsList(list);
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-855 font-medium"
                 />
               </div>
 
@@ -235,7 +401,7 @@ export default function VariantManager({ variantsList, setVariantsList, basePric
                     list[idx].stock = parseInt(e.target.value);
                     setVariantsList(list);
                   }}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-800"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 dark:bg-zinc-850 font-semibold"
                 />
               </div>
             </div>

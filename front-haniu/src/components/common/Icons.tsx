@@ -55,7 +55,8 @@ import {
   AlertTriangle,
   Leaf,
   Image,
-  Share
+  Share,
+  Video
 } from 'lucide-react';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -301,6 +302,11 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
     case 'AlertTriangle':
     case '⚠️':
       return <AlertTriangle size={size} className={className} {...props} />;
+    case 'video':
+    case 'Video':
+    case '📹':
+    case '🎥':
+      return <Video size={size} className={className} {...props} />;
     default:
       // Fallback if no matching Lucide icon is found
       return <span className={`inline-block font-sans ${className}`}>{name}</span>;

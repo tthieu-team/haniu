@@ -52,6 +52,7 @@ interface ProductInfoProps {
   giftWrapOptions?: string[];
   giftWrapLabel?: string;
   showGiftWrap?: boolean;
+  variantsLabel?: string;
 }
 
 export default function ProductInfo({
@@ -66,7 +67,8 @@ export default function ProductInfo({
   setGiftWrap,
   giftWrapOptions,
   giftWrapLabel,
-  showGiftWrap
+  showGiftWrap,
+  variantsLabel
 }: ProductInfoProps) {
   const { toggleWishlist, isInWishlist } = useWishlistStore();
   const isFavorite = isInWishlist(product.id);
@@ -308,16 +310,20 @@ export default function ProductInfo({
           {/* Variants Selector */}
           {((product as any).variants && (product as any).variants.length > 0) && (
             <div className="space-y-2.5">
-              <label className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-450 block mb-3">{trans("Chọn mẫu hộp quà / màu sắc")}</label>
+              <label className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-450 block mb-3">{trans(variantsLabel || "Chọn mẫu hộp quà / màu sắc")}</label>
               <div className={`grid grid-cols-2 sm:grid-cols-3 gap-2 ${(product as any).variants.length > 6 ? 'max-h-[230px] overflow-y-auto pr-1 scrollbar-thin' : ''}`}>
-                {(product as any).variants.map((v: Variant) => {
-                  const isSelected = selectedVariant?.id === v.id;
+                {(product as any).variants.map((v: Variant, idx: number) => {
+                  const isSelected = selectedVariant && (
+                    (v.id && selectedVariant.id === v.id) ||
+                    (!v.id && v.sku && selectedVariant.sku === v.sku) ||
+                    (!v.id && !v.sku && selectedVariant.name === v.name)
+                  );
                   const isLowStock = v.stock > 0 && v.stock <= 10;
                   const isOutOfStock = v.stock === 0;
 
                   return (
                     <button
-                      key={v.id}
+                      key={v.id || v.sku || idx}
                       type="button"
                       disabled={isOutOfStock}
                       onClick={() => setSelectedVariant(v)}
@@ -346,7 +352,7 @@ export default function ProductInfo({
 
                       {/* Name and Stock Info */}
                       <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                        <div className={`leading-tight break-words line-clamp-1 pr-1 transition-colors ${isSelected ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-zinc-200'}`}>
+                        <div className={`leading-tight break-words pr-1 transition-colors ${isSelected ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-zinc-200'}`}>
                           {trans(v.name)}
                         </div>
                         <div className="flex items-center gap-1 text-[8px] text-slate-400 dark:text-zinc-500 font-medium">
