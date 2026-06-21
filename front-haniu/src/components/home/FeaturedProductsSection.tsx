@@ -184,34 +184,32 @@ export default function FeaturedProductsSection({
         {/* Occasions Filters */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-extrabold tracking-widest text-slate-450 dark:text-zinc-500 uppercase block whitespace-nowrap">
+            <span className="text-[10px] font-extrabold tracking-widest text-slate-450 dark:text-zinc-550 uppercase block whitespace-nowrap">
               {t('home.products.filter_occasion')}
             </span>
             <div className="h-[1px] flex-1 bg-slate-200/60 dark:bg-zinc-800/50" />
           </div>
 
-          <div className="flex flex-wrap gap-2.5 sm:gap-5 justify-start sm:justify-start">
+          <div className="flex overflow-x-auto pt-1.5 pb-2 sm:pt-0 sm:pb-0 sm:flex-wrap gap-2.5 sm:gap-5 justify-start scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
             {occasions.map((occ) => {
               const isSelected = selectedOccasion === occ.slug;
               return (
                 <button
                   key={occ.slug}
                   onClick={() => setSelectedOccasion(occ.slug)}
-                  className="flex flex-col items-center gap-1 sm:gap-2 group cursor-pointer active:scale-95 transition-all duration-300 min-w-[58px] sm:min-w-[80px] max-w-[66px] sm:max-w-none"
+                  className="flex-shrink-0 flex flex-col items-center gap-1 sm:gap-2 group cursor-pointer active:scale-95 transition-all duration-300 min-w-[58px] sm:min-w-[80px] max-w-[66px] sm:max-w-none"
                 >
-                  {/* Circle Icon Container */}
                   <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-[14px] sm:rounded-2xl flex items-center justify-center transition-all duration-300 border relative ${isSelected
                     ? 'bg-gradient-to-br from-rose-500 to-pink-500 text-white border-rose-500 shadow-lg shadow-rose-500/25 scale-105 ring-4 ring-rose-500/10'
                     : 'bg-white text-slate-700 border-slate-200 hover:bg-rose-50/50 hover:text-rose-600 hover:border-rose-300/80 hover:scale-105 hover:shadow-md hover:shadow-rose-500/5 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-rose-950/20 dark:hover:text-rose-400 dark:hover:border-rose-900/40'
                     }`}>
                     <Icon name={getOccasionIcon(occ.slug)} size={16} className="w-4 h-4 sm:w-5 sm:h-5" />
                     {isSelected && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-pink-600 text-white border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[7px] sm:text-[9px] font-bold animate-scale-up">
+                      <span className="absolute -top-1 -right-1 z-10 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-pink-600 text-white border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[7px] sm:text-[9px] font-bold animate-scale-up">
                         ✓
                       </span>
                     )}
                   </div>
-                  {/* Text Label */}
                   <span className={`text-[9px] sm:text-[10px] font-bold tracking-wide transition-colors text-center leading-tight line-clamp-2 ${isSelected ? 'text-rose-500' : 'text-slate-500 dark:text-zinc-400 group-hover:text-rose-600 dark:group-hover:text-rose-400'
                     }`}>
                     {occ.slug === '' ? t('home.products.all_occasions') : occ.name}
@@ -225,34 +223,32 @@ export default function FeaturedProductsSection({
         {/* Recipients Filters */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-extrabold tracking-widest text-slate-450 dark:text-zinc-550 uppercase block whitespace-nowrap">
+            <span className="text-[10px] font-extrabold tracking-widest text-slate-450 dark:text-zinc-555 uppercase block whitespace-nowrap">
               {t('home.products.filter_recipient')}
             </span>
             <div className="h-[1px] flex-1 bg-slate-200/60 dark:bg-zinc-800/50" />
           </div>
 
-          <div className="flex flex-wrap gap-2.5 sm:gap-5 justify-start sm:justify-start">
+          <div className="flex overflow-x-auto pt-1.5 pb-2 sm:pt-0 sm:pb-0 sm:flex-wrap gap-2.5 sm:gap-5 justify-start scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
             {recipients.map((rec) => {
               const isSelected = selectedRecipient === rec.slug;
               return (
                 <button
                   key={rec.slug}
                   onClick={() => setSelectedRecipient(rec.slug)}
-                  className="flex flex-col items-center gap-1 sm:gap-2 group cursor-pointer active:scale-95 transition-all duration-300 min-w-[58px] sm:min-w-[80px] max-w-[66px] sm:max-w-none"
+                  className="flex-shrink-0 flex flex-col items-center gap-1 sm:gap-2 group cursor-pointer active:scale-95 transition-all duration-300 min-w-[58px] sm:min-w-[80px] max-w-[66px] sm:max-w-none"
                 >
-                  {/* Circle Icon Container */}
                   <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-[14px] sm:rounded-2xl flex items-center justify-center transition-all duration-300 border relative ${isSelected
                     ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white border-amber-500 shadow-lg shadow-amber-500/25 scale-105 ring-4 ring-amber-500/10'
-                    : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50/50 hover:text-amber-600 hover:border-rose-300/80 hover:scale-105 hover:shadow-md hover:shadow-amber-500/5 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-amber-950/20 dark:hover:text-amber-400 dark:hover:border-amber-900/40'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50/50 hover:text-amber-650 hover:border-rose-300/80 hover:scale-105 hover:shadow-md hover:shadow-amber-500/5 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-amber-950/20 dark:hover:text-amber-400 dark:hover:border-amber-900/40'
                     }`}>
                     <Icon name={getRecipientIcon(rec.slug)} size={16} className="w-4 h-4 sm:w-5 sm:h-5" />
                     {isSelected && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-orange-600 text-white border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[7px] sm:text-[9px] font-bold animate-scale-up">
+                      <span className="absolute -top-1 -right-1 z-10 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-orange-600 text-white border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[7px] sm:text-[9px] font-bold animate-scale-up">
                         ✓
                       </span>
                     )}
                   </div>
-                  {/* Text Label */}
                   <span className={`text-[9px] sm:text-[10px] font-bold tracking-wide transition-colors text-center leading-tight line-clamp-2 ${isSelected ? 'text-amber-600 dark:text-amber-500' : 'text-slate-500 dark:text-zinc-400 group-hover:text-amber-650 dark:group-hover:text-amber-500'
                     }`}>
                     {rec.slug === '' ? t('home.products.all_recipients') : rec.name}

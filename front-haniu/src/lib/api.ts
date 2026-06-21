@@ -41,6 +41,16 @@ export async function fetchApi(path: string, options: RequestInit = {}): Promise
   if (typeof window !== 'undefined') {
     const lang = localStorage.getItem('haniu_lang') || 'vi';
     headers['Accept-Language'] = lang;
+  } else {
+    try {
+      // Dynamic require to prevent client-side build errors
+      const { cookies } = require('next/headers');
+      const cookieStore = cookies();
+      const lang = cookieStore.get('haniu_lang')?.value || 'vi';
+      headers['Accept-Language'] = lang;
+    } catch (e) {
+      headers['Accept-Language'] = 'vi';
+    }
   }
 
   const token = useAuthStore.getState().token;

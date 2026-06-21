@@ -114,7 +114,7 @@ export default async function BlogPostDetailPage({ params }: PageProps) {
       />
 
       <div className="bg-slate-50/50 dark:bg-zinc-950 min-h-screen pt-4 pb-8 sm:pb-12 animate-fade-in">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 space-y-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
           
           {/* Back button */}
           <div>

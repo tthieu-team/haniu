@@ -28,6 +28,59 @@ export async function POST(req: Request) {
       );
     }
 
+    if (action === 'generate_post') {
+      const systemPrompt = `Bạn là một chuyên gia viết nội dung Marketing, nhà văn và chuyên viên tối ưu hóa SEO cho thương hiệu Haniu (thương hiệu quà tặng cao cấp, tình cảm, tinh tế).
+Nhiệm vụ của bạn là viết một bài viết (blog post) chất lượng cao, chuẩn SEO, có độ dài khoảng 1000 từ dựa trên chủ đề hoặc từ khóa được cung cấp.
+
+Yêu cầu cực kỳ quan trọng về nội dung:
+- Phải viết bằng TIẾNG VIỆT, văn phong lôi cuốn, chuyên nghiệp nhưng ấm áp, gần gũi, đong đầy cảm xúc.
+- Bài viết phải dài khoảng 1000 từ (rất chi tiết, phân tích sâu, có ví dụ cụ thể), có bố cục rõ ràng với các tiêu đề phụ (H2, H3).
+- Cung cấp nội dung dưới dạng HTML sạch (sử dụng các thẻ h2, h3, p, strong, em, ul, li, blockquote, khuyên dùng định dạng HTML chuẩn không cần thẻ bao ngoài body hay html).
+- Trả về cấu trúc JSON chính xác theo định dạng dưới đây. Không thêm giải thích ngoài JSON.
+
+MẪU JSON TRẢ VỀ:
+{
+  "title": "Tiêu đề bài viết hấp dẫn, thu hút người đọc",
+  "slug": "duong-dan-tinh-viet-lien-khong-dau-ngan-cach-bang-dau-gach-ngang",
+  "summary": "Tóm tắt ngắn gọn nội dung bài viết hiển thị ngoài danh sách (khoảng 2-3 câu, từ 100 đến 150 từ)...",
+  "imageUrl": "https://images.unsplash.com/photo-...", (Tìm một URL hình ảnh Unsplash thật chất lượng liên quan đến quà tặng/tình yêu/chủ đề bài viết để làm ảnh đại diện)
+  "content": "Nội dung bài viết chi tiết khoảng 1000 từ..."
+}`;
+
+      const userPrompt = `Chủ đề bài viết: "${body.topic || ''}"
+Tone giọng mong muốn: "${body.tone || 'Lãng mạn, sâu sắc'}"
+Yêu cầu bổ sung đặc biệt: "${body.customPrompt || 'Không có'}"
+
+Hãy viết bài viết dài khoảng 1000 từ, đầy tính thuyết phục và cảm xúc.`;
+
+      const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: model,
+          temperature: 0.7,
+          response_format: { type: 'json_object' },
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+        }),
+      });
+
+      if (!groqResponse.ok) {
+        const errText = await groqResponse.text();
+        return NextResponse.json({ error: `Groq error: ${errText}` }, { status: groqResponse.status });
+      }
+
+      const data = await groqResponse.json();
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) return NextResponse.json({ error: 'Empty AI response' }, { status: 500 });
+      return NextResponse.json(JSON.parse(content));
+    }
+
     if (action === 'generate_variants') {
       const systemPrompt = `Bạn là một chuyên gia quản lý sản phẩm E-commerce cho thương hiệu Haniu.
 Nhiệm vụ của bạn là sinh ra danh sách các biến thể (variants) phù hợp, thực tế và bán chạy cho sản phẩm quà tặng dựa trên Tên sản phẩm, Danh mục, Mô tả và Giá bán.

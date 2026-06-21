@@ -18,6 +18,53 @@ export default function AdminPostsPage() {
     active: true
   });
 
+  // AI Helper States
+  const [aiTopic, setAiTopic] = useState('');
+  const [aiTone, setAiTone] = useState('Lãng mạn, sâu sắc');
+  const [aiCustomPrompt, setAiCustomPrompt] = useState('');
+  const [isAiWriting, setIsAiWriting] = useState(false);
+  const [showAiHelper, setShowAiHelper] = useState(false);
+
+  const handleAiWrite = async () => {
+    if (!aiTopic.trim()) {
+      alert('Vui lòng nhập chủ đề bài viết!');
+      return;
+    }
+    setIsAiWriting(true);
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate_post',
+          topic: aiTopic,
+          tone: aiTone,
+          customPrompt: aiCustomPrompt
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Lỗi khi gọi API AI');
+      }
+
+      setCurrentPost(prev => ({
+        ...prev,
+        title: data.title || prev.title,
+        slug: data.slug || prev.slug,
+        summary: data.summary || prev.summary,
+        imageUrl: data.imageUrl || prev.imageUrl,
+        content: data.content || prev.content
+      }));
+
+      setShowAiHelper(false);
+      alert('Tạo bài viết bằng AI thành công! 🎉');
+    } catch (err: any) {
+      alert(err.message || 'Lỗi khi viết bài bằng AI!');
+    } finally {
+      setIsAiWriting(false);
+    }
+  };
+
   const loadPosts = async () => {
     await fetchPosts();
   };
@@ -94,9 +141,92 @@ export default function AdminPostsPage() {
       {/* Edit Form */}
       {isEditing && (
         <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800/80 shadow-sm space-y-6 animate-fade-in">
-          <h3 className="font-bold text-slate-800 dark:text-white text-base">
-            {currentPost.id ? 'Biên tập bài viết' : 'Soạn thảo bài viết mới'}
-          </h3>
+          <div className="flex justify-between items-center border-b border-slate-100 dark:border-zinc-800/60 pb-3">
+            <h3 className="font-bold text-slate-800 dark:text-white text-base">
+              {currentPost.id ? 'Biên tập bài viết' : 'Soạn thảo bài viết mới'}
+            </h3>
+            {!currentPost.id && (
+              <button
+                type="button"
+                onClick={() => setShowAiHelper(!showAiHelper)}
+                className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-sm hover:opacity-90 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>✨ Viết bài bằng AI</span>
+              </button>
+            )}
+          </div>
+
+          {showAiHelper && (
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800 space-y-3 animate-fade-in">
+              <div className="text-xs font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
+                <span>🤖 Trợ lý nội dung AI</span>
+                <span className="text-[10px] text-slate-400 font-normal">(Sử dụng AI để tự động tạo một bài viết chất lượng ~1000 từ)</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="md:col-span-2 space-y-1">
+                  <label className="text-[10px] text-slate-400 font-bold uppercase block">Chủ đề / Ý tưởng bài viết</label>
+                  <input
+                    type="text"
+                    value={aiTopic}
+                    onChange={e => setAiTopic(e.target.value)}
+                    className="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-slate-700 dark:text-white focus:border-rose-500 focus:outline-none"
+                    placeholder="Ví dụ: Bí quyết chọn quà tặng bạn gái ngày Valentine ý nghĩa..."
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 font-bold uppercase block">Tone giọng</label>
+                  <select
+                    value={aiTone}
+                    onChange={e => setAiTone(e.target.value)}
+                    className="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-slate-700 dark:text-white focus:border-rose-500 focus:outline-none"
+                  >
+                    <option value="Lãng mạn, sâu sắc">Lãng mạn, sâu sắc</option>
+                    <option value="Chuyên nghiệp, thông tin">Chuyên nghiệp, chia sẻ kinh nghiệm</option>
+                    <option value="Vui tươi, trẻ trung">Vui tươi, trẻ trung</option>
+                    <option value="Trang trọng, tinh tế">Trang trọng, tinh tế</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 font-bold uppercase block">Yêu cầu bổ sung (Không bắt buộc)</label>
+                <input
+                  type="text"
+                  value={aiCustomPrompt}
+                  onChange={e => setAiCustomPrompt(e.target.value)}
+                  className="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-slate-700 dark:text-white focus:border-rose-500 focus:outline-none"
+                  placeholder="Ví dụ: Có nhắc tới sản phẩm nến thơm Haniu, chèn thêm 3 lời khuyên..."
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAiHelper(false)}
+                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg border border-slate-200 dark:border-zinc-750 bg-white dark:bg-zinc-900 text-slate-500 cursor-pointer hover:bg-slate-50"
+                >
+                  Đóng
+                </button>
+                <button
+                  type="button"
+                  disabled={isAiWriting}
+                  onClick={handleAiWrite}
+                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-rose-500 hover:bg-rose-600 text-white shadow-sm active:scale-95 transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                >
+                  <span>Chấp bút viết bài 🚀</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isAiWriting && (
+            <div className="p-8 rounded-2xl bg-rose-50/30 dark:bg-rose-950/10 border border-rose-100/50 dark:border-rose-900/30 flex flex-col items-center justify-center space-y-3 animate-pulse">
+              <div className="w-10 h-10 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="text-xs font-bold text-rose-500 dark:text-rose-450">AI đang viết bài...</div>
+              <div className="text-[10px] text-slate-400 text-center">Quá trình này có thể mất khoảng 10-15 giây để tạo nội dung ~1000 từ chất lượng cao. Vui lòng giữ kết nối.</div>
+            </div>
+          )}
+
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
