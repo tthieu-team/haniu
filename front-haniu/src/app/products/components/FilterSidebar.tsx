@@ -129,7 +129,10 @@ export default function FilterSidebar({
   };
 
   return (
-    <aside className="hidden lg:block w-72 shrink-0 sticky top-24 space-y-6 bg-white dark:bg-zinc-950 p-6 rounded-[32px] border border-slate-200/60 dark:border-zinc-800 shadow-sm shadow-slate-100/50 dark:shadow-none">
+    <aside 
+      style={{ zIndex: 40 }}
+      className="hidden lg:block w-72 shrink-0 sticky sticky-filter-sidebar space-y-6 bg-white dark:bg-zinc-950 p-6 rounded-[32px] border border-slate-200/60 dark:border-zinc-800 shadow-sm shadow-slate-100/50 dark:shadow-none"
+    >
       {/* Title & Clear Filters Button */}
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-4">
         <div className="flex items-center gap-2">

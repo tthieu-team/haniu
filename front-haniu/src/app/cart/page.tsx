@@ -287,7 +287,7 @@ export default function CartPage() {
                 {trans("Có vẻ như bạn chưa chọn được sản phẩm ưng ý. Hãy tiếp tục khám phá các mẫu quà tặng thiết kế độc đáo nhé!")}
               </p>
             </div>
-            <Link href="/" className="inline-block px-8 py-3.5 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-rose-500/20 transition-all hover:scale-[1.02]">
+            <Link href="/products" className="inline-block px-8 py-3.5 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-rose-500/20 transition-all hover:scale-[1.02]">
               {trans("Tiếp tục mua sắm")}
             </Link>
           </div>
@@ -608,7 +608,7 @@ export default function CartPage() {
                 )}
 
                 <div className="pt-2 text-center">
-                  <Link href="/" className="text-[10px] text-slate-400 dark:text-zinc-550 hover:text-rose-500 hover:underline font-bold transition-colors">
+                  <Link href="/products" className="text-[10px] text-slate-400 dark:text-zinc-550 hover:text-rose-500 hover:underline font-bold transition-colors">
                     ← {trans("Tiếp tục mua sắm")}
                   </Link>
                 </div>

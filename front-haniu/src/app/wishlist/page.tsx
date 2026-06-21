@@ -73,7 +73,7 @@ export default function WishlistPage() {
               </p>
             </div>
             <Link
-              href="/#products"
+              href="/products"
               className="inline-flex bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 text-white font-bold py-3.5 px-10 rounded-2xl text-xs transition-all cursor-pointer shadow-md active:scale-98"
             >
               Khám phá set quà ngay

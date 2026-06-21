@@ -294,11 +294,15 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
     variantsLabel: "Chọn mẫu hộp quà / màu sắc"
   };
 
+  let maxPhotoboothPhotos = 4;
   if (product && product.layoutConfig) {
     try {
       const parsedLayout = typeof product.layoutConfig === 'string'
         ? JSON.parse(product.layoutConfig)
         : product.layoutConfig;
+      if (parsedLayout?.maxPhotoboothPhotos !== undefined) {
+        maxPhotoboothPhotos = parseInt(parsedLayout.maxPhotoboothPhotos) || 4;
+      }
       if (parsedLayout?.customizationConfig) {
         customizationConfig = {
           ...customizationConfig,
@@ -380,6 +384,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                 setPhotoboothPhotoUrls={setPhotoboothPhotoUrls}
                 onPhotoSelected={(file) => setPhotoboothPhotoFiles(prev => [...prev, file])}
                 onPhotoDeleted={handlePhotoDeleted}
+                maxPhotoboothPhotos={maxPhotoboothPhotos}
               />
             )}
 

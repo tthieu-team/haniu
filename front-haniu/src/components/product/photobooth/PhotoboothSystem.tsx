@@ -51,7 +51,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
   const [faceFilterLoading, setFaceFilterLoading] = useState(false);
 
   // Aspect Ratio state
-  const [aspectRatio, setAspectRatio] = useState<string>('free');
+  const [aspectRatio, setAspectRatio] = useState<string>('template');
 
 
 
@@ -82,6 +82,17 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
       }));
     }
   }, [settings]);
+
+  useEffect(() => {
+    if (activeTemplates && activeTemplates.length > 0) {
+      const defaultTpl = activeTemplates[0];
+      setConfig(prev => ({
+        ...prev,
+        mode: defaultTpl.id as any,
+        template: defaultTpl
+      }));
+    }
+  }, [activeTemplates]);
 
 
   // Cleanup Result URLs on unmount
@@ -316,14 +327,22 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
 
         {(step === 'countdown' || step === 'capturing') && (
           <motion.div key="camera" className="w-full h-full relative z-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <CameraView
-              isCapturing={isCapturing}
-              onCapture={handleCapture}
-              onReady={() => setCameraReady(true)}
-              faceFilter={faceFilter}
-              onFaceFilterLoading={setFaceFilterLoading}
-              aspectRatio={aspectRatio}
-            />
+            {(() => {
+              const currentSlotIndex = retakeIndex !== null ? retakeIndex : photos.length;
+              const currentSlot = config.template.slots[currentSlotIndex] || config.template.slots[0];
+              const slotRatio = currentSlot ? `${currentSlot.width}:${currentSlot.height}` : 'free';
+              const resolvedAspectRatio = aspectRatio === 'template' ? slotRatio : aspectRatio;
+              return (
+                <CameraView
+                  isCapturing={isCapturing}
+                  onCapture={handleCapture}
+                  onReady={() => setCameraReady(true)}
+                  faceFilter={faceFilter}
+                  onFaceFilterLoading={setFaceFilterLoading}
+                  aspectRatio={resolvedAspectRatio}
+                />
+              );
+            })()}
 
             {/* Face AI Loading Overlay — block interaction until model is ready */}
             {faceFilterLoading && cameraReady && (
@@ -446,6 +465,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
               {/* Row 2: Aspect Ratio */}
               <div className="flex justify-center gap-1.5 flex-wrap">
                 {[
+                  { id: 'template', label: 'Theo khung' },
                   { id: 'free', label: 'Tự do' },
                   { id: '1:1', label: '1:1' },
                   { id: '3:4', label: '3:4' },
@@ -521,8 +541,8 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
                       <Icon name="palette" size={20} className="sm:scale-125" />
                     </div>
                     <div>
-                      <p className="font-black text-[9px] sm:text-[12px] uppercase tracking-wide">{trans("Khung & Viền")}</p>
-                      <p className="text-[7.5px] sm:text-[9px] text-muted-color font-normal mt-0.5 sm:mt-1 leading-tight line-clamp-2 sm:line-clamp-none">{trans("Thay đổi màu viền, tải hình nền riêng, chữ ký.")}</p>
+                      <p className="font-black text-[9px] sm:text-[12px] uppercase tracking-wide">{trans("Chữ ký & Ngày")}</p>
+                      <p className="text-[7.5px] sm:text-[9px] text-muted-color font-normal mt-0.5 sm:mt-1 leading-tight line-clamp-2 sm:line-clamp-none">{trans("Thêm chữ ký cá nhân và ngày chụp kỷ niệm vào bức ảnh.")}</p>
                     </div>
                   </button>
 

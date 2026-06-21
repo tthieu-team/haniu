@@ -47,6 +47,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/carts/**").permitAll()
                 .requestMatchers("/api/v1/coupons/**").permitAll()
                 .requestMatchers("/api/v1/reviews/**").permitAll()
+                .requestMatchers("/api/v1/wishlist/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/system-configs/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/photobooth/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/photobooth/sessions").permitAll()

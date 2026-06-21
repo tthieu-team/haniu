@@ -57,7 +57,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const isCustomizable = product.isCustomizable || (product as any).is_customizable;
 
   return (
-    <div className="group bg-white dark:bg-zinc-900 rounded-2xl sm:rounded-[28px] border border-slate-100 dark:border-zinc-800/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden relative">
+    <div className="group bg-white dark:bg-zinc-900 rounded-2xl sm:rounded-[28px] border border-slate-100 dark:border-zinc-800/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden relative z-10">
       {/* Wishlist Button */}
       <button
         onClick={(e) => {

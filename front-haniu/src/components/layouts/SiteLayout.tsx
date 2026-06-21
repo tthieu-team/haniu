@@ -31,6 +31,16 @@ export default function SiteLayout({
   const isCheckoutOrOrderPage = pathname === '/checkout' || pathname?.startsWith('/checkout/') || pathname?.startsWith('/orders');
   const isAnnouncementBar = (isMounted ? storeIsAnnouncementBar : DEFAULT_STATE.announcementBar.isEnabled) && !isCheckoutOrOrderPage;
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const isFullWidth = isHome || 
     pathname?.startsWith('/collections') || 
     pathname?.startsWith('/story') || 
@@ -59,7 +69,17 @@ export default function SiteLayout({
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div 
+      className="flex flex-col min-h-screen"
+      style={{
+        '--header-height': isSticky 
+          ? (isAnnouncementBar ? (isScrolled ? '92px' : '112px') : (isScrolled ? '60px' : '80px')) 
+          : '0px',
+        '--header-height-sm': isSticky 
+          ? (isAnnouncementBar ? (isScrolled ? '100px' : '128px') : (isScrolled ? '68px' : '96px')) 
+          : '0px',
+      } as React.CSSProperties}
+    >
       <ScrollToTop />
       <WelcomeSplash />
       <PromoPopup />

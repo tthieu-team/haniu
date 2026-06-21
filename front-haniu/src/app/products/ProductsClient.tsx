@@ -564,7 +564,7 @@ function ProductsContent() {
           />
 
           {/* Product grid list panel */}
-          <div className="flex-1 w-full space-y-6">
+          <div className="flex-1 w-full space-y-6 relative z-10">
 
             {/* Toolbar sorting and display toggles */}
             <ProductToolbar

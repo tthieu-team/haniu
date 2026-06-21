@@ -40,6 +40,7 @@ export default function Header() {
   const { cart, fetchCart } = useCartStore();
   const { theme, toggleTheme } = useThemeStore();
   const wishlistItems = useWishlistStore((state) => state.items);
+  const fetchWishlist = useWishlistStore((state) => state.fetchWishlist);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchVal, setSearchVal] = useState('');
@@ -60,7 +61,8 @@ export default function Header() {
 
   useEffect(() => {
     fetchCart();
-  }, [fetchCart]);
+    fetchWishlist();
+  }, [fetchCart, fetchWishlist, isAuthenticated]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -197,14 +199,14 @@ export default function Header() {
       )}
       {/* 2. ANNOUNCEMENT BAR */}
       {showAnnouncementBar && (
-        <div className="w-full bg-rose-600 text-white text-[10px] sm:text-[11px] py-2 sm:py-2.5 px-2 sm:px-4 text-center font-semibold tracking-wide transition-all duration-350 shadow-sm">
+        <div className="w-full bg-rose-600 text-white text-[10px] sm:text-[11px] py-2 sm:py-2.5 px-2 sm:px-4 text-center font-semibold tracking-wide transition-all duration-350 shadow-sm announcement-container">
           <a
             href={announcementBar.linkHref || '#products'}
-            className="hover:underline flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 cursor-pointer leading-relaxed"
+            className="hover:underline flex flex-nowrap sm:flex-wrap items-center justify-start sm:justify-center gap-1 sm:gap-1.5 cursor-pointer leading-relaxed announcement-marquee w-max sm:w-full"
           >
             <span>{trans(announcementBar.text)}</span>
             {announcementBar.linkText && (
-              <span className="underline font-bold">{trans(announcementBar.linkText)} →</span>
+              <span className="underline font-bold whitespace-nowrap ml-1">{trans(announcementBar.linkText)} →</span>
             )}
           </a>
         </div>

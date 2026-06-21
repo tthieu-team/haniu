@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@/components/common/Icons';
 import { PhotoboothMode } from './types';
+import { TemplateBlueprintPreview } from './TemplateBlueprintPreview';
 import { useTranslate } from '@/lib/translator';
+import { useAuthStore } from '@/store/auth';
 
 interface ModeSelectorProps {
   onSelect: (mode: string, userName: string) => void;
@@ -105,7 +107,7 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect, customTemp
         typeof t.layers === 'string' ? (() => {
           try {
             return JSON.parse(t.layers).filter((l: any) => l.type === 'frame').length;
-          } catch(e) { return 0; }
+          } catch (e) { return 0; }
         })() : 0
       )
     );
@@ -114,7 +116,8 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect, customTemp
       label: t.name,
       iconName: frameCount <= 2 ? 'image' : 'grid',
       description: t.description || `Bố cục ${frameCount} ảnh chụp thiết kế riêng`,
-      color: 'from-rose-500 to-amber-500'
+      color: 'from-rose-500 to-amber-500',
+      template: t
     };
   });
 
@@ -153,17 +156,8 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect, customTemp
               className="relative group bg-card-bg/45 border border-border-color rounded-2xl p-4 flex flex-col items-center justify-between text-center hover:border-primary-color/50 hover:bg-accent-color/10 transition-all duration-300 shadow-xs hover:shadow-md cursor-pointer h-full min-h-[155px]"
             >
               <div className="flex flex-col items-center w-full">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${mode.color || 'from-rose-500 to-amber-500'} flex items-center justify-center mb-2.5 shadow-sm relative group-hover:scale-105 transition-transform duration-300`}>
-                  <div className="absolute inset-0 bg-white/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <Icon name={mode.iconName} className="w-5 h-5 text-white relative z-10" />
-                </div>
-
+                <TemplateBlueprintPreview template={mode.template} />
                 <h3 className="text-[11px] sm:text-xs font-black text-foreground mb-1 uppercase tracking-tight">{trans(mode.label)}</h3>
-                <p className="text-muted-color text-[8.5px] sm:text-[9.5px] font-medium leading-normal px-1">{trans(mode.description)}</p>
-              </div>
-
-              <div className="mt-3 px-3 py-1 bg-primary-color hover:bg-primary-color/90 text-white rounded-full text-[8.5px] font-bold uppercase tracking-wider transition-opacity shadow-xs">
-                {trans("Chọn mẫu")}
               </div>
             </motion.button>
           ))}

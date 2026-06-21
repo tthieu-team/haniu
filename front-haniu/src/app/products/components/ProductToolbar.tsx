@@ -24,7 +24,7 @@ export default function ProductToolbar({
 }: ProductToolbarProps) {
   const trans = useTranslate();
   return (
-    <div className="sticky top-20 z-30 flex flex-col sm:flex-row sm:items-center justify-between bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md p-4 sm:px-6 sm:py-3 border border-slate-200/60 dark:border-zinc-800 rounded-2xl sm:rounded-3xl gap-y-0 gap-x-3 w-full shadow-xs">
+    <div className="sticky sticky-product-toolbar flex flex-col sm:flex-row sm:items-center justify-between bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md p-4 sm:px-6 sm:py-3 border border-slate-200/60 dark:border-zinc-800 rounded-2xl sm:rounded-3xl gap-y-0 gap-x-3 w-full shadow-xs">
       {/* Left side: Filter toggle (mobile) & Product Count Display */}
       <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto pb-3 sm:pb-0">
         <div className="flex items-center gap-2.5">

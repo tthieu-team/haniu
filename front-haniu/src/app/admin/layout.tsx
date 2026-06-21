@@ -20,7 +20,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const { isAuthenticated, isInitialized, user } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
-  
+
   const [collapsed, setCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -93,12 +93,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#f5f7fb] text-slate-800 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-200">
-      
+
       {/* 1. SIDEBAR */}
-      <aside 
-        className={`flex flex-col bg-slate-900 text-slate-300 dark:bg-zinc-900 border-r border-slate-800 dark:border-zinc-800 transition-all duration-300 z-30 shrink-0 ${
-          collapsed ? 'w-[70px]' : 'w-[240px]'
-        }`}
+      <aside
+        className={`flex flex-col bg-slate-900 text-slate-300 dark:bg-zinc-900 border-r border-slate-800 dark:border-zinc-800 transition-all duration-300 z-30 shrink-0 ${collapsed ? 'w-[70px]' : 'w-[240px]'
+          }`}
       >
         {/* Sidebar Header Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800 dark:border-zinc-850">
@@ -124,11 +123,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${
-                  isActive
-                    ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/10'
-                    : 'hover:bg-slate-850 dark:hover:bg-zinc-800/50 hover:text-white text-slate-400'
-                } ${collapsed ? 'justify-center' : ''}`}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${isActive
+                  ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/10'
+                  : 'hover:bg-slate-850 dark:hover:bg-zinc-800/50 hover:text-white text-slate-400'
+                  } ${collapsed ? 'justify-center' : ''}`}
                 title={item.name}
               >
                 <span className="shrink-0">
@@ -154,10 +152,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* 2. MAIN APP SHELL */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        
+
         {/* Header */}
         <header className="h-16 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between px-6 z-20 shadow-sm shrink-0">
-          
+
           {/* Header Left (Breadcrumbs) */}
           <div className="flex items-center gap-3">
             <nav className="flex items-center gap-1.5 text-xs font-medium text-slate-400 dark:text-zinc-500">
@@ -179,7 +177,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Header Right */}
           <div className="flex items-center gap-4">
-            
+
             {/* Dark / Light Toggle */}
             <button
               onClick={toggleTheme}
@@ -210,7 +208,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400">Thông báo đơn hàng</h4>
                       {unreadCount > 0 && (
-                        <button 
+                        <button
                           onClick={() => markAllAsRead()}
                           className="text-[10px] text-rose-500 hover:underline font-semibold cursor-pointer"
                         >
@@ -223,18 +221,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <p className="text-slate-400 text-center py-4">Chưa có thông báo đơn hàng nào</p>
                       ) : (
                         notifications.map((item) => (
-                          <div 
-                            key={item.id} 
+                          <div
+                            key={item.id}
                             onClick={() => {
                               markAsRead(item.id);
                               setNotifOpen(false);
                               router.push('/admin/orders');
                             }}
-                            className={`p-2 rounded-xl cursor-pointer transition-colors ${
-                              item.unread 
-                                ? 'bg-rose-50 dark:bg-rose-950/20 border-l-2 border-rose-500' 
-                                : 'bg-slate-50 dark:bg-zinc-850'
-                            }`}
+                            className={`p-2 rounded-xl cursor-pointer transition-colors ${item.unread
+                              ? 'bg-rose-50 dark:bg-rose-950/20 border-l-2 border-rose-500'
+                              : 'bg-slate-50 dark:bg-zinc-850'
+                              }`}
                           >
                             <div className="flex justify-between items-start">
                               <p className="font-semibold text-slate-800 dark:text-zinc-200">Đơn hàng mới #{item.orderCode}</p>

@@ -375,8 +375,8 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
           </div>
         </div>
 
-        {/* Snap Grid control */}
-        <div className="flex items-center gap-3">
+        {/* Controls */}
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none shrink-0">
           <button
             onClick={() => setSnapToGrid(p => !p)}
             className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border cursor-pointer transition-colors ${
@@ -386,6 +386,17 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
             }`}
           >
             {snapToGrid ? '🧲 Hít lưới: BẬT' : '🧲 Hít lưới: TẮT'}
+          </button>
+
+          <button
+            onClick={() => setBuilderTemplate((prev: any) => ({ ...prev, showSlotBackground: !prev.showSlotBackground }))}
+            className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border cursor-pointer transition-colors ${
+              builderTemplate.showSlotBackground
+                ? 'bg-rose-500 text-white border-rose-600'
+                : 'bg-white dark:bg-zinc-850 border-slate-200 text-slate-600'
+            }`}
+          >
+            {builderTemplate.showSlotBackground ? '🖼️ Nền ô ảnh: BẬT' : '🖼️ Nền ô ảnh: TẮT'}
           </button>
           
           <button 
@@ -504,7 +515,9 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                   {/* FRAME LAYER RENDERING */}
                   {layer.type === 'frame' && (
                     <div 
-                      className="w-full h-full flex flex-col items-center justify-center text-slate-450 bg-slate-50 dark:bg-zinc-900 border transition-all"
+                      className={`w-full h-full flex flex-col items-center justify-center text-slate-450 border transition-all ${
+                        builderTemplate.showSlotBackground ? 'bg-slate-50 dark:bg-zinc-900' : 'bg-transparent'
+                      }`}
                       style={{
                         borderWidth: `${layer.borderSize ?? 4}px`,
                         borderColor: layer.borderColor || '#ffffff',

@@ -108,6 +108,29 @@ export default function BasicInfoForm({
     return `HNU-${initials || 'GIFT'}-${rand}`;
   };
 
+  let parsedLayout: any = {};
+  try {
+    if (layoutConfig) {
+      parsedLayout = typeof layoutConfig === 'string' ? JSON.parse(layoutConfig) : layoutConfig;
+    }
+  } catch (e) {
+    console.error('Failed to parse layoutConfig in BasicInfoForm', e);
+  }
+  const maxPhotoboothPhotos = parsedLayout?.maxPhotoboothPhotos ?? 4;
+
+  const handleMaxPhotosChange = (newVal: number) => {
+    let parsed: any = {};
+    try {
+      if (layoutConfig) {
+        parsed = typeof layoutConfig === 'string' ? JSON.parse(layoutConfig) : layoutConfig;
+      }
+    } catch (e) {}
+    parsed.maxPhotoboothPhotos = newVal;
+    if (setLayoutConfig) {
+      setLayoutConfig(JSON.stringify(parsed, null, 2));
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6 text-xs font-semibold">
       <h3 className="font-bold text-sm tracking-wider uppercase text-slate-400 border-b border-slate-50 dark:border-zinc-800 pb-2">
@@ -283,17 +306,48 @@ export default function BasicInfoForm({
           </span>
         </label>
  
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={allowPhotoUpload}
-            onChange={(e) => setAllowPhotoUpload(e.target.checked)}
-            className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
-          />
-          <span className="text-slate-600 dark:text-zinc-300 font-bold flex items-center gap-1.5">
-            <Icon name="🖼️" size={14} className="text-rose-500" /> Studio Photobooth Haniu - In ảnh tặng kèm
-          </span>
-        </label>
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={allowPhotoUpload}
+              onChange={(e) => {
+                setAllowPhotoUpload(e.target.checked);
+                if (e.target.checked) {
+                  let parsed: any = {};
+                  try {
+                    if (layoutConfig) {
+                      parsed = typeof layoutConfig === 'string' ? JSON.parse(layoutConfig) : layoutConfig;
+                    }
+                  } catch (e) {}
+                  if (parsed.maxPhotoboothPhotos === undefined) {
+                    parsed.maxPhotoboothPhotos = 4;
+                    if (setLayoutConfig) setLayoutConfig(JSON.stringify(parsed, null, 2));
+                  }
+                }
+              }}
+              className="rounded border-slate-300 text-rose-500 focus:ring-rose-500"
+            />
+            <span className="text-slate-600 dark:text-zinc-300 font-bold flex items-center gap-1.5">
+              <Icon name="🖼️" size={14} className="text-rose-500" /> Studio Photobooth Haniu - In ảnh tặng kèm
+            </span>
+          </label>
+          {allowPhotoUpload && (
+            <div className="pl-6 flex items-center gap-2">
+              <span className="text-slate-500">Số lượng ảnh tối đa:</span>
+              <input
+                type="number"
+                min={1}
+                value={maxPhotoboothPhotos}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value) || 1;
+                  handleMaxPhotosChange(val);
+                }}
+                className="w-20 px-2 py-1 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-zinc-800 dark:bg-zinc-800 font-semibold"
+              />
+            </div>
+          )}
+        </div>
  
         <label className="flex items-center gap-2 cursor-pointer">
           <input

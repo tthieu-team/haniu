@@ -87,8 +87,8 @@ public class DatabaseConfig {
                 config.setDriverClassName("org.postgresql.Driver");
 
                 // Copy key HikariCP pool optimizations
-                config.setMaximumPoolSize(10);
-                config.setMinimumIdle(5);
+                config.setMaximumPoolSize(3);
+                config.setMinimumIdle(1);
                 config.setIdleTimeout(300000);
                 config.setMaxLifetime(1800000);
                 config.setConnectionTimeout(20000);
@@ -136,8 +136,8 @@ public class DatabaseConfig {
         config.setDriverClassName("org.postgresql.Driver");
 
         // Copy key HikariCP pool optimizations
-        config.setMaximumPoolSize(10);
-        config.setMinimumIdle(5);
+        config.setMaximumPoolSize(3);
+        config.setMinimumIdle(1);
         config.setIdleTimeout(300000);
         config.setMaxLifetime(1800000);
         config.setConnectionTimeout(20000);

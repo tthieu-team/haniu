@@ -19,6 +19,7 @@ interface StudioPhotoboothProps {
   setPhotoboothPhotoUrls: Dispatch<SetStateAction<string[]>>;
   onPhotoSelected: (file: File) => void;
   onPhotoDeleted: (index: number) => void;
+  maxPhotoboothPhotos?: number;
 }
 
 export default function StudioPhotobooth({
@@ -26,6 +27,7 @@ export default function StudioPhotobooth({
   setPhotoboothPhotoUrls,
   onPhotoSelected,
   onPhotoDeleted,
+  maxPhotoboothPhotos = 4,
 }: StudioPhotoboothProps) {
   const trans = useTranslate();
   const currentTheme = useThemeStore(state => state.theme);
@@ -75,14 +77,19 @@ export default function StudioPhotobooth({
     );
   };
 
-  const resolvePhotoUrl = (url: string) => {
+  const resolvePhotoUrl = (url: string): string | undefined => {
     if (url && url.startsWith('local_pb_') && typeof window !== 'undefined') {
-      return localStorage.getItem(`haniu_pb_${url}`) || '';
+      return localStorage.getItem(`haniu_pb_${url}`) || undefined;
     }
-    return getFullImageUrl(url) || '';
+    return getFullImageUrl(url) || undefined;
   };
 
   const uploadAndLogSession = async (file: File, templateName: string) => {
+    if (photoboothPhotoUrls.length >= maxPhotoboothPhotos) {
+      alert(trans(`Số lượng ảnh đạt giới hạn tối đa cho phép là ${maxPhotoboothPhotos} ảnh.`));
+      return;
+    }
+
     const localId = `local_pb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const reader = new FileReader();
@@ -94,10 +101,9 @@ export default function StudioPhotobooth({
       } catch (e) {
         console.warn('LocalStorage full, could not cache Base64 photobooth image:', e);
       }
+      setPhotoboothPhotoUrls(prev => [...prev, localId]);
+      onPhotoSelected(file);
     };
-
-    setPhotoboothPhotoUrls(prev => [...prev, localId]);
-    onPhotoSelected(file);
   };
 
 
@@ -106,10 +112,22 @@ export default function StudioPhotobooth({
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (photoboothPhotoUrls.length >= maxPhotoboothPhotos) {
+      alert(trans(`Số lượng ảnh đạt giới hạn tối đa cho phép là ${maxPhotoboothPhotos} ảnh.`));
+      return;
+    }
     const file = e.target.files?.[0];
     if (file) {
       await uploadAndLogSession(file, 'Ảnh tải lên từ thiết bị');
     }
+  };
+
+  const handleOpenModal = () => {
+    if (photoboothPhotoUrls.length >= maxPhotoboothPhotos) {
+      alert(trans(`Số lượng ảnh đạt giới hạn tối đa cho phép là ${maxPhotoboothPhotos} ảnh.`));
+      return;
+    }
+    setIsModalOpen(true);
   };
 
   const hasPhotos = photoboothPhotoUrls.length > 0;
@@ -159,7 +177,12 @@ export default function StudioPhotobooth({
                   }}
                   className="cursor-pointer w-full h-full border-2 border-white dark:border-zinc-850 shadow-md rounded-2xl overflow-hidden bg-slate-50 dark:bg-zinc-900 transition-all hover:scale-[1.03] active:scale-98 relative"
                 >
-                  <img src={resolvePhotoUrl(url)} className="w-full h-full object-cover" alt={`Photobooth print ${idx + 1}`} />
+                  {(() => {
+                    const imgUrl = resolvePhotoUrl(url);
+                    return imgUrl ? (
+                      <img src={imgUrl} className="w-full h-full object-cover" alt={`Photobooth print ${idx + 1}`} />
+                    ) : null;
+                  })()}
                   <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white">
                     <Icon name="search" size={16} />
                   </div>
@@ -182,9 +205,9 @@ export default function StudioPhotobooth({
           </div>
           
           <div className="space-y-1 text-center px-4">
-            <p className="text-emerald-500 text-[11px] font-bold">✓ {trans("Đã đính kèm")} {photoboothPhotoUrls.length} {trans("ảnh photobooth!")}</p>
+            <p className="text-emerald-500 text-[11px] font-bold font-semibold">✓ {trans("Đã đính kèm")} {photoboothPhotoUrls.length}/{maxPhotoboothPhotos} {trans("ảnh photobooth!")}</p>
             <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-normal leading-normal italic">
-              {trans("Nhấp vào từng ảnh để xem kích thước đầy đủ. Bạn có thể chụp hoặc tải thêm tối đa nhiều ảnh kỷ niệm.")}
+              {trans(`Nhấp vào từng ảnh để xem kích thước đầy đủ. Bạn có thể chụp hoặc tải thêm tối đa ${maxPhotoboothPhotos} ảnh kỷ niệm.`)}
             </p>
             <p className="text-[10px] text-rose-500 dark:text-rose-400 font-bold leading-normal">
               {trans("* Đừng lo lắng về kích thước ảnh! Đội ngũ Haniu sẽ tự động tối ưu hóa và căn chỉnh chuyên nghiệp để đảm bảo thành phẩm in đạt chất lượng tốt nhất.")}
@@ -193,7 +216,7 @@ export default function StudioPhotobooth({
             <div className="flex flex-col sm:flex-row gap-2 justify-center mt-3.5 max-w-[280px] mx-auto">
               <button
                 type="button"
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleOpenModal}
                 className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-[10px] font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 flex-1"
               >
                 <Icon name="camera" size={11} /> {trans("Chụp thêm ảnh")}
@@ -215,13 +238,13 @@ export default function StudioPhotobooth({
         /* Invitation / Launcher Card */
         <div className="text-center p-5 border-2 border-dashed border-rose-200/50 dark:border-zinc-800/80 rounded-2xl bg-rose-500/[0.01] dark:bg-zinc-900/10">
           <p className="text-slate-550 dark:text-zinc-400 mb-4 text-[11px] leading-relaxed font-normal">
-            {trans("Haniu tặng bạn các tấm ảnh in màu lưu niệm kèm theo hộp quà. Tự sướng với webcam hoặc tải lên bức ảnh có sẵn, chèn lời chúc cùng sticker xinh xắn để đặt vào quà tặng nhé!")}
+            {trans(`Haniu tặng bạn các tấm ảnh in màu lưu niệm kèm theo hộp quà. Tự sướng với webcam hoặc tải lên bức ảnh có sẵn, chèn lời chúc cùng sticker xinh xắn để đặt vào quà tặng nhé! (Tối đa ${maxPhotoboothPhotos} ảnh)`)}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-2.5 justify-center max-w-sm mx-auto">
             <button
               type="button"
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleOpenModal}
               className="px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 text-[10px] cursor-pointer flex-1"
             >
               <Icon name="camera" size={12} /> {trans("Bật Camera Photobooth")}
@@ -324,11 +347,16 @@ export default function StudioPhotobooth({
           </div>
 
           <div className="relative w-full h-full flex items-center justify-center p-4 sm:p-12" onClick={e => e.stopPropagation()}>
-            <img 
-              src={resolvePhotoUrl(photoboothPhotoUrls[selectedPhotoIndex])} 
-              className="max-w-[95vw] max-h-[85vh] object-contain transition-all duration-300 cursor-default rounded-xl shadow-2xl" 
-              alt="Full size photobooth composite" 
-            />
+            {(() => {
+              const imgUrl = resolvePhotoUrl(photoboothPhotoUrls[selectedPhotoIndex]);
+              return imgUrl ? (
+                <img 
+                  src={imgUrl} 
+                  className="max-w-[95vw] max-h-[85vh] object-contain transition-all duration-300 cursor-default rounded-xl shadow-2xl" 
+                  alt="Full size photobooth composite" 
+                />
+              ) : null;
+            })()}
           </div>
         </div>,
         document.body

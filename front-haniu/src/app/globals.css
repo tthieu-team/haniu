@@ -123,4 +123,50 @@ body {
   animation: slide-down 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Scrolling marquee for announcement bar on mobile screens */
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
 
+@media (max-width: 640px) {
+  .announcement-container {
+    overflow: hidden;
+    width: 100%;
+    white-space: nowrap;
+    display: block;
+    position: relative;
+  }
+  .announcement-marquee {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: marquee 18s linear infinite;
+    padding-left: 10px;
+  }
+  .announcement-marquee:hover {
+    animation-play-state: paused;
+  }
+}
+
+/* Sticky top offsets dynamically adjusted for header heights */
+.sticky-filter-sidebar {
+  position: sticky !important;
+  top: calc(var(--header-height, 80px) + 16px) !important;
+  z-index: 40 !important;
+}
+@media (min-width: 640px) {
+  .sticky-filter-sidebar {
+    top: calc(var(--header-height-sm, 96px) + 20px) !important;
+  }
+}
+
+.sticky-product-toolbar {
+  position: sticky !important;
+  top: calc(var(--header-height, 80px) + 10px) !important;
+  z-index: 30 !important;
+}
+@media (min-width: 640px) {
+  .sticky-product-toolbar {
+    top: calc(var(--header-height-sm, 96px) + 12px) !important;
+  }
+}

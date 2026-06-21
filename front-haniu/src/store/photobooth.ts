@@ -94,6 +94,7 @@ export const usePhotoboothStore = create<PhotoboothState>((set, get) => ({
         const canvasHeight = t.canvasHeight || 800;
         const slots = (layers || [])
           .filter((l: any) => l.type === 'frame')
+          .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
           .map((l: any) => ({
             x: ((l.x || 0) / 100) * canvasWidth,
             y: ((l.y || 0) / 100) * canvasHeight,
@@ -102,6 +103,7 @@ export const usePhotoboothStore = create<PhotoboothState>((set, get) => ({
           }));
 
         return {
+          ...t,
           id: t.id,
           name: t.name,
           layout: t.canvasWidth > t.canvasHeight ? 'grid' : 'strip',

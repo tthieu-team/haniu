@@ -105,7 +105,7 @@ function SuccessContent() {
       {/* Footer / Actions */}
       <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-slate-200/40 dark:border-zinc-800/60 max-w-md mx-auto sm:max-w-none">
         <Link
-          href="/"
+          href="/products"
           className="flex-1 text-center py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-rose-500/10 transition-all hover:scale-[1.01] duration-200 cursor-pointer"
         >
           Tiếp tục mua sắm

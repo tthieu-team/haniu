@@ -205,6 +205,41 @@ export default function NewProductPage() {
     loadBrandsAndCollections();
   }, []);
 
+  useEffect(() => {
+    let maxPhotos = 4;
+    try {
+      const parsed = JSON.parse(layoutConfig);
+      if (parsed.maxPhotoboothPhotos !== undefined) {
+        maxPhotos = parsed.maxPhotoboothPhotos;
+      }
+    } catch (e) {}
+
+    setIncludedItems(prev => {
+      const targetKey = "In ảnh tặng kèm";
+      const exists = prev.some(item => item.key.trim() === targetKey);
+      
+      if (allowPhotoUpload) {
+        const newValue = `${maxPhotos} ảnh`;
+        const itemToMatch = prev.find(item => item.key.trim() === targetKey);
+        if (itemToMatch && itemToMatch.value === newValue) {
+          return prev;
+        }
+        if (exists) {
+          return prev.map(item => 
+            item.key.trim() === targetKey ? { ...item, value: newValue } : item
+          );
+        } else {
+          return [...prev, { key: targetKey, value: newValue }];
+        }
+      } else {
+        if (exists) {
+          return prev.filter(item => item.key.trim() !== targetKey);
+        }
+      }
+      return prev;
+    });
+  }, [allowPhotoUpload, layoutConfig]);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 

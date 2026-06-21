@@ -40,7 +40,23 @@ export const generateComposition = async (
     bgFillColor = config.frameColor;
   }
   
-  ctx.fillStyle = bgFillColor;
+  if ((template as any).backgroundType === 'gradient' && (template as any).backgroundGradient && (!config.frameColor || config.frameColor === '#ffffff')) {
+    const grad = (template as any).backgroundGradient;
+    const angleRad = ((grad.angle || 45) * Math.PI) / 180;
+    
+    // Calculate start and end coordinates of the gradient line inside the canvas
+    const x1 = canvas.width / 2 - Math.cos(angleRad) * (canvas.width / 2);
+    const y1 = canvas.height / 2 - Math.sin(angleRad) * (canvas.height / 2);
+    const x2 = canvas.width / 2 + Math.cos(angleRad) * (canvas.width / 2);
+    const y2 = canvas.height / 2 + Math.sin(angleRad) * (canvas.height / 2);
+    
+    const canvasGrad = ctx.createLinearGradient(x1, y1, x2, y2);
+    canvasGrad.addColorStop(0, grad.color1 || '#fda4af');
+    canvasGrad.addColorStop(1, grad.color2 || '#f43f5e');
+    ctx.fillStyle = canvasGrad;
+  } else {
+    ctx.fillStyle = bgFillColor;
+  }
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const bgSource = config.backgroundImage || (isImageUrl(template.background) ? template.background : null);
