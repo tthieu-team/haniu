@@ -112,8 +112,10 @@ function CheckoutForm() {
   };
 
   useEffect(() => {
+    const isValidUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
     const initCheckoutCart = async () => {
-      if (paramCartId) {
+      if (paramCartId && isValidUUID(paramCartId)) {
         try {
           const data = await cartService.getCartById(paramCartId);
           setCheckoutCart(data);

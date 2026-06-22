@@ -15,6 +15,7 @@ import { StickerEditor } from './StickerEditor';
 import { FrameEditor } from './FrameEditor';
 import { ResultView } from './ResultView';
 import { generateComposition } from './composition';
+import { applyBeautyFilter } from './beautyFilter';
 import { DEFAULT_TEMPLATES } from './templates';
 import { playSound } from './sounds';
 import { StartModeOverlay } from './StartModeOverlay';
@@ -41,7 +42,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
   const [cameraReady, setCameraReady] = useState(false);
   const [retakeIndex, setRetakeIndex] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
+
   const [captureMode, setCaptureMode] = useState<'auto' | 'manual'>('auto');
   const [hasSelectedCaptureMode, setHasSelectedCaptureMode] = useState(false);
   const [waitingForNextCapture, setWaitingForNextCapture] = useState(false);
@@ -143,7 +144,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
     playSound('click');
     const customTpl = activeTemplates.find(t => t.id === mode);
     let template: PhotoboothTemplate;
-    
+
     if (customTpl) {
       template = customTpl;
     } else {
@@ -156,10 +157,21 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
   };
 
 
-  const handleCapture = useCallback((blob: Blob, url: string) => {
+  const handleCapture = useCallback(async (blob: Blob, url: string) => {
     if (photos.length >= config.template.slots.length && retakeIndex === null) return;
 
-    const newPhoto = { id: Math.random().toString(36).substr(2, 9), url, blob };
+    // Apply Instagram-style beauty filter (skin smoothing, sharpening, color grading)
+    let finalBlob = blob;
+    let finalUrl = url;
+    try {
+      const beautified = await applyBeautyFilter(blob);
+      finalBlob = beautified.blob;
+      finalUrl = beautified.dataUrl;
+    } catch (err) {
+      console.warn('Beauty filter failed, using original photo:', err);
+    }
+
+    const newPhoto = { id: Math.random().toString(36).substr(2, 9), url: finalUrl, blob: finalBlob };
 
     if (retakeIndex !== null) {
       setPhotos(prev => {
@@ -340,6 +352,12 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
                   faceFilter={faceFilter}
                   onFaceFilterLoading={setFaceFilterLoading}
                   aspectRatio={resolvedAspectRatio}
+                  frameShape={currentSlot?.frameShape}
+                  framePath={currentSlot?.framePath}
+                  framePolygon={currentSlot?.framePolygon}
+                  cornerRadius={currentSlot?.cornerRadius}
+                  borderColor={currentSlot?.borderColor || '#ffffff'}
+                  borderSize={currentSlot?.borderSize}
                 />
               );
             })()}
@@ -476,11 +494,10 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
                   <button
                     key={r.id}
                     onClick={() => setAspectRatio(r.id)}
-                    className={`px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border ${
-                      aspectRatio === r.id
+                    className={`px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border ${aspectRatio === r.id
                         ? 'bg-rose-500 text-white border-rose-400 shadow-lg shadow-rose-500/30 scale-105'
                         : 'bg-black/50 text-white/70 border-white/10 hover:bg-black/70 hover:text-white backdrop-blur-sm'
-                    }`}
+                      }`}
                   >
                     {r.label}
                   </button>
@@ -505,14 +522,14 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
         {step === 'design-menu' && (
           <motion.div key="design-menu" className="w-full h-full flex flex-col items-center justify-start sm:justify-center p-4 sm:p-6 md:p-8 relative z-10 overflow-y-auto custom-scrollbar" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <div className="w-full max-w-4xl bg-card-bg border border-border-color rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
-              
+
               {/* Left Column: Image Preview */}
               {resultUrl && (
                 <div className="w-full md:w-[320px] shrink-0 bg-black/5 dark:bg-black/30 rounded-2xl p-1.5 border border-border-color/60 shadow-inner overflow-y-auto max-h-[400px] custom-scrollbar flex flex-col items-center justify-start">
                   <div className="w-full flex justify-center">
-                    <img 
-                      src={resultUrl} 
-                      alt="Composition Preview" 
+                    <img
+                      src={resultUrl}
+                      alt="Composition Preview"
                       className="w-full h-auto object-contain rounded-lg shadow-lg border border-white/5 transition-transform duration-300 hover:scale-102"
                     />
                   </div>

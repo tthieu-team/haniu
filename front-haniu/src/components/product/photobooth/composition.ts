@@ -105,13 +105,73 @@ export const generateComposition = async (
           const img = photoImages[frameIndex];
           ctx.save();
           ctx.beginPath();
-          const radius = layer.cornerRadius ?? 8;
-          if (radius > 0) {
-            ctx.roundRect(posX, posY, rectW, rectH, radius);
+          const scaleFactor = canvas.width / (template.canvasWidth * 0.25 || 300);
+          const radius = (layer.cornerRadius ?? 8) * scaleFactor;
+          const frameShape = layer.frameShape || 'rect';
+
+          if (frameShape === 'circle') {
+            ctx.ellipse(posX + rectW / 2, posY + rectH / 2, rectW / 2, rectH / 2, 0, 0, Math.PI * 2);
+          } else if (frameShape === 'triangle') {
+            ctx.moveTo(posX + rectW / 2, posY);
+            ctx.lineTo(posX, posY + rectH);
+            ctx.lineTo(posX + rectW, posY + rectH);
+            ctx.closePath();
+          } else if (frameShape === 'heart') {
+            // Polygon points matching CSS heart clip-path exactly
+            const pts = [
+              [50, 24], [62, 10], [78, 10], [90, 20], [94, 40], [82, 65],
+              [50, 95], [18, 65], [6, 40], [10, 20], [26, 10], [38, 24]
+            ];
+            ctx.moveTo(posX + (pts[0][0] / 100) * rectW, posY + (pts[0][1] / 100) * rectH);
+            for (let k = 1; k < pts.length; k++) {
+              ctx.lineTo(posX + (pts[k][0] / 100) * rectW, posY + (pts[k][1] / 100) * rectH);
+            }
+            ctx.closePath();
+          } else if (frameShape === 'star') {
+            // Polygon points matching CSS star clip-path exactly
+            const pts = [
+              [50, 0], [61, 35], [98, 35], [68, 57], [79, 91],
+              [50, 70], [21, 91], [32, 57], [2, 35], [39, 35]
+            ];
+            ctx.moveTo(posX + (pts[0][0] / 100) * rectW, posY + (pts[0][1] / 100) * rectH);
+            for (let k = 1; k < pts.length; k++) {
+              ctx.lineTo(posX + (pts[k][0] / 100) * rectW, posY + (pts[k][1] / 100) * rectH);
+            }
+            ctx.closePath();
+          } else if (frameShape === 'custom-path' && (layer.framePath || layer.framePolygon)) {
+            if (layer.framePath) {
+              ctx.translate(posX, posY);
+              ctx.scale(rectW / 100, rectH / 100);
+              const p2d = new Path2D(layer.framePath);
+              ctx.clip(p2d);
+              ctx.setTransform(1, 0, 0, 1, 0, 0);
+            } else {
+              try {
+                const pairs = layer.framePolygon.split(',').map((p: string) => {
+                  const parts = p.trim().split(/\s+/);
+                  const xVal = parseFloat(parts[0].replace('%', ''));
+                  const yVal = parseFloat(parts[1].replace('%', ''));
+                  return [xVal, yVal];
+                });
+                ctx.moveTo(posX + (pairs[0][0] / 100) * rectW, posY + (pairs[0][1] / 100) * rectH);
+                for (let k = 1; k < pairs.length; k++) {
+                  ctx.lineTo(posX + (pairs[k][0] / 100) * rectW, posY + (pairs[k][1] / 100) * rectH);
+                }
+              } catch (err) {
+                ctx.rect(posX, posY, rectW, rectH);
+              }
+              ctx.closePath();
+              ctx.clip();
+            }
           } else {
-            ctx.rect(posX, posY, rectW, rectH);
+            // rect, roundRect or custom (custom is drawn rectangular first then overlaid)
+            if (radius > 0 && frameShape !== 'custom') {
+              ctx.roundRect(posX, posY, rectW, rectH, radius);
+            } else {
+              ctx.rect(posX, posY, rectW, rectH);
+            }
+            ctx.clip();
           }
-          ctx.clip();
 
           const scale = Math.max(rectW / img.width, rectH / img.height);
           const x = posX + (rectW - img.width * scale) / 2;
@@ -122,23 +182,96 @@ export const generateComposition = async (
           }
 
           ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-          ctx.restore();
 
-          // Draw Frame border
-          const borderWidth = layer.borderSize ?? 4;
-          if (borderWidth > 0) {
+          // Draw Frame border INSIDE the clipped region so exactly half (the inner side) is visible
+          const borderWidth = (layer.borderSize ?? 4) * scaleFactor;
+          if (borderWidth > 0 && frameShape !== 'custom') {
             ctx.save();
             ctx.strokeStyle = layer.borderColor || '#ffffff';
-            ctx.lineWidth = borderWidth;
+            ctx.lineWidth = borderWidth * 2;
             ctx.lineJoin = 'round';
             ctx.beginPath();
-            if (radius > 0) {
-              ctx.roundRect(posX + borderWidth/2, posY + borderWidth/2, rectW - borderWidth, rectH - borderWidth, radius);
+            
+            if (frameShape === 'circle') {
+              ctx.ellipse(posX + rectW / 2, posY + rectH / 2, rectW / 2, rectH / 2, 0, 0, Math.PI * 2);
+            } else if (frameShape === 'triangle') {
+              ctx.moveTo(posX + rectW / 2, posY);
+              ctx.lineTo(posX, posY + rectH);
+              ctx.lineTo(posX + rectW, posY + rectH);
+              ctx.closePath();
+            } else if (frameShape === 'heart') {
+              const pts = [
+                [50, 24], [62, 10], [78, 10], [90, 20], [94, 40], [82, 65],
+                [50, 95], [18, 65], [6, 40], [10, 20], [26, 10], [38, 24]
+              ];
+              ctx.moveTo(posX + (pts[0][0] / 100) * rectW, posY + (pts[0][1] / 100) * rectH);
+              for (let k = 1; k < pts.length; k++) {
+                ctx.lineTo(posX + (pts[k][0] / 100) * rectW, posY + (pts[k][1] / 100) * rectH);
+              }
+              ctx.closePath();
+            } else if (frameShape === 'star') {
+              const pts = [
+                [50, 0], [61, 35], [98, 35], [68, 57], [79, 91],
+                [50, 70], [21, 91], [32, 57], [2, 35], [39, 35]
+              ];
+              ctx.moveTo(posX + (pts[0][0] / 100) * rectW, posY + (pts[0][1] / 100) * rectH);
+              for (let k = 1; k < pts.length; k++) {
+                ctx.lineTo(posX + (pts[k][0] / 100) * rectW, posY + (pts[k][1] / 100) * rectH);
+              }
+              ctx.closePath();
+            } else if (frameShape === 'custom-path' && (layer.framePath || layer.framePolygon)) {
+              if (layer.framePath) {
+                const avgScale = (rectW / 100 + rectH / 100) / 2;
+                ctx.lineWidth = (borderWidth * 2) / (avgScale || 1);
+                ctx.translate(posX, posY);
+                ctx.scale(rectW / 100, rectH / 100);
+                const p2d = new Path2D(layer.framePath);
+                ctx.stroke(p2d);
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+              } else {
+                try {
+                  const pairs = layer.framePolygon.split(',').map((p: string) => {
+                    const parts = p.trim().split(/\s+/);
+                    const xVal = parseFloat(parts[0].replace('%', ''));
+                    const yVal = parseFloat(parts[1].replace('%', ''));
+                    return [xVal, yVal];
+                  });
+                  ctx.moveTo(posX + (pairs[0][0] / 100) * rectW, posY + (pairs[0][1] / 100) * rectH);
+                  for (let k = 1; k < pairs.length; k++) {
+                    ctx.lineTo(posX + (pairs[k][0] / 100) * rectW, posY + (pairs[k][1] / 100) * rectH);
+                  }
+                } catch (err) {
+                  ctx.rect(posX, posY, rectW, rectH);
+                }
+                ctx.closePath();
+              }
             } else {
-              ctx.rect(posX + borderWidth/2, posY + borderWidth/2, rectW - borderWidth, rectH - borderWidth);
+              if (radius > 0) {
+                ctx.roundRect(posX, posY, rectW, rectH, radius);
+              } else {
+                ctx.rect(posX, posY, rectW, rectH);
+              }
             }
             ctx.stroke();
             ctx.restore();
+          }
+
+          ctx.restore();
+
+          // If custom shape overlay is selected, render it on top of the clipped photo slot
+          if (frameShape === 'custom' && layer.frameMaskUrl) {
+            const maskImg = await new Promise<HTMLImageElement>((resolve) => {
+              const i = new Image();
+              i.crossOrigin = "anonymous";
+              i.onload = () => resolve(i);
+              i.onerror = () => resolve(new Image());
+              i.src = layer.frameMaskUrl;
+            });
+            if (maskImg.complete && maskImg.naturalWidth > 0) {
+              ctx.save();
+              ctx.drawImage(maskImg, posX, posY, rectW, rectH);
+              ctx.restore();
+            }
           }
         }
       } else if (layer.type === 'text') {
@@ -193,7 +326,19 @@ export const generateComposition = async (
             ctx.scale(layer.flipX ? -1 : 1, layer.flipY ? -1 : 1);
           }
           ctx.globalAlpha = (layer.opacity ?? 100) / 100;
-          ctx.drawImage(img, -rectW / 2, -rectH / 2, rectW, rectH);
+          
+          // Preserve aspect ratio (object-contain logic)
+          const imgRatio = img.naturalWidth / img.naturalHeight;
+          const rectRatio = rectW / rectH;
+          let drawW = rectW;
+          let drawH = rectH;
+          if (imgRatio > rectRatio) {
+            drawH = rectW / imgRatio;
+          } else {
+            drawW = rectH * imgRatio;
+          }
+          
+          ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
           ctx.restore();
         }
       } else if (layer.type === 'logo' && !layer.url) {
@@ -270,10 +415,72 @@ export const generateComposition = async (
         const slotW = slot.width - offset * 2;
         const slotH = slot.height - offset * 2;
 
+        const scaleFactor = canvas.width / (template.canvasWidth * 0.25 || 300);
+        const radius = (slot.cornerRadius ?? 8) * scaleFactor;
+        const frameShape = slot.frameShape || 'rect';
+
         ctx.save();
         ctx.beginPath();
-        ctx.rect(slotX, slotY, slotW, slotH);
-        ctx.clip();
+        if (frameShape === 'circle') {
+          ctx.ellipse(slotX + slotW / 2, slotY + slotH / 2, slotW / 2, slotH / 2, 0, 0, Math.PI * 2);
+        } else if (frameShape === 'triangle') {
+          ctx.moveTo(slotX + slotW / 2, slotY);
+          ctx.lineTo(slotX, slotY + slotH);
+          ctx.lineTo(slotX + slotW, slotY + slotH);
+          ctx.closePath();
+        } else if (frameShape === 'heart') {
+          const pts = [
+            [50, 24], [62, 10], [78, 10], [90, 20], [94, 40], [82, 65],
+            [50, 95], [18, 65], [6, 40], [10, 20], [26, 10], [38, 24]
+          ];
+          ctx.moveTo(slotX + (pts[0][0] / 100) * slotW, slotY + (pts[0][1] / 100) * slotH);
+          for (let k = 1; k < pts.length; k++) {
+            ctx.lineTo(slotX + (pts[k][0] / 100) * slotW, slotY + (pts[k][1] / 100) * slotH);
+          }
+          ctx.closePath();
+        } else if (frameShape === 'star') {
+          const pts = [
+            [50, 0], [61, 35], [98, 35], [68, 57], [79, 91],
+            [50, 70], [21, 91], [32, 57], [2, 35], [39, 35]
+          ];
+          ctx.moveTo(slotX + (pts[0][0] / 100) * slotW, slotY + (pts[0][1] / 100) * slotH);
+          for (let k = 1; k < pts.length; k++) {
+            ctx.lineTo(slotX + (pts[k][0] / 100) * slotW, slotY + (pts[k][1] / 100) * slotH);
+          }
+          ctx.closePath();
+        } else if (frameShape === 'custom-path' && (slot.framePath || slot.framePolygon)) {
+          if (slot.framePath) {
+            ctx.translate(slotX, slotY);
+            ctx.scale(slotW / 100, slotH / 100);
+            const p2d = new Path2D(slot.framePath);
+            ctx.clip(p2d);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+          } else if (slot.framePolygon) {
+            try {
+              const pairs = slot.framePolygon.split(',').map((p: string) => {
+                const parts = p.trim().split(/\s+/);
+                const xVal = parseFloat(parts[0].replace('%', ''));
+                const yVal = parseFloat(parts[1].replace('%', ''));
+                return [xVal, yVal];
+              });
+              ctx.moveTo(slotX + (pairs[0][0] / 100) * slotW, slotY + (pairs[0][1] / 100) * slotH);
+              for (let k = 1; k < pairs.length; k++) {
+                ctx.lineTo(slotX + (pairs[k][0] / 100) * slotW, slotY + (pairs[k][1] / 100) * slotH);
+              }
+            } catch (err) {
+              ctx.rect(slotX, slotY, slotW, slotH);
+            }
+            ctx.closePath();
+            ctx.clip();
+          }
+        } else {
+          if (radius > 0 && frameShape !== 'custom') {
+            ctx.roundRect(slotX, slotY, slotW, slotH, radius);
+          } else {
+            ctx.rect(slotX, slotY, slotW, slotH);
+          }
+          ctx.clip();
+        }
 
         const scale = Math.max(slotW / img.width, slotH / img.height);
         const x = slotX + (slotW - img.width * scale) / 2;
@@ -285,6 +492,84 @@ export const generateComposition = async (
 
         ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
         ctx.restore();
+
+        // Draw Custom frame overlay if any
+        if (frameShape === 'custom' && slot.frameMaskUrl) {
+          // Draw mask on top
+        }
+
+        // Draw Border
+        const borderWidth = (slot.borderSize ?? 4) * scaleFactor;
+        if (borderWidth > 0 && frameShape !== 'custom') {
+          ctx.save();
+          ctx.strokeStyle = slot.borderColor || '#ffffff';
+          ctx.lineWidth = borderWidth;
+          ctx.lineJoin = 'round';
+          ctx.beginPath();
+          
+          if (frameShape === 'circle') {
+            ctx.ellipse(slotX + slotW / 2, slotY + slotH / 2, slotW / 2 - borderWidth / 2, slotH / 2 - borderWidth / 2, 0, 0, Math.PI * 2);
+          } else if (frameShape === 'triangle') {
+            ctx.moveTo(slotX + slotW / 2, slotY + borderWidth);
+            ctx.lineTo(slotX + borderWidth, slotY + slotH - borderWidth);
+            ctx.lineTo(slotX + slotW - borderWidth, slotY + slotH - borderWidth);
+            ctx.closePath();
+          } else if (frameShape === 'heart') {
+            const pts = [
+              [50, 24], [62, 10], [78, 10], [90, 20], [94, 40], [82, 65],
+              [50, 95], [18, 65], [6, 40], [10, 20], [26, 10], [38, 24]
+            ];
+            ctx.moveTo(slotX + (pts[0][0] / 100) * slotW, slotY + (pts[0][1] / 100) * slotH);
+            for (let k = 1; k < pts.length; k++) {
+              ctx.lineTo(slotX + (pts[k][0] / 100) * slotW, slotY + (pts[k][1] / 100) * slotH);
+            }
+            ctx.closePath();
+          } else if (frameShape === 'star') {
+            const pts = [
+              [50, 0], [61, 35], [98, 35], [68, 57], [79, 91],
+              [50, 70], [21, 91], [32, 57], [2, 35], [39, 35]
+            ];
+            ctx.moveTo(slotX + (pts[0][0] / 100) * slotW, slotY + (pts[0][1] / 100) * slotH);
+            for (let k = 1; k < pts.length; k++) {
+              ctx.lineTo(slotX + (pts[k][0] / 100) * slotW, slotY + (pts[k][1] / 100) * slotH);
+            }
+            ctx.closePath();
+          } else if (frameShape === 'custom-path' && (slot.framePath || slot.framePolygon)) {
+            if (slot.framePath) {
+              const avgScale = (slotW / 100 + slotH / 100) / 2;
+              ctx.lineWidth = borderWidth / (avgScale || 1);
+              ctx.translate(slotX, slotY);
+              ctx.scale(slotW / 100, slotH / 100);
+              const p2d = new Path2D(slot.framePath);
+              ctx.stroke(p2d);
+              ctx.setTransform(1, 0, 0, 1, 0, 0);
+            } else if (slot.framePolygon) {
+              try {
+                const pairs = slot.framePolygon.split(',').map((p: string) => {
+                  const parts = p.trim().split(/\s+/);
+                  const xVal = parseFloat(parts[0].replace('%', ''));
+                  const yVal = parseFloat(parts[1].replace('%', ''));
+                  return [xVal, yVal];
+                });
+                ctx.moveTo(slotX + (pairs[0][0] / 100) * slotW, slotY + (pairs[0][1] / 100) * slotH);
+                for (let k = 1; k < pairs.length; k++) {
+                  ctx.lineTo(slotX + (pairs[k][0] / 100) * slotW, slotY + (pairs[k][1] / 100) * slotH);
+                }
+              } catch (err) {
+                ctx.rect(slotX + borderWidth/2, slotY + borderWidth/2, slotW - borderWidth, slotH - borderWidth);
+              }
+              ctx.closePath();
+            }
+          } else {
+            if (radius > 0) {
+              ctx.roundRect(slotX + borderWidth/2, slotY + borderWidth/2, slotW - borderWidth, slotH - borderWidth, radius);
+            } else {
+              ctx.rect(slotX + borderWidth/2, slotY + borderWidth/2, slotW - borderWidth, slotH - borderWidth);
+            }
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
       }
     });
   }

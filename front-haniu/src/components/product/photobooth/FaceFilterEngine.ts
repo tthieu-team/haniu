@@ -852,7 +852,22 @@ export async function initFaceLandmarker(): Promise<FaceLandmarker | null> {
 
 export function destroyFaceLandmarker() {
   if (faceLandmarkerInstance) {
-    faceLandmarkerInstance.close();
+    // Suppress MediaPipe WASM internal logs during close()
+    const origWarn = console.warn;
+    const origLog = console.log;
+    const origInfo = console.info;
+    console.warn = () => {};
+    console.log = () => {};
+    console.info = () => {};
+    try {
+      faceLandmarkerInstance.close();
+    } catch {
+      // Ignore close errors
+    } finally {
+      console.warn = origWarn;
+      console.log = origLog;
+      console.info = origInfo;
+    }
     faceLandmarkerInstance = null;
   }
   sparkleParticles = [];

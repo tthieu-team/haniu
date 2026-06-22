@@ -234,15 +234,24 @@ public class CartServiceImpl implements CartService {
                         return cartRepository.save(newCart);
                     });
         } else if (sessionId != null && !sessionId.trim().isEmpty()) {
-            cart = cartRepository.findBySessionId(sessionId)
-                    .orElseGet(() -> {
-                        Cart newCart = Cart.builder()
-                                .sessionId(sessionId)
-                                .totalItems(0)
-                                .totalPrice(BigDecimal.ZERO)
-                                .build();
-                        return cartRepository.save(newCart);
-                    });
+            Optional<Cart> existing = cartRepository.findBySessionId(sessionId);
+            if (existing.isPresent()) {
+                cart = existing.get();
+            } else {
+                try {
+                    Cart newCart = Cart.builder()
+                            .sessionId(sessionId)
+                            .totalItems(0)
+                            .totalPrice(BigDecimal.ZERO)
+                            .build();
+                    cart = cartRepository.save(newCart);
+                    cartRepository.flush();
+                } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                    // Race condition: another request already created the cart for this session
+                    cart = cartRepository.findBySessionId(sessionId)
+                            .orElseThrow(() -> new RuntimeException("Cart creation failed for session: " + sessionId));
+                }
+            }
         } else {
             throw new IllegalArgumentException("Either email or sessionId must be provided");
         }

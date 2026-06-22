@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '@/components/common/Icons';
 import { GiphyFetch } from '@giphy/js-fetch-api';
+import { LOCAL_STICKERS } from './stickersData';
 
 const gf = new GiphyFetch('h4WnsWOfiI1R0QymIt6qeUM3FCVUMUhD');
 
@@ -41,6 +42,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
   const [giphySearch, setGiphySearch] = useState('');
   const [giphyStickers, setGiphyStickers] = useState<any[]>([]);
   const [loadingGiphy, setLoadingGiphy] = useState(false);
+  const [activeLocalCategory, setActiveLocalCategory] = useState(LOCAL_STICKERS[0].category);
 
   const fetchGiphyStickers = async (query: string) => {
     setLoadingGiphy(true);
@@ -105,6 +107,92 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
             >
               <span className="text-sm font-bold">{item.icon}</span>
             </button>
+          ))}
+        </div>
+      </div>
+
+      {/* HANIU LOCAL STICKERS LIBRARY */}
+      <div className="space-y-3 pt-1 border-t border-slate-100 dark:border-zinc-800 pt-3">
+        <h4 className="text-xs font-black uppercase text-slate-800 dark:text-zinc-200 tracking-wider flex items-center justify-between">
+          <span>🎨 Thư viện Sticker Haniu</span>
+          <span className="text-[8px] bg-rose-500/10 text-rose-500 px-1.5 py-0.5 rounded font-black">LOCAL</span>
+        </h4>
+
+        {/* Categories Tab Selector */}
+        <div className="flex gap-1 overflow-x-auto scrollbar-none pb-1">
+          {LOCAL_STICKERS.map((cat) => (
+            <button
+              key={cat.category}
+              onClick={() => setActiveLocalCategory(cat.category)}
+              className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase whitespace-nowrap cursor-pointer transition-all ${
+                activeLocalCategory === cat.category
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-750'
+              }`}
+            >
+              {cat.category}
+            </button>
+          ))}
+        </div>
+
+        {/* Sticker Grid */}
+        <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
+          {LOCAL_STICKERS.find(c => c.category === activeLocalCategory)?.items.map((item) => (
+            <div
+              key={item.url}
+              onClick={() => {
+                if (item.type === 'background') {
+                  if (confirm('Bạn muốn dùng hình này làm hình nền hay nhãn dán?\n- OK: Làm hình nền\n- Cancel: Làm nhãn dán')) {
+                    setBuilderTemplate((prev: any) => ({
+                      ...prev,
+                      background: item.url,
+                      backgroundType: 'image'
+                    }));
+                    return;
+                  }
+                }
+                handleAddStickerLayer(item.url);
+              }}
+              className="group relative border border-slate-150 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-xl p-1.5 flex flex-col items-center justify-center cursor-pointer aspect-square bg-slate-50 dark:bg-zinc-900 transition-all"
+            >
+              <img
+                src={item.url}
+                alt={item.name}
+                className="w-12 h-12 object-contain pointer-events-none group-hover:scale-110 transition-transform duration-200"
+                title={`Click để thêm ${item.name}`}
+              />
+              <span className="text-[8px] font-bold text-slate-450 dark:text-zinc-400 text-center truncate w-full mt-1.5">
+                {item.name}
+              </span>
+              
+              {/* Quick actions for backgrounds */}
+              {item.type === 'background' && (
+                <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity flex flex-col gap-1 items-center justify-center p-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setBuilderTemplate((prev: any) => ({
+                        ...prev,
+                        background: item.url,
+                        backgroundType: 'image'
+                      }));
+                    }}
+                    className="w-full py-0.5 bg-rose-600 hover:bg-rose-700 text-white rounded text-[7px] font-black uppercase text-center cursor-pointer"
+                  >
+                    Làm Nền
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddStickerLayer(item.url);
+                    }}
+                    className="w-full py-0.5 bg-slate-700 hover:bg-slate-650 text-white rounded text-[7px] font-black uppercase text-center cursor-pointer"
+                  >
+                    Dán Lớp
+                  </button>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </div>

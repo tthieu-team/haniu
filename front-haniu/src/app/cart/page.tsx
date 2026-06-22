@@ -595,7 +595,7 @@ export default function CartPage() {
                     href={{
                       pathname: '/checkout',
                       query: {
-                        cartId: cart.id,
+                        ...(cart.id && cart.id !== 'guest-cart' ? { cartId: cart.id } : {}),
                         coupon: discountAmount > 0 && appliedCoupon ? appliedCoupon.code : '',
                         shippingMethod: shippingMethod,
                         paymentMethod: paymentMethod

@@ -21,6 +21,12 @@ interface CameraViewProps {
   faceFilter?: FaceFilterType;
   onFaceFilterLoading?: (loading: boolean) => void;
   aspectRatio?: string;
+  frameShape?: string;
+  framePath?: string;
+  framePolygon?: string;
+  cornerRadius?: number;
+  borderColor?: string;
+  borderSize?: number;
 }
 
 export const CameraView: React.FC<CameraViewProps> = ({
@@ -31,6 +37,12 @@ export const CameraView: React.FC<CameraViewProps> = ({
   faceFilter = 'none',
   onFaceFilterLoading,
   aspectRatio = 'free',
+  frameShape = 'rect',
+  framePath,
+  framePolygon,
+  cornerRadius = 16,
+  borderColor = '#ffffff',
+  borderSize = 4,
 }) => {
   const trans = useTranslate();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -126,7 +138,22 @@ export const CameraView: React.FC<CameraViewProps> = ({
 
   useEffect(() => {
     if (stream && videoRef.current) {
-      videoRef.current.play().catch(e => console.warn("Video play failed:", e));
+      const video = videoRef.current;
+      // Only attempt play when video has enough data to start
+      const attemptPlay = () => {
+        video.play().catch(e => {
+          // AbortError is expected when component re-renders trigger a new load
+          if (e.name !== 'AbortError') {
+            console.warn("Video play failed:", e);
+          }
+        });
+      };
+      if (video.readyState >= 2) {
+        attemptPlay();
+      } else {
+        video.addEventListener('loadeddata', attemptPlay, { once: true });
+        return () => video.removeEventListener('loadeddata', attemptPlay);
+      }
     }
   }, [stream]);
 
@@ -381,6 +408,37 @@ export const CameraView: React.FC<CameraViewProps> = ({
     }
   }, [isCapturing, onCapture, mirrored, faceFilter, aspectRatio]);
 
+  const [rw, rh] = (aspectRatio && aspectRatio !== 'free') ? aspectRatio.split(':').map(Number) : [0, 0];
+  const targetRatio = rw && rh ? rw / rh : 0;
+  const cW = containerSize.w;
+  const cH = containerSize.h;
+  const containerRatio = cW / cH;
+
+  let cutW = cW;
+  let cutH = cH;
+  if (targetRatio > 0 && cW > 0 && cH > 0) {
+    if (targetRatio > containerRatio) {
+      cutW = cW;
+      cutH = cW / targetRatio;
+    } else {
+      cutH = cH;
+      cutW = cH * targetRatio;
+    }
+  }
+  const cutX = (cW - cutW) / 2;
+  const cutY = (cH - cutH) / 2;
+
+  const borderRadius = frameShape === 'circle' ? '999px' : (frameShape !== 'rect' && frameShape !== 'custom' && frameShape !== 'custom-path' ? '0px' : `${cornerRadius ?? 16}px`);
+  
+  const clipPath = frameShape === 'custom-path' && (framePath || framePolygon)
+    ? (framePath ? 'url(#clip-camera)' : `polygon(${framePolygon})`)
+    : (frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom'
+       ? (frameShape === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' 
+          : frameShape === 'heart' ? 'polygon(50% 24%, 62% 10%, 78% 10%, 90% 20%, 94% 40%, 82% 65%, 50% 95%, 18% 65%, 6% 40%, 10% 20%, 26% 10%, 38% 24%)'
+          : frameShape === 'star' ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
+          : 'none')
+       : 'none');
+
   return (
     <div 
       ref={containerRef}
@@ -391,72 +449,101 @@ export const CameraView: React.FC<CameraViewProps> = ({
         }
       }}
     >
-      <motion.video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        muted
-        onCanPlay={() => {
-          videoRef.current?.play().then(() => {
-            setLoading(false);
-            onReady?.();
-            setError(null);
-          }).catch(e => {
-            console.error("Autoplay failed:", e);
-            setLoading(false);
-            setError(trans('Trình duyệt chặn phát Video tự động. Vui lòng nhấn vào màn hình để bắt đầu.'));
-          });
-        }}
-        animate={{
-          scale: isCapturing ? [1, 0.98, 1] : 1,
-        }}
-        className={`w-full h-full object-cover transition-transform duration-300 ${mirrored ? 'scale-x-[-1]' : ''}`}
-      />
+      {frameShape === 'custom-path' && framePath && (
+        <svg width="0" height="0" className="absolute">
+          <defs>
+            <clipPath id="clip-camera" clipPathUnits="objectBoundingBox">
+              <path d={framePath} transform="scale(0.01)" />
+            </clipPath>
+          </defs>
+        </svg>
+      )}
 
-      {/* Face Filter Overlay Canvas — positioned to exactly overlap the video */}
-      <canvas
-        ref={overlayCanvasRef}
-        className={`absolute inset-0 w-full h-full pointer-events-none z-[5] ${mirrored ? 'scale-x-[-1]' : ''}`}
-      />
+      <div
+        className="absolute overflow-hidden flex items-center justify-center bg-zinc-950 shadow-2xl z-[5]"
+        style={{
+          left: cutX,
+          top: cutY,
+          width: cutW,
+          height: cutH,
+          borderRadius,
+          clipPath,
+          borderWidth: (frameShape === 'rect' || frameShape === 'circle') ? `${borderSize ?? 4}px` : '0px',
+          borderColor: borderColor || '#ffffff',
+          borderStyle: (borderSize ?? 4) > 0 ? 'solid' : 'none',
+        }}
+      >
+        <motion.video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          onCanPlay={() => {
+            videoRef.current?.play().then(() => {
+              setLoading(false);
+              onReady?.();
+              setError(null);
+            }).catch(e => {
+              console.error("Autoplay failed:", e);
+              setLoading(false);
+              setError(trans('Trình duyệt chặn phát Video tự động. Vui lòng nhấn vào màn hình để bắt đầu.'));
+            });
+          }}
+          animate={{
+            scale: isCapturing ? [1, 0.98, 1] : 1,
+          }}
+          className={`w-full h-full object-cover transition-transform duration-300 ${mirrored ? 'scale-x-[-1]' : ''}`}
+        />
+
+        {/* Face Filter Overlay Canvas — positioned to exactly overlap the video */}
+        <canvas
+          ref={overlayCanvasRef}
+          className={`absolute inset-0 w-full h-full pointer-events-none z-[5] ${mirrored ? 'scale-x-[-1]' : ''}`}
+        />
+
+        {/* SVG Border Stroke for custom shapes/polygons */}
+        {frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom' && (
+          <svg className="absolute inset-0 w-full h-full pointer-events-none z-[15]" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {frameShape === 'custom-path' && framePath ? (
+              <path 
+                d={framePath}
+                fill="none"
+                stroke={borderColor || '#ffffff'}
+                strokeWidth={(borderSize ?? 4) * 2}
+                vectorEffect="non-scaling-stroke"
+              />
+            ) : (
+              <polygon 
+                points={
+                  frameShape === 'triangle' ? '50 0, 0 100, 100 100'
+                  : frameShape === 'heart' ? '50 24, 62 10, 78 10, 90 20, 94 40, 82 65, 50 95, 18 65, 6 40, 10 20, 26 10, 38 24'
+                  : frameShape === 'custom-path' && framePolygon ? framePolygon.replace(/%/g, '')
+                  : '50 0, 61 35, 98 35, 68 57, 79 91, 50 70, 21 91, 32 57, 2 35, 39 35'
+                }
+                fill="none"
+                stroke={borderColor || '#ffffff'}
+                strokeWidth={(borderSize ?? 4) * 2}
+                vectorEffect="non-scaling-stroke"
+              />
+            )}
+          </svg>
+        )}
+      </div>
 
       {/* Aspect Ratio Crop Mask */}
-      {aspectRatio !== 'free' && containerSize.w > 0 && (() => {
-        const [rw, rh] = aspectRatio.split(':').map(Number);
-        const targetRatio = rw / rh;
-        const cW = containerSize.w;
-        const cH = containerSize.h;
-        const containerRatio = cW / cH;
-
-        let cutW: number, cutH: number;
-        if (targetRatio > containerRatio) {
-          cutW = cW;
-          cutH = cW / targetRatio;
-        } else {
-          cutH = cH;
-          cutW = cH * targetRatio;
-        }
-
-        const cutX = (cW - cutW) / 2;
-        const cutY = (cH - cutH) / 2;
-
-        return (
-          <div className="absolute inset-0 z-[6] pointer-events-none">
-            <svg width={cW} height={cH} className="absolute inset-0">
-              <defs>
-                <mask id="crop-mask">
-                  <rect width={cW} height={cH} fill="white" />
-                  <rect x={cutX} y={cutY} width={cutW} height={cutH} fill="black" rx="2" />
-                </mask>
-              </defs>
-              <rect width={cW} height={cH} fill="rgba(0,0,0,0.55)" mask="url(#crop-mask)" />
-            </svg>
-            <div
-              className="absolute border-2 border-white/50 rounded-sm"
-              style={{ left: cutX, top: cutY, width: cutW, height: cutH }}
-            />
-          </div>
-        );
-      })()}
+      {aspectRatio !== 'free' && containerSize.w > 0 && (
+        <div className="absolute inset-0 z-[4] pointer-events-none">
+          <svg width={cW} height={cH} className="absolute inset-0">
+            <defs>
+              <mask id="crop-mask">
+                <rect width={cW} height={cH} fill="white" />
+                <rect x={cutX} y={cutY} width={cutW} height={cutH} fill="black" rx="2" />
+              </mask>
+            </defs>
+            <rect width={cW} height={cH} fill="rgba(0,0,0,0.55)" mask="url(#crop-mask)" />
+          </svg>
+        </div>
+      )}
 
       <canvas ref={canvasRef} className="hidden" />
 

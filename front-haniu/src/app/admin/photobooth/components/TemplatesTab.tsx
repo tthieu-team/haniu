@@ -266,25 +266,76 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                     >
                       {/* Frame: Simulate cute placeholder image */}
                       {isFrame && (
-                        <div 
-                          className="w-full h-full flex flex-col items-center justify-center text-slate-450 border relative"
-                          style={{
-                            borderWidth: `${layer.borderSize ?? 4}px`,
-                            borderColor: layer.borderColor || '#ffffff',
-                            borderRadius: `${layer.cornerRadius ?? 8}px`,
-                            boxShadow: shadowStyle,
-                            // Premium mock background for portrait photography
-                            background: 'linear-gradient(to bottom, #dbeafe, #eff6ff)',
-                            backgroundImage: `url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80')`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center'
-                          }}
-                        >
-                          {/* Order Indicator */}
-                          <span className="absolute top-1 left-1 bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[8px] font-black">
-                            {layer.order || 1}
-                          </span>
-                        </div>
+                        <>
+                          {layer.frameShape === 'custom-path' && layer.framePath && (
+                            <svg width="0" height="0" className="absolute">
+                              <defs>
+                                <clipPath id={`clip-tab-${layer.id}`} clipPathUnits="objectBoundingBox">
+                                  <path d={layer.framePath} transform="scale(0.01)" />
+                                </clipPath>
+                              </defs>
+                            </svg>
+                          )}
+                          <div 
+                            className="w-full h-full flex flex-col items-center justify-center text-slate-455 border relative"
+                            style={{
+                              borderWidth: (layer.frameShape === 'rect' || layer.frameShape === 'circle') ? `${layer.borderSize ?? 4}px` : '0px',
+                              borderColor: layer.borderColor || '#ffffff',
+                              borderRadius: layer.frameShape === 'circle' ? '999px' : (layer.frameShape && layer.frameShape !== 'rect' && layer.frameShape !== 'custom' && layer.frameShape !== 'custom-path' ? '0px' : `${layer.cornerRadius ?? 8}px`),
+                              clipPath: layer.frameShape === 'custom-path'
+                                ? (layer.framePath ? `url(#clip-tab-${layer.id})` : (layer.framePolygon ? `polygon(${layer.framePolygon})` : 'none'))
+                                : (layer.frameShape && layer.frameShape !== 'rect' && layer.frameShape !== 'circle' && layer.frameShape !== 'custom'
+                                   ? (layer.frameShape === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' 
+                                      : layer.frameShape === 'heart' ? 'polygon(50% 24%, 62% 10%, 78% 10%, 90% 20%, 94% 40%, 82% 65%, 50% 95%, 18% 65%, 6% 40%, 10% 20%, 26% 10%, 38% 24%)'
+                                      : 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)')
+                                   : 'none'),
+                              boxShadow: shadowStyle,
+                              // Premium mock background for portrait photography
+                              background: 'linear-gradient(to bottom, #dbeafe, #eff6ff)',
+                              backgroundImage: `url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80')`,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center'
+                            }}
+                          >
+                            {layer.frameShape === 'custom' && layer.frameMaskUrl && (
+                              <img 
+                                src={layer.frameMaskUrl} 
+                                alt="custom mask" 
+                                className="absolute inset-0 w-full h-full object-fill pointer-events-none z-10 animate-fade-in" 
+                              />
+                            )}
+                            {layer.frameShape && layer.frameShape !== 'rect' && layer.frameShape !== 'circle' && layer.frameShape !== 'custom' && (
+                               <svg className="absolute inset-0 w-full h-full pointer-events-none z-15" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                 {layer.frameShape === 'custom-path' && layer.framePath ? (
+                                   <path 
+                                     d={layer.framePath}
+                                     fill="none"
+                                     stroke={layer.borderColor || '#ffffff'}
+                                     strokeWidth={(layer.borderSize ?? 4) * 2}
+                                     vectorEffect="non-scaling-stroke"
+                                   />
+                                 ) : (
+                                   <polygon 
+                                     points={
+                                       layer.frameShape === 'triangle' ? '50 0, 0 100, 100 100'
+                                       : layer.frameShape === 'heart' ? '50 24, 62 10, 78 10, 90 20, 94 40, 82 65, 50 95, 18 65, 6 40, 10 20, 26 10, 38 24'
+                                       : layer.frameShape === 'custom-path' && layer.framePolygon ? layer.framePolygon.replace(/%/g, '')
+                                       : '50 0, 61 35, 98 35, 68 57, 79 91, 50 70, 21 91, 32 57, 2 35, 39 35'
+                                     }
+                                     fill="none"
+                                     stroke={layer.borderColor || '#ffffff'}
+                                     strokeWidth={(layer.borderSize ?? 4) * 2}
+                                     vectorEffect="non-scaling-stroke"
+                                   />
+                                 )}
+                               </svg>
+                             )}
+                            {/* Order Indicator */}
+                            <span className="absolute top-1 left-1 bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[8px] font-black z-20">
+                              {layer.order || 1}
+                            </span>
+                          </div>
+                        </>
                       )}
 
                       {/* Text */}

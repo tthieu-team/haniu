@@ -9,6 +9,13 @@ export interface PhotoboothSlot {
   y: number;
   width: number;
   height: number;
+  frameShape?: string;
+  framePath?: string;
+  framePolygon?: string;
+  frameMaskUrl?: string;
+  borderSize?: number;
+  borderColor?: string;
+  cornerRadius?: number;
 }
 
 export interface PhotoboothTemplate {

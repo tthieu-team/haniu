@@ -100,6 +100,13 @@ export const usePhotoboothStore = create<PhotoboothState>((set, get) => ({
             y: ((l.y || 0) / 100) * canvasHeight,
             width: ((l.width || 0) / 100) * canvasWidth,
             height: ((l.height || 0) / 100) * canvasHeight,
+            frameShape: l.frameShape || 'rect',
+            framePath: l.framePath || '',
+            framePolygon: l.framePolygon || '',
+            frameMaskUrl: l.frameMaskUrl || '',
+            borderSize: l.borderSize,
+            borderColor: l.borderColor,
+            cornerRadius: l.cornerRadius,
           }));
 
         return {

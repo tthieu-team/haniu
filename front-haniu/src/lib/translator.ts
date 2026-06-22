@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { fetchApi } from './api';
 import { useLanguage } from '@/providers/LanguageProvider';
 
@@ -11,6 +11,21 @@ interface TranslationStore {
 }
 
 const pending = new Set<string>();
+
+// SSR-safe storage: returns no-op on server, localStorage on client
+const safeStorage = createJSONStorage(() => {
+  if (typeof window === 'undefined') {
+    return {
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {},
+      length: 0,
+      clear: () => {},
+      key: () => null,
+    } as Storage;
+  }
+  return localStorage;
+});
 
 export const useTranslationStore = create<TranslationStore>()(
   persist(
@@ -63,6 +78,7 @@ export const useTranslationStore = create<TranslationStore>()(
     }),
     {
       name: 'haniu-translation-cache-v2',
+      storage: safeStorage,
     }
   )
 );

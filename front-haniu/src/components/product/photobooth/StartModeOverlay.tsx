@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import Icon from '@/components/common/Icons';
 import { useTranslate } from '@/lib/translator';
 import { playSound } from './sounds';
@@ -12,20 +12,6 @@ interface StartModeOverlayProps {
 
 export const StartModeOverlay: React.FC<StartModeOverlayProps> = ({ onSelect }) => {
   const trans = useTranslate();
-  const [timeLeft, setTimeLeft] = useState(10);
-
-  useEffect(() => {
-    if (timeLeft <= 0) {
-      onSelect('auto');
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setTimeLeft(prev => prev - 1);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [timeLeft, onSelect]);
 
   const handleSelectMode = (mode: 'auto' | 'manual') => {
     playSound('click');
@@ -83,16 +69,6 @@ export const StartModeOverlay: React.FC<StartModeOverlayProps> = ({ onSelect }) 
               {trans("Chủ động nhấn nút chụp khi bạn đã chuẩn bị sẵn sàng.")}
             </p>
           </button>
-        </div>
-
-        {/* Countdown footer */}
-        <div className="w-full pt-4 border-t border-white/5 text-center flex flex-col items-center gap-1.5">
-          <div className="flex items-center gap-2 text-zinc-400 text-[10px] font-bold">
-            <div className="w-2 h-2 rounded-full bg-primary-color animate-ping" />
-            <span>
-              {trans("Chế độ Tự động chụp sẽ bắt đầu sau")} <span className="text-primary-color text-xs font-black font-mono">{timeLeft}s</span>
-            </span>
-          </div>
         </div>
       </motion.div>
     </div>

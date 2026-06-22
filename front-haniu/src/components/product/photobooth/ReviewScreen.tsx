@@ -35,17 +35,74 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-4xl w-full mb-8">
         <AnimatePresence mode="popLayout">
-          {photos.map((photo, index) => (
-            <motion.div
-              key={photo.id}
-              layout
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.5, opacity: 0 }}
-              whileHover={{ y: -4 }}
-              className="relative group aspect-[3/4] bg-card-bg rounded-2xl overflow-hidden border border-border-color shadow-lg"
-            >
-              <img src={photo.url} alt={`Shot ${index + 1}`} className="w-full h-full object-cover" />
+          {photos.map((photo, index) => {
+            const slot = template.slots[index] || {};
+             const frameShape = slot.frameShape || 'rect';
+            const borderRadius = frameShape === 'circle' ? '999px' : (frameShape !== 'rect' && frameShape !== 'custom' && frameShape !== 'custom-path' ? '0px' : `${slot.cornerRadius ?? 16}px`);
+            
+            const clipPath = frameShape === 'custom-path' && (slot.framePath || slot.framePolygon)
+              ? (slot.framePath ? `url(#clip-review-${photo.id || index})` : `polygon(${slot.framePolygon})`)
+              : (frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom'
+                 ? (frameShape === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' 
+                    : frameShape === 'heart' ? 'polygon(50% 24%, 62% 10%, 78% 10%, 90% 20%, 94% 40%, 82% 65%, 50% 95%, 18% 65%, 6% 40%, 10% 20%, 26% 10%, 38% 24%)'
+                    : frameShape === 'star' ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
+                    : 'none')
+                 : 'none');
+
+            return (
+              <motion.div
+                key={photo.id}
+                layout
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                whileHover={{ y: -4 }}
+                className="relative group bg-card-bg overflow-hidden shadow-lg w-full"
+                style={{ 
+                  aspectRatio: (slot.width && slot.height) ? `${slot.width} / ${slot.height}` : '3/4',
+                  borderRadius, 
+                  clipPath,
+                  borderWidth: (frameShape === 'rect' || frameShape === 'circle') ? `${slot.borderSize ?? 4}px` : '0px',
+                  borderColor: slot.borderColor || '#ffffff',
+                  borderStyle: (slot.borderSize ?? 4) > 0 ? 'solid' : 'none'
+                }}
+              >
+                {frameShape === 'custom-path' && slot.framePath && (
+                  <svg width="0" height="0" className="absolute">
+                    <defs>
+                      <clipPath id={`clip-review-${photo.id || index}`} clipPathUnits="objectBoundingBox">
+                        <path d={slot.framePath} transform="scale(0.01)" />
+                      </clipPath>
+                    </defs>
+                  </svg>
+                )}
+                {frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom' && (
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none z-15" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    {frameShape === 'custom-path' && slot.framePath ? (
+                      <path 
+                        d={slot.framePath}
+                        fill="none"
+                        stroke={slot.borderColor || '#ffffff'}
+                        strokeWidth={(slot.borderSize ?? 4) * 2}
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    ) : (
+                      <polygon 
+                        points={
+                          frameShape === 'triangle' ? '50 0, 0 100, 100 100'
+                          : frameShape === 'heart' ? '50 24, 62 10, 78 10, 90 20, 94 40, 82 65, 50 95, 18 65, 6 40, 10 20, 26 10, 38 24'
+                          : frameShape === 'custom-path' && slot.framePolygon ? slot.framePolygon.replace(/%/g, '')
+                          : '50 0, 61 35, 98 35, 68 57, 79 91, 50 70, 21 91, 32 57, 2 35, 39 35'
+                        }
+                        fill="none"
+                        stroke={slot.borderColor || '#ffffff'}
+                        strokeWidth={(slot.borderSize ?? 4) * 2}
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    )}
+                  </svg>
+                )}
+                <img src={photo.url} alt={`Shot ${index + 1}`} className="w-full h-full object-cover" />
 
               <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-2.5 p-3">
                 <div className="text-center">
@@ -66,7 +123,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
                 {index + 1}
               </div>
             </motion.div>
-          ))}
+          );})}
         </AnimatePresence>
       </div>
 
