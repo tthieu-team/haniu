@@ -222,17 +222,26 @@ public class CartServiceImpl implements CartService {
     private Cart getOrCreateCart(String email, String sessionId) {
         Cart cart;
         if (email != null && !email.trim().isEmpty()) {
-            cart = cartRepository.findByUserEmail(email)
-                    .orElseGet(() -> {
-                        User user = userRepository.findByEmail(email)
-                                .orElseThrow(() -> new RuntimeException("User not found"));
-                        Cart newCart = Cart.builder()
-                                .user(user)
-                                .totalItems(0)
-                                .totalPrice(BigDecimal.ZERO)
-                                .build();
-                        return cartRepository.save(newCart);
-                    });
+            Optional<Cart> existing = cartRepository.findByUserEmail(email);
+            if (existing.isPresent()) {
+                cart = existing.get();
+            } else {
+                try {
+                    User user = userRepository.findByEmail(email)
+                            .orElseThrow(() -> new RuntimeException("User not found"));
+                    Cart newCart = Cart.builder()
+                            .user(user)
+                            .totalItems(0)
+                            .totalPrice(BigDecimal.ZERO)
+                            .build();
+                    cart = cartRepository.save(newCart);
+                    cartRepository.flush();
+                } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                    // Race condition: another request already created the cart for this user
+                    cart = cartRepository.findByUserEmail(email)
+                            .orElseThrow(() -> new RuntimeException("Cart creation failed for user: " + email));
+                }
+            }
         } else if (sessionId != null && !sessionId.trim().isEmpty()) {
             Optional<Cart> existing = cartRepository.findBySessionId(sessionId);
             if (existing.isPresent()) {

@@ -2,6 +2,7 @@ package com.haniu.tthieu.haniu.controller;
 
 import com.haniu.tthieu.haniu.entity.system.NeonDatabase;
 import com.haniu.tthieu.haniu.repository.NeonDatabaseRepository;
+import com.haniu.tthieu.haniu.config.DatabaseConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,7 @@ public class NeonDatabaseController {
     private final NeonDatabaseRepository repository;
     private final com.haniu.tthieu.haniu.config.DatabaseSeeder databaseSeeder;
     private final jakarta.persistence.EntityManagerFactory entityManagerFactory;
+    private final com.haniu.tthieu.haniu.service.DatabaseBackupService backupService;
 
     @GetMapping
     public ResponseEntity<List<NeonDatabase>> getAll() {
@@ -65,8 +67,15 @@ public class NeonDatabaseController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> delete(@PathVariable UUID id) {
-        repository.deleteById(id);
-        return ResponseEntity.ok(Map.of("message", "Xóa cấu hình database thành công"));
+        NeonDatabase db = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Database connection not found"));
+        try {
+            backupService.createBackup("AUTO_DELETE_" + db.getName(), db.getConnectionUrl());
+        } catch (Exception e) {
+            System.err.println(">>> [DB Delete] Auto-backup failed: " + e.getMessage());
+        }
+        repository.delete(db);
+        return ResponseEntity.ok(Map.of("message", "Xóa cấu hình database thành công (đã tự động backup)"));
     }
 
     @PostMapping("/rotate")
@@ -129,131 +138,55 @@ public class NeonDatabaseController {
 
     @PostMapping("/sync-current")
     public ResponseEntity<Map<String, Object>> syncCurrent(@RequestBody(required = false) Map<String, String> body) {
-        String connectionUrl = null;
-        String activeDbName = "Local/Mặc định";
-        NeonDatabase targetDb = null;
-
-        if (body != null && body.containsKey("targetDbId")) {
-            String targetDbIdStr = body.get("targetDbId");
-            if (targetDbIdStr != null && !targetDbIdStr.trim().isEmpty()) {
-                try {
-                    UUID targetDbId = UUID.fromString(targetDbIdStr);
-                    targetDb = repository.findById(targetDbId).orElse(null);
-                    if (targetDb != null) {
-                        connectionUrl = targetDb.getConnectionUrl();
-                        activeDbName = targetDb.getName();
-                    }
-                } catch (IllegalArgumentException e) {
-                    // Ignore and fallback
-                }
-            }
+        // 1. Determine target DB from request
+        String targetDbId = (body != null) ? body.get("targetDbId") : null;
+        if (targetDbId == null || targetDbId.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Vui lòng chọn database để đồng bộ"));
         }
 
-        if (connectionUrl == null) {
-            List<NeonDatabase> list = repository.findAllByOrderBySortOrderAsc();
-            NeonDatabase currentActive = list.stream()
-                    .filter(NeonDatabase::isActive)
-                    .findFirst()
-                    .orElse(null);
-
-            if (currentActive != null) {
-                connectionUrl = currentActive.getConnectionUrl();
-                activeDbName = currentActive.getName();
-                targetDb = currentActive;
-            } else {
-                // Fallback to bootstrap connection URL
-                connectionUrl = System.getProperty("DATABASE_URL_POSTGRE");
-                if (connectionUrl == null) {
-                    connectionUrl = System.getenv("DATABASE_URL_POSTGRE");
-                }
-            }
+        NeonDatabase targetDb;
+        try {
+            targetDb = repository.findById(UUID.fromString(targetDbId))
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy database với ID: " + targetDbId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "ID database không hợp lệ"));
         }
 
-        if (connectionUrl == null || connectionUrl.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Không tìm thấy URL kết nối database đích"));
+        String targetUrl = targetDb.getConnectionUrl();
+        String activeDbName = targetDb.getName();
+
+        // 2. Source = the database this app is currently connected to
+        String sourceUrl = DatabaseConfig.getCurrentActiveUrl();
+        if (sourceUrl == null || sourceUrl.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Không xác định được database nguồn (local) đang kết nối"));
         }
 
-        // Determine the local database URL
-        String localDbUrl = System.getProperty("DATABASE_URL_LOCAL");
-        if (localDbUrl == null) {
-            localDbUrl = System.getenv("DATABASE_URL_LOCAL");
-        }
-        if (localDbUrl == null) {
-            String postgreUrl = System.getProperty("DATABASE_URL_POSTGRE");
-            if (postgreUrl == null) {
-                postgreUrl = System.getenv("DATABASE_URL_POSTGRE");
-            }
-            if (postgreUrl != null && (postgreUrl.contains("localhost") || postgreUrl.contains("127.0.0.1"))) {
-                localDbUrl = postgreUrl;
-            }
-        }
-        if (localDbUrl == null) {
-            localDbUrl = "postgresql://localhost:5432/haniu?schema=public&sslmode=disable";
+        // 3. Prevent syncing to self
+        if (sourceUrl.trim().equals(targetUrl.trim())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Database nguồn và đích giống nhau, không cần đồng bộ"));
         }
 
-        String sourceUrl = null;
-        String targetUrl = connectionUrl;
+        System.out.println(">>> [DB Sync] Source (current app): " + sourceUrl);
+        System.out.println(">>> [DB Sync] Target (selected): " + targetUrl);
 
-        // Smart direction resolution:
-        // If the selected target database is Neon, user wants to upload: local -> Neon.
-        if (targetUrl != null && targetUrl.contains("neon.tech")) {
-            sourceUrl = localDbUrl;
-        } else {
-            // If selected target database is local, user wants to pull: Neon -> local.
-            String neonUrl = System.getProperty("DATABASE_URL_NEON");
-            if (neonUrl == null) {
-                neonUrl = System.getenv("DATABASE_URL_NEON");
-            }
-            if (neonUrl == null) {
-                String postgreUrl = System.getProperty("DATABASE_URL_POSTGRE");
-                if (postgreUrl == null) {
-                    postgreUrl = System.getenv("DATABASE_URL_POSTGRE");
-                }
-                if (postgreUrl != null && postgreUrl.contains("neon.tech")) {
-                    neonUrl = postgreUrl;
-                }
-            }
-            if (neonUrl == null) {
-                List<NeonDatabase> list = repository.findAll();
-                for (NeonDatabase db : list) {
-                    if (db.getConnectionUrl() != null && db.getConnectionUrl().contains("neon.tech")) {
-                        neonUrl = db.getConnectionUrl();
-                        break;
-                    }
-                }
-            }
-            sourceUrl = neonUrl;
+        // 4. Copy all data from source to target (drop + recreate + insert)
+        try {
+            copyDataBetweenDatabases(sourceUrl, targetUrl);
+            System.out.println(">>> [DB Sync] Copy completed successfully.");
+        } catch (Exception e) {
+            System.err.println(">>> [DB Sync] FATAL ERROR during sync: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of(
+                "message", "Đồng bộ cơ sở dữ liệu thất bại: " + e.getMessage(),
+                "error", e.toString()
+            ));
         }
 
-        System.out.println(">>> [DB Sync] Resolving databases...");
-        System.out.println(">>> [DB Sync] targetUrl (connectionUrl): " + targetUrl);
-        System.out.println(">>> [DB Sync] localDbUrl resolved: " + localDbUrl);
-        System.out.println(">>> [DB Sync] sourceUrl resolved: " + sourceUrl);
+        // 5. Switch app connection to target and run seeder
+        triggerRotationIfProduction(targetUrl);
 
-        // Copy all data from source database to the target database
-        if (sourceUrl != null && targetUrl != null && !sourceUrl.equals(targetUrl)) {
-            try {
-                System.out.println(">>> [DB Sync] Executing copyDataBetweenDatabases from " + sourceUrl + " to " + targetUrl);
-                copyDataBetweenDatabases(sourceUrl, targetUrl);
-                System.out.println(">>> [DB Sync] Copy completed successfully.");
-            } catch (Exception e) {
-                System.err.println(">>> [DB Sync] FATAL ERROR during sync: " + e.getMessage());
-                e.printStackTrace();
-                return ResponseEntity.status(500).body(Map.of(
-                    "message", "Đồng bộ cơ sở dữ liệu thất bại: " + e.getMessage(),
-                    "sourceUrl", sourceUrl,
-                    "targetUrl", targetUrl,
-                    "error", e.toString()
-                ));
-            }
-        } else {
-            System.out.println(">>> [DB Sync] Skipped copy (source and target are same, or null).");
-        }
-
-        triggerRotationIfProduction(connectionUrl);
-
-        // Update active database in database configurations
-        if (targetDb != null && !targetDb.isActive()) {
+        // 6. Update active database
+        if (!targetDb.isActive()) {
             deactivateAll();
             targetDb.setActive(true);
             targetDb.setLastSwitchedAt(LocalDateTime.now());
@@ -261,10 +194,154 @@ public class NeonDatabaseController {
         }
 
         return ResponseEntity.ok(Map.of(
-            "message", "Đồng bộ cấu trúc bảng và toàn bộ dữ liệu thành công lên database: " + activeDbName,
+            "message", "Đồng bộ toàn bộ dữ liệu thành công từ local lên: " + activeDbName,
             "activeDb", activeDbName,
-            "connectionUrl", connectionUrl
+            "connectionUrl", targetUrl
         ));
+    }
+
+    @PostMapping("/sync-multiple")
+    public ResponseEntity<Map<String, Object>> syncMultiple(@RequestBody Map<String, Object> body) {
+        String sourceDbId = (String) body.get("sourceDbId");
+        List<String> targetDbIds = (List<String>) body.get("targetDbIds");
+
+        if (sourceDbId == null || targetDbIds == null || targetDbIds.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Vui lòng chọn database nguồn và ít nhất 1 database đích"));
+        }
+
+        String sourceUrl;
+        String sourceName;
+        if ("local".equalsIgnoreCase(sourceDbId)) {
+            sourceUrl = com.haniu.tthieu.haniu.config.DatabaseConfig.getCurrentActiveUrl();
+            sourceName = "Local DB";
+        } else {
+            NeonDatabase src = repository.findById(UUID.fromString(sourceDbId))
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy database nguồn"));
+            sourceUrl = src.getConnectionUrl();
+            sourceName = src.getName();
+        }
+
+        List<String> successDbs = new java.util.ArrayList<>();
+        List<String> failedDbs = new java.util.ArrayList<>();
+
+        for (String targetId : targetDbIds) {
+            try {
+                String targetUrl;
+                String targetName;
+                if ("local".equalsIgnoreCase(targetId)) {
+                    targetUrl = System.getProperty("DATABASE_URL_LOCAL");
+                    if (targetUrl == null) targetUrl = System.getenv("DATABASE_URL_LOCAL");
+                    if (targetUrl == null) targetUrl = "jdbc:postgresql://localhost:5432/haniu";
+                    targetName = "Local DB";
+                } else {
+                    NeonDatabase targetDb = repository.findById(UUID.fromString(targetId))
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy database đích: " + targetId));
+                    targetUrl = targetDb.getConnectionUrl();
+                    targetName = targetDb.getName();
+                }
+
+                if (sourceUrl.trim().equals(targetUrl.trim())) {
+                    continue;
+                }
+
+                try {
+                    backupService.createBackup("AUTO_SYNC_" + targetName, targetUrl);
+                } catch (Exception backupEx) {
+                    System.err.println(">>> [Multi-Sync] Failed auto-backup: " + backupEx.getMessage());
+                }
+
+                copyDataBetweenDatabases(sourceUrl, targetUrl);
+                successDbs.add(targetName);
+            } catch (Exception e) {
+                e.printStackTrace();
+                failedDbs.add(targetId + " (" + e.getMessage() + ")");
+            }
+        }
+
+        return ResponseEntity.ok(Map.of(
+            "message", "Đồng bộ hoàn thành",
+            "source", sourceName,
+            "success", successDbs,
+            "failed", failedDbs
+        ));
+    }
+
+    @GetMapping("/backups")
+    public ResponseEntity<List<com.haniu.tthieu.haniu.service.DatabaseBackupService.BackupMetadata>> getBackups() {
+        return ResponseEntity.ok(backupService.listBackups());
+    }
+
+    @PostMapping("/backups/create")
+    public ResponseEntity<Map<String, Object>> createBackup(@RequestBody Map<String, String> body) {
+        String dbId = body.get("dbId");
+        if (dbId == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Thiếu ID database"));
+        }
+
+        try {
+            String url;
+            String name;
+            if ("local".equalsIgnoreCase(dbId)) {
+                url = com.haniu.tthieu.haniu.config.DatabaseConfig.getCurrentActiveUrl();
+                name = "Local_DB";
+            } else {
+                NeonDatabase db = repository.findById(UUID.fromString(dbId))
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy database"));
+                url = db.getConnectionUrl();
+                name = db.getName();
+            }
+
+            var meta = backupService.createBackup(name, url);
+            return ResponseEntity.ok(Map.of("message", "Sao lưu thành công", "metadata", meta));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Sao lưu thất bại: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/backups/restore")
+    public ResponseEntity<Map<String, Object>> restoreBackup(@RequestBody Map<String, String> body) {
+        String backupName = body.get("backupName");
+        String targetDbId = body.get("targetDbId");
+
+        if (backupName == null || targetDbId == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Thiếu thông tin backup hoặc target DB"));
+        }
+
+        try {
+            String url;
+            String name;
+            if ("local".equalsIgnoreCase(targetDbId)) {
+                url = com.haniu.tthieu.haniu.config.DatabaseConfig.getCurrentActiveUrl();
+                name = "Local_DB";
+            } else {
+                NeonDatabase db = repository.findById(UUID.fromString(targetDbId))
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy database đích"));
+                url = db.getConnectionUrl();
+                name = db.getName();
+            }
+
+            try {
+                backupService.createBackup("AUTO_RESTORE_OVERWRITE_" + name, url);
+            } catch (Exception backupEx) {
+                System.err.println(">>> [Restore Backup] Auto-backup failed: " + backupEx.getMessage());
+            }
+
+            backupService.restoreBackup(backupName, url);
+            return ResponseEntity.ok(Map.of("message", "Phục hồi dữ liệu thành công lên database: " + name));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Phục hồi thất bại: " + e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/backups/{name}")
+    public ResponseEntity<Map<String, String>> deleteBackup(@PathVariable String name) {
+        try {
+            backupService.deleteBackup(name);
+            return ResponseEntity.ok(Map.of("message", "Xóa bản sao lưu thành công"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Xóa bản sao lưu thất bại: " + e.getMessage()));
+        }
     }
 
     private void copyDataBetweenDatabases(String sourceUrl, String targetUrl) throws Exception {
