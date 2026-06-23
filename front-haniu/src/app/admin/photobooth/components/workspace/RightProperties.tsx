@@ -7,12 +7,16 @@ interface RightPropertiesProps {
   selectedLayer: any;
   updateSelectedLayer: (updates: any) => void;
   handleDeleteLayer: (id: string) => void;
+  builderTemplate?: any;
+  setBuilderTemplate?: React.Dispatch<React.SetStateAction<any>>;
 }
 
 export const RightProperties: React.FC<RightPropertiesProps> = ({
   selectedLayer,
   updateSelectedLayer,
-  handleDeleteLayer
+  handleDeleteLayer,
+  builderTemplate,
+  setBuilderTemplate
 }) => {
   const [aiPrompt, setAiPrompt] = React.useState('');
   const [isGeneratingAiShape, setIsGeneratingAiShape] = React.useState(false);
@@ -155,11 +159,194 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
 
   if (!selectedLayer) {
     return (
-      <div className="w-80 border-l border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto p-5 space-y-6 shrink-0 flex flex-col items-center justify-center text-center">
-        <span className="text-3xl block mb-2">⚙️</span>
-        <p className="text-xs font-semibold px-2 text-slate-400">
-          Bấm vào bất kỳ thành phần nào trên Canvas hoặc trong danh sách Lớp để cấu hình chi tiết.
-        </p>
+      <div className="w-80 border-l border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto p-5 space-y-6 shrink-0 flex flex-col font-sans">
+        <div className="flex justify-between items-center border-b border-slate-100 dark:border-zinc-800 pb-3">
+          <span className="text-xs font-black uppercase text-rose-500 tracking-wider flex items-center gap-1">
+            ⚙️ Cấu hình Template
+          </span>
+        </div>
+
+        {/* Template General Info */}
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider block">Tên Template</label>
+          <input
+            type="text"
+            value={builderTemplate?.name || ''}
+            onChange={e => setBuilderTemplate?.((prev: any) => ({ ...prev, name: e.target.value }))}
+            className="w-full px-3 h-9 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-[11px] font-bold text-slate-800 dark:text-zinc-200 focus:outline-none"
+            placeholder="Tên template..."
+          />
+        </div>
+
+        {/* Background Config */}
+        <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
+          <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Hình nền (Background)</h5>
+          
+          <div className="flex gap-2">
+            {['solid', 'gradient', 'image'].map((bType) => (
+              <button
+                key={bType}
+                onClick={() => setBuilderTemplate?.((p: any) => ({
+                  ...p,
+                  backgroundType: bType,
+                  backgroundGradient: p.backgroundGradient || { color1: '#fda4af', color2: '#f43f5e', angle: 45 }
+                }))}
+                className={`flex-1 py-1 rounded-lg text-[9px] font-black uppercase border transition-colors ${
+                  (builderTemplate?.backgroundType || 'solid') === bType
+                    ? 'bg-rose-500 border-rose-600 text-white shadow-sm'
+                    : 'bg-slate-50 dark:bg-zinc-850 border-slate-200 dark:border-zinc-800 text-slate-500 hover:text-rose-600'
+                }`}
+              >
+                {bType === 'solid' ? 'Đơn sắc' : bType === 'gradient' ? 'Gradient' : 'Ảnh nền'}
+              </button>
+            ))}
+          </div>
+
+          {builderTemplate?.backgroundType === 'gradient' && (
+            <div className="space-y-2 p-2.5 bg-slate-50 dark:bg-zinc-850 rounded-xl border border-slate-200 dark:border-zinc-800">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[8px] text-slate-400 font-bold block mb-1">Màu bắt đầu</label>
+                  <input
+                    type="color"
+                    value={builderTemplate.backgroundGradient?.color1 || '#fda4af'}
+                    onChange={e => setBuilderTemplate?.((p: any) => ({
+                      ...p,
+                      backgroundGradient: { ...(p.backgroundGradient || {}), color1: e.target.value }
+                    }))}
+                    className="w-full h-8 rounded-lg cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <label className="text-[8px] text-slate-400 font-bold block mb-1">Màu kết thúc</label>
+                  <input
+                    type="color"
+                    value={builderTemplate.backgroundGradient?.color2 || '#f43f5e'}
+                    onChange={e => setBuilderTemplate?.((p: any) => ({
+                      ...p,
+                      backgroundGradient: { ...(p.backgroundGradient || {}), color2: e.target.value }
+                    }))}
+                    className="w-full h-8 rounded-lg cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {builderTemplate?.backgroundType === 'solid' && (
+            <div className="flex gap-2 items-center p-2.5 bg-slate-50 dark:bg-zinc-850 rounded-xl border border-slate-200 dark:border-zinc-800">
+              <input
+                type="color"
+                value={builderTemplate.background?.startsWith('#') ? builderTemplate.background : '#ffffff'}
+                onChange={e => setBuilderTemplate?.((p: any) => ({ ...p, background: e.target.value, backgroundType: 'solid' }))}
+                className="w-8 h-8 rounded-lg cursor-pointer"
+              />
+              <span className="text-[10px] font-mono font-bold text-slate-700 dark:text-zinc-350">{builderTemplate.background || '#ffffff'}</span>
+            </div>
+          )}
+
+          {builderTemplate?.backgroundType === 'image' && (
+            <div className="space-y-1.5 p-2.5 bg-slate-50 dark:bg-zinc-850 rounded-xl border border-slate-200 dark:border-zinc-800">
+              <input
+                type="text"
+                value={builderTemplate.background?.startsWith('http') || builderTemplate.background?.startsWith('data:') ? builderTemplate.background : ''}
+                onChange={e => setBuilderTemplate?.((p: any) => ({ ...p, background: e.target.value, backgroundType: 'image' }))}
+                placeholder="Link URL ảnh nền..."
+                className="w-full px-2 h-8 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] focus:outline-none"
+              />
+              <label className="w-full h-8 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10px] font-black uppercase flex items-center justify-center cursor-pointer transition-colors shadow-sm">
+                Chọn file ảnh nền
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        if (event.target?.result) {
+                          setBuilderTemplate?.((p: any) => ({
+                            ...p,
+                            background: event.target!.result as string,
+                            backgroundType: 'image'
+                          }));
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          )}
+        </div>
+
+        {/* OVERLAY CONFIG */}
+        <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
+          <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Lớp Phủ Thiết Kế (Overlay)</h5>
+          <p className="text-[8px] text-slate-400 leading-relaxed font-medium">
+            💡 Tải lên một ảnh PNG trong suốt có hoa văn, khung viền đè hoặc logo để phủ lên trên tất cả các lớp.
+          </p>
+
+          <div className="space-y-2">
+            <input
+              type="text"
+              value={builderTemplate?.overlay || ''}
+              onChange={e => setBuilderTemplate?.((p: any) => ({ ...p, overlay: e.target.value }))}
+              placeholder="URL ảnh overlay (.png)..."
+              className="w-full px-2 h-8 rounded-lg bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-[10px] font-mono focus:outline-none"
+            />
+            <div className="flex gap-2">
+              <label className="flex-1 h-8 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10px] font-black uppercase flex items-center justify-center cursor-pointer transition-colors shadow-sm">
+                Tải ảnh phủ lên
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        if (event.target?.result) {
+                          setBuilderTemplate?.((p: any) => ({
+                            ...p,
+                            overlay: event.target!.result as string
+                          }));
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+              {builderTemplate?.overlay && (
+                <button
+                  onClick={() => setBuilderTemplate?.((p: any) => ({ ...p, overlay: '' }))}
+                  className="px-3 bg-red-50 hover:bg-red-100 dark:bg-red-955/20 border border-red-200 dark:border-red-900 rounded-lg text-red-500 text-[9px] font-black uppercase transition-colors cursor-pointer"
+                >
+                  Xóa
+                </button>
+              )}
+            </div>
+            {builderTemplate?.overlay && (
+              <div className="relative mt-2 p-1 border border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50 dark:bg-zinc-850 max-h-28 overflow-hidden flex items-center justify-center">
+                <img
+                  src={builderTemplate.overlay}
+                  alt="overlay preview"
+                  className="max-h-24 object-contain rounded"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="pt-6 text-center">
+          <p className="text-[9px] font-semibold px-2 text-slate-400 leading-normal">
+            Bấm vào bất kỳ thành phần nào trên Canvas để chỉnh sửa thuộc tính lớp chi tiết.
+          </p>
+        </div>
       </div>
     );
   }
@@ -740,6 +927,49 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
                 />
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* OVERLAY LAYER PROPERTIES */}
+      {selectedLayer.type === 'overlay' && (
+        <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-zinc-850">
+          <h5 className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Thông số Lớp Phủ (Overlay)</h5>
+          
+          <div>
+            <label className="text-[8px] text-slate-400 font-bold block mb-1">Ảnh lớp phủ / PNG URL</label>
+            <div className="flex gap-2">
+              <input 
+                type="text"
+                value={selectedLayer.url || ''}
+                onChange={e => updateSelectedLayer({ url: e.target.value })}
+                placeholder="URL ảnh lớp phủ (.png)..."
+                className="w-full px-2 h-8 rounded-lg bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-[10px] focus:outline-none focus:border-rose-500"
+              />
+              <label className="px-3 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[9px] font-black uppercase flex items-center justify-center cursor-pointer transition-colors shrink-0">
+                Tải lên
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        if (event.target?.result) {
+                          updateSelectedLayer({ url: event.target!.result as string });
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+            <p className="text-[8px] text-slate-400 mt-1 leading-relaxed">
+              💡 Khuyên dùng ảnh PNG trong suốt có viền/logo trang trí để làm lớp phủ kéo thả.
+            </p>
           </div>
         </div>
       )}

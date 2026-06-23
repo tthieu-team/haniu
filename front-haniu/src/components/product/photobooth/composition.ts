@@ -89,7 +89,9 @@ export const generateComposition = async (
 
   // 3. Draw Design Layers or default slots
   if (template.layers && template.layers.length > 0) {
-    const frameLayers = template.layers.filter((l: any) => l.type === 'frame');
+    const frameLayers = template.layers
+      .filter((l: any) => l.type === 'frame')
+      .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
     // Custom template drawing
     for (let layer of template.layers) {
       if (layer.visible === false) continue;
@@ -104,18 +106,33 @@ export const generateComposition = async (
         if (frameIndex !== -1 && photoImages[frameIndex]) {
           const img = photoImages[frameIndex];
           ctx.save();
+          
+          if (layer.rotation) {
+            ctx.translate(posX + rectW / 2, posY + rectH / 2);
+            ctx.rotate((layer.rotation * Math.PI) / 180);
+            ctx.translate(-(posX + rectW / 2), -(posY + rectH / 2));
+          }
+          
+          ctx.globalAlpha = (layer.opacity ?? 100) / 100;
+          
+          // Save the state with rotation/alpha but without clipping
+          ctx.save();
+          
           ctx.beginPath();
           const scaleFactor = canvas.width / (template.canvasWidth * 0.25 || 300);
           const radius = (layer.cornerRadius ?? 8) * scaleFactor;
           const frameShape = layer.frameShape || 'rect';
 
           if (frameShape === 'circle') {
-            ctx.ellipse(posX + rectW / 2, posY + rectH / 2, rectW / 2, rectH / 2, 0, 0, Math.PI * 2);
+            const radius = Math.min(rectW, rectH) / 2;
+            ctx.roundRect(posX, posY, rectW, rectH, radius);
+            ctx.clip();
           } else if (frameShape === 'triangle') {
             ctx.moveTo(posX + rectW / 2, posY);
             ctx.lineTo(posX, posY + rectH);
             ctx.lineTo(posX + rectW, posY + rectH);
             ctx.closePath();
+            ctx.clip();
           } else if (frameShape === 'heart') {
             // Polygon points matching CSS heart clip-path exactly
             const pts = [
@@ -127,6 +144,7 @@ export const generateComposition = async (
               ctx.lineTo(posX + (pts[k][0] / 100) * rectW, posY + (pts[k][1] / 100) * rectH);
             }
             ctx.closePath();
+            ctx.clip();
           } else if (frameShape === 'star') {
             // Polygon points matching CSS star clip-path exactly
             const pts = [
@@ -138,13 +156,15 @@ export const generateComposition = async (
               ctx.lineTo(posX + (pts[k][0] / 100) * rectW, posY + (pts[k][1] / 100) * rectH);
             }
             ctx.closePath();
+            ctx.clip();
           } else if (frameShape === 'custom-path' && (layer.framePath || layer.framePolygon)) {
             if (layer.framePath) {
+              const currentTransform = ctx.getTransform();
               ctx.translate(posX, posY);
               ctx.scale(rectW / 100, rectH / 100);
               const p2d = new Path2D(layer.framePath);
               ctx.clip(p2d);
-              ctx.setTransform(1, 0, 0, 1, 0, 0);
+              ctx.setTransform(currentTransform);
             } else {
               try {
                 const pairs = layer.framePolygon.split(',').map((p: string) => {
@@ -173,6 +193,13 @@ export const generateComposition = async (
             ctx.clip();
           }
 
+          // Rotate back to draw the image upright
+          if (layer.rotation) {
+            ctx.translate(posX + rectW / 2, posY + rectH / 2);
+            ctx.rotate(-(layer.rotation * Math.PI) / 180);
+            ctx.translate(-(posX + rectW / 2), -(posY + rectH / 2));
+          }
+
           const scale = Math.max(rectW / img.width, rectH / img.height);
           const x = posX + (rectW - img.width * scale) / 2;
           const y = posY + (rectH - img.height * scale) / 2;
@@ -182,6 +209,13 @@ export const generateComposition = async (
           }
 
           ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+
+          // Rotate back to rotated state for borders and custom overlays
+          if (layer.rotation) {
+            ctx.translate(posX + rectW / 2, posY + rectH / 2);
+            ctx.rotate((layer.rotation * Math.PI) / 180);
+            ctx.translate(-(posX + rectW / 2), -(posY + rectH / 2));
+          }
 
           // Draw Frame border INSIDE the clipped region so exactly half (the inner side) is visible
           const borderWidth = (layer.borderSize ?? 4) * scaleFactor;
@@ -193,7 +227,8 @@ export const generateComposition = async (
             ctx.beginPath();
             
             if (frameShape === 'circle') {
-              ctx.ellipse(posX + rectW / 2, posY + rectH / 2, rectW / 2, rectH / 2, 0, 0, Math.PI * 2);
+              const radius = Math.min(rectW, rectH) / 2;
+              ctx.roundRect(posX, posY, rectW, rectH, radius);
             } else if (frameShape === 'triangle') {
               ctx.moveTo(posX + rectW / 2, posY);
               ctx.lineTo(posX, posY + rectH);
@@ -221,13 +256,14 @@ export const generateComposition = async (
               ctx.closePath();
             } else if (frameShape === 'custom-path' && (layer.framePath || layer.framePolygon)) {
               if (layer.framePath) {
+                const currentTransform = ctx.getTransform();
                 const avgScale = (rectW / 100 + rectH / 100) / 2;
                 ctx.lineWidth = (borderWidth * 2) / (avgScale || 1);
                 ctx.translate(posX, posY);
                 ctx.scale(rectW / 100, rectH / 100);
                 const p2d = new Path2D(layer.framePath);
                 ctx.stroke(p2d);
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.setTransform(currentTransform);
               } else {
                 try {
                   const pairs = layer.framePolygon.split(',').map((p: string) => {
@@ -256,9 +292,10 @@ export const generateComposition = async (
             ctx.restore();
           }
 
+          // Restore state to remove clipping but preserve rotation/opacity
           ctx.restore();
 
-          // If custom shape overlay is selected, render it on top of the clipped photo slot
+          // If custom shape overlay is selected, render it on top of the clipped photo slot (rotated!)
           if (frameShape === 'custom' && layer.frameMaskUrl) {
             const maskImg = await new Promise<HTMLImageElement>((resolve) => {
               const i = new Image();
@@ -268,11 +305,12 @@ export const generateComposition = async (
               i.src = layer.frameMaskUrl;
             });
             if (maskImg.complete && maskImg.naturalWidth > 0) {
-              ctx.save();
               ctx.drawImage(maskImg, posX, posY, rectW, rectH);
-              ctx.restore();
             }
           }
+
+          // Finally restore state back to original unrotated context
+          ctx.restore();
         }
       } else if (layer.type === 'text') {
         ctx.save();
@@ -308,6 +346,27 @@ export const generateComposition = async (
         }
         ctx.fillText(layer.text || '', textX, textY);
         ctx.restore();
+      } else if (layer.type === 'overlay' && layer.url) {
+        const img = await new Promise<HTMLImageElement>((resolve) => {
+          const i = new Image();
+          i.crossOrigin = "anonymous";
+          i.onload = () => resolve(i);
+          i.onerror = () => resolve(new Image());
+          i.src = layer.url;
+        });
+        if (img.complete && img.naturalWidth > 0) {
+          ctx.save();
+          ctx.translate(posX + rectW / 2, posY + rectH / 2);
+          if (layer.rotation) {
+            ctx.rotate((layer.rotation * Math.PI) / 180);
+          }
+          if (layer.flipX || layer.flipY) {
+            ctx.scale(layer.flipX ? -1 : 1, layer.flipY ? -1 : 1);
+          }
+          ctx.globalAlpha = (layer.opacity ?? 100) / 100;
+          ctx.drawImage(img, -rectW / 2, -rectH / 2, rectW, rectH);
+          ctx.restore();
+        }
       } else if ((layer.type === 'sticker' || layer.type === 'logo') && layer.url) {
         const img = await new Promise<HTMLImageElement>((resolve) => {
           const i = new Image();
@@ -343,6 +402,11 @@ export const generateComposition = async (
         }
       } else if (layer.type === 'logo' && !layer.url) {
         ctx.save();
+        if (layer.rotation) {
+          ctx.translate(posX + rectW / 2, posY + rectH / 2);
+          ctx.rotate((layer.rotation * Math.PI) / 180);
+          ctx.translate(-(posX + rectW / 2), -(posY + rectH / 2));
+        }
         ctx.globalAlpha = (layer.opacity ?? 100) / 100;
         const scaledSize = (layer.size || 20) * (canvas.width / 400);
         ctx.font = `bold ${scaledSize}px ${resolveFont('be-vietnam-pro')}`;
@@ -360,44 +424,93 @@ export const generateComposition = async (
         ctx.globalAlpha = (layer.opacity ?? 100) / 100;
         ctx.fillStyle = layer.fillColor || '#fda4af';
 
-        const drawShapePath = () => {
-          ctx.beginPath();
-          if (layer.shapeType === 'circle') {
-            ctx.arc(0, 0, Math.min(rectW, rectH) / 2, 0, Math.PI * 2);
-          } else if (layer.shapeType === 'triangle') {
-            ctx.moveTo(0, -rectH / 2);
-            ctx.lineTo(-rectW / 2, rectH / 2);
-            ctx.lineTo(rectW / 2, rectH / 2);
-            ctx.closePath();
-          } else if (layer.shapeType === 'heart') {
-            ctx.font = `${Math.min(rectW, rectH)}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = layer.fillColor || '#f43f5e';
-            ctx.fillText('❤️', 0, 0);
-          } else if (layer.shapeType === 'star') {
-            ctx.font = `${Math.min(rectW, rectH)}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = layer.fillColor || '#f59e0b';
-            ctx.fillText('⭐', 0, 0);
-          } else {
-            const radius = layer.cornerRadius ?? 8;
-            ctx.roundRect(-rectW / 2, -rectH / 2, rectW, rectH, radius);
-          }
-        };
+        const scaleFactor = canvas.width / (template.canvasWidth * 0.25 || 300);
 
-        if (layer.shapeType !== 'heart' && layer.shapeType !== 'star') {
-          drawShapePath();
+        // Draw shape background path
+        ctx.beginPath();
+        const hasCustomPath = (layer.shapeType === 'custom-path' || layer.frameShape === 'custom-path') && (layer.framePath || layer.framePolygon);
+        let customPathDrawn = false;
+
+        if (hasCustomPath) {
+          if (layer.framePath) {
+            const currentTransform = ctx.getTransform();
+            ctx.translate(-rectW / 2, -rectH / 2);
+            ctx.scale(rectW / 100, rectH / 100);
+            const p2d = new Path2D(layer.framePath);
+            ctx.fill(p2d);
+            
+            const borderSize = layer.borderSize ?? 0;
+            if (borderSize > 0) {
+              ctx.strokeStyle = layer.borderColor || '#f43f5e';
+              const avgScale = (rectW / 100 + rectH / 100) / 2;
+              ctx.lineWidth = (borderSize * scaleFactor) / (avgScale || 1);
+              ctx.stroke(p2d);
+            }
+            ctx.setTransform(currentTransform);
+            customPathDrawn = true;
+          } else if (layer.framePolygon) {
+            try {
+              const pairs = layer.framePolygon.split(',').map((p: string) => {
+                const parts = p.trim().split(/\s+/);
+                const xVal = parseFloat(parts[0].replace('%', ''));
+                const yVal = parseFloat(parts[1].replace('%', ''));
+                return [xVal, yVal];
+              });
+              ctx.moveTo(-rectW / 2 + (pairs[0][0] / 100) * rectW, -rectH / 2 + (pairs[0][1] / 100) * rectH);
+              for (let k = 1; k < pairs.length; k++) {
+                ctx.lineTo(-rectW / 2 + (pairs[k][0] / 100) * rectW, -rectH / 2 + (pairs[k][1] / 100) * rectH);
+              }
+            } catch (err) {
+              ctx.rect(-rectW / 2, -rectH / 2, rectW, rectH);
+            }
+            ctx.closePath();
+          }
+        } else if (layer.shapeType === 'circle') {
+          const radius = Math.min(rectW, rectH) / 2;
+          ctx.roundRect(-rectW / 2, -rectH / 2, rectW, rectH, radius);
+        } else if (layer.shapeType === 'triangle') {
+          ctx.moveTo(0, -rectH / 2);
+          ctx.lineTo(-rectW / 2, rectH / 2);
+          ctx.lineTo(rectW / 2, rectH / 2);
+          ctx.closePath();
+        } else if (layer.shapeType === 'heart') {
+          const pts = [
+            [50, 24], [62, 10], [78, 10], [90, 20], [94, 40], [82, 65],
+            [50, 95], [18, 65], [6, 40], [10, 20], [26, 10], [38, 24]
+          ];
+          ctx.moveTo(-rectW / 2 + (pts[0][0] / 100) * rectW, -rectH / 2 + (pts[0][1] / 100) * rectH);
+          for (let k = 1; k < pts.length; k++) {
+            ctx.lineTo(-rectW / 2 + (pts[k][0] / 100) * rectW, -rectH / 2 + (pts[k][1] / 100) * rectH);
+          }
+          ctx.closePath();
+        } else if (layer.shapeType === 'star') {
+          const pts = [
+            [50, 0], [61, 35], [98, 35], [68, 57], [79, 91],
+            [50, 70], [21, 91], [32, 57], [2, 35], [39, 35]
+          ];
+          ctx.moveTo(-rectW / 2 + (pts[0][0] / 100) * rectW, -rectH / 2 + (pts[0][1] / 100) * rectH);
+          for (let k = 1; k < pts.length; k++) {
+            ctx.lineTo(-rectW / 2 + (pts[k][0] / 100) * rectW, -rectH / 2 + (pts[k][1] / 100) * rectH);
+          }
+          ctx.closePath();
+        } else {
+          // rect shape has rounded rect background
+          const radius = (layer.cornerRadius ?? 8) * scaleFactor;
+          ctx.roundRect(-rectW / 2, -rectH / 2, rectW, rectH, radius);
+        }
+
+        if (!customPathDrawn) {
           ctx.fill();
-          if (layer.borderSize > 0) {
+
+          // Stroke border
+          const borderSize = layer.borderSize ?? 0;
+          if (borderSize > 0) {
             ctx.strokeStyle = layer.borderColor || '#f43f5e';
-            ctx.lineWidth = layer.borderSize * (canvas.width / 400);
+            ctx.lineWidth = borderSize * scaleFactor;
             ctx.stroke();
           }
-        } else {
-          drawShapePath();
         }
+
         ctx.restore();
       }
     }
@@ -420,14 +533,23 @@ export const generateComposition = async (
         const frameShape = slot.frameShape || 'rect';
 
         ctx.save();
+        if (slot.rotation) {
+          ctx.translate(slotX + slotW / 2, slotY + slotH / 2);
+          ctx.rotate((slot.rotation * Math.PI) / 180);
+          ctx.translate(-(slotX + slotW / 2), -(slotY + slotH / 2));
+        }
+        ctx.save(); // Save 2 for clipping path
         ctx.beginPath();
         if (frameShape === 'circle') {
-          ctx.ellipse(slotX + slotW / 2, slotY + slotH / 2, slotW / 2, slotH / 2, 0, 0, Math.PI * 2);
+          const radius = Math.min(slotW, slotH) / 2;
+          ctx.roundRect(slotX, slotY, slotW, slotH, radius);
+          ctx.clip();
         } else if (frameShape === 'triangle') {
           ctx.moveTo(slotX + slotW / 2, slotY);
           ctx.lineTo(slotX, slotY + slotH);
           ctx.lineTo(slotX + slotW, slotY + slotH);
           ctx.closePath();
+          ctx.clip();
         } else if (frameShape === 'heart') {
           const pts = [
             [50, 24], [62, 10], [78, 10], [90, 20], [94, 40], [82, 65],
@@ -438,6 +560,7 @@ export const generateComposition = async (
             ctx.lineTo(slotX + (pts[k][0] / 100) * slotW, slotY + (pts[k][1] / 100) * slotH);
           }
           ctx.closePath();
+          ctx.clip();
         } else if (frameShape === 'star') {
           const pts = [
             [50, 0], [61, 35], [98, 35], [68, 57], [79, 91],
@@ -448,13 +571,15 @@ export const generateComposition = async (
             ctx.lineTo(slotX + (pts[k][0] / 100) * slotW, slotY + (pts[k][1] / 100) * slotH);
           }
           ctx.closePath();
+          ctx.clip();
         } else if (frameShape === 'custom-path' && (slot.framePath || slot.framePolygon)) {
           if (slot.framePath) {
+            const currentTransform = ctx.getTransform();
             ctx.translate(slotX, slotY);
             ctx.scale(slotW / 100, slotH / 100);
             const p2d = new Path2D(slot.framePath);
             ctx.clip(p2d);
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.setTransform(currentTransform);
           } else if (slot.framePolygon) {
             try {
               const pairs = slot.framePolygon.split(',').map((p: string) => {
@@ -482,6 +607,13 @@ export const generateComposition = async (
           ctx.clip();
         }
 
+        // Rotate back to draw the image upright
+        if (slot.rotation) {
+          ctx.translate(slotX + slotW / 2, slotY + slotH / 2);
+          ctx.rotate(-(slot.rotation * Math.PI) / 180);
+          ctx.translate(-(slotX + slotW / 2), -(slotY + slotH / 2));
+        }
+
         const scale = Math.max(slotW / img.width, slotH / img.height);
         const x = slotX + (slotW - img.width * scale) / 2;
         const y = slotY + (slotH - img.height * scale) / 2;
@@ -491,7 +623,16 @@ export const generateComposition = async (
         }
 
         ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+        
+        // Restore Save 2 to remove clipping path, but keep rotation
         ctx.restore();
+
+        // Rotate back to rotated state for borders and custom overlays
+        if (slot.rotation) {
+          ctx.translate(slotX + slotW / 2, slotY + slotH / 2);
+          ctx.rotate((slot.rotation * Math.PI) / 180);
+          ctx.translate(-(slotX + slotW / 2), -(slotY + slotH / 2));
+        }
 
         // Draw Custom frame overlay if any
         if (frameShape === 'custom' && slot.frameMaskUrl) {
@@ -508,7 +649,8 @@ export const generateComposition = async (
           ctx.beginPath();
           
           if (frameShape === 'circle') {
-            ctx.ellipse(slotX + slotW / 2, slotY + slotH / 2, slotW / 2 - borderWidth / 2, slotH / 2 - borderWidth / 2, 0, 0, Math.PI * 2);
+            const radius = Math.min(slotW - borderWidth, slotH - borderWidth) / 2;
+            ctx.roundRect(slotX + borderWidth / 2, slotY + borderWidth / 2, slotW - borderWidth, slotH - borderWidth, radius);
           } else if (frameShape === 'triangle') {
             ctx.moveTo(slotX + slotW / 2, slotY + borderWidth);
             ctx.lineTo(slotX + borderWidth, slotY + slotH - borderWidth);
@@ -536,13 +678,14 @@ export const generateComposition = async (
             ctx.closePath();
           } else if (frameShape === 'custom-path' && (slot.framePath || slot.framePolygon)) {
             if (slot.framePath) {
+              const currentTransform = ctx.getTransform();
               const avgScale = (slotW / 100 + slotH / 100) / 2;
               ctx.lineWidth = borderWidth / (avgScale || 1);
               ctx.translate(slotX, slotY);
               ctx.scale(slotW / 100, slotH / 100);
               const p2d = new Path2D(slot.framePath);
               ctx.stroke(p2d);
-              ctx.setTransform(1, 0, 0, 1, 0, 0);
+              ctx.setTransform(currentTransform);
             } else if (slot.framePolygon) {
               try {
                 const pairs = slot.framePolygon.split(',').map((p: string) => {
@@ -570,6 +713,7 @@ export const generateComposition = async (
           ctx.stroke();
           ctx.restore();
         }
+        ctx.restore(); // Restore Save 1: Back to original unrotated context
       }
     });
   }
@@ -650,6 +794,23 @@ export const generateComposition = async (
       }
     }
     ctx.restore();
+  }
+
+  // 3.5. Draw Template Overlay
+  if ((template as any).overlay) {
+    const overlayImg = await new Promise<HTMLImageElement>((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = () => {
+        console.error("Failed to load template overlay image");
+        resolve(new Image());
+      };
+      img.src = (template as any).overlay;
+    });
+    if (overlayImg.complete && overlayImg.naturalWidth > 0) {
+      ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height);
+    }
   }
 
   // 4. Draw Premium Branding (Adjusted to Haniu with drag-drop coordinates and fonts)

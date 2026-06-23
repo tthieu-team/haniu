@@ -45,6 +45,9 @@ public class PhotoboothTemplate {
     @Column(columnDefinition = "TEXT")
     private String thumbnail;
 
+    @Column(columnDefinition = "TEXT")
+    private String overlay;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "layers", columnDefinition = "jsonb")
     private Object layers; // JSON layers configurations

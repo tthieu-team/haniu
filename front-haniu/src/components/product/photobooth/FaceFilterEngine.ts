@@ -12,7 +12,6 @@ export const FACE_FILTERS: FaceFilterConfig[] = [
   { id: 'sunglasses', name: 'Kính Mát', icon: '😎', category: 'accessories' },
   { id: 'crown', name: 'Vương Miện', icon: '👑', category: 'accessories' },
   { id: 'clown-nose', name: 'Mũi Hề', icon: '🤡', category: 'accessories' },
-  { id: 'face-zoom', name: 'Zoom Mặt', icon: '😂', category: 'effect' },
   { id: 'sparkle', name: 'Lấp Lánh', icon: '✨', category: 'effect' },
 ];
 

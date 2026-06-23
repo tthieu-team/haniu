@@ -208,6 +208,29 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
     setSelectedLayerId(newLayer.id);
   };
 
+  const handleAddOverlayLayer = () => {
+    const newLayer = {
+      id: 'l-ovl-' + Date.now(),
+      type: 'overlay',
+      url: '',
+      label: 'Lớp Phủ Thiết Kế',
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100,
+      rotation: 0,
+      opacity: 100,
+      locked: false,
+      visible: true,
+      shadowColor: 'rgba(0,0,0,0)',
+      shadowBlur: 0,
+      shadowOffsetX: 0,
+      shadowOffsetY: 0
+    };
+    setBuilderTemplate((prev: any) => ({ ...prev, layers: [...prev.layers, newLayer] }));
+    setSelectedLayerId(newLayer.id);
+  };
+
   const handleDuplicateLayer = (layer: any) => {
     const newLayer = {
       ...JSON.parse(JSON.stringify(layer)),
@@ -443,6 +466,7 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
           handleDuplicateLayer={handleDuplicateLayer}
           handleMoveLayerUp={handleMoveLayerUp}
           handleMoveLayerDown={handleMoveLayerDown}
+          handleAddOverlayLayer={handleAddOverlayLayer}
         />
 
         {/* WORKSPACE CENTRAL WORKBOARD */}
@@ -508,7 +532,8 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                     height: `${layer.height}%`,
                     transform: transformStr || 'none',
                     opacity: (layer.opacity ?? 100) / 100,
-                    boxShadow: layer.type !== 'frame' ? shadowStyle : 'none'
+                    boxShadow: layer.type !== 'frame' ? shadowStyle : 'none',
+                    pointerEvents: (layer.locked && !isSelected) ? 'none' : 'auto'
                   }}
                 >
                   
@@ -612,6 +637,22 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                     />
                   )}
 
+                  {/* OVERLAY LAYER RENDERING */}
+                  {layer.type === 'overlay' && (
+                    layer.url ? (
+                      <img 
+                        src={layer.url} 
+                        alt="overlay layer" 
+                        className="w-full h-full object-fill pointer-events-none"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-slate-200/50 dark:bg-zinc-800/50 border border-dashed border-slate-400 dark:border-zinc-700 flex flex-col items-center justify-center text-slate-400 dark:text-zinc-500 text-[10px] p-2 text-center leading-normal">
+                        <span>🖼️ LỚP PHỦ TRỐNG</span>
+                        <span className="text-[8px] mt-1">Click chọn để tải ảnh lớp phủ (.png)</span>
+                      </div>
+                    )
+                  )}
+
                   {/* LOGO LAYER RENDERING */}
                   {layer.type === 'logo' && (
                     <div className="flex items-center justify-center gap-1.5 w-full h-full">
@@ -707,6 +748,15 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                 </div>
               );
             })}
+
+            {/* Design template overlay PNG */}
+            {builderTemplate.overlay && (
+              <img 
+                src={builderTemplate.overlay} 
+                alt="layout overlay" 
+                className="absolute inset-0 w-full h-full object-fill pointer-events-none z-20" 
+              />
+            )}
           </div>
         </div>
 
@@ -715,6 +765,8 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
           selectedLayer={selectedLayer}
           updateSelectedLayer={updateSelectedLayer}
           handleDeleteLayer={handleDeleteLayer}
+          builderTemplate={builderTemplate}
+          setBuilderTemplate={setBuilderTemplate}
         />
 
       </div>

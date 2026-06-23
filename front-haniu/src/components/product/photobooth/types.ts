@@ -16,6 +16,7 @@ export interface PhotoboothSlot {
   borderSize?: number;
   borderColor?: string;
   cornerRadius?: number;
+  rotation?: number;
 }
 
 export interface PhotoboothTemplate {

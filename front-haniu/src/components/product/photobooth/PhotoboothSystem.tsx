@@ -358,6 +358,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
                   cornerRadius={currentSlot?.cornerRadius}
                   borderColor={currentSlot?.borderColor || '#ffffff'}
                   borderSize={currentSlot?.borderSize}
+                  rotation={currentSlot?.rotation}
                 />
               );
             })()}
@@ -470,7 +471,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
 
 
 
-            {/* Bottom Controls: 2 rows */}
+            {/* Bottom Controls */}
             <div className="absolute bottom-4 left-4 right-4 z-40 flex flex-col gap-2.5">
               {/* Row 1: Face Filters */}
               <div className="flex justify-center">
@@ -479,29 +480,6 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
                   onSelect={setFaceFilter}
                   isLoading={faceFilterLoading}
                 />
-              </div>
-              {/* Row 2: Aspect Ratio */}
-              <div className="flex justify-center gap-1.5 flex-wrap">
-                {[
-                  { id: 'template', label: 'Theo khung' },
-                  { id: 'free', label: 'Tự do' },
-                  { id: '1:1', label: '1:1' },
-                  { id: '3:4', label: '3:4' },
-                  { id: '4:3', label: '4:3' },
-                  { id: '9:16', label: '9:16' },
-                  { id: '16:9', label: '16:9' },
-                ].map((r) => (
-                  <button
-                    key={r.id}
-                    onClick={() => setAspectRatio(r.id)}
-                    className={`px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border ${aspectRatio === r.id
-                        ? 'bg-rose-500 text-white border-rose-400 shadow-lg shadow-rose-500/30 scale-105'
-                        : 'bg-black/50 text-white/70 border-white/10 hover:bg-black/70 hover:text-white backdrop-blur-sm'
-                      }`}
-                  >
-                    {r.label}
-                  </button>
-                ))}
               </div>
             </div>
           </motion.div>

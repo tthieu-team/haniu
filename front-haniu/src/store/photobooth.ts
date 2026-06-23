@@ -107,6 +107,8 @@ export const usePhotoboothStore = create<PhotoboothState>((set, get) => ({
             borderSize: l.borderSize,
             borderColor: l.borderColor,
             cornerRadius: l.cornerRadius,
+            rotation: l.rotation || 0,
+            opacity: l.opacity ?? 100,
           }));
 
         return {

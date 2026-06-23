@@ -21,6 +21,7 @@ interface LeftToolboxProps {
   handleDuplicateLayer: (layer: any) => void;
   handleMoveLayerUp: (idx: number) => void;
   handleMoveLayerDown: (idx: number) => void;
+  handleAddOverlayLayer: () => void;
 }
 
 export const LeftToolbox: React.FC<LeftToolboxProps> = ({
@@ -36,7 +37,8 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
   handleAddLogoLayer,
   handleDuplicateLayer,
   handleMoveLayerUp,
-  handleMoveLayerDown
+  handleMoveLayerDown,
+  handleAddOverlayLayer
 }) => {
   // GIPHY stickers states
   const [giphySearch, setGiphySearch] = useState('');
@@ -91,7 +93,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
       
       <div className="space-y-2">
         <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider">Thêm lớp thành phần</h4>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <button 
             onClick={handleAddFrameLayer}
             className="h-16 border border-dashed border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-rose-600 cursor-pointer transition-all"
@@ -105,6 +107,13 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
           >
             <span className="text-lg">🖋️</span>
             <span className="text-[9px] font-black uppercase tracking-wider font-sans">Văn Bản</span>
+          </button>
+          <button 
+            onClick={handleAddOverlayLayer}
+            className="h-16 border border-dashed border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-rose-600 cursor-pointer transition-all"
+          >
+            <span className="text-lg">🖼️</span>
+            <span className="text-[9px] font-black uppercase tracking-wider font-sans">Lớp Phủ</span>
           </button>
         </div>
       </div>
@@ -310,7 +319,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 truncate max-w-[65%]">
                     <span className="text-slate-400">
-                      {layer.type === 'frame' ? '📸' : layer.type === 'text' ? '🖋️' : layer.type === 'sticker' ? '🎨' : layer.type === 'logo' ? '🏷️' : '■'}
+                      {layer.type === 'frame' ? '📸' : layer.type === 'text' ? '🖋️' : layer.type === 'sticker' ? '🎨' : layer.type === 'logo' ? '🏷️' : layer.type === 'overlay' ? '🖼️' : '■'}
                     </span>
                     <input
                       type="text"

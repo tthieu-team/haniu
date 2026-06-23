@@ -112,9 +112,24 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                             }}
                           >
                             {layer.type === 'frame' && `📸 ${layer.order || idx + 1}`}
+                            {layer.type === 'overlay' && layer.url && (
+                              <img 
+                                src={layer.url} 
+                                alt="overlay thumbnail" 
+                                className="w-full h-full object-fill pointer-events-none"
+                              />
+                            )}
                           </div>
                         );
                       })}
+                      {/* Overlay visualization inside thumbnail card */}
+                      {tpl.overlay && (
+                        <img 
+                          src={tpl.overlay} 
+                          alt="card overlay" 
+                          className="absolute inset-0 w-full h-full object-fill pointer-events-none z-20"
+                        />
+                      )}
                     </div>
                   )}
 
@@ -245,6 +260,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                   const isSticker = layer.type === 'sticker';
                   const isLogo = layer.type === 'logo';
                   const isShape = layer.type === 'shape';
+                  const isOverlay = layer.type === 'overlay';
 
                   const shadowStyle = layer.shadowColor 
                     ? `${layer.shadowOffsetX || 0}px ${layer.shadowOffsetY || 4}px ${layer.shadowBlur || 10}px ${layer.shadowColor}` 
@@ -404,9 +420,26 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                           )}
                         </div>
                       )}
+
+                      {/* Overlay */}
+                      {isOverlay && layer.url && (
+                        <img 
+                          src={layer.url} 
+                          alt="overlay" 
+                          className="w-full h-full object-fill pointer-events-none"
+                        />
+                      )}
                     </div>
                   );
                 })}
+                {/* Overlay visualization inside preview modal */}
+                {previewTemplate.overlay && (
+                  <img 
+                    src={previewTemplate.overlay} 
+                    alt="preview overlay" 
+                    className="absolute inset-0 w-full h-full object-fill pointer-events-none z-20"
+                  />
+                )}
               </div>
             </div>
 

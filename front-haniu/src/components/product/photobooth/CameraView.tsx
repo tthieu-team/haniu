@@ -27,6 +27,7 @@ interface CameraViewProps {
   cornerRadius?: number;
   borderColor?: string;
   borderSize?: number;
+  rotation?: number;
 }
 
 export const CameraView: React.FC<CameraViewProps> = ({
@@ -43,6 +44,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
   cornerRadius = 16,
   borderColor = '#ffffff',
   borderSize = 4,
+  rotation = 0,
 }) => {
   const trans = useTranslate();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -425,6 +427,20 @@ export const CameraView: React.FC<CameraViewProps> = ({
       cutW = cH * targetRatio;
     }
   }
+
+  // Adjust dimensions for rotation to prevent clipping at the screen boundaries
+  let videoScale = 1;
+  const rad = (rotation * Math.PI) / 180;
+  const cos = Math.abs(Math.cos(rad));
+  const sin = Math.abs(Math.sin(rad));
+
+  if (rotation && rotation !== 0 && cW > 0 && cH > 0) {
+    // Calculate scaling needed for the upright video to fully cover the rotated slot
+    const rotatedBoxW = cutW * cos + cutH * sin;
+    const rotatedBoxH = cutW * sin + cutH * cos;
+    videoScale = Math.max(rotatedBoxW / cutW, rotatedBoxH / cutH);
+  }
+
   const cutX = (cW - cutW) / 2;
   const cutY = (cH - cutH) / 2;
 
@@ -471,9 +487,10 @@ export const CameraView: React.FC<CameraViewProps> = ({
           borderWidth: (frameShape === 'rect' || frameShape === 'circle') ? `${borderSize ?? 4}px` : '0px',
           borderColor: borderColor || '#ffffff',
           borderStyle: (borderSize ?? 4) > 0 ? 'solid' : 'none',
+          transform: rotation ? `rotate(${rotation}deg)` : 'none',
         }}
       >
-        <motion.video
+        <video
           ref={videoRef}
           autoPlay
           playsInline
@@ -489,16 +506,19 @@ export const CameraView: React.FC<CameraViewProps> = ({
               setError(trans('Trình duyệt chặn phát Video tự động. Vui lòng nhấn vào màn hình để bắt đầu.'));
             });
           }}
-          animate={{
-            scale: isCapturing ? [1, 0.98, 1] : 1,
+          className="w-full h-full object-cover transition-transform duration-300"
+          style={{
+            transform: `rotate(${-rotation}deg) scaleX(${mirrored ? -1 : 1}) scale(${videoScale})`,
           }}
-          className={`w-full h-full object-cover transition-transform duration-300 ${mirrored ? 'scale-x-[-1]' : ''}`}
         />
 
         {/* Face Filter Overlay Canvas — positioned to exactly overlap the video */}
         <canvas
           ref={overlayCanvasRef}
-          className={`absolute inset-0 w-full h-full pointer-events-none z-[5] ${mirrored ? 'scale-x-[-1]' : ''}`}
+          className="absolute inset-0 w-full h-full pointer-events-none z-[5]"
+          style={{
+            transform: `rotate(${-rotation}deg) scaleX(${mirrored ? -1 : 1}) scale(${videoScale})`,
+          }}
         />
 
         {/* SVG Border Stroke for custom shapes/polygons */}

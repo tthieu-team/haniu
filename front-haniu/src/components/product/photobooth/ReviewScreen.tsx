@@ -57,72 +57,84 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.5, opacity: 0 }}
                 whileHover={{ y: -4 }}
-                className="relative group bg-card-bg overflow-hidden shadow-lg w-full"
-                style={{ 
-                  aspectRatio: (slot.width && slot.height) ? `${slot.width} / ${slot.height}` : '3/4',
-                  borderRadius, 
-                  clipPath,
-                  borderWidth: (frameShape === 'rect' || frameShape === 'circle') ? `${slot.borderSize ?? 4}px` : '0px',
-                  borderColor: slot.borderColor || '#ffffff',
-                  borderStyle: (slot.borderSize ?? 4) > 0 ? 'solid' : 'none'
-                }}
+                className="relative w-full"
               >
-                {frameShape === 'custom-path' && slot.framePath && (
-                  <svg width="0" height="0" className="absolute">
-                    <defs>
-                      <clipPath id={`clip-review-${photo.id || index}`} clipPathUnits="objectBoundingBox">
-                        <path d={slot.framePath} transform="scale(0.01)" />
-                      </clipPath>
-                    </defs>
-                  </svg>
-                )}
-                {frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom' && (
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none z-15" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    {frameShape === 'custom-path' && slot.framePath ? (
-                      <path 
-                        d={slot.framePath}
-                        fill="none"
-                        stroke={slot.borderColor || '#ffffff'}
-                        strokeWidth={(slot.borderSize ?? 4) * 2}
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    ) : (
-                      <polygon 
-                        points={
-                          frameShape === 'triangle' ? '50 0, 0 100, 100 100'
-                          : frameShape === 'heart' ? '50 24, 62 10, 78 10, 90 20, 94 40, 82 65, 50 95, 18 65, 6 40, 10 20, 26 10, 38 24'
-                          : frameShape === 'custom-path' && slot.framePolygon ? slot.framePolygon.replace(/%/g, '')
-                          : '50 0, 61 35, 98 35, 68 57, 79 91, 50 70, 21 91, 32 57, 2 35, 39 35'
-                        }
-                        fill="none"
-                        stroke={slot.borderColor || '#ffffff'}
-                        strokeWidth={(slot.borderSize ?? 4) * 2}
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    )}
-                  </svg>
-                )}
-                <img src={photo.url} alt={`Shot ${index + 1}`} className="w-full h-full object-cover" />
-
-              <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-2.5 p-3">
-                <div className="text-center">
-                  <p className="text-white font-black text-xs uppercase tracking-wider">{trans("ẢNH")} {index + 1}</p>
-                  <p className="text-white/70 text-[9px] font-bold mt-0.5">{trans("Bạn muốn chụp lại?")}</p>
-                </div>
-
-                <button
-                  onClick={() => onRetake(index)}
-                  className="px-3.5 py-1.5 bg-white hover:bg-slate-100 text-slate-900 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                <div 
+                  className="relative group bg-card-bg overflow-hidden shadow-lg w-full"
+                  style={{ 
+                    aspectRatio: (slot.width && slot.height) ? `${slot.width} / ${slot.height}` : '3/4',
+                    borderRadius, 
+                    clipPath,
+                    borderWidth: (frameShape === 'rect' || frameShape === 'circle') ? `${slot.borderSize ?? 4}px` : '0px',
+                    borderColor: slot.borderColor || '#ffffff',
+                    borderStyle: (slot.borderSize ?? 4) > 0 ? 'solid' : 'none',
+                    transform: slot.rotation ? `rotate(${slot.rotation}deg)` : 'none'
+                  }}
                 >
-                  <Icon name="refresh" size={11} className="text-primary-color" />
-                  {trans("Chụp lại")}
-                </button>
-              </div>
+                  {frameShape === 'custom-path' && slot.framePath && (
+                    <svg width="0" height="0" className="absolute">
+                      <defs>
+                        <clipPath id={`clip-review-${photo.id || index}`} clipPathUnits="objectBoundingBox">
+                          <path d={slot.framePath} transform="scale(0.01)" />
+                        </clipPath>
+                      </defs>
+                    </svg>
+                  )}
+                  {frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom' && (
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-15" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      {frameShape === 'custom-path' && slot.framePath ? (
+                        <path 
+                          d={slot.framePath}
+                          fill="none"
+                          stroke={slot.borderColor || '#ffffff'}
+                          strokeWidth={(slot.borderSize ?? 4) * 2}
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      ) : (
+                        <polygon 
+                          points={
+                            frameShape === 'triangle' ? '50 0, 0 100, 100 100'
+                            : frameShape === 'heart' ? '50 24, 62 10, 78 10, 90 20, 94 40, 82 65, 50 95, 18 65, 6 40, 10 20, 26 10, 38 24'
+                            : frameShape === 'custom-path' && slot.framePolygon ? slot.framePolygon.replace(/%/g, '')
+                            : '50 0, 61 35, 98 35, 68 57, 79 91, 50 70, 21 91, 32 57, 2 35, 39 35'
+                          }
+                          fill="none"
+                          stroke={slot.borderColor || '#ffffff'}
+                          strokeWidth={(slot.borderSize ?? 4) * 2}
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      )}
+                    </svg>
+                  )}
+                  <img 
+                    src={photo.url} 
+                    alt={`Shot ${index + 1}`} 
+                    className="w-full h-full object-cover" 
+                    style={{
+                      transform: slot.rotation ? `rotate(${-slot.rotation}deg)` : 'none'
+                    }}
+                  />
 
-              <div className="absolute top-3 left-3 w-6 h-6 bg-primary-color rounded-lg flex items-center justify-center text-white text-[10px] font-black shadow-md">
-                {index + 1}
-              </div>
-            </motion.div>
+                  <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-2.5 p-3">
+                    <div className="text-center">
+                      <p className="text-white font-black text-xs uppercase tracking-wider">{trans("ẢNH")} {index + 1}</p>
+                      <p className="text-white/70 text-[9px] font-bold mt-0.5">{trans("Bạn muốn chụp lại?")}</p>
+                    </div>
+
+                    <button
+                      onClick={() => onRetake(index)}
+                      className="px-3.5 py-1.5 bg-white hover:bg-slate-100 text-slate-900 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                    >
+                      <Icon name="refresh" size={11} className="text-primary-color" />
+                      {trans("Chụp lại")}
+                    </button>
+                  </div>
+
+                  <div className="absolute top-3 left-3 w-6 h-6 bg-primary-color rounded-lg flex items-center justify-center text-white text-[10px] font-black shadow-md">
+                    {index + 1}
+                  </div>
+                </div>
+              </motion.div>
           );})}
         </AnimatePresence>
       </div>
