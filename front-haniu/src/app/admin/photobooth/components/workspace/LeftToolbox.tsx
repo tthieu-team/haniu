@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '@/components/common/Icons';
 import { GiphyFetch } from '@giphy/js-fetch-api';
-import { LOCAL_STICKERS } from './stickersData';
+import { LOCAL_STICKERS, LocalStickerCategory, LocalStickerItem } from './stickersData';
 
 const gf = new GiphyFetch('h4WnsWOfiI1R0QymIt6qeUM3FCVUMUhD');
 
@@ -42,7 +42,8 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
   const [giphySearch, setGiphySearch] = useState('');
   const [giphyStickers, setGiphyStickers] = useState<any[]>([]);
   const [loadingGiphy, setLoadingGiphy] = useState(false);
-  const [activeLocalCategory, setActiveLocalCategory] = useState(LOCAL_STICKERS[0].category);
+  const [localStickers, setLocalStickers] = useState<LocalStickerCategory[]>(LOCAL_STICKERS);
+  const [activeLocalCategory, setActiveLocalCategory] = useState(LOCAL_STICKERS[0]?.category || '');
 
   const fetchGiphyStickers = async (query: string) => {
     setLoadingGiphy(true);
@@ -63,6 +64,26 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
 
   useEffect(() => {
     fetchGiphyStickers('');
+    
+    // Fetch dynamic stickers from backend public files
+    const loadLocalStickers = async () => {
+      try {
+        const res = await fetch('/api/stickers');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setLocalStickers(data);
+            setActiveLocalCategory(prev => {
+              if (data.some(c => c.category === prev)) return prev;
+              return data[0]?.category || '';
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load dynamic stickers:', err);
+      }
+    };
+    loadLocalStickers();
   }, []);
 
   return (
@@ -120,7 +141,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
 
         {/* Categories Tab Selector */}
         <div className="flex gap-1 overflow-x-auto scrollbar-none pb-1">
-          {LOCAL_STICKERS.map((cat) => (
+          {localStickers.map((cat) => (
             <button
               key={cat.category}
               onClick={() => setActiveLocalCategory(cat.category)}
@@ -137,20 +158,10 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
 
         {/* Sticker Grid */}
         <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
-          {LOCAL_STICKERS.find(c => c.category === activeLocalCategory)?.items.map((item) => (
+          {localStickers.find((c: LocalStickerCategory) => c.category === activeLocalCategory)?.items.map((item: LocalStickerItem) => (
             <div
               key={item.url}
               onClick={() => {
-                if (item.type === 'background') {
-                  if (confirm('Bạn muốn dùng hình này làm hình nền hay nhãn dán?\n- OK: Làm hình nền\n- Cancel: Làm nhãn dán')) {
-                    setBuilderTemplate((prev: any) => ({
-                      ...prev,
-                      background: item.url,
-                      backgroundType: 'image'
-                    }));
-                    return;
-                  }
-                }
                 handleAddStickerLayer(item.url);
               }}
               className="group relative border border-slate-150 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-xl p-1.5 flex flex-col items-center justify-center cursor-pointer aspect-square bg-slate-50 dark:bg-zinc-900 transition-all"
