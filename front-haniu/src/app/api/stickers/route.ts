@@ -14,7 +14,11 @@ const CATEGORY_MAP: Record<string, string> = {
   ribbon: '🎀 Ruy băng & Nơ',
   text: '🔤 Chữ nghệ thuật',
   background: '🖼️ Hình nền',
-  frame: '🖼️ Khung ảnh'
+  frame: '🖼️ Khung ảnh',
+  birthday: '🎂 Sinh nhật',
+  graduation: '🎓 Tốt nghiệp',
+  national_day: '🇻🇳 Quốc khánh',
+  valentine: '💝 Valentine'
 };
 
 function formatName(filename: string): string {
@@ -81,7 +85,7 @@ export async function GET() {
       }
     }
 
-    const order = ['teddy', 'balloon', 'gift', 'cake', 'flower', 'heart', 'ribbon', 'text', 'background', 'frame'];
+    const order = ['teddy', 'balloon', 'gift', 'cake', 'flower', 'heart', 'ribbon', 'text', 'birthday', 'graduation', 'national_day', 'valentine', 'background', 'frame'];
     categories.sort((a, b) => {
       const getIndex = (catName: string) => {
         const matchingKey = Object.keys(CATEGORY_MAP).find(key => CATEGORY_MAP[key] === catName);

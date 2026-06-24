@@ -170,7 +170,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
         </h4>
 
         {/* Categories Tab Selector */}
-        <div className="flex gap-1 overflow-x-auto scrollbar-none pb-1">
+        <div className="flex gap-1 overflow-x-auto custom-scrollbar pb-1">
           {allCategories.map((cat) => (
             <button
               key={cat.category}
