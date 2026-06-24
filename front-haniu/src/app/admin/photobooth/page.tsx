@@ -242,13 +242,6 @@ export default function PhotoboothAdmin() {
               Quản lý các sự kiện chụp hình, định nghĩa layout template kéo thả, tải sticker, theo dõi hoạt động chụp ảnh và xuất báo cáo analytics.
             </p>
           </div>
-          <button 
-            onClick={() => window.open('/collections/photobooth', '_blank')}
-            className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md shadow-rose-600/10 flex items-center gap-1.5 transition-all duration-200 active:scale-95"
-          >
-            <Icon name="camera" size={14} />
-            Mở Studio Chụp
-          </button>
         </div>
       </div>
 

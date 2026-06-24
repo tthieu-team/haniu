@@ -45,7 +45,21 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
   const [giphyStickers, setGiphyStickers] = useState<any[]>([]);
   const [loadingGiphy, setLoadingGiphy] = useState(false);
   const [localStickers, setLocalStickers] = useState<LocalStickerCategory[]>(LOCAL_STICKERS);
-  const [activeLocalCategory, setActiveLocalCategory] = useState(LOCAL_STICKERS[0]?.category || '');
+  const [activeLocalCategory, setActiveLocalCategory] = useState('');
+
+  const uploadedCategory: LocalStickerCategory = {
+    category: 'ĐÃ TẢI LÊN',
+    items: (assets?.stickers || []).map((stk: any) => ({
+      name: stk.name,
+      url: stk.url,
+      type: 'sticker' as const
+    }))
+  };
+
+  const allCategories = [
+    ...(uploadedCategory.items.length > 0 ? [uploadedCategory] : []),
+    ...localStickers
+  ];
 
   const fetchGiphyStickers = async (query: string) => {
     setLoadingGiphy(true);
@@ -75,10 +89,6 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
             setLocalStickers(data);
-            setActiveLocalCategory(prev => {
-              if (data.some(c => c.category === prev)) return prev;
-              return data[0]?.category || '';
-            });
           }
         }
       } catch (err) {
@@ -87,6 +97,17 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
     };
     loadLocalStickers();
   }, []);
+
+  // Update activeLocalCategory when allCategories changes
+  useEffect(() => {
+    if (allCategories.length > 0) {
+      if (!activeLocalCategory || !allCategories.some(c => c.category === activeLocalCategory)) {
+        setActiveLocalCategory(allCategories[0].category);
+      }
+    } else {
+      setActiveLocalCategory('');
+    }
+  }, [assets?.stickers, localStickers]);
 
   return (
     <div className="w-80 border-r border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto p-5 space-y-6 shrink-0">
@@ -150,7 +171,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
 
         {/* Categories Tab Selector */}
         <div className="flex gap-1 overflow-x-auto scrollbar-none pb-1">
-          {localStickers.map((cat) => (
+          {allCategories.map((cat) => (
             <button
               key={cat.category}
               onClick={() => setActiveLocalCategory(cat.category)}
@@ -167,7 +188,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
 
         {/* Sticker Grid */}
         <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
-          {localStickers.find((c: LocalStickerCategory) => c.category === activeLocalCategory)?.items.map((item: LocalStickerItem) => (
+          {allCategories.find((c: LocalStickerCategory) => c.category === activeLocalCategory)?.items.map((item: LocalStickerItem) => (
             <div
               key={item.url}
               onClick={() => {

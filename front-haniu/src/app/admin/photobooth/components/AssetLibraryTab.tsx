@@ -17,6 +17,7 @@ export const AssetLibraryTab: React.FC<AssetLibraryTabProps> = ({
 }) => {
   const [uploadingSticker, setUploadingSticker] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBackground, setUploadingBackground] = useState(false);
 
   const handleUploadSticker = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -64,6 +65,29 @@ export const AssetLibraryTab: React.FC<AssetLibraryTabProps> = ({
     }
   };
 
+  const handleUploadBackground = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const name = prompt('Nhập tên hình nền:', file.name.split('.')[0]);
+    if (!name) return;
+
+    try {
+      setUploadingBackground(true);
+      const res = await productService.uploadImage(file);
+      if (res && res.url) {
+        onAddAsset('backgrounds', { name, url: res.url, category: 'Background' });
+      } else {
+        alert('Tải ảnh lên thất bại!');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Lỗi xảy ra khi tải ảnh lên.');
+    } finally {
+      setUploadingBackground(false);
+      e.target.value = ''; // Reset input
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -71,8 +95,77 @@ export const AssetLibraryTab: React.FC<AssetLibraryTabProps> = ({
         <p className="text-[11px] text-slate-400 dark:text-zinc-500">Tải lên hoặc xem trước các tài nguyên sticker, hình nền và con dấu dùng chung.</p>
       </div>
 
+      {/* Backgrounds */}
+      <div className="space-y-4 pb-4 border-b border-slate-100 dark:border-zinc-800">
+        <h4 className="text-xs font-black uppercase text-slate-700 dark:text-zinc-350 border-b border-slate-100 dark:border-zinc-800 pb-1">
+          🖼️ Thư Viện Hình Nền (Backgrounds)
+        </h4>
+
+        <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 gap-4">
+          {assets.backgrounds?.map((bg: any) => (
+            <div key={bg.id} className="bg-slate-50 dark:bg-zinc-850 border border-slate-150 dark:border-zinc-800 p-3 rounded-2xl flex flex-col items-center justify-center relative group min-h-[110px]">
+              <img src={bg.url} alt={bg.name} className="w-12 h-12 object-cover rounded-lg hover:scale-110 transition-transform" />
+              <p className="text-[8px] font-bold text-slate-450 dark:text-zinc-500 text-center truncate mt-2 max-w-[75px]" title={bg.name}>
+                {bg.name}
+              </p>
+              
+              <div className="flex gap-1.5 mt-1.5">
+                <button
+                  onClick={() => {
+                    const newName = prompt('Đổi tên hình nền:', bg.name);
+                    if (newName && newName !== bg.name) {
+                      onAddAsset('backgrounds', { ...bg, name: newName });
+                    }
+                  }}
+                  className="p-1 rounded bg-slate-200 dark:bg-zinc-750 text-slate-650 dark:text-zinc-350 hover:bg-rose-500 hover:text-white transition-colors cursor-pointer"
+                  title="Sửa tên hình nền"
+                >
+                  <Icon name="edit" size={8} />
+                </button>
+                <button 
+                  onClick={() => {
+                    if (confirm(`Bạn có muốn xóa hình nền "${bg.name}" không?`)) {
+                      onDeleteAsset('backgrounds', bg.id);
+                    }
+                  }}
+                  className="p-1 rounded bg-red-100 dark:bg-red-950/20 text-red-650 dark:text-red-400 hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
+                  title="Xóa hình nền"
+                >
+                  <Icon name="close" size={8} />
+                </button>
+              </div>
+            </div>
+          ))}
+
+          <input
+            type="file"
+            accept="image/*"
+            id="background-file-upload"
+            className="hidden"
+            onChange={handleUploadBackground}
+            disabled={uploadingBackground}
+          />
+          <label 
+            htmlFor="background-file-upload"
+            className="bg-dashed border-2 border-dashed border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center p-3 text-slate-400 hover:text-rose-500 cursor-pointer aspect-square transition-all min-h-[110px]"
+          >
+            {uploadingBackground ? (
+              <>
+                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-rose-500 mb-1" />
+                <span className="text-[8px] font-black uppercase tracking-wider">Tải lên...</span>
+              </>
+            ) : (
+              <>
+                <Icon name="plus" size={18} className="mb-1" />
+                <span className="text-[9px] font-black uppercase tracking-wider">Thêm mới</span>
+              </>
+            )}
+          </label>
+        </div>
+      </div>
+
       {/* Stickers */}
-      <div className="space-y-4">
+      <div className="space-y-4 pt-2">
         <h4 className="text-xs font-black uppercase text-slate-700 dark:text-zinc-350 border-b border-slate-100 dark:border-zinc-800 pb-1">
           🎨 Thư Viện Stickers Hỗ Trợ Dán
         </h4>
