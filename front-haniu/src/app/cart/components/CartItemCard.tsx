@@ -148,7 +148,7 @@ export default function CartItemCard({
           {/* Plus */}
           <button
             onClick={() => onUpdateQty(item.id, item.quantity + 1)}
-            disabled={isUpdating || loading || (item.stock !== undefined && item.quantity >= item.stock)}
+            disabled={isUpdating || loading || item.isAccessory || (item.stock !== undefined && item.quantity >= item.stock)}
             className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 flex items-center justify-center cursor-pointer transition-colors disabled:opacity-50"
           >
             <Icon name="plus" size={10} />

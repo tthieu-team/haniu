@@ -32,7 +32,7 @@ export default function PersonalizationForm({
   config
 }: PersonalizationFormProps) {
   const trans = useTranslate();
-  const showEngraving = config?.showEngraving ?? true;
+  const showEngraving = false;
   const engravingLabel = config?.engravingLabel || "Khắc tên hoặc lời chúc muốn khắc lên sản phẩm";
   const engravingPlaceholder = config?.engravingPlaceholder || "Nhập nội dung muốn khắc (ví dụ: Happy Birthday, Hieu & Vy...)";
   const engravingMaxLength = config?.engravingMaxLength ?? 50;

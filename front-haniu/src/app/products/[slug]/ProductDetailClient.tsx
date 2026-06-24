@@ -66,7 +66,9 @@ interface Product {
   allowAdminChat?: boolean;
   allowPhotoUpload?: boolean;
   allowPhotobooth?: boolean;
-  category?: { id?: string; name: string; slug: string };
+  category?: { id?: string; name: string; slug: string; isAccessory?: boolean; accessory?: boolean };
+  isAccessory?: boolean;
+
   brand?: { id?: string; name: string; slug: string } | null;
   collection?: { id?: string; name: string; slug: string } | null;
   occasions?: Array<{ id: string; name: string; slug: string }>;
@@ -97,6 +99,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
 
   const { loading } = useProductStore();
   const product = useProductStore(state => state.currentProduct) as unknown as Product | null;
+  const isAccessory = product?.category?.isAccessory || product?.category?.accessory || product?.category?.slug?.includes('phu-kien') || false;
   const { addToCart } = useCartStore();
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
 
@@ -370,7 +373,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                 </div>
                 <button 
                   type="button" 
-                  onClick={() => window.open('https://zalo.me/0987654321', '_blank')}
+                  onClick={() => window.open('https://web.facebook.com/profile.php?id=61590521378095', '_blank')}
                   className="bg-sky-500 hover:bg-sky-600 text-white font-bold px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95 flex items-center gap-1 cursor-pointer"
                 >
                   {trans('Chat ngay')}
@@ -396,20 +399,34 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
               </div>
             )}
 
-            <div className="flex gap-3 sm:gap-4">
-              <button
-                onClick={handleAddToCart}
-                className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:text-zinc-950 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md active:scale-95 text-xs sm:text-sm flex items-center justify-center gap-2"
-              >
-                <Icon name="bag" size={16} /> {trans("Thêm Vào Giỏ Hàng")}
-              </button>
-              <button
-                onClick={handleBuyNow}
-                className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
-              >
-                <Icon name="zap" size={16} /> {trans("Mua Ngay")}
-              </button>
-            </div>
+            {isAccessory ? (
+              <div className="w-full space-y-3">
+                <p className="text-amber-600 dark:text-amber-400 font-bold bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl text-center text-xs">
+                  🎁 Đây là phụ kiện tặng kèm/chọn thêm. Bạn chỉ có thể chọn thêm sản phẩm này trực tiếp trong Giỏ hàng khi đặt hàng.
+                </p>
+                <Link
+                  href="/cart"
+                  className="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Icon name="cart" size={16} /> {trans("Đi đến Giỏ hàng")}
+                </Link>
+              </div>
+            ) : (
+              <div className="flex gap-3 sm:gap-4">
+                <button
+                  onClick={handleAddToCart}
+                  className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:text-zinc-950 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md active:scale-95 text-xs sm:text-sm flex items-center justify-center gap-2"
+                >
+                  <Icon name="bag" size={16} /> {trans("Thêm Vào Giỏ Hàng")}
+                </button>
+                <button
+                  onClick={handleBuyNow}
+                  className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-4 sm:py-3.5 sm:px-6 rounded-2xl transition-all shadow-md shadow-rose-500/20 active:scale-95 text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Icon name="zap" size={16} /> {trans("Mua Ngay")}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -496,12 +513,14 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
       <RelatedProducts currentProduct={product} />
 
       {/* Floating Sticky Buy Bar on scroll */}
-      <StickyBuyBar
-        product={product}
-        selectedVariant={selectedVariant}
-        onAddToCart={handleAddToCart}
-        onBuyNow={handleBuyNow}
-      />
+      {!isAccessory && (
+        <StickyBuyBar
+          product={product}
+          selectedVariant={selectedVariant}
+          onAddToCart={handleAddToCart}
+          onBuyNow={handleBuyNow}
+        />
+      )}
     </div>
   );
 }

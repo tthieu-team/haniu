@@ -130,12 +130,12 @@ export default function FaqPage() {
                     Gửi liên hệ ngay
                   </a>
                   <a 
-                    href="https://zalo.me" 
+                    href="https://web.facebook.com/profile.php?id=61590521378095" 
                     target="_blank" 
                     rel="noreferrer"
                     className="px-6 py-3 rounded-2xl border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-xs font-bold transition-all text-center"
                   >
-                    Trò chuyện qua Zalo
+                    Trò chuyện qua Facebook
                   </a>
                 </div>
               </div>

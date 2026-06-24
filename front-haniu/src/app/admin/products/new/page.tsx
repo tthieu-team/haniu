@@ -174,6 +174,12 @@ export default function NewProductPage() {
   const [attributes, setAttributes] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    const timePart = Date.now().toString().slice(-6);
+    const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+    setSku(`HNU-${timePart}-${randomPart}`);
+  }, []);
+
+  useEffect(() => {
     async function loadCategories() {
       try {
         const catData = await catalogService.getAllCategories();

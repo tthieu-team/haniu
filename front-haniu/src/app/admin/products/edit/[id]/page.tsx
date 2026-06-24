@@ -61,6 +61,72 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [aiCustomPrompt, setAiCustomPrompt] = useState('');
+  const [aiSuccessMsg, setAiSuccessMsg] = useState('');
+
+  const handleGenerateAiContent = async () => {
+    if (!name.trim()) {
+      setErrorMsg('⚠️ Vui lòng nhập tên sản phẩm trước khi sinh nội dung bằng AI.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
+    const activeCategory = categories.find(c => c.id === categoryId);
+    const categoryName = activeCategory ? activeCategory.name : 'Quà tặng';
+
+    try {
+      setIsAiGenerating(true);
+      setErrorMsg('');
+      setAiSuccessMsg('');
+
+      const response = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          categoryName,
+          description,
+          basePrice,
+          salePrice,
+          isCustomizable,
+          occasions: selectedOccasions,
+          recipients: selectedRecipients,
+          specs,
+          includedItems,
+          customPrompt: aiCustomPrompt
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to generate content');
+      }
+
+      const data = await response.json();
+
+      if (data.seoTitle) setSeoTitle(data.seoTitle);
+      if (data.seoKeywords) setSeoKeywords(data.seoKeywords);
+      if (data.seoDescription) setSeoDescription(data.seoDescription);
+      
+      if (data.layoutConfig) {
+        setLayoutConfig(JSON.stringify(data.layoutConfig, null, 2));
+      }
+
+      setAiSuccessMsg('🎉 Đã sinh thông tin sản phẩm và cấu hình chi tiết thành công!');
+      setTimeout(() => {
+        setIsAiModalOpen(false);
+        setAiSuccessMsg('');
+        setAiCustomPrompt('');
+      }, 2000);
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(`Lỗi khi sinh thông tin bằng AI: ${err.message}`);
+    } finally {
+      setIsAiGenerating(false);
+    }
+  };
 
   // Form Fields
   const [name, setName] = useState('');
@@ -492,6 +558,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           </Link>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-800 dark:text-zinc-100">Chỉnh Sửa Sản Phẩm Quà Tặng</h1>
         </div>
+        <button
+          type="button"
+          onClick={() => setIsAiModalOpen(true)}
+          className="px-4 py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-purple-600 to-rose-600 hover:from-purple-700 hover:to-rose-700 text-white active:scale-95 transition-all flex items-center gap-2 cursor-pointer shadow-md shadow-purple-500/15"
+        >
+          <Icon name="sparkles" size={13} /> Viết thông tin bằng AI ✨
+        </button>
       </div>
 
       {successMsg && (
@@ -669,7 +742,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           </div>
 
           {/* Variations */}
-          <VariantManager variantsList={variantsList} setVariantsList={setVariantsList} basePrice={basePrice} />
+          <VariantManager
+            variantsList={variantsList}
+            setVariantsList={setVariantsList}
+            basePrice={basePrice}
+            productName={name}
+            categoryName={categories.find(c => c.id === categoryId)?.name}
+            productDescription={description}
+          />
 
           {/* Submit & Preview Bar (Sticky bottom) */}
           <div className="sticky bottom-4 z-35 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-slate-200 dark:border-zinc-800 p-4 rounded-2xl flex items-center justify-between shadow-lg gap-4 mt-8">
@@ -726,6 +806,104 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         onClose={() => setIsPreviewModalOpen(false)}
         product={previewProductData}
       />
+
+      {/* AI Assistant Modal */}
+      {isAiModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md transition-all duration-300">
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 md:p-8 max-w-xl w-full border border-slate-100 dark:border-zinc-800 shadow-2xl space-y-6 transform scale-100 transition-all duration-300">
+            <div className="flex items-center justify-between border-b border-slate-50 dark:border-zinc-800 pb-4">
+              <h3 className="font-extrabold text-lg text-slate-800 dark:text-zinc-100 flex items-center gap-2">
+                <span className="p-2 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl">
+                  <Icon name="sparkles" size={18} />
+                </span>
+                Trợ lý viết nội dung AI
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsAiModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-all rounded-full p-1.5 hover:bg-slate-100 dark:hover:bg-zinc-800"
+              >
+                <Icon name="close" size={16} />
+              </button>
+            </div>
+
+            {aiSuccessMsg ? (
+              <div className="py-8 text-center space-y-3">
+                <span className="text-4xl">✨</span>
+                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                  {aiSuccessMsg}
+                </p>
+                <p className="text-xs text-slate-400">Đang cập nhật các trường biểu mẫu...</p>
+              </div>
+            ) : isAiGenerating ? (
+              <div className="py-12 flex flex-col items-center justify-center space-y-4">
+                <div className="relative">
+                  <div className="w-16 h-16 border-4 border-purple-500/20 border-t-purple-600 rounded-full animate-spin"></div>
+                  <div className="absolute inset-0 flex items-center justify-center text-lg">🔮</div>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold text-purple-600 dark:text-purple-400 animate-pulse">
+                    AI đang viết nội dung...
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Quá trình này có thể mất từ 5-10 giây để tạo dữ liệu chất lượng cao.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-slate-50 dark:bg-zinc-950/40 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800/80 space-y-2">
+                  <div className="flex justify-between text-slate-500 font-semibold text-[11px]">
+                    <span>Tên sản phẩm hiện tại:</span>
+                    <span className="text-slate-800 dark:text-zinc-200 font-bold">{name || '(Chưa nhập)'}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-500 font-semibold text-[11px]">
+                    <span>Danh mục:</span>
+                    <span className="text-slate-800 dark:text-zinc-200 font-bold">
+                      {categories.find(c => c.id === categoryId)?.name || 'Quà tặng'}
+                    </span>
+                  </div>
+                </div>
+
+                {!name.trim() && (
+                  <p className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl text-xs font-semibold">
+                    ⚠️ Vui lòng đóng modal này và điền "Tên sản phẩm" trước khi dùng AI.
+                  </p>
+                )}
+
+                <div className="space-y-2">
+                  <label className="block text-slate-500 font-bold">Yêu cầu bổ sung cho AI (Tùy chọn)</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Ví dụ: Nhấn mạnh vào phong cách lãng mạn, phù hợp làm quà tặng kỷ niệm ngày yêu nhau, hộp quà kèm hoa hồng sáp thơm mịn..."
+                    value={aiCustomPrompt}
+                    onChange={(e) => setAiCustomPrompt(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-purple-500 dark:border-zinc-800 dark:bg-zinc-800 shadow-xs font-medium text-xs"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsAiModalOpen(false)}
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300 font-bold"
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!name.trim()}
+                    onClick={handleGenerateAiContent}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-650 to-rose-600 hover:from-purple-700 hover:to-rose-700 text-white font-bold disabled:opacity-50 active:scale-95 transition-all flex items-center gap-1.5 shadow-md shadow-purple-500/10 cursor-pointer"
+                  >
+                    <Icon name="sparkles" size={13} /> Bắt đầu viết bằng AI ✨
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

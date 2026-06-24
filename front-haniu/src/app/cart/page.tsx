@@ -138,6 +138,10 @@ export default function CartPage() {
   }, [subtotal]);
 
   const handleUpdateQuantity = async (itemId: string, newQty: number) => {
+    const item = cart?.items.find(i => i.id === itemId);
+    if (item?.isAccessory && newQty > 1) {
+      return;
+    }
     if (newQty < 1) {
       handleRemoveItem(itemId);
       return;

@@ -166,7 +166,7 @@ function ProductDetailPreview({ product }: { product: any }) {
               </div>
               <button 
                 type="button" 
-                onClick={() => window.open('https://zalo.me/0987654321', '_blank')}
+                onClick={() => window.open('https://web.facebook.com/profile.php?id=61590521378095', '_blank')}
                 className="bg-sky-500 text-white font-bold px-4 py-2 rounded-xl"
               >
                 Chat ngay

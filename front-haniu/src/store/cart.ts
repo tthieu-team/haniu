@@ -21,6 +21,7 @@ export interface CartItem {
   color?: string;
   size?: string;
   material?: string;
+  isAccessory?: boolean;
 }
 
 export interface Cart {
@@ -77,10 +78,27 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   addToCart: async (payload) => {
     set({ loading: true, error: null });
+    const currentCart = get().cart;
+    const existingItem = currentCart?.items.find(i => i.productId === payload.productId);
+    
+    let isAccessory = false;
+    try {
+      const product = await productService.getProductById(payload.productId);
+      if (product && (product.category?.isAccessory || product.category?.accessory || product.category?.slug?.includes('phu-kien'))) {
+        isAccessory = true;
+      }
+    } catch (e) {}
+
+    if (existingItem && existingItem.isAccessory) {
+      set({ loading: false });
+      return currentCart;
+    }
+
     const isAuthenticated = useAuthStore.getState().isAuthenticated;
     if (isAuthenticated) {
       try {
-        const data = await cartService.addToCart(payload);
+        const finalPayload = isAccessory ? { ...payload, quantity: 1 } : payload;
+        const data = await cartService.addToCart(finalPayload);
         set({ cart: data, loading: false });
         return data;
       } catch (err: any) {
@@ -119,12 +137,13 @@ export const useCartStore = create<CartState>((set, get) => ({
           variantName: variantName || undefined,
           variantSku: variantSku,
           imageUrl,
-          quantity: payload.quantity,
+          quantity: isAccessory ? 1 : payload.quantity,
           unitPrice: price,
-          totalPrice: price * payload.quantity,
+          totalPrice: price * (isAccessory ? 1 : payload.quantity),
           customizationInfo: payload.customizationInfo,
           originalPrice: variant ? variant.price : product.basePrice,
-          stock: variant ? variant.stock : product.stock
+          stock: variant ? variant.stock : product.stock,
+          isAccessory: isAccessory
         };
 
         let localCart: Cart = { id: 'guest-cart', totalItems: 0, totalPrice: 0, items: [] };
@@ -142,7 +161,11 @@ export const useCartStore = create<CartState>((set, get) => ({
         );
 
         if (existingItemIndex > -1) {
-          localCart.items[existingItemIndex].quantity += newItem.quantity;
+          if (localCart.items[existingItemIndex].isAccessory) {
+            localCart.items[existingItemIndex].quantity = 1;
+          } else {
+            localCart.items[existingItemIndex].quantity += newItem.quantity;
+          }
           localCart.items[existingItemIndex].totalPrice = localCart.items[existingItemIndex].unitPrice * localCart.items[existingItemIndex].quantity;
         } else {
           localCart.items.push(newItem);
@@ -165,6 +188,12 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
 
   updateQuantity: async (itemId, quantity) => {
+    const currentCart = get().cart;
+    const item = currentCart?.items.find(i => i.id === itemId);
+    if (item && item.isAccessory && quantity > 1) {
+      return currentCart;
+    }
+
     set({ loading: true, error: null });
     const isAuthenticated = useAuthStore.getState().isAuthenticated;
     if (isAuthenticated) {
@@ -186,8 +215,8 @@ export const useCartStore = create<CartState>((set, get) => ({
             if (quantity <= 0) {
               localCart.items.splice(itemIndex, 1);
             } else {
-              localCart.items[itemIndex].quantity = quantity;
-              localCart.items[itemIndex].totalPrice = localCart.items[itemIndex].unitPrice * quantity;
+              localCart.items[itemIndex].quantity = localCart.items[itemIndex].isAccessory ? 1 : quantity;
+              localCart.items[itemIndex].totalPrice = localCart.items[itemIndex].unitPrice * localCart.items[itemIndex].quantity;
             }
             localCart.totalItems = localCart.items.reduce((acc, item) => acc + item.quantity, 0);
             localCart.totalPrice = localCart.items.reduce((acc, item) => acc + item.totalPrice, 0);
