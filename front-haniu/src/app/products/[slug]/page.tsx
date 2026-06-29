@@ -3,7 +3,7 @@ import { productService } from '@/services/product.service';
 import { cookies } from 'next/headers';
 import ProductDetailClient from './ProductDetailClient';
 
-export const revalidate = 60; // Revalidate static cache every 60 seconds
+export const dynamic = 'force-dynamic';
 
 interface Product {
   id: string;
