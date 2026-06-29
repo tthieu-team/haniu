@@ -117,6 +117,12 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
 
   initializeTheme: () => {
     if (typeof window === 'undefined') return;
+    const currentVersion = process.env.NEXT_PUBLIC_APP_VERSION || 'default';
+    const storedVersion = localStorage.getItem('app_version');
+    if (storedVersion !== currentVersion) {
+      localStorage.clear();
+      localStorage.setItem('app_version', currentVersion);
+    }
     const storedTheme = localStorage.getItem('theme') as Theme | null;
     const activeTheme = storedTheme || 'light';
 

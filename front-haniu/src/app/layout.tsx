@@ -126,6 +126,13 @@ export default async function RootLayout({
             __html: `
               (function() {
                 try {
+                  var currentVersion = '${process.env.NEXT_PUBLIC_APP_VERSION || "default"}';
+                  var storedVersion = localStorage.getItem('app_version');
+                  if (storedVersion !== currentVersion) {
+                    localStorage.clear();
+                    localStorage.setItem('app_version', currentVersion);
+                  }
+                  
                   var storedTheme = localStorage.getItem('theme');
                   var activeTheme = storedTheme === 'dark' ? 'dark' : 'light';
                   
