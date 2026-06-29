@@ -420,85 +420,86 @@ public class NeonDatabaseController {
 
             // 3. Copy row by row for each table dynamically (handling foreign key dependencies via retry queue)
             java.util.List<String> queue = new java.util.ArrayList<>(tables);
-            int lastQueueSize = -1;
-            int consecutiveFailures = 0;
             java.util.Map<String, Exception> tableErrors = new java.util.HashMap<>();
 
             System.out.println(">>> [DB Rotation] Copying " + queue.size() + " tables dynamically resolving dependencies...");
 
             while (!queue.isEmpty()) {
-                if (queue.size() == lastQueueSize) {
-                    consecutiveFailures++;
-                    if (consecutiveFailures > 3) {
-                        // Failed to progress, throw the errors
-                        String failedTables = String.join(", ", queue);
-                        Exception firstError = tableErrors.get(queue.get(0));
-                        throw new RuntimeException("Cannot resolve foreign key dependencies for tables: [" + failedTables + "]. First error: " + (firstError != null ? firstError.getMessage() : "unknown"), firstError);
-                    }
-                } else {
-                    lastQueueSize = queue.size();
-                    consecutiveFailures = 0;
-                }
+                int size = queue.size();
+                boolean progressMade = false;
 
-                String table = queue.remove(0);
-                String selectSql = "SELECT * FROM " + table;
-                
-                try (java.sql.Statement srcStmt = srcConn.createStatement();
-                     java.sql.ResultSet srcRs = srcStmt.executeQuery(selectSql)) {
+                for (int pass = 0; pass < size; pass++) {
+                    String table = queue.remove(0);
+                    String selectSql = "SELECT * FROM " + table;
+                    
+                    try (java.sql.Statement srcStmt = srcConn.createStatement();
+                         java.sql.ResultSet srcRs = srcStmt.executeQuery(selectSql)) {
 
-                    java.sql.ResultSetMetaData meta = srcRs.getMetaData();
-                    int colCount = meta.getColumnCount();
-                    if (colCount == 0) continue;
-
-                    StringBuilder insertSql = new StringBuilder("INSERT INTO " + table + " (");
-                    StringBuilder valuesPart = new StringBuilder("VALUES (");
-                    for (int i = 1; i <= colCount; i++) {
-                        insertSql.append(meta.getColumnName(i));
-                        valuesPart.append("?");
-                        if (i < colCount) {
-                            insertSql.append(", ");
-                            valuesPart.append(", ");
+                        java.sql.ResultSetMetaData meta = srcRs.getMetaData();
+                        int colCount = meta.getColumnCount();
+                        if (colCount == 0) {
+                            progressMade = true;
+                            continue;
                         }
-                    }
-                    insertSql.append(") ").append(valuesPart).append(")");
 
-                    try (java.sql.PreparedStatement destPstmt = destConn.prepareStatement(insertSql.toString())) {
-                        int batchCount = 0;
-                        while (srcRs.next()) {
-                            for (int i = 1; i <= colCount; i++) {
-                                destPstmt.setObject(i, srcRs.getObject(i));
+                        StringBuilder insertSql = new StringBuilder("INSERT INTO " + table + " (");
+                        StringBuilder valuesPart = new StringBuilder("VALUES (");
+                        for (int i = 1; i <= colCount; i++) {
+                            insertSql.append(meta.getColumnName(i));
+                            valuesPart.append("?");
+                            if (i < colCount) {
+                                insertSql.append(", ");
+                                valuesPart.append(", ");
                             }
-                            destPstmt.addBatch();
-                            batchCount++;
-                            if (batchCount % 500 == 0) {
+                        }
+                        insertSql.append(") ").append(valuesPart).append(")");
+
+                        try (java.sql.PreparedStatement destPstmt = destConn.prepareStatement(insertSql.toString())) {
+                            int batchCount = 0;
+                            while (srcRs.next()) {
+                                for (int i = 1; i <= colCount; i++) {
+                                    destPstmt.setObject(i, srcRs.getObject(i));
+                                }
+                                destPstmt.addBatch();
+                                batchCount++;
+                                if (batchCount % 500 == 0) {
+                                    destPstmt.executeBatch();
+                                }
+                            }
+                            if (batchCount % 500 != 0) {
                                 destPstmt.executeBatch();
                             }
+                            destConn.commit();
+                            System.out.println(">>> [DB Rotation] Copied " + batchCount + " rows for table: " + table);
+                            tableErrors.remove(table);
+                            progressMade = true;
                         }
-                        if (batchCount % 500 != 0) {
-                            destPstmt.executeBatch();
+                    } catch (Exception tableEx) {
+                        destConn.rollback();
+                        
+                        String sqlState = "";
+                        if (tableEx instanceof java.sql.SQLException) {
+                            sqlState = ((java.sql.SQLException) tableEx).getSQLState();
                         }
-                        destConn.commit();
-                        System.out.println(">>> [DB Rotation] Copied " + batchCount + " rows for table: " + table);
-                        tableErrors.remove(table);
+                        
+                        // SQLState 23503 is foreign key violation in PostgreSQL
+                        if ("23503".equals(sqlState)) {
+                            System.out.println(">>> [DB Rotation] Table " + table + " has foreign key violations. Retrying in next pass...");
+                            queue.add(table);
+                            tableErrors.put(table, tableEx);
+                        } else {
+                            System.err.println("Failed to copy table " + table + ": " + tableEx.getMessage());
+                            tableEx.printStackTrace();
+                            throw tableEx;
+                        }
                     }
-                } catch (Exception tableEx) {
-                    destConn.rollback();
-                    
-                    String sqlState = "";
-                    if (tableEx instanceof java.sql.SQLException) {
-                        sqlState = ((java.sql.SQLException) tableEx).getSQLState();
-                    }
-                    
-                    // SQLState 23503 is foreign key violation in PostgreSQL
-                    if ("23503".equals(sqlState)) {
-                        System.out.println(">>> [DB Rotation] Table " + table + " has foreign key violations. Retrying in next pass...");
-                        queue.add(table);
-                        tableErrors.put(table, tableEx);
-                    } else {
-                        System.err.println("Failed to copy table " + table + ": " + tableEx.getMessage());
-                        tableEx.printStackTrace();
-                        throw tableEx;
-                    }
+                }
+
+                if (!progressMade && !queue.isEmpty()) {
+                    // Failed to progress in an entire pass, throw the errors
+                    String failedTables = String.join(", ", queue);
+                    Exception firstError = tableErrors.get(queue.get(0));
+                    throw new RuntimeException("Cannot resolve foreign key dependencies for tables: [" + failedTables + "]. First error: " + (firstError != null ? firstError.getMessage() : "unknown"), firstError);
                 }
             }
 

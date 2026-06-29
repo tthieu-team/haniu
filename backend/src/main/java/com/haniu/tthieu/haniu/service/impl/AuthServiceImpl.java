@@ -24,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -42,21 +44,24 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final VerificationCodeRepository verificationCodeRepository;
     private final EmailService emailService;
-    private final HttpServletRequest httpServletRequest;
-
 
     private boolean isVerificationRequired() {
         try {
-            String headerVal = httpServletRequest.getHeader("X-Require-Verification");
-            log.info("Received X-Require-Verification header: {}", headerVal);
-            if (headerVal != null) {
-                return Boolean.parseBoolean(headerVal);
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                String headerVal = request.getHeader("X-Require-Verification");
+                log.info("Received X-Require-Verification header: {}", headerVal);
+                if (headerVal != null) {
+                    return Boolean.parseBoolean(headerVal);
+                }
             }
         } catch (Exception e) {
             log.warn("Failed to read X-Require-Verification header: {}", e.getMessage());
         }
         return true;
     }
+
 
 
     @Override
