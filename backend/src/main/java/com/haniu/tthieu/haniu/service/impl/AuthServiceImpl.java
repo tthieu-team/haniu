@@ -18,6 +18,7 @@ import com.haniu.tthieu.haniu.repository.VerificationCodeRepository;
 import com.haniu.tthieu.haniu.security.JwtTokenProvider;
 import com.haniu.tthieu.haniu.service.AuthService;
 import com.haniu.tthieu.haniu.service.EmailService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,39 +42,88 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final VerificationCodeRepository verificationCodeRepository;
     private final EmailService emailService;
+    private final HttpServletRequest httpServletRequest;
+
+
+    private boolean isVerificationRequired() {
+        try {
+            String headerVal = httpServletRequest.getHeader("X-Require-Verification");
+            log.info("Received X-Require-Verification header: {}", headerVal);
+            if (headerVal != null) {
+                return Boolean.parseBoolean(headerVal);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to read X-Require-Verification header: {}", e.getMessage());
+        }
+        return true;
+    }
+
 
     @Override
     public TokenResponseDto register(RegisterRequestDto request) {
         Optional<User> existingUserOpt = userRepository.findByEmail(request.getEmail());
         User user;
+        boolean requireVerification = isVerificationRequired();
+
         if (existingUserOpt.isPresent()) {
             User existing = existingUserOpt.get();
             if (existing.getStatus() == UserStatus.ACTIVE) {
                 throw new RuntimeException("Email is already in use");
             }
-            // If status is PENDING, we update user info and activate them directly
+            // If status is PENDING
             existing.setFullName(request.getFullName());
             existing.setPassword(passwordEncoder.encode(request.getPassword()));
             existing.setPhone(request.getPhone());
-            existing.setStatus(UserStatus.ACTIVE);
-            existing.setEmailVerified(true);
-            user = userRepository.save(existing);
+            if (requireVerification) {
+                user = userRepository.save(existing);
+                saveAndSendOtp(user.getEmail());
+                return TokenResponseDto.builder()
+                        .email(user.getEmail())
+                        .fullName(user.getFullName())
+                        .phone(user.getPhone())
+                        .role(user.getRole().name())
+                        .build();
+            } else {
+                existing.setStatus(UserStatus.ACTIVE);
+                existing.setEmailVerified(true);
+                user = userRepository.save(existing);
+                return generateTokens(user);
+            }
         } else {
-            user = User.builder()
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .fullName(request.getFullName())
-                    .phone(request.getPhone())
-                    .role(Role.USER)
-                    .status(UserStatus.ACTIVE)
-                    .emailVerified(true)
-                    .phoneVerified(false)
-                    .build();
-            user = userRepository.save(user);
+            if (requireVerification) {
+                user = User.builder()
+                        .email(request.getEmail())
+                        .password(passwordEncoder.encode(request.getPassword()))
+                        .fullName(request.getFullName())
+                        .phone(request.getPhone())
+                        .role(Role.USER)
+                        .status(UserStatus.PENDING)
+                        .emailVerified(false)
+                        .phoneVerified(false)
+                        .build();
+                user = userRepository.save(user);
+                saveAndSendOtp(user.getEmail());
+                return TokenResponseDto.builder()
+                        .email(user.getEmail())
+                        .fullName(user.getFullName())
+                        .phone(user.getPhone())
+                        .role(user.getRole().name())
+                        .build();
+            } else {
+                user = User.builder()
+                        .email(request.getEmail())
+                        .password(passwordEncoder.encode(request.getPassword()))
+                        .fullName(request.getFullName())
+                        .phone(request.getPhone())
+                        .role(Role.USER)
+                        .status(UserStatus.ACTIVE)
+                        .emailVerified(true)
+                        .phoneVerified(false)
+                        .build();
+                user = userRepository.save(user);
+                return generateTokens(user);
+            }
         }
-
-        // Return token DTO with accessToken directly to auto-login
-        return generateTokens(user);
     }
 
     @Override
@@ -86,9 +136,13 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (user.getStatus() == UserStatus.PENDING) {
-            user.setStatus(UserStatus.ACTIVE);
-            user.setEmailVerified(true);
-            user = userRepository.save(user);
+            if (isVerificationRequired()) {
+                throw new RuntimeException("Tài khoản chưa được xác thực. Vui lòng xác thực mã OTP gửi qua Email.");
+            } else {
+                user.setStatus(UserStatus.ACTIVE);
+                user.setEmailVerified(true);
+                user = userRepository.save(user);
+            }
         }
 
         if (user.getStatus() != UserStatus.ACTIVE) {
@@ -100,6 +154,7 @@ public class AuthServiceImpl implements AuthService {
 
         return generateTokens(user);
     }
+
 
     @Override
     public TokenResponseDto verifyEmail(VerifyEmailRequestDto request) {

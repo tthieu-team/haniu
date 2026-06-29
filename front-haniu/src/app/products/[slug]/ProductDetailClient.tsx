@@ -99,7 +99,21 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
 
   const { loading } = useProductStore();
   const product = useProductStore(state => state.currentProduct) as unknown as Product | null;
-  const isAccessory = product?.category?.isAccessory || product?.category?.accessory || product?.category?.slug?.includes('phu-kien') || false;
+  const isAccessory = !!(
+    product?.isAccessory ||
+    product?.slug?.includes('phu-kien') ||
+    product?.slug?.includes('accessory') ||
+    product?.name?.toLowerCase().includes('phụ kiện') ||
+    product?.name?.toLowerCase().includes('phu kien') ||
+    product?.name?.toLowerCase().includes('accessory') ||
+    product?.category?.isAccessory ||
+    product?.category?.accessory ||
+    product?.category?.slug?.includes('phu-kien') ||
+    product?.category?.slug?.includes('accessory') ||
+    product?.category?.name?.toLowerCase().includes('phụ kiện') ||
+    product?.category?.name?.toLowerCase().includes('phu kien') ||
+    product?.category?.name?.toLowerCase().includes('accessory')
+  );
   const { addToCart } = useCartStore();
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
 

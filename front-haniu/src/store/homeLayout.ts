@@ -512,7 +512,7 @@ export const DEFAULT_STATE = {
   videoBanner: {
     title: "Nghệ Thuật Chế Tác Độc Bản",
     subtitle: "Khám phá quy trình tỉ mỉ để tạo ra một tác phẩm quà tặng được khắc laser cá nhân hóa bởi Haniu.",
-    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-spinning-gold-glitter-particles-background-40096-large.mp4",
     placeholderImage: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=1200&auto=format&fit=crop&q=80",
     buttonText: "Xem Thêm Câu Chuyện",
     buttonHref: "/#story",
@@ -629,7 +629,7 @@ export const DEFAULT_STATE = {
     content: "Tại xưởng chế tác của Haniu, mỗi chi tiết nhỏ đều được chúng tôi trân quý. Từ khâu tuyển chọn những tấm da bò nguyên tấm, mài giũa các góc cạnh của gỗ, cho đến kỹ thuật nung men gốm sứ hỏa biến độc bản. Chúng tôi không sản xuất công nghiệp hàng loạt. Mỗi món quà bạn cầm trên tay đều mang hơi ấm và tâm huyết của những người thợ thủ công Việt Nam.",
     videoPlaceholderUrl: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=1200&auto=format&fit=crop&q=80",
     videoTitle: "Xem video Behind the Scenes",
-    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-spinning-gold-glitter-particles-background-40096-large.mp4",
   },
   cta: {
     title: "Tạo Nên Món Quà Mang Dấu Ấn Riêng Của Bạn",

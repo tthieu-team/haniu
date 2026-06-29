@@ -45,19 +45,52 @@ interface CartState {
   clearCartState: () => void;
 }
 
+const populateAccessories = async (cart: Cart | null): Promise<Cart | null> => {
+  if (!cart || !cart.items) return cart;
+  try {
+    const itemsWithAccessory = await Promise.all(cart.items.map(async (item: any) => {
+      try {
+        const product = await productService.getProductById(item.productId);
+        const isAccessory = product && (
+          product.isAccessory || 
+          product.slug?.includes('phu-kien') ||
+          product.slug?.includes('accessory') ||
+          product.name?.toLowerCase().includes('phụ kiện') ||
+          product.name?.toLowerCase().includes('phu kien') ||
+          product.name?.toLowerCase().includes('accessory') ||
+          product.category?.isAccessory || 
+          product.category?.accessory || 
+          product.category?.slug?.includes('phu-kien') ||
+          product.category?.slug?.includes('accessory') ||
+          product.category?.name?.toLowerCase().includes('phụ kiện') ||
+          product.category?.name?.toLowerCase().includes('phu kien') ||
+          product.category?.name?.toLowerCase().includes('accessory')
+        );
+        return { ...item, isAccessory: !!isAccessory };
+      } catch (e) {
+        return { ...item, isAccessory: item.isAccessory || false };
+      }
+    }));
+    return { ...cart, items: itemsWithAccessory };
+  } catch (e) {
+    return cart;
+  }
+};
+
 export const useCartStore = create<CartState>((set, get) => ({
   cart: null,
   loading: false,
   error: null,
-
+  
   fetchCart: async () => {
     set({ loading: true, error: null });
     const isAuthenticated = useAuthStore.getState().isAuthenticated;
     if (isAuthenticated) {
       try {
         const data = await cartService.getCart();
-        set({ cart: data, loading: false });
-        return data;
+        const populatedCart = await populateAccessories(data);
+        set({ cart: populatedCart, loading: false });
+        return populatedCart;
       } catch (err: any) {
         set({ loading: false, error: err.message || 'Lỗi lấy giỏ hàng' });
         return null;
@@ -84,7 +117,21 @@ export const useCartStore = create<CartState>((set, get) => ({
     let isAccessory = false;
     try {
       const product = await productService.getProductById(payload.productId);
-      if (product && (product.category?.isAccessory || product.category?.accessory || product.category?.slug?.includes('phu-kien'))) {
+      if (product && (
+        product.isAccessory || 
+        product.slug?.includes('phu-kien') ||
+        product.slug?.includes('accessory') ||
+        product.name?.toLowerCase().includes('phụ kiện') ||
+        product.name?.toLowerCase().includes('phu kien') ||
+        product.name?.toLowerCase().includes('accessory') ||
+        product.category?.isAccessory || 
+        product.category?.accessory || 
+        product.category?.slug?.includes('phu-kien') ||
+        product.category?.slug?.includes('accessory') ||
+        product.category?.name?.toLowerCase().includes('phụ kiện') ||
+        product.category?.name?.toLowerCase().includes('phu kien') ||
+        product.category?.name?.toLowerCase().includes('accessory')
+      )) {
         isAccessory = true;
       }
     } catch (e) {}
@@ -99,8 +146,9 @@ export const useCartStore = create<CartState>((set, get) => ({
       try {
         const finalPayload = isAccessory ? { ...payload, quantity: 1 } : payload;
         const data = await cartService.addToCart(finalPayload);
-        set({ cart: data, loading: false });
-        return data;
+        const populatedCart = await populateAccessories(data);
+        set({ cart: populatedCart, loading: false });
+        return populatedCart;
       } catch (err: any) {
         set({ loading: false, error: err.message || 'Lỗi thêm sản phẩm' });
         throw err;
@@ -199,8 +247,9 @@ export const useCartStore = create<CartState>((set, get) => ({
     if (isAuthenticated) {
       try {
         const data = await cartService.updateQuantity(itemId, quantity);
-        set({ cart: data, loading: false });
-        return data;
+        const populatedCart = await populateAccessories(data);
+        set({ cart: populatedCart, loading: false });
+        return populatedCart;
       } catch (err: any) {
         set({ loading: false, error: err.message || 'Lỗi cập nhật số lượng' });
         throw err;
@@ -237,8 +286,9 @@ export const useCartStore = create<CartState>((set, get) => ({
     if (isAuthenticated) {
       try {
         const data = await cartService.removeItem(itemId);
-        set({ cart: data, loading: false });
-        return data;
+        const populatedCart = await populateAccessories(data);
+        set({ cart: populatedCart, loading: false });
+        return populatedCart;
       } catch (err: any) {
         set({ loading: false, error: err.message || 'Lỗi xóa sản phẩm' });
         throw err;
@@ -265,8 +315,9 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const data = await cartService.mergeCarts();
-      set({ cart: data, loading: false });
-      return data;
+      const populatedCart = await populateAccessories(data);
+      set({ cart: populatedCart, loading: false });
+      return populatedCart;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi gộp giỏ hàng' });
       return null;
@@ -299,8 +350,9 @@ export const useCartStore = create<CartState>((set, get) => ({
       }
 
       localStorage.removeItem('haniu_guest_cart');
-      set({ cart: backendCart, loading: false });
-      return backendCart;
+      const populatedCart = await populateAccessories(backendCart);
+      set({ cart: populatedCart, loading: false });
+      return populatedCart;
     } catch (err: any) {
       set({ loading: false, error: err.message || 'Lỗi đồng bộ giỏ hàng' });
       return null;

@@ -10,6 +10,8 @@ export default function PromoPopup() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [collectedCodes, setCollectedCodes] = useState<string[]>([]);
   const [usedCodes, setUsedCodes] = useState<string[]>([]);
+  const [initialCollected, setInitialCollected] = useState<string[]>([]);
+  const [initialUsed, setInitialUsed] = useState<string[]>([]);
   const { welcomeScreen } = useHomeLayoutStore();
   const { coupons, fetchCoupons } = useCouponStore();
 
@@ -19,11 +21,15 @@ export default function PromoPopup() {
       try {
         const storedCollected = localStorage.getItem('haniu_collected_coupons');
         if (storedCollected) {
-          setCollectedCodes(JSON.parse(storedCollected));
+          const parsed = JSON.parse(storedCollected);
+          setCollectedCodes(parsed);
+          setInitialCollected(parsed);
         }
         const storedUsed = localStorage.getItem('haniu_used_coupons');
         if (storedUsed) {
-          setUsedCodes(JSON.parse(storedUsed));
+          const parsed = JSON.parse(storedUsed);
+          setUsedCodes(parsed);
+          setInitialUsed(parsed);
         }
       } catch (e) {
         console.error('Lỗi đọc dữ liệu coupon từ localStorage:', e);
@@ -64,8 +70,12 @@ export default function PromoPopup() {
     }
   };
 
-  // Filter coupons showing in popup banner
-  const bannerCoupons = (coupons || []).filter(c => c.active && c.showInBanner);
+  // Filter coupons showing in popup banner (only active ones that haven't been collected or used when page loaded)
+  const bannerCoupons = (coupons || []).filter(c => {
+    const isCollected = initialCollected.some(code => code.toUpperCase() === c.code.toUpperCase());
+    const isUsed = initialUsed.some(code => code.toUpperCase() === c.code.toUpperCase());
+    return c.active && c.showInBanner && !isCollected && !isUsed;
+  });
 
   if (!isOpen || bannerCoupons.length === 0) return null;
 

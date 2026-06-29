@@ -127,8 +127,7 @@ export default async function RootLayout({
               (function() {
                 try {
                   var storedTheme = localStorage.getItem('theme');
-                  var systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  var activeTheme = storedTheme === 'dark' || (!storedTheme && systemPrefersDark) ? 'dark' : 'light';
+                  var activeTheme = storedTheme === 'dark' ? 'dark' : 'light';
                   
                   if (activeTheme === 'dark') {
                     document.documentElement.classList.add('dark');

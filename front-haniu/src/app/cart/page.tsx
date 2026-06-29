@@ -55,6 +55,9 @@ export default function CartPage() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodConfig[]>(ALL_PAYMENT_METHODS);
   const [accessories, setAccessories] = useState<any[]>([]);
   const [loadingAccessories, setLoadingAccessories] = useState(false);
+  const [collectedCodes, setCollectedCodes] = useState<string[]>([]);
+  const [usedCodes, setUsedCodes] = useState<string[]>([]);
+  const [isUsedCouponsOpen, setIsUsedCouponsOpen] = useState(false);
 
   const loadCart = async () => {
     setIsInitialLoading(true);
@@ -86,6 +89,14 @@ export default function CartPage() {
     const savedCoupon = localStorage.getItem('haniu_active_coupon');
     if (savedCoupon) {
       setCouponCode(savedCoupon);
+    }
+    const storedCollected = localStorage.getItem('haniu_collected_coupons');
+    if (storedCollected) {
+      setCollectedCodes(JSON.parse(storedCollected));
+    }
+    const storedUsed = localStorage.getItem('haniu_used_coupons');
+    if (storedUsed) {
+      setUsedCodes(JSON.parse(storedUsed));
     }
     // Fetch enabled payment methods from system config
     fetchApi('/api/v1/system-configs/payment_methods')
@@ -469,56 +480,110 @@ export default function CartPage() {
                   {couponSuccess && <p className="text-[10px] text-emerald-500 font-semibold">{trans(couponSuccess)}</p>}
                 </form>
 
-                {/* Available Coupons list */}
-                <div className="space-y-3 pt-2 pb-4 border-b border-slate-100 dark:border-zinc-800">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{trans("Mã giảm giá khả dụng")}</span>
-                  {coupons && coupons.length > 0 ? (
-                    <div className="space-y-2.5 max-h-[140px] overflow-y-auto pr-1 animate-fade-in">
-                      {coupons.map(c => {
-                        const isUnavailable = c.minOrderValue && subtotal < c.minOrderValue;
-                        return (
-                          <div
-                            key={c.code}
-                            className={`p-2.5 rounded-xl border border-dashed flex justify-between items-center text-xs transition-colors ${
-                              isUnavailable
-                                ? 'border-slate-250 dark:border-zinc-850 bg-slate-50/20 dark:bg-zinc-950/10 opacity-60'
-                                : 'border-slate-200 dark:border-zinc-850 bg-slate-50/50 dark:bg-zinc-950/20'
-                            }`}
-                          >
-                            <div className="space-y-1 pr-2">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className={`font-bold uppercase tracking-wider px-2 py-0.5 rounded text-[10px] ${
-                                  isUnavailable
-                                    ? 'bg-slate-200 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400'
-                                    : 'bg-rose-500/10 text-rose-500'
-                                }`}>
-                                  {c.code}
-                                </span>
-                                <span className="font-bold text-slate-700 dark:text-zinc-300">
-                                  {c.discountType === 'PERCENT' ? `${trans("Giảm")} ${c.discountValue}%` : `${trans("Giảm")} ${Number(c.discountValue).toLocaleString()}đ`}
-                                </span>
-                              </div>
-                              <p className="text-[9px] text-slate-400 font-medium leading-tight">
-                                {trans(c.description) || (c.minOrderValue ? `${trans("Đơn tối thiểu")} ${Number(c.minOrderValue).toLocaleString()}đ` : trans('Tất cả đơn hàng'))}
-                              </p>
-                            </div>
-                            {!isUnavailable && (
-                              <button
-                                onClick={() => handleQuickApply(c.code)}
-                                type="button"
-                                className="px-2.5 py-1 text-[10px] font-bold text-slate-800 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 hover:border-rose-500 hover:text-rose-500 dark:text-white rounded-lg cursor-pointer transition-all shrink-0 shadow-sm"
-                              >
-                                {trans("Áp dụng")}
-                              </button>
-                            )}
+                {(() => {
+                  const collectedCoupons = (coupons || []).filter(c => collectedCodes.some(code => code.toUpperCase() === c.code.toUpperCase()));
+                  const availableCoupons = collectedCoupons.filter(c => !usedCodes.some(code => code.toUpperCase() === c.code.toUpperCase()));
+                  const usedCoupons = collectedCoupons.filter(c => usedCodes.some(code => code.toUpperCase() === c.code.toUpperCase()));
+
+                  return (
+                    <>
+                      {/* Available Coupons list */}
+                      <div className="space-y-3 pt-2 pb-4 border-b border-slate-100 dark:border-zinc-800">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{trans("Mã giảm giá khả dụng")}</span>
+                        {availableCoupons.length > 0 ? (
+                          <div className="space-y-2.5 max-h-[140px] overflow-y-auto pr-1 animate-fade-in">
+                            {availableCoupons.map(c => {
+                              const isUnavailable = c.minOrderValue && subtotal < c.minOrderValue;
+                              return (
+                                <div
+                                  key={c.code}
+                                  className={`p-2.5 rounded-xl border border-dashed flex justify-between items-center text-xs transition-colors ${
+                                    isUnavailable
+                                      ? 'border-slate-250 dark:border-zinc-850 bg-slate-50/20 dark:bg-zinc-950/10 opacity-60'
+                                      : 'border-slate-200 dark:border-zinc-850 bg-slate-50/50 dark:bg-zinc-950/20'
+                                  }`}
+                                >
+                                  <div className="space-y-1 pr-2">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className={`font-bold uppercase tracking-wider px-2 py-0.5 rounded text-[10px] ${
+                                        isUnavailable
+                                          ? 'bg-slate-200 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400'
+                                          : 'bg-rose-500/10 text-rose-500'
+                                      }`}>
+                                        {c.code}
+                                      </span>
+                                      <span className="font-bold text-slate-700 dark:text-zinc-300">
+                                        {c.discountType === 'PERCENT' ? `${trans("Giảm")} ${c.discountValue}%` : `${trans("Giảm")} ${Number(c.discountValue).toLocaleString()}đ`}
+                                      </span>
+                                    </div>
+                                    <p className="text-[9px] text-slate-400 font-medium leading-tight">
+                                      {trans(c.description) || (c.minOrderValue ? `${trans("Đơn tối thiểu")} ${Number(c.minOrderValue).toLocaleString()}đ` : trans('Tất cả đơn hàng'))}
+                                    </p>
+                                  </div>
+                                  {!isUnavailable && (
+                                    <button
+                                      onClick={() => handleQuickApply(c.code)}
+                                      type="button"
+                                      className="px-2.5 py-1 text-[10px] font-bold text-slate-800 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 hover:border-rose-500 hover:text-rose-500 dark:text-white rounded-lg cursor-pointer transition-all shrink-0 shadow-sm"
+                                    >
+                                      {trans("Áp dụng")}
+                                    </button>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-[10px] text-slate-400 font-medium italic px-2">{trans("Không có mã giảm giá nào khả dụng.")}</p>
-                  )}
-                </div>
+                        ) : (
+                          <p className="text-[10px] text-slate-400 font-medium italic px-2">{trans("Không có mã giảm giá nào khả dụng.")}</p>
+                        )}
+                      </div>
+
+                      {/* Used Coupons list */}
+                      {usedCoupons.length > 0 && (
+                        <div className="space-y-3 pt-4 pb-4 border-b border-slate-100 dark:border-zinc-800">
+                          <button
+                            type="button"
+                            onClick={() => setIsUsedCouponsOpen(!isUsedCouponsOpen)}
+                            className="w-full flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider cursor-pointer select-none"
+                          >
+                            <span>{trans("Voucher đã được sử dụng")} ({usedCoupons.length})</span>
+                            <span className="text-slate-400 dark:text-zinc-500">
+                              <Icon name={isUsedCouponsOpen ? "chevron-up" : "chevron-down"} size={10} />
+                            </span>
+                          </button>
+                          
+                          {isUsedCouponsOpen && (
+                            <div className="space-y-2.5 max-h-[140px] overflow-y-auto pr-1 opacity-70 animate-fade-in">
+                              {usedCoupons.map(c => (
+                                <div
+                                  key={c.code}
+                                  className="p-2.5 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 dark:border-zinc-850 dark:bg-zinc-950/20 flex justify-between items-center text-xs"
+                                >
+                                  <div className="space-y-1 pr-2">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className="font-bold uppercase tracking-wider px-2 py-0.5 rounded text-[10px] bg-slate-200 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400">
+                                        {c.code}
+                                      </span>
+                                      <span className="font-bold text-slate-450 line-through dark:text-zinc-550">
+                                        {c.discountType === 'PERCENT' ? `${trans("Giảm")} ${c.discountValue}%` : `${trans("Giảm")} ${Number(c.discountValue).toLocaleString()}đ`}
+                                      </span>
+                                    </div>
+                                    <p className="text-[9px] text-slate-400 font-medium leading-tight">
+                                      {trans(c.description) || (c.minOrderValue ? `${trans("Đơn tối thiểu")} ${Number(c.minOrderValue).toLocaleString()}đ` : trans('Tất cả đơn hàng'))}
+                                    </p>
+                                  </div>
+                                  <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-450 bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded-lg shrink-0">
+                                    {trans("Đã được sử dụng")}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
 
                 {/* Price Breakdown */}
                 <div className="space-y-3 text-xs">

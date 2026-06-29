@@ -118,8 +118,7 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
   initializeTheme: () => {
     if (typeof window === 'undefined') return;
     const storedTheme = localStorage.getItem('theme') as Theme | null;
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const activeTheme = storedTheme || (systemPrefersDark ? 'dark' : 'light');
+    const activeTheme = storedTheme || 'light';
 
     // Retrieve saved configurations if any
     const storedConfigStr = localStorage.getItem('theme_config');

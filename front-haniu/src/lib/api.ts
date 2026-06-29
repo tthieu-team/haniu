@@ -38,7 +38,11 @@ export async function fetchApi(path: string, options: RequestInit = {}): Promise
     'Content-Type': 'application/json',
   };
 
+  const requireVerification = process.env.NEXT_PUBLIC_REQUIRE_VERIFICATION !== 'false';
+  headers['X-Require-Verification'] = String(requireVerification);
+
   if (typeof window !== 'undefined') {
+
     const lang = localStorage.getItem('haniu_lang') || 'vi';
     headers['Accept-Language'] = lang;
   } else {
