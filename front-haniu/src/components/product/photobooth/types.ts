@@ -75,6 +75,17 @@ export interface Sticker {
   scale: number;
   rotation: number;
   color?: string;
+  opacity?: number;
+  strokeWidth?: number;
+  fontWeight?: 'thin' | 'normal' | 'bold';
+  layout?: 'horizontal' | 'vertical' | 'grid';
+  spacing?: number;
+  textAlign?: 'left' | 'center' | 'right';
+  textBaseline?: 'top' | 'middle' | 'bottom';
+  shadowColor?: string;
+  shadowBlur?: number;
+  fontFamily?: string;
+  fontSize?: number;
 }
 
 export type PhotoboothStep = 

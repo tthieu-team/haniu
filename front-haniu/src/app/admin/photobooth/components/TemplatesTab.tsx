@@ -97,21 +97,38 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                       {/* Nested layers visualization inside card */}
                       {tpl.layers?.map((layer: any, idx: number) => {
                         if (layer.visible === false) return null;
+                        const isText = layer.type === 'text';
+                        const bgCol = layer.backgroundColor || layer.bg;
+                        const hasBg = bgCol && bgCol !== 'transparent';
                         return (
                           <div 
-                            key={layer.id}
-                            className={`absolute flex items-center justify-center border-[0.5px] ${
-                              layer.type === 'frame' ? 'bg-slate-350 dark:bg-zinc-700 border-white text-[6px]' : 'bg-transparent border-transparent'
+                            key={layer.id || idx}
+                            className={`absolute flex items-center justify-center overflow-hidden border-[0.5px] ${
+                              layer.type === 'frame' ? 'bg-slate-350 dark:bg-zinc-700 border-white text-[6px]' : 'border-transparent'
                             }`}
                             style={{
                               left: `${layer.x}%`,
                               top: `${layer.y}%`,
                               width: `${layer.width}%`,
                               height: `${layer.height}%`,
-                              borderRadius: layer.type === 'frame' ? `${(layer.cornerRadius || 2) / 3}px` : '0px'
+                              borderRadius: layer.type === 'frame' ? `${(layer.cornerRadius || 2) / 3}px` : (isText && (layer.bgRadius ?? 0) >= 40 ? '999px' : '0px'),
+                              backgroundColor: isText && hasBg ? bgCol : (layer.type === 'frame' ? undefined : 'transparent'),
+                              transform: layer.rotation ? `rotate(${layer.rotation}deg)` : 'none',
+                              zIndex: isText ? 25 : (layer.type === 'overlay' ? 10 : (idx + 1))
                             }}
                           >
                             {layer.type === 'frame' && `📸 ${layer.order || idx + 1}`}
+                            {isText && (
+                              <span 
+                                className="block text-center truncate font-bold text-[5px] px-0.5"
+                                style={{
+                                  color: layer.fontColor || '#2b2b2b',
+                                  fontFamily: layer.fontFamily ? `"${layer.fontFamily}", cursive` : '"Patrick Hand", cursive'
+                                }}
+                              >
+                                {layer.text}
+                              </span>
+                            )}
                             {layer.type === 'overlay' && layer.url && (
                               <img 
                                 src={layer.url} 
@@ -355,21 +372,34 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                       )}
 
                       {/* Text */}
-                      {isText && (
-                        <span 
-                          className="block text-center truncate w-full font-bold px-1"
-                          style={{
-                            fontSize: `${(layer.fontSize || 24) * 0.08}px`,
-                            color: layer.fontColor || '#1e293b',
-                            fontFamily: layer.fontFamily || 'sans-serif',
-                            fontWeight: layer.fontWeight || 'bold',
-                            fontStyle: layer.fontStyle || 'italic',
-                            textAlign: (layer.align || 'center') as any
-                          }}
-                        >
-                          {layer.text}
-                        </span>
-                      )}
+                      {isText && (() => {
+                        const bgCol = layer.backgroundColor || layer.bg;
+                        const hasBg = bgCol && bgCol !== 'transparent';
+                        const radiusVal = (layer.bgRadius ?? 0) >= 40 ? '999px' : `${(layer.bgRadius ?? 0) * 0.15}px`;
+                        return (
+                          <div 
+                            className="w-full h-full flex items-center justify-center select-none overflow-hidden"
+                            style={{
+                              backgroundColor: hasBg ? bgCol : 'transparent',
+                              borderRadius: radiusVal,
+                            }}
+                          >
+                            <span 
+                              className="block text-center truncate font-bold px-1"
+                              style={{
+                                fontSize: `${Math.max(6, (layer.fontSize || 24) * 0.22)}px`,
+                                color: layer.fontColor || '#2b2b2b',
+                                fontFamily: layer.fontFamily ? `"${layer.fontFamily}", cursive` : '"Patrick Hand", cursive',
+                                fontWeight: layer.fontWeight || 'bold',
+                                fontStyle: layer.fontStyle || 'normal',
+                                textAlign: (layer.align || 'center') as any
+                              }}
+                            >
+                              {layer.text}
+                            </span>
+                          </div>
+                        );
+                      })()}
 
                       {/* Sticker */}
                       {isSticker && (

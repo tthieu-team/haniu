@@ -21,6 +21,33 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
   const [aiPrompt, setAiPrompt] = React.useState('');
   const [isGeneratingAiShape, setIsGeneratingAiShape] = React.useState(false);
 
+  // EyeDropper (Bút chấm màu từ màn hình)
+  const handlePickColor = async (targetKey: string, isTemplateProp?: boolean) => {
+    if (typeof window !== 'undefined' && 'EyeDropper' in window) {
+      try {
+        const eyeDropper = new (window as any).EyeDropper();
+        const result = await eyeDropper.open();
+        if (result?.sRGBHex) {
+          if (isTemplateProp) {
+            setBuilderTemplate?.((p: any) => ({ ...p, [targetKey]: result.sRGBHex, backgroundType: 'solid' }));
+          } else {
+            updateSelectedLayer({ 
+              [targetKey]: result.sRGBHex,
+              ...(targetKey === 'backgroundColor' ? { 
+                bgRadius: selectedLayer?.bgRadius ?? 999, 
+                bgPadding: selectedLayer?.bgPadding ?? 8 
+              } : {})
+            });
+          }
+        }
+      } catch {
+        // User cancelled via Esc or clicked outside
+      }
+    } else {
+      alert('Trình duyệt hiện tại chưa hỗ trợ API ống hút màu EyeDropper. Bạn có thể sử dụng Chrome, Edge hoặc nhập trực tiếp mã màu HEX.');
+    }
+  };
+
   const handleGenerateAiShape = async () => {
     if (!aiPrompt.trim()) return;
     setIsGeneratingAiShape(true);
@@ -234,14 +261,56 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
           )}
 
           {builderTemplate?.backgroundType === 'solid' && (
-            <div className="flex gap-2 items-center p-2.5 bg-slate-50 dark:bg-zinc-850 rounded-xl border border-slate-200 dark:border-zinc-800">
-              <input
-                type="color"
-                value={builderTemplate.background?.startsWith('#') ? builderTemplate.background : '#ffffff'}
-                onChange={e => setBuilderTemplate?.((p: any) => ({ ...p, background: e.target.value, backgroundType: 'solid' }))}
-                className="w-8 h-8 rounded-lg cursor-pointer"
-              />
-              <span className="text-[10px] font-mono font-bold text-slate-700 dark:text-zinc-350">{builderTemplate.background || '#ffffff'}</span>
+            <div className="space-y-2 p-2.5 bg-slate-50 dark:bg-zinc-850 rounded-xl border border-slate-200 dark:border-zinc-800">
+              <div className="flex gap-2 items-center">
+                <input
+                  type="color"
+                  value={builderTemplate.background?.startsWith('#') ? builderTemplate.background : '#f6f1ec'}
+                  onChange={e => setBuilderTemplate?.((p: any) => ({ ...p, background: e.target.value, backgroundType: 'solid' }))}
+                  className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 dark:border-zinc-700 p-0.5 bg-white dark:bg-zinc-800 shrink-0"
+                />
+                <input
+                  type="text"
+                  value={builderTemplate.background || '#f6f1ec'}
+                  onChange={e => setBuilderTemplate?.((p: any) => ({ ...p, background: e.target.value, backgroundType: 'solid' }))}
+                  className="flex-1 px-2 h-8 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono font-bold"
+                />
+                <button
+                  type="button"
+                  onClick={() => handlePickColor('background', true)}
+                  title="Bút chấm màu: Chấm vào bất kỳ đâu trên màn hình để lấy màu nền template"
+                  className="h-8 px-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:border-rose-400 text-slate-600 dark:text-zinc-300 hover:text-rose-500 transition-all flex items-center gap-1.5 text-[10px] font-bold shadow-xs active:scale-95 cursor-pointer shrink-0"
+                >
+                  <svg className="w-3.5 h-3.5 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m14 7 3 3m-9.5 9.5-3.5 1 1-3.5 11.5-11.5a2.12 2.12 0 0 1 3 3L7.5 19.5z" />
+                    <path d="M16 5l3 3" />
+                  </svg>
+                  <span>Bút chấm</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-200/60 dark:border-zinc-800">
+                <span className="text-[8px] text-slate-400 font-bold mr-0.5">Màu nền xinh:</span>
+                {[
+                  { color: '#f6f1ec', name: 'Be kem ấm (như ảnh mẫu)' },
+                  { color: '#ffffff', name: 'Trắng sứ', border: true },
+                  { color: '#fad2d8', name: 'Hồng pastel' },
+                  { color: '#fef3c7', name: 'Vàng bơ nhạt' },
+                  { color: '#d1fae5', name: 'Xanh bơ bạc hà' },
+                  { color: '#1e293b', name: 'Đen mờ vintage' },
+                ].map(p => (
+                  <button
+                    key={p.color}
+                    type="button"
+                    onClick={() => setBuilderTemplate?.((prev: any) => ({ ...prev, background: p.color, backgroundType: 'solid' }))}
+                    className={`w-4.5 h-4.5 rounded-md transition-transform hover:scale-115 active:scale-95 cursor-pointer ${
+                      p.border ? 'border border-slate-300 dark:border-zinc-600' : ''
+                    } ${builderTemplate.background === p.color ? 'ring-2 ring-rose-500 ring-offset-1' : ''}`}
+                    style={{ backgroundColor: p.color }}
+                    title={p.name}
+                  />
+                ))}
+              </div>
             </div>
           )}
 
@@ -368,6 +437,394 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
           <Icon name="trash" size={12} />
         </button>
       </div>
+
+      {/* TEXT PROPERTIES - PLACED AT THE TOP FOR IMMEDIATE VISIBILITY */}
+      {selectedLayer.type === 'text' && (
+        <div className="space-y-3.5 pb-4 border-b border-slate-200 dark:border-zinc-800">
+          <div className="flex items-center justify-between">
+            <h5 className="text-[11px] font-black uppercase text-rose-600 dark:text-rose-400 tracking-wider flex items-center gap-1.5">
+              <span>🖋️</span>
+              <span>Cấu Hình Chữ & Màu Nền</span>
+            </h5>
+          </div>
+          
+          {/* NỘI DUNG CHỮ */}
+          <div>
+            <label className="text-[9px] text-slate-500 dark:text-zinc-400 font-bold block mb-1 uppercase tracking-wider">
+              Nội dung văn bản
+            </label>
+            <textarea 
+              rows={2}
+              value={selectedLayer.text || ''}
+              onChange={e => updateSelectedLayer({ text: e.target.value })}
+              placeholder="Nhập nội dung chữ..."
+              className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-xs font-bold text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-rose-500 shadow-2xs"
+            />
+          </div>
+
+          {/* MÀU NỀN CHO CHỮ (HIGHLIGHT VỆT MÀU - NỔI BẬT NHẤT) */}
+          {(() => {
+            const isBgActive = Boolean(selectedLayer.backgroundColor && selectedLayer.backgroundColor !== 'transparent');
+            const currentColor = isBgActive ? selectedLayer.backgroundColor : '#fad2d8';
+            
+            return (
+              <div className="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-300/80 dark:border-rose-900/60 space-y-3 shadow-xs">
+                {/* Header card with Master Toggle Switch */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">🏷️</span>
+                    <div>
+                      <label className="text-[11px] font-black uppercase text-rose-700 dark:text-rose-300 tracking-wider block">
+                        Màu Nền Cho Chữ
+                      </label>
+                      <span className="text-[8px] text-rose-500/80 dark:text-rose-400 block font-medium">
+                        Highlight vệt pastel hoặc khung viền
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Nút Bật / Tắt nổi bật */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isBgActive) {
+                        updateSelectedLayer({ backgroundColor: 'transparent' });
+                      } else {
+                        updateSelectedLayer({ 
+                          backgroundColor: '#fad2d8', 
+                          bgRadius: selectedLayer.bgRadius ?? 999, 
+                          bgPadding: selectedLayer.bgPadding ?? 8 
+                        });
+                      }
+                    }}
+                    className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 ${
+                      isBgActive
+                        ? 'bg-rose-500 text-white shadow-rose-500/20'
+                        : 'bg-slate-200 dark:bg-zinc-700 text-slate-700 dark:text-zinc-300 hover:bg-slate-300'
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${isBgActive ? 'bg-white animate-pulse' : 'bg-slate-400'}`} />
+                    <span>{isBgActive ? 'Đang Bật Nền' : 'Tắt Nền'}</span>
+                  </button>
+                </div>
+
+                {/* HÀNG CHỌN MÀU & BÚT CHẤM */}
+                <div className="flex gap-2 items-center">
+                  <div className="relative">
+                    <input 
+                      type="color" 
+                      value={currentColor}
+                      onClick={() => {
+                        if (!isBgActive) {
+                          updateSelectedLayer({ 
+                            backgroundColor: '#fad2d8', 
+                            bgRadius: selectedLayer.bgRadius ?? 999, 
+                            bgPadding: selectedLayer.bgPadding ?? 8 
+                          });
+                        }
+                      }}
+                      onChange={e => updateSelectedLayer({ 
+                        backgroundColor: e.target.value,
+                        bgRadius: selectedLayer.bgRadius ?? 999,
+                        bgPadding: selectedLayer.bgPadding ?? 8
+                      })}
+                      className="w-10 h-10 rounded-xl cursor-pointer border border-rose-300 dark:border-rose-800 p-0.5 bg-white dark:bg-zinc-800 shrink-0 shadow-xs"
+                      title="Nhấp để chọn màu nền từ bảng màu"
+                    />
+                  </div>
+
+                  <input 
+                    type="text" 
+                    placeholder="#fad2d8"
+                    value={isBgActive ? selectedLayer.backgroundColor : 'Tắt (trong suốt)'}
+                    onChange={e => {
+                      const val = e.target.value.trim();
+                      if (val.toLowerCase() === 'transparent' || val === '') {
+                        updateSelectedLayer({ backgroundColor: 'transparent' });
+                      } else {
+                        updateSelectedLayer({ 
+                          backgroundColor: val,
+                          bgRadius: selectedLayer.bgRadius ?? 999,
+                          bgPadding: selectedLayer.bgPadding ?? 8
+                        });
+                      }
+                    }}
+                    className="flex-1 px-3 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-rose-200 dark:border-zinc-800 text-xs font-mono font-bold text-slate-800 dark:text-zinc-200 focus:outline-none focus:border-rose-500 shadow-2xs"
+                  />
+
+                  {/* BÚT CHẤM MÀU (EYEDROPPER PIPETTE) */}
+                  <button
+                    type="button"
+                    onClick={() => handlePickColor('backgroundColor')}
+                    title="Bút chấm màu: Nhấp vào đây rồi chấm vào bất kỳ điểm màu nào trên màn hình để lấy mã màu nền"
+                    className="h-10 px-3 rounded-xl bg-linear-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 active:scale-95 text-white transition-all flex items-center gap-1.5 text-xs font-black shadow-sm cursor-pointer shrink-0"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="m14 7 3 3m-9.5 9.5-3.5 1 1-3.5 11.5-11.5a2.12 2.12 0 0 1 3 3L7.5 19.5z" />
+                      <path d="M16 5l3 3" />
+                    </svg>
+                    <span>Bút chấm</span>
+                  </button>
+                </div>
+
+                {/* BẢNG MÀU PASTEL GỢI Ý CHUẨN THEO ẢNH MẪU */}
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-[9px] font-black uppercase text-slate-500 dark:text-zinc-400">
+                      Bảng màu xinh (lấy từ ảnh mẫu):
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {[
+                      { color: '#fad2d8', name: '🌸 Hồng pastel vệt cọ (chuẩn ảnh mẫu)' },
+                      { color: '#fbcfe8', name: '🎀 Hồng kẹo baby' },
+                      { color: '#f6f1ec', name: '🧁 Be kem nền vintage ấm' },
+                      { color: '#fef08a', name: '🍋 Vàng bơ nhạt' },
+                      { color: '#bbf7d0', name: '🍃 Xanh bơ bạc hà' },
+                      { color: '#ddd6fe', name: '🪻 Tím hoa cà pastel' },
+                      { color: '#fed7aa', name: '🍑 Cam đào sữa' },
+                      { color: '#ffffff', name: '⚪ Trắng sứ', border: true },
+                      { color: '#1e293b', name: '⚫ Đen than' },
+                      { color: 'transparent', name: '✕ Tắt màu nền (trong suốt)', border: true }
+                    ].map(p => (
+                      <button
+                        key={p.color}
+                        type="button"
+                        onClick={() => {
+                          if (p.color === 'transparent') {
+                            updateSelectedLayer({ backgroundColor: 'transparent' });
+                          } else {
+                            updateSelectedLayer({ 
+                              backgroundColor: p.color,
+                              bgRadius: selectedLayer.bgRadius ?? 999,
+                              bgPadding: selectedLayer.bgPadding ?? 8
+                            });
+                          }
+                        }}
+                        className={`w-7 h-7 rounded-xl transition-all hover:scale-120 active:scale-95 cursor-pointer relative shadow-2xs ${
+                          p.border ? 'border border-slate-300 dark:border-zinc-600' : ''
+                        } ${selectedLayer.backgroundColor === p.color ? 'ring-3 ring-rose-500 ring-offset-2 ring-offset-white dark:ring-offset-zinc-900 scale-110' : ''}`}
+                        style={{ backgroundColor: p.color === 'transparent' ? '#ffffff' : p.color }}
+                        title={p.name}
+                      >
+                        {p.color === 'transparent' && (
+                          <span className="absolute inset-0 flex items-center justify-center text-xs text-red-500 font-black leading-none">✕</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* KIỂU DÁNG BO NỀN */}
+                {isBgActive && (
+                  <div className="space-y-2 pt-2.5 border-t border-rose-200/70 dark:border-rose-900/40">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[9px] font-black uppercase text-slate-500 dark:text-zinc-400">
+                        Kiểu dáng viền nền:
+                      </label>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => updateSelectedLayer({ bgRadius: 999 })}
+                        className={`py-1.5 px-2 rounded-xl text-[9px] font-black transition-all flex items-center justify-center gap-1 border cursor-pointer ${
+                          (selectedLayer.bgRadius ?? 0) >= 40
+                            ? 'bg-rose-500 border-rose-600 text-white shadow-xs'
+                            : 'bg-white dark:bg-zinc-900 border-rose-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300'
+                        }`}
+                      >
+                        <span>🏷️</span>
+                        <span>Bo Tròn (Ảnh)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => updateSelectedLayer({ bgRadius: 12 })}
+                        className={`py-1.5 px-2 rounded-xl text-[9px] font-black transition-all flex items-center justify-center gap-1 border cursor-pointer ${
+                          (selectedLayer.bgRadius ?? 0) > 0 && (selectedLayer.bgRadius ?? 0) < 40
+                            ? 'bg-rose-500 border-rose-600 text-white shadow-xs'
+                            : 'bg-white dark:bg-zinc-900 border-rose-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300'
+                        }`}
+                      >
+                        <span>🔲</span>
+                        <span>Bo Nhẹ (12px)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => updateSelectedLayer({ bgRadius: 0 })}
+                        className={`py-1.5 px-2 rounded-xl text-[9px] font-black transition-all flex items-center justify-center gap-1 border cursor-pointer ${
+                          (selectedLayer.bgRadius ?? 0) === 0
+                            ? 'bg-rose-500 border-rose-600 text-white shadow-xs'
+                            : 'bg-white dark:bg-zinc-900 border-rose-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300'
+                        }`}
+                      >
+                        <span>⏹️</span>
+                        <span>Vuông (0px)</span>
+                      </button>
+                    </div>
+
+                    {/* THANH TRƯỢT BO GÓC & ĐỆM VIỀN */}
+                    <div className="grid grid-cols-2 gap-2.5 pt-1.5">
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-[8px] text-slate-600 dark:text-zinc-400 font-bold block">Bo góc nền</label>
+                          <span className="text-[9px] font-mono font-bold text-rose-500">
+                            {(selectedLayer.bgRadius ?? 0) >= 40 ? '999px (Tròn)' : `${selectedLayer.bgRadius ?? 0}px`}
+                          </span>
+                        </div>
+                        <input 
+                          type="range" min="0" max="50"
+                          value={(selectedLayer.bgRadius ?? 0) >= 40 ? 50 : (selectedLayer.bgRadius ?? 0)}
+                          onChange={e => {
+                            const val = parseInt(e.target.value) || 0;
+                            updateSelectedLayer({ bgRadius: val >= 45 ? 999 : val });
+                          }}
+                          className="w-full h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-lg cursor-pointer accent-rose-500"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-[8px] text-slate-600 dark:text-zinc-400 font-bold block">Đệm viền (Padding)</label>
+                          <span className="text-[9px] font-mono font-bold text-rose-500">{selectedLayer.bgPadding ?? 8}px</span>
+                        </div>
+                        <input 
+                          type="range" min="0" max="25"
+                          value={selectedLayer.bgPadding ?? 8}
+                          onChange={e => updateSelectedLayer({ bgPadding: parseInt(e.target.value) || 0 })}
+                          className="w-full h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-lg cursor-pointer accent-rose-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* MÀU SẮC CHỮ */}
+          <div>
+            <label className="text-[9px] text-slate-500 dark:text-zinc-400 font-bold block mb-1 uppercase tracking-wider">
+              Màu sắc chữ
+            </label>
+            <div className="flex gap-2 items-center">
+              <input 
+                type="color" 
+                value={selectedLayer.fontColor || '#2b2b2b'}
+                onChange={e => updateSelectedLayer({ fontColor: e.target.value })}
+                className="w-9 h-9 rounded-xl cursor-pointer border border-slate-200 dark:border-zinc-700 p-0.5 bg-white dark:bg-zinc-800 shrink-0"
+              />
+              <input 
+                type="text" 
+                value={selectedLayer.fontColor || '#2b2b2b'}
+                onChange={e => updateSelectedLayer({ fontColor: e.target.value })}
+                className="flex-1 px-2.5 h-9 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-xs font-mono font-bold"
+              />
+              <button
+                type="button"
+                onClick={() => handlePickColor('fontColor')}
+                title="Bút chấm màu: Chấm vào bất kỳ đâu trên màn hình để lấy mã màu chữ"
+                className="h-9 px-3 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:border-rose-400 text-slate-600 dark:text-zinc-300 hover:text-rose-500 transition-all flex items-center gap-1.5 text-xs font-bold shadow-xs active:scale-95 cursor-pointer shrink-0"
+              >
+                <svg className="w-3.5 h-3.5 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m14 7 3 3m-9.5 9.5-3.5 1 1-3.5 11.5-11.5a2.12 2.12 0 0 1 3 3L7.5 19.5z" />
+                  <path d="M16 5l3 3" />
+                </svg>
+                <span>Bút chấm</span>
+              </button>
+            </div>
+            
+            {/* Gợi ý màu chữ nhanh */}
+            <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+              <span className="text-[8px] text-slate-400 font-bold mr-0.5">Gợi ý:</span>
+              {[
+                { color: '#2b2b2b', name: 'Đen chì mộc mạc (như ảnh)' },
+                { color: '#5c4033', name: 'Nâu đất ấm' },
+                { color: '#8c7b70', name: 'Nâu nhạt vintage' },
+                { color: '#c28b96', name: 'Hồng đất' },
+                { color: '#e11d48', name: 'Đỏ hồng Haniu' },
+                { color: '#ffffff', name: 'Trắng', border: true },
+              ].map(p => (
+                <button
+                  key={p.color}
+                  type="button"
+                  onClick={() => updateSelectedLayer({ fontColor: p.color })}
+                  className={`w-5 h-5 rounded-md transition-transform hover:scale-115 active:scale-95 cursor-pointer ${
+                    p.border ? 'border border-slate-300 dark:border-zinc-600' : ''
+                  } ${selectedLayer.fontColor === p.color ? 'ring-2 ring-rose-500 ring-offset-1' : ''}`}
+                  style={{ backgroundColor: p.color }}
+                  title={p.name}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* FONT & KÍCH CỠ */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[8px] text-slate-400 font-bold block mb-1 uppercase tracking-wider">Họ Font</label>
+              <select 
+                value={selectedLayer.fontFamily || 'Patrick Hand'}
+                onChange={e => updateSelectedLayer({ fontFamily: e.target.value })}
+                className="w-full px-2 h-9 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-[10px] font-bold text-slate-800 dark:text-zinc-100"
+              >
+                <optgroup label="✍️ Chữ Vẽ Tay / Viết Tay (Đẹp nhất cho Photobooth)">
+                  <option value="Patrick Hand">✍️ Patrick Hand (Vẽ tay - Giống ảnh mẫu)</option>
+                  <option value="Caveat">✒️ Caveat (Bút dạ mềm mại)</option>
+                  <option value="Mali">🌸 Mali (Chữ tròn cute)</option>
+                  <option value="Itim">✏️ Itim (Nét bút học sinh)</option>
+                  <option value="Dancing Script">💖 Dancing Script (Nghệ thuật uốn lượn)</option>
+                </optgroup>
+                <optgroup label="✨ Font Tiêu Chuẩn & Hiện Đại">
+                  <option value="Be Vietnam Pro">Be Vietnam Pro (Hiện đại)</option>
+                  <option value="Cormorant Garamond">Cormorant Garamond (Cổ điển)</option>
+                  <option value="sans-serif">Sans Serif</option>
+                  <option value="serif">Classic Serif</option>
+                  <option value="monospace">Monospace</option>
+                </optgroup>
+              </select>
+            </div>
+            <div>
+              <label className="text-[8px] text-slate-400 font-bold block mb-1 uppercase tracking-wider">Cỡ chữ (px)</label>
+              <input 
+                type="number" 
+                value={selectedLayer.fontSize || 28}
+                onChange={e => updateSelectedLayer({ fontSize: parseInt(e.target.value) || 12 })}
+                className="w-full px-2 h-9 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-xs font-bold"
+              />
+            </div>
+          </div>
+
+          {/* ĐỊNH DẠNG CHỮ B/I/CĂN LỀ */}
+          <div className="flex gap-1.5">
+            <button 
+              type="button"
+              onClick={() => updateSelectedLayer({ fontWeight: selectedLayer.fontWeight === 'bold' ? 'normal' : 'bold' })}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-black border transition-all ${selectedLayer.fontWeight === 'bold' ? 'bg-rose-500 border-rose-600 text-white' : 'bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'}`}
+            >
+              B
+            </button>
+            <button 
+              type="button"
+              onClick={() => updateSelectedLayer({ fontStyle: selectedLayer.fontStyle === 'italic' ? 'normal' : 'italic' })}
+              className={`flex-1 py-1.5 rounded-lg text-xs italic font-bold border transition-all ${selectedLayer.fontStyle === 'italic' ? 'bg-rose-500 border-rose-600 text-white' : 'bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'}`}
+            >
+              I
+            </button>
+            {['left', 'center', 'right'].map((align) => (
+              <button 
+                key={align}
+                type="button"
+                onClick={() => updateSelectedLayer({ align })}
+                className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold border uppercase transition-all ${selectedLayer.align === align ? 'bg-rose-500 border-rose-600 text-white' : 'bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'}`}
+              >
+                {align.charAt(0)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Positions coordinate controls */}
       <div className="space-y-2">
@@ -714,122 +1171,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
         </div>
       )}
 
-      {/* TEXT PROPERTIES */}
-      {selectedLayer.type === 'text' && (
-        <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-zinc-850">
-          <h5 className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Thông số Văn Bản</h5>
-          
-          <div>
-            <label className="text-[8px] text-slate-400 font-bold block mb-1">Nội dung chữ</label>
-            <textarea 
-              rows={2}
-              value={selectedLayer.text || ''}
-              onChange={e => updateSelectedLayer({ text: e.target.value })}
-              className="w-full p-2 rounded-lg bg-slate-50 border text-xs font-semibold"
-            />
-          </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-[8px] text-slate-400 font-bold block mb-1">Kích cỡ font</label>
-              <input 
-                type="number" 
-                value={selectedLayer.fontSize || 24}
-                onChange={e => updateSelectedLayer({ fontSize: parseInt(e.target.value) || 12 })}
-                className="w-full px-2 h-8 rounded-lg bg-slate-50 border text-xs"
-              />
-            </div>
-            <div>
-              <label className="text-[8px] text-slate-400 font-bold block mb-1">Họ Font (Font Family)</label>
-              <select 
-                value={selectedLayer.fontFamily || 'sans-serif'}
-                onChange={e => updateSelectedLayer({ fontFamily: e.target.value })}
-                className="w-full px-2 h-8 rounded-lg bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-[10px]"
-              >
-                <option value="sans-serif">Sans Serif</option>
-                <option value="serif">Classic Serif</option>
-                <option value="monospace">Monospace</option>
-                <option value="cursive">Cursive Hand</option>
-                <option value="system-ui">System Default</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-[8px] text-slate-400 font-bold block mb-1">Cách chữ (spacing)</label>
-              <input 
-                type="number" 
-                value={selectedLayer.letterSpacing || 0}
-                onChange={e => updateSelectedLayer({ letterSpacing: parseInt(e.target.value) || 0 })}
-                className="w-full px-2 h-8 rounded-lg bg-slate-50 border text-xs"
-              />
-            </div>
-            <div>
-              <label className="text-[8px] text-slate-400 font-bold block mb-1">Viền chữ (stroke px)</label>
-              <input 
-                type="number" 
-                value={selectedLayer.strokeSize || 0}
-                onChange={e => updateSelectedLayer({ strokeSize: parseInt(e.target.value) || 0 })}
-                className="w-full px-2 h-8 rounded-lg bg-slate-50 border text-xs"
-              />
-            </div>
-          </div>
-
-          {selectedLayer.strokeSize > 0 && (
-            <div>
-              <label className="text-[8px] text-slate-400 font-bold block mb-1">Màu viền chữ</label>
-              <input 
-                type="color" 
-                value={selectedLayer.strokeColor || '#ffffff'}
-                onChange={e => updateSelectedLayer({ strokeColor: e.target.value })}
-                className="w-8 h-8 rounded-lg cursor-pointer"
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="text-[8px] text-slate-400 font-bold block mb-1">Định dạng chữ</label>
-            <div className="flex gap-1.5">
-              <button 
-                onClick={() => updateSelectedLayer({ fontWeight: selectedLayer.fontWeight === 'bold' ? 'normal' : 'bold' })}
-                className={`flex-1 py-1 rounded text-xs font-black border ${selectedLayer.fontWeight === 'bold' ? 'bg-slate-200 border-slate-350' : 'bg-white'}`}
-              >
-                B
-              </button>
-              <button 
-                onClick={() => updateSelectedLayer({ fontStyle: selectedLayer.fontStyle === 'italic' ? 'normal' : 'italic' })}
-                className={`flex-1 py-1 rounded text-xs italic border ${selectedLayer.fontStyle === 'italic' ? 'bg-slate-200 border-slate-350' : 'bg-white'}`}
-              >
-                I
-              </button>
-              {['left', 'center', 'right'].map((align) => (
-                <button 
-                  key={align}
-                  onClick={() => updateSelectedLayer({ align })}
-                  className={`flex-1 py-1 rounded text-[9px] font-bold border uppercase ${selectedLayer.align === align ? 'bg-slate-200 border-slate-350' : 'bg-white'}`}
-                >
-                  {align.charAt(0)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="text-[8px] text-slate-400 font-bold block mb-1">Màu sắc chữ</label>
-            <div className="flex gap-2 items-center">
-              <input 
-                type="color" 
-                value={selectedLayer.fontColor || '#1e293b'}
-                onChange={e => updateSelectedLayer({ fontColor: e.target.value })}
-                className="w-8 h-8 rounded-lg cursor-pointer"
-              />
-              <span className="text-xs font-mono font-bold text-slate-500">{selectedLayer.fontColor}</span>
-            </div>
-          </div>
-
-        </div>
-      )}
 
       {/* LOGO PROPERTIES */}
       {selectedLayer.type === 'logo' && (

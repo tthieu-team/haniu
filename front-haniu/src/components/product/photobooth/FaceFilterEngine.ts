@@ -849,25 +849,61 @@ export async function initFaceLandmarker(): Promise<FaceLandmarker | null> {
   }
 }
 
+// ─── Suppress Benign TFLite WASM Logs ────────────────────────
+// Emscripten WASM routes stderr (including benign TFLite INFO/delegate creation messages) to console.error.
+// In Next.js dev mode, any call to console.error displays a red error overlay. We filter these benign messages out.
+if (typeof window !== 'undefined') {
+  const isTFLiteInfo = (arg: any): boolean => {
+    if (typeof arg === 'string') {
+      return (
+        arg.includes('TensorFlow Lite') ||
+        arg.includes('XNNPACK') ||
+        arg.includes('INFO: Created TensorFlow')
+      );
+    }
+    if (arg && typeof arg.message === 'string') {
+      return (
+        arg.message.includes('TensorFlow Lite') ||
+        arg.message.includes('XNNPACK') ||
+        arg.message.includes('INFO: Created TensorFlow')
+      );
+    }
+    return false;
+  };
+
+  const origConsoleError = console.error;
+  console.error = (...args: any[]) => {
+    if (args.some(isTFLiteInfo)) {
+      return;
+    }
+    origConsoleError.apply(console, args);
+  };
+}
+
 export function destroyFaceLandmarker() {
   if (faceLandmarkerInstance) {
+    const instance = faceLandmarkerInstance;
+    faceLandmarkerInstance = null;
+
     // Suppress MediaPipe WASM internal logs during close()
     const origWarn = console.warn;
     const origLog = console.log;
     const origInfo = console.info;
+    const origError = console.error;
     console.warn = () => {};
     console.log = () => {};
     console.info = () => {};
+    console.error = () => {};
     try {
-      faceLandmarkerInstance.close();
+      instance.close();
     } catch {
       // Ignore close errors
     } finally {
       console.warn = origWarn;
       console.log = origLog;
       console.info = origInfo;
+      console.error = origError;
     }
-    faceLandmarkerInstance = null;
   }
   sparkleParticles = [];
 }

@@ -23,12 +23,29 @@ export const generateComposition = async (
   // Helper to resolve font families
   const resolveFont = (fontKey?: string) => {
     switch (fontKey) {
-      case 'dancing-script': return '"Dancing Script", cursive';
-      case 'patrick-hand': return '"Patrick Hand", cursive';
-      case 'mali': return '"Mali", cursive';
-      case 'cormorant-garamond': return '"Cormorant Garamond", serif';
-      case 'be-vietnam-pro': return '"Be Vietnam Pro", sans-serif';
-      default: return fontKey || '"Be Vietnam Pro", sans-serif';
+      case 'dancing-script':
+      case 'Dancing Script':
+        return '"Dancing Script", cursive';
+      case 'patrick-hand':
+      case 'Patrick Hand':
+        return '"Patrick Hand", "Mali", cursive';
+      case 'caveat':
+      case 'Caveat':
+        return '"Caveat", cursive';
+      case 'itim':
+      case 'Itim':
+        return '"Itim", cursive';
+      case 'mali':
+      case 'Mali':
+        return '"Mali", cursive';
+      case 'cormorant-garamond':
+      case 'Cormorant Garamond':
+        return '"Cormorant Garamond", serif';
+      case 'be-vietnam-pro':
+      case 'Be Vietnam Pro':
+        return '"Be Vietnam Pro", sans-serif';
+      default:
+        return fontKey || '"Patrick Hand", "Mali", cursive';
     }
   };
 
@@ -320,8 +337,43 @@ export const generateComposition = async (
           ctx.translate(-(posX + rectW / 2), -(posY + rectH / 2));
         }
         ctx.globalAlpha = (layer.opacity ?? 100) / 100;
+
+        // Draw Text Background (Highlight band / badge / box)
+        const bgCol = layer.backgroundColor || layer.bg;
+        if (bgCol && bgCol !== 'transparent') {
+          ctx.fillStyle = bgCol;
+          const bgPadding = (layer.bgPadding ?? 0) * (canvas.width / 400);
+          const scaledFontSize = (layer.fontSize || 24) * (canvas.width / 400);
+          const bgW = rectW + bgPadding * 2;
+          const bgH = Math.max(rectH, scaledFontSize * 1.2) + bgPadding * 2;
+          const bgX = posX - bgPadding;
+          const bgY = posY + (rectH - bgH) / 2;
+          const bgRadius = (layer.bgRadius ?? 0) >= 40 ? Math.min(bgW, bgH) / 2 : (layer.bgRadius ?? 0) * (canvas.width / 400);
+
+          if (bgRadius > 0 && typeof (ctx as any).roundRect === 'function') {
+            ctx.beginPath();
+            (ctx as any).roundRect(bgX, bgY, bgW, bgH, bgRadius);
+            ctx.fill();
+          } else if (bgRadius > 0) {
+            ctx.beginPath();
+            ctx.moveTo(bgX + bgRadius, bgY);
+            ctx.lineTo(bgX + bgW - bgRadius, bgY);
+            ctx.quadraticCurveTo(bgX + bgW, bgY, bgX + bgW, bgY + bgRadius);
+            ctx.lineTo(bgX + bgW, bgY + bgH - bgRadius);
+            ctx.quadraticCurveTo(bgX + bgW, bgY + bgH, bgX + bgW - bgRadius, bgY + bgH);
+            ctx.lineTo(bgX + bgRadius, bgY + bgH);
+            ctx.quadraticCurveTo(bgX, bgY + bgH, bgX, bgY + bgH - bgRadius);
+            ctx.lineTo(bgX, bgY + bgRadius);
+            ctx.quadraticCurveTo(bgX, bgY, bgX + bgRadius, bgY);
+            ctx.closePath();
+            ctx.fill();
+          } else {
+            ctx.fillRect(bgX, bgY, bgW, bgH);
+          }
+        }
+
         const uFont = resolveFont(layer.fontFamily);
-        ctx.fillStyle = layer.fontColor || '#1e293b';
+        ctx.fillStyle = layer.fontColor || '#2b2b2b';
         const scaledFontSize = (layer.fontSize || 24) * (canvas.width / 400);
         ctx.font = `${layer.fontStyle || 'normal'} ${layer.fontWeight || 'bold'} ${scaledFontSize}px ${uFont}`;
         ctx.textAlign = (layer.align || 'center') as CanvasTextAlign;
@@ -734,6 +786,14 @@ export const generateComposition = async (
 
   const isEmoji = (url: string) => !url.startsWith('http') && !url.startsWith('data:') && !url.startsWith('/') && !url.startsWith('icon:');
 
+  const splitGraphemes = (text: string): string[] => {
+    if (typeof Intl !== 'undefined' && (Intl as any).Segmenter) {
+      const seg = new (Intl as any).Segmenter('en', { granularity: 'grapheme' });
+      return Array.from(seg.segment(text), (s: any) => s.segment).filter((c: string) => c.trim() !== '');
+    }
+    return Array.from(text).filter((c: string) => c.trim() !== '');
+  };
+
   for (let i = 0; i < stickers.length; i++) {
     const s = stickers[i];
     
@@ -742,6 +802,18 @@ export const generateComposition = async (
     const posY = (s.y / 100) * canvas.height;
     ctx.translate(posX, posY);
     ctx.rotate(s.rotation);
+    ctx.globalAlpha = s.opacity !== undefined ? s.opacity : 1;
+
+    // Apply configurable shadow
+    const shadowColor = s.shadowColor !== undefined ? s.shadowColor : 'rgba(0,0,0,0.25)';
+    const shadowBlur = s.shadowBlur !== undefined ? s.shadowBlur : 10;
+    if (shadowBlur > 0 && shadowColor !== 'transparent') {
+      ctx.shadowColor = shadowColor;
+      ctx.shadowBlur = shadowBlur * (canvas.width / 400);
+    } else {
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+    }
 
     if (s.url.startsWith('icon:')) {
       const iconKey = s.url.replace('icon:', '');
@@ -751,6 +823,9 @@ export const generateComposition = async (
         if (s.color) {
           finalSvg = finalSvg.replace(/stroke="#[0-9a-fA-F]{6}"/g, `stroke="${s.color}"`);
           finalSvg = finalSvg.replace(/fill="#[0-9a-fA-F]{6}"/g, `fill="${s.color}"`);
+        }
+        if (s.strokeWidth !== undefined) {
+          finalSvg = finalSvg.replace(/stroke-width="[0-9.]+"/g, `stroke-width="${s.strokeWidth}"`);
         }
         const svgUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(finalSvg)));
         const img = await new Promise<HTMLImageElement>((resolve) => {
@@ -768,14 +843,58 @@ export const generateComposition = async (
         }
       }
     } else if (isEmoji(s.url)) {
-      // Draw Emoji as Text
-      const fontSize = canvas.width * 0.12 * s.scale;
-      ctx.font = `${fontSize}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.shadowColor = 'rgba(0,0,0,0.3)';
-      ctx.shadowBlur = 15;
-      ctx.fillText(s.url, 0, 0);
+      // Draw Emoji as Text with layout & spacing support
+      const glyphs = splitGraphemes(s.url);
+      const fontFam = s.fontFamily ? resolveFont(s.fontFamily) : '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+      const fontSize = (s.fontSize ? s.fontSize * (canvas.width / 400) : canvas.width * 0.10) * s.scale;
+      const spacingPx = (s.spacing !== undefined ? s.spacing : 4) * (canvas.width / 400) * s.scale;
+      const weight = s.fontWeight === 'thin' ? '300' : s.fontWeight === 'bold' ? 'bold' : 'normal';
+      ctx.font = `${weight} ${fontSize}px ${fontFam}`;
+
+      const align = (s.textAlign || 'center') as CanvasTextAlign;
+      const baseline = (s.textBaseline || 'middle') as CanvasTextBaseline;
+      ctx.textAlign = align;
+      ctx.textBaseline = baseline;
+
+      if (glyphs.length <= 1) {
+        ctx.fillText(s.url, 0, 0);
+      } else {
+        const layout = s.layout || 'horizontal';
+        if (layout === 'vertical') {
+          const stepY = fontSize + spacingPx;
+          const totalH = (glyphs.length - 1) * stepY;
+          let startY = baseline === 'top' ? 0 : baseline === 'bottom' ? -totalH : -totalH / 2;
+          for (const g of glyphs) {
+            ctx.fillText(g, 0, startY);
+            startY += stepY;
+          }
+        } else if (layout === 'grid') {
+          const cols = 2;
+          const rows = Math.ceil(glyphs.length / cols);
+          const stepX = fontSize + spacingPx;
+          const stepY = fontSize + spacingPx;
+          const totalW = (cols - 1) * stepX;
+          const totalH = (rows - 1) * stepY;
+          const startXOffset = align === 'left' ? 0 : align === 'right' ? -totalW : -totalW / 2;
+          const startYOffset = baseline === 'top' ? 0 : baseline === 'bottom' ? -totalH : -totalH / 2;
+          for (let k = 0; k < glyphs.length; k++) {
+            const col = k % cols;
+            const row = Math.floor(k / cols);
+            const gx = startXOffset + col * stepX;
+            const gy = startYOffset + row * stepY;
+            ctx.fillText(glyphs[k], gx, gy);
+          }
+        } else {
+          // Default horizontal
+          const stepX = fontSize + spacingPx;
+          const totalW = (glyphs.length - 1) * stepX;
+          let startX = align === 'left' ? 0 : align === 'right' ? -totalW : -totalW / 2;
+          for (const g of glyphs) {
+            ctx.fillText(g, startX, 0);
+            startX += stepX;
+          }
+        }
+      }
     } else {
       // Draw Image Sticker
       const img = await new Promise<HTMLImageElement>((resolve) => {
@@ -813,52 +932,54 @@ export const generateComposition = async (
     }
   }
 
-  // 4. Draw Premium Branding (Adjusted to Haniu with drag-drop coordinates and fonts)
-  ctx.save();
-  const bottomY = canvas.height - 80;
+  // 4. Draw Premium Branding (Only for legacy basic templates without design layers, and only if explicitly set)
+  const hasCustomLayers = template.layers && template.layers.length > 0;
+  if (!hasCustomLayers && ((config.userName && config.userName.trim() !== '') || config.showDate)) {
+    ctx.save();
+    const bottomY = canvas.height - 80;
 
-  // Subtle Divider (Draw only if custom positions aren't overriding it entirely)
-  const isCustomized = config.userNameX !== undefined || config.userNameY !== undefined || config.dateX !== undefined || config.dateY !== undefined;
-  if (!isCustomized) {
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-    ctx.lineWidth = 1;
-    ctx.moveTo(100, bottomY - 20);
-    ctx.lineTo(canvas.width - 100, bottomY - 20);
-    ctx.stroke();
-  }
+    // Subtle Divider (Draw only if custom positions aren't overriding it entirely)
+    const isCustomized = config.userNameX !== undefined || config.userNameY !== undefined || config.dateX !== undefined || config.dateY !== undefined;
+    if (!isCustomized) {
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+      ctx.lineWidth = 1;
+      ctx.moveTo(100, bottomY - 20);
+      ctx.lineTo(canvas.width - 100, bottomY - 20);
+      ctx.stroke();
+    }
 
-  // Branding Text
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  
-  // User Name / Main Brand
-  if (config.userName !== '') {
-    const uFont = resolveFont(config.userNameFont || 'cormorant-garamond');
-    ctx.fillStyle = config.userNameColor || '#e11d48';
-    ctx.font = `bold ${config.userNameSize || 36}px ${uFont}`;
+    // Branding Text
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     
-    const userX = config.userNameX !== undefined ? (config.userNameX / 100) * canvas.width : canvas.width / 2;
-    const userY = config.userNameY !== undefined ? (config.userNameY / 100) * canvas.height : bottomY + 10;
-    
-    const brandTitle = config.userName || 'HANIU STUDIO';
-    ctx.fillText(brandTitle, userX, userY);
-  }
+    // User Name / Main Brand
+    if (config.userName && config.userName.trim() !== '') {
+      const uFont = resolveFont(config.userNameFont || 'cormorant-garamond');
+      ctx.fillStyle = config.userNameColor || '#e11d48';
+      ctx.font = `bold ${config.userNameSize || 36}px ${uFont}`;
+      
+      const userX = config.userNameX !== undefined ? (config.userNameX / 100) * canvas.width : canvas.width / 2;
+      const userY = config.userNameY !== undefined ? (config.userNameY / 100) * canvas.height : bottomY + 10;
+      
+      ctx.fillText(config.userName, userX, userY);
+    }
 
-  // Date / Tagline
-  if (config.showDate) {
-    const dFont = resolveFont(config.dateFont || 'be-vietnam-pro');
-    ctx.fillStyle = config.dateColor || '#64748b';
-    ctx.font = `500 ${config.dateSize || 18}px ${dFont}`;
+    // Date / Tagline
+    if (config.showDate) {
+      const dFont = resolveFont(config.dateFont || 'be-vietnam-pro');
+      ctx.fillStyle = config.dateColor || '#64748b';
+      ctx.font = `500 ${config.dateSize || 18}px ${dFont}`;
+      
+      const dX = config.dateX !== undefined ? (config.dateX / 100) * canvas.width : canvas.width / 2;
+      const dY = config.dateY !== undefined ? (config.dateY / 100) * canvas.height : bottomY + 50;
+      
+      const tagline = new Date().toLocaleDateString('vi-VN');
+      ctx.fillText(tagline, dX, dY);
+    }
     
-    const dX = config.dateX !== undefined ? (config.dateX / 100) * canvas.width : canvas.width / 2;
-    const dY = config.dateY !== undefined ? (config.dateY / 100) * canvas.height : bottomY + 50;
-    
-    const tagline = new Date().toLocaleDateString('vi-VN');
-    ctx.fillText(tagline, dX, dY);
+    ctx.restore();
   }
-  
-  ctx.restore();
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {

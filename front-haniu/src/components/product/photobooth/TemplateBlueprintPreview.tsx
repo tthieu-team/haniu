@@ -33,6 +33,19 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
     };
   }
 
+  const getResolvedFont = (font?: string) => {
+    switch (font) {
+      case 'Patrick Hand': return '"Patrick Hand", "Mali", cursive';
+      case 'Caveat': return '"Caveat", cursive';
+      case 'Mali': return '"Mali", cursive';
+      case 'Itim': return '"Itim", cursive';
+      case 'Dancing Script': return '"Dancing Script", cursive';
+      case 'Be Vietnam Pro': return '"Be Vietnam Pro", sans-serif';
+      case 'Cormorant Garamond': return '"Cormorant Garamond", serif';
+      default: return font || '"Patrick Hand", cursive';
+    }
+  };
+
   return (
     <div 
       className="relative border border-slate-250/80 dark:border-zinc-800 rounded-xl overflow-hidden mb-3 shadow-xs flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shrink-0 w-full"
@@ -53,7 +66,9 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
           const isOverlay = layer.type === 'overlay';
 
           const frameShape = layer.frameShape || 'rect';
-          const borderRadius = (isFrame && frameShape === 'circle') ? '999px' : (isFrame && frameShape !== 'rect' && frameShape !== 'custom' && frameShape !== 'custom-path' ? '0px' : `${layer.cornerRadius ?? 8}px`);
+          const borderRadius = isText
+            ? ((layer.bgRadius ?? 0) >= 40 ? '999px' : `${(layer.bgRadius ?? 0) * 0.15}px`)
+            : (isFrame && frameShape === 'circle') ? '999px' : (isFrame && frameShape !== 'rect' && frameShape !== 'custom' && frameShape !== 'custom-path' ? '0px' : `${layer.cornerRadius ?? 8}px`);
           const clipPath = isFrame && frameShape === 'custom-path' && (layer.framePath || layer.framePolygon)
             ? (layer.framePath ? `url(#clip-preview-layer-${layer.id || idx})` : `polygon(${layer.framePolygon})`)
             : (isFrame && frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom'
@@ -76,11 +91,15 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
                 height: `${layer.height}%`,
                 borderRadius,
                 clipPath,
+                backgroundColor: isText && (layer.backgroundColor || layer.bg) && (layer.backgroundColor || layer.bg) !== 'transparent'
+                  ? (layer.backgroundColor || layer.bg)
+                  : undefined,
                 borderWidth: isFrame && (frameShape === 'rect' || frameShape === 'circle') ? `${layer.borderSize ?? 1.5}px` : '0px',
                 borderColor: isFrame ? layer.borderColor || '#cbd5e1' : 'transparent',
                 borderStyle: isFrame && (layer.borderSize ?? 1.5) > 0 ? 'solid' : 'none',
                 transform: layer.rotation ? `rotate(${layer.rotation}deg)` : 'none',
-                opacity: (layer.opacity ?? 100) / 100
+                opacity: (layer.opacity ?? 100) / 100,
+                zIndex: isText ? 25 : (isOverlay ? 10 : (isFrame ? 5 : (idx + 1)))
               }}
             >
               {isFrame && (
@@ -123,21 +142,34 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
                   <span className="text-[8px] scale-75 text-slate-500 font-black">📸 {layer.order || idx + 1}</span>
                 </>
               )}
-              {isText && (
-                <span 
-                  className="block text-center truncate w-full px-1"
-                  style={{
-                    fontSize: `${(layer.fontSize || 24) * 0.08}px`,
-                    color: layer.fontColor || '#1e293b',
-                    fontFamily: layer.fontFamily || 'sans-serif',
-                    fontWeight: layer.fontWeight || 'bold',
-                    fontStyle: layer.fontStyle || 'normal',
-                    textAlign: (layer.align || 'center') as any
-                  }}
-                >
-                  {layer.text}
-                </span>
-              )}
+              {isText && (() => {
+                const bgCol = layer.backgroundColor || layer.bg;
+                const hasBg = bgCol && bgCol !== 'transparent';
+                const radiusVal = (layer.bgRadius ?? 0) >= 40 ? '999px' : `${(layer.bgRadius ?? 0) * 0.15}px`;
+                return (
+                  <div
+                    className="w-full h-full flex items-center justify-center select-none overflow-hidden"
+                    style={{
+                      backgroundColor: hasBg ? bgCol : 'transparent',
+                      borderRadius: radiusVal,
+                    }}
+                  >
+                    <span 
+                      className="block text-center truncate select-none font-bold px-1"
+                      style={{
+                        fontSize: `${Math.max(6, (layer.fontSize || 24) * 0.22)}px`,
+                        color: layer.fontColor || '#2b2b2b',
+                        fontFamily: getResolvedFont(layer.fontFamily),
+                        fontWeight: layer.fontWeight || 'bold',
+                        fontStyle: layer.fontStyle || 'normal',
+                        textAlign: (layer.align || 'center') as any
+                      }}
+                    >
+                      {layer.text}
+                    </span>
+                  </div>
+                );
+              })()}
               {isSticker && layer.url && (
                 <img src={layer.url} alt="sticker" className="w-full h-full object-contain pointer-events-none" />
               )}

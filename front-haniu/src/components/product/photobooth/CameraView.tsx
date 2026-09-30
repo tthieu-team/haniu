@@ -7,7 +7,6 @@ import { useTranslate } from '@/lib/translator';
 import type { FaceFilterType } from './types';
 import {
   initFaceLandmarker,
-  destroyFaceLandmarker,
   detectFaceLandmarks,
   renderFaceFilter,
 } from './FaceFilterEngine';
@@ -159,15 +158,41 @@ export const CameraView: React.FC<CameraViewProps> = ({
     }
   }, [stream]);
 
-  // ─── FaceLandmarker Preload (eager) ─────────────────────────
-  // Start loading the AI model as soon as camera stream is available.
-  // This ensures zero lag when user picks a face filter.
+  // ─── FaceLandmarker Preload (eager) with Warmup ──────────────
+  // Start loading the AI model as soon as camera stream is available,
+  // and run a silent warmup pass so WebGL shaders are compiled in background.
   useEffect(() => {
     if (stream && !faceLandmarkerRef.current) {
       onFaceFilterLoading?.(true);
       initFaceLandmarker().then((landmarker) => {
         faceLandmarkerRef.current = landmarker;
-        onFaceFilterLoading?.(false);
+        if (landmarker) {
+          const video = videoRef.current;
+          const doWarmup = () => {
+            try {
+              if (video && video.videoWidth > 0 && video.readyState >= 2) {
+                const detected = landmarker.detectForVideo(video, performance.now());
+                if (detected?.faceLandmarks?.[0]) {
+                  cachedLandmarksRef.current = detected.faceLandmarks[0];
+                }
+              }
+            } catch {
+              // Ignore warmup error
+            } finally {
+              onFaceFilterLoading?.(false);
+            }
+          };
+
+          if (video && video.readyState >= 2 && video.videoWidth > 0) {
+            setTimeout(doWarmup, 150);
+          } else if (video) {
+            video.addEventListener('loadeddata', () => setTimeout(doWarmup, 150), { once: true });
+          } else {
+            onFaceFilterLoading?.(false);
+          }
+        } else {
+          onFaceFilterLoading?.(false);
+        }
       });
     }
   }, [stream]);
@@ -305,13 +330,13 @@ export const CameraView: React.FC<CameraViewProps> = ({
     };
   }, [mirrored]); // Only depend on mirrored — faceFilter is read from ref
 
-  // ─── Cleanup FaceLandmarker on unmount ─────────────────────
+  // ─── Cleanup on unmount ───────────────────────────────────
   useEffect(() => {
     return () => {
       if (animFrameRef.current) {
         cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
       }
-      destroyFaceLandmarker();
     };
   }, []);
 

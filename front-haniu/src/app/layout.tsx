@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Be_Vietnam_Pro, Geist_Mono, Dancing_Script, Cormorant_Garamond, Patrick_Hand, Mali } from "next/font/google";
+import { Be_Vietnam_Pro, Geist_Mono, Dancing_Script, Cormorant_Garamond, Patrick_Hand, Mali, Caveat, Itim } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { LanguageProvider } from "@/providers/LanguageProvider";
@@ -41,6 +41,18 @@ const mali = Mali({
   variable: "--font-mali",
   subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600", "700"],
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const itim = Itim({
+  variable: "--font-itim",
+  subsets: ["latin", "vietnamese"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -113,13 +125,13 @@ export default async function RootLayout({
   return (
     <html
       lang={language}
-      className={`${beVietnamPro.variable} ${geistMono.variable} ${dancingScript.variable} ${cormorantGaramond.variable} ${patrickHand.variable} ${mali.variable} h-full antialiased`}
+      className={`${beVietnamPro.variable} ${geistMono.variable} ${dancingScript.variable} ${cormorantGaramond.variable} ${patrickHand.variable} ${mali.variable} ${caveat.variable} ${itim.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100;300;450;500;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dancing+Script:wght@400;600;700&family=Mali:wght@400;500;600;700&family=Patrick+Hand&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100;300;450;500;700;900&family=Caveat:wght@400..700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dancing+Script:wght@400;600;700&family=Itim&family=Mali:wght@400;500;600;700&family=Patrick+Hand&display=swap" rel="stylesheet" />
         <script
           id="theme-initializer"
           dangerouslySetInnerHTML={{

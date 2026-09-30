@@ -104,18 +104,34 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
     setSelectedLayerId(newLayer.id);
   };
 
-  const handleAddTextLayer = () => {
+  const getResolvedFontFamily = (font?: string) => {
+    switch (font) {
+      case 'Patrick Hand': return '"Patrick Hand", "Mali", cursive';
+      case 'Caveat': return '"Caveat", cursive';
+      case 'Mali': return '"Mali", cursive';
+      case 'Itim': return '"Itim", cursive';
+      case 'Dancing Script': return '"Dancing Script", cursive';
+      case 'Be Vietnam Pro': return '"Be Vietnam Pro", sans-serif';
+      case 'Cormorant Garamond': return '"Cormorant Garamond", serif';
+      default: return font || '"Patrick Hand", "Mali", cursive';
+    }
+  };
+
+  const handleAddTextLayer = (withBackground: boolean = true) => {
     const newLayer = {
       id: 'l-txt-' + Date.now(),
       type: 'text',
-      text: 'HANIU PHOTOBOOTH',
-      x: 25,
-      y: 75,
-      width: 50,
+      text: '2 NĂM yêu nhau ♡',
+      x: 28,
+      y: 5,
+      width: 44,
       height: 8,
-      fontSize: 28,
-      fontColor: '#1e293b',
-      fontFamily: 'sans-serif',
+      fontSize: 26,
+      fontColor: '#2b2b2b',
+      fontFamily: 'Patrick Hand',
+      backgroundColor: withBackground ? '#fad2d8' : 'transparent',
+      bgRadius: 999,
+      bgPadding: 8,
       fontWeight: 'bold',
       fontStyle: 'normal',
       align: 'center',
@@ -610,23 +626,39 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                   )}
 
                   {/* TEXT LAYER RENDERING */}
-                  {layer.type === 'text' && (
-                    <span 
-                      className="block text-center select-none truncate w-full font-bold px-1"
-                      style={{
-                        fontSize: `${(layer.fontSize || 24) * 0.25 * canvasZoom}px`,
-                        color: layer.fontColor || '#1e293b',
-                        fontFamily: layer.fontFamily || 'sans-serif',
-                        fontWeight: layer.fontWeight || 'bold',
-                        fontStyle: layer.fontStyle || 'normal',
-                        textAlign: (layer.align || 'center') as any,
-                        letterSpacing: `${layer.letterSpacing || 0}px`,
-                        WebkitTextStroke: strokeStyle
-                      }}
-                    >
-                      {layer.text}
-                    </span>
-                  )}
+                  {layer.type === 'text' && (() => {
+                    const textScale = 0.75 * canvasZoom;
+                    const bgCol = layer.backgroundColor || layer.bg;
+                    const hasBg = bgCol && bgCol !== 'transparent';
+                    const radiusVal = (layer.bgRadius ?? 0) >= 40 ? '999px' : `${(layer.bgRadius ?? 0) * textScale}px`;
+                    
+                    return (
+                      <div
+                        className="w-full h-full flex items-center justify-center select-none overflow-visible transition-all"
+                        style={{
+                          backgroundColor: hasBg ? bgCol : 'transparent',
+                          borderRadius: radiusVal,
+                          boxShadow: hasBg && layer.shadowColor ? shadowStyle : 'none'
+                        }}
+                      >
+                        <span 
+                          className="block text-center select-none whitespace-pre-wrap leading-tight font-bold px-1"
+                          style={{
+                            fontSize: `${Math.max(10, (layer.fontSize || 24) * textScale)}px`,
+                            color: layer.fontColor || '#2b2b2b',
+                            fontFamily: getResolvedFontFamily(layer.fontFamily),
+                            fontWeight: layer.fontWeight || 'bold',
+                            fontStyle: layer.fontStyle || 'normal',
+                            textAlign: (layer.align || 'center') as any,
+                            letterSpacing: `${layer.letterSpacing || 0}px`,
+                            WebkitTextStroke: strokeStyle
+                          }}
+                        >
+                          {layer.text}
+                        </span>
+                      </div>
+                    );
+                  })()}
 
                   {/* STICKER LAYER RENDERING */}
                   {layer.type === 'sticker' && (

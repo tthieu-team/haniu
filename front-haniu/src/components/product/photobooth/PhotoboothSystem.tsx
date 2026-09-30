@@ -20,6 +20,7 @@ import { DEFAULT_TEMPLATES } from './templates';
 import { playSound } from './sounds';
 import { StartModeOverlay } from './StartModeOverlay';
 import { FaceFilterSelector } from './FaceFilterSelector';
+import { destroyFaceLandmarker } from './FaceFilterEngine';
 import { photoboothService } from '@/services/photobooth.service';
 import { usePhotoboothStore } from '@/store/photobooth';
 import { PhotoboothTemplate } from './types';
@@ -72,14 +73,21 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
     fetchPhotoboothData();
   }, [fetchPhotoboothData]);
 
+  // Clean up FaceLandmarker AI resources when user exits the Photobooth modal
+  useEffect(() => {
+    return () => {
+      destroyFaceLandmarker();
+    };
+  }, []);
+
   useEffect(() => {
     if (settings) {
       setConfig(prev => ({
         ...prev,
         countdown: settings.countdown,
         frameColor: settings.defaultFrameColor,
-        userName: settings.watermarkText,
-        showDate: settings.showDate
+        userName: '',
+        showDate: false
       }));
     }
   }, [settings]);
@@ -363,40 +371,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
               );
             })()}
 
-            {/* Face AI Loading Overlay — block interaction until model is ready */}
-            {faceFilterLoading && cameraReady && (
-              <div className="absolute inset-0 z-45 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-4">
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="bg-zinc-900/90 border border-white/10 rounded-2xl p-6 flex flex-col items-center gap-4 max-w-xs shadow-2xl"
-                >
-                  <div className="relative w-14 h-14">
-                    <div className="absolute inset-0 rounded-full border-3 border-white/10" />
-                    <div className="absolute inset-0 rounded-full border-3 border-t-rose-500 animate-spin" />
-                    <div className="absolute inset-0 flex items-center justify-center text-lg">🤖</div>
-                  </div>
-                  <div className="text-center">
-                    <h4 className="text-xs font-black text-white uppercase tracking-wider">
-                      {trans('Đang tải Face AI')}
-                    </h4>
-                    <p className="text-[9px] text-zinc-400 mt-1">
-                      {trans('Mô hình nhận diện khuôn mặt đang được khởi tạo...')}
-                    </p>
-                  </div>
-                  <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
-                    <motion.div
-                      className="h-full bg-gradient-to-r from-rose-500 to-pink-500 rounded-full"
-                      initial={{ width: '10%' }}
-                      animate={{ width: '90%' }}
-                      transition={{ duration: 8, ease: 'easeOut' }}
-                    />
-                  </div>
-                </motion.div>
-              </div>
-            )}
-
-            {!hasSelectedCaptureMode && cameraReady && !faceFilterLoading && (
+            {!hasSelectedCaptureMode && cameraReady && (
               <StartModeOverlay
                 onSelect={(mode) => {
                   setCaptureMode(mode);
@@ -471,16 +446,14 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
 
 
 
-            {/* Bottom Controls */}
-            <div className="absolute bottom-4 left-4 right-4 z-40 flex flex-col gap-2.5">
-              {/* Row 1: Face Filters */}
-              <div className="flex justify-center">
-                <FaceFilterSelector
-                  activeFilter={faceFilter}
-                  onSelect={setFaceFilter}
-                  isLoading={faceFilterLoading}
-                />
-              </div>
+            {/* Right Side Vertical Face Filters */}
+            <div className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40">
+              <FaceFilterSelector
+                activeFilter={faceFilter}
+                onSelect={setFaceFilter}
+                isLoading={faceFilterLoading}
+                orientation="vertical"
+              />
             </div>
           </motion.div>
         )}
@@ -546,39 +519,46 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
               </div>
 
               {/* Grid of Options */}
-              <div className="grid grid-cols-2 gap-3 w-full">
-                <button
-                  onClick={() => setStep('edit-frame')}
-                  className="aspect-square rounded-2xl border border-dashed border-rose-300 hover:border-rose-500 hover:bg-rose-500/5 text-slate-800 dark:text-zinc-100 flex flex-col items-center justify-center gap-2 p-3 text-center transition-all cursor-pointer hover:scale-103 active:scale-95 shadow-xs w-full"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
-                    <Icon name="palette" size={18} />
-                  </div>
-                  <div>
-                    <p className="font-black text-[10px] uppercase tracking-wide">{trans("Chữ ký & Ngày")}</p>
-                    <p className="text-[7.5px] text-muted-color font-normal mt-0.5 leading-tight">{trans("Thêm chữ ký cá nhân và ngày chụp.")}</p>
-                  </div>
-                </button>
+              {(() => {
+                const hasTextLayers = Boolean(config.template?.layers?.some((l: any) => l.type === 'text'));
+                return (
+                  <div className={`grid gap-3 w-full ${hasTextLayers ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                    {hasTextLayers && (
+                      <button
+                        onClick={() => setStep('edit-frame')}
+                        className="aspect-square rounded-2xl border border-dashed border-rose-300 hover:border-rose-500 hover:bg-rose-500/5 text-slate-800 dark:text-zinc-100 flex flex-col items-center justify-center gap-2 p-3 text-center transition-all cursor-pointer hover:scale-103 active:scale-95 shadow-xs w-full"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
+                          <Icon name="palette" size={18} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-xs uppercase tracking-wide">{trans("Chỉnh sửa chữ")}</p>
+                          <p className="text-[10px] text-muted-color font-normal mt-0.5 leading-tight">{trans("Sửa đổi các dòng chữ trên khung hình.")}</p>
+                        </div>
+                      </button>
+                    )}
 
-                <button
-                  onClick={() => setStep('editing')}
-                  className="aspect-square rounded-2xl border border-dashed border-rose-300 hover:border-rose-500 hover:bg-rose-500/5 text-slate-800 dark:text-zinc-100 flex flex-col items-center justify-center gap-2 p-3 text-center transition-all cursor-pointer hover:scale-103 active:scale-95 shadow-xs w-full"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
-                    <Icon name="heart" size={18} />
+                    <button
+                      onClick={() => setStep('editing')}
+                      className={`${hasTextLayers ? 'aspect-square' : 'py-6'} rounded-2xl border border-dashed border-rose-300 hover:border-rose-500 hover:bg-rose-500/5 text-slate-800 dark:text-zinc-100 flex flex-col items-center justify-center gap-2 p-3 text-center transition-all cursor-pointer hover:scale-103 active:scale-95 shadow-xs w-full`}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
+                        <Icon name="heart" size={18} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-xs uppercase tracking-wide">{trans("Trang trí Sticker")}</p>
+                        <p className="text-[10px] text-muted-color font-normal mt-0.5 leading-tight">{trans("Dán nhãn biểu tượng Haniu hoặc emoji.")}</p>
+                      </div>
+                    </button>
                   </div>
-                  <div>
-                    <p className="font-black text-[10px] uppercase tracking-wide">{trans("Trang trí Sticker")}</p>
-                    <p className="text-[7.5px] text-muted-color font-normal mt-0.5 leading-tight">{trans("Dán nhãn biểu tượng Haniu hoặc emoji.")}</p>
-                  </div>
-                </button>
-              </div>
+                );
+              })()}
 
               {/* Action Buttons in Sidebar */}
               <div className="pt-4 border-t border-border-color space-y-3">
                 <button
                   onClick={() => setStep('result')}
-                  className="w-full h-11 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-[11px] uppercase tracking-wider shadow-md shadow-rose-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98"
+                  className="w-full h-11 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-rose-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98"
                 >
                   <Icon name="check" size={14} />
                   {trans("Xem kết quả & Hoàn tất")}
@@ -586,7 +566,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
 
                 <button
                   onClick={() => handleConfirmFinal(resultBlob!, false)}
-                  className="w-full h-10 rounded-xl border border-border-color hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-350 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  className="w-full h-10 rounded-xl border border-border-color hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-350 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                 >
 
                   <Icon name="camera" size={12} className="text-rose-500" />

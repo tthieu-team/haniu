@@ -14,7 +14,7 @@ interface LeftToolboxProps {
   setSelectedLayerId: (id: string | null) => void;
   assets: any;
   handleAddFrameLayer: () => void;
-  handleAddTextLayer: () => void;
+  handleAddTextLayer: (withBackground?: boolean) => void;
   handleAddShapeLayer: (shape: 'rect' | 'circle' | 'triangle' | 'heart' | 'star') => void;
   handleAddStickerLayer: (url: string) => void;
   handleAddLogoLayer: (url: string) => void;
@@ -118,23 +118,52 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
           <button 
             onClick={handleAddFrameLayer}
             className="h-16 border border-dashed border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-rose-600 cursor-pointer transition-all"
+            title="Thêm khung chứa ảnh photobooth"
           >
             <span className="text-lg">📸</span>
             <span className="text-[9px] font-black uppercase tracking-wider font-sans">Khung Ảnh</span>
           </button>
+          
           <button 
-            onClick={handleAddTextLayer}
-            className="h-16 border border-dashed border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-rose-600 cursor-pointer transition-all"
+            onClick={() => handleAddTextLayer(true)}
+            className="h-16 border border-rose-300 dark:border-rose-800 bg-rose-50/80 dark:bg-rose-950/40 hover:bg-rose-100 hover:border-rose-400 rounded-2xl flex flex-col items-center justify-center gap-1 text-rose-600 dark:text-rose-300 cursor-pointer transition-all shadow-xs group"
+            title="Thêm văn bản viết tay có màu nền pastel (#fad2d8) chuẩn ảnh mẫu"
           >
-            <span className="text-lg">🖋️</span>
+            <div className="relative">
+              <span className="text-lg group-hover:scale-110 transition-transform inline-block">🖋️</span>
+              <span className="absolute -top-1 -right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            </div>
             <span className="text-[9px] font-black uppercase tracking-wider font-sans">Văn Bản</span>
           </button>
+
           <button 
             onClick={handleAddOverlayLayer}
             className="h-16 border border-dashed border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-rose-600 cursor-pointer transition-all"
+            title="Thêm lớp phủ ảnh trong suốt overlay"
           >
             <span className="text-lg">🖼️</span>
             <span className="text-[9px] font-black uppercase tracking-wider font-sans">Lớp Phủ</span>
+          </button>
+        </div>
+
+        {/* Nút thêm nhanh chữ phong cách vẽ tay */}
+        <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+          <button 
+            onClick={() => handleAddTextLayer(true)}
+            className="py-1.5 px-2 rounded-xl bg-rose-100/70 hover:bg-rose-200/80 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 text-[9px] font-black flex items-center justify-center gap-1 cursor-pointer transition-all"
+            title="Thêm chữ có vệt màu hồng pastel (#fad2d8)"
+          >
+            <span>🏷️</span>
+            <span>Chữ Có Nền Pastel</span>
+          </button>
+          
+          <button 
+            onClick={() => handleAddTextLayer(false)}
+            className="py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 text-[9px] font-black flex items-center justify-center gap-1 cursor-pointer transition-all"
+            title="Thêm chữ viết tay không màu nền (trong suốt)"
+          >
+            <span>✍️</span>
+            <span>Chữ Không Nền</span>
           </button>
         </div>
       </div>

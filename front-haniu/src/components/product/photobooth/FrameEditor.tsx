@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon from '@/components/common/Icons';
 import { CapturedPhoto, PhotoboothConfig, Sticker } from './types';
 import { generateComposition } from './composition';
@@ -15,14 +15,14 @@ interface FrameEditorProps {
   onCancel: () => void;
 }
 
-const TRENDY_COLORS = [
-  { name: 'Trắng tinh khôi', value: '#ffffff' },
-  { name: 'Kem sữa ngọt', value: '#faf7f2' },
-  { name: 'Hồng phấn pastel', value: '#fff0f2' },
-  { name: 'Xanh matcha', value: '#f1f8e9' },
-  { name: 'Tím oải hương', value: '#f3e5f5' },
-  { name: 'Xanh da trời', value: '#e3f2fd' },
-  { name: 'Đen Matte cổ điển', value: '#18181b' },
+const AVAILABLE_FONTS = [
+  { id: 'Caveat', name: 'Caveat (Bút dạ nét tay)', font: '"Caveat", cursive' },
+  { id: 'Dancing Script', name: 'Dancing Script (Viết tay mềm)', font: '"Dancing Script", cursive' },
+  { id: 'Patrick Hand', name: 'Patrick Hand (Viết tay mộc)', font: '"Patrick Hand", cursive' },
+  { id: 'Mali', name: 'Mali (Viết tay ngộ nghĩnh)', font: '"Mali", cursive' },
+  { id: 'Itim', name: 'Itim (Bút lông nhẹ nhàng)', font: '"Itim", cursive' },
+  { id: 'Be Vietnam Pro', name: 'Be Vietnam Pro (Hiện đại)', font: '"Be Vietnam Pro", sans-serif' },
+  { id: 'Cormorant Garamond', name: 'Cormorant (Cổ điển)', font: '"Cormorant Garamond", serif' },
 ];
 
 export const FrameEditor: React.FC<FrameEditorProps> = ({
@@ -33,65 +33,39 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
   onCancel,
 }) => {
   const trans = useTranslate();
-  // Local state to modify config copy
   const [localConfig, setLocalConfig] = useState<PhotoboothConfig>({ ...config });
   const [liveUrl, setLiveUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [sliderBorderSize, setSliderBorderSize] = useState(localConfig.borderSize !== undefined ? localConfig.borderSize : 15);
 
-  // Sync slider state when config changes externally
-  useEffect(() => {
-    setSliderBorderSize(localConfig.borderSize !== undefined ? localConfig.borderSize : 15);
-  }, [localConfig.borderSize]);
+  // Extract all text layers from the current template
+  const textLayers = (localConfig.template?.layers || []).filter((l: any) => l.type === 'text');
 
-  const AVAILABLE_FONTS = [
-    { id: 'be-vietnam-pro', name: 'Be Vietnam Pro (Không chân)' },
-    { id: 'cormorant-garamond', name: 'Cormorant Garamond (Có chân)' },
-    { id: 'dancing-script', name: 'Dancing Script (Viết tay mềm)' },
-    { id: 'patrick-hand', name: 'Patrick Hand (Viết tay mộc)' },
-    { id: 'mali', name: 'Mali (Viết tay ngộ nghĩnh)' },
-  ];
-
-  const resolveFont = (fontKey?: string) => {
-    switch (fontKey) {
-      case 'dancing-script': return '"Dancing Script", cursive';
-      case 'patrick-hand': return '"Patrick Hand", cursive';
-      case 'mali': return '"Mali", cursive';
-      case 'cormorant-garamond': return '"Cormorant Garamond", serif';
-      case 'be-vietnam-pro': return '"Be Vietnam Pro", sans-serif';
-      default: return '"Be Vietnam Pro", sans-serif';
-    }
-  };
-
-  // Update Live Preview Composition URL with Debounce - Only when background frame styles change!
+  // Update Live Preview Composition URL with Debounce whenever template text layers change
   useEffect(() => {
     let active = true;
+    setIsGenerating(true);
     const timer = setTimeout(async () => {
       try {
-        // We render the canvas preview WITHOUT signature and date for high performance!
-        const baseConfigForPreview: PhotoboothConfig = {
-          ...localConfig,
-          userName: '',
-          showDate: false
-        };
-        const blob = await generateComposition(photos, baseConfigForPreview, stickers);
+        const blob = await generateComposition(photos, localConfig, stickers);
         const url = URL.createObjectURL(blob);
         if (active) {
           setLiveUrl(prev => {
             if (prev) URL.revokeObjectURL(prev);
             return url;
           });
+          setIsGenerating(false);
         }
       } catch (err) {
         console.error(err);
+        if (active) setIsGenerating(false);
       }
-    }, 150); // 150ms debounce
+    }, 150);
 
     return () => {
       active = false;
       clearTimeout(timer);
     };
-  }, [photos, localConfig.frameColor, localConfig.backgroundImage, localConfig.borderSize, localConfig.filter, stickers]);
+  }, [photos, localConfig, stickers]);
 
   // Cleanup Live URL
   useEffect(() => {
@@ -100,42 +74,40 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
     };
   }, [liveUrl]);
 
-  const handleColorSelect = (colorHex: string) => {
-    playSound('click');
-    setLocalConfig(prev => ({
-      ...prev,
-      frameColor: colorHex,
-      backgroundImage: undefined, // Clear background image when color selected
-    }));
-  };
-
-  const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (reader.result) {
-          setLocalConfig(prev => ({
-            ...prev,
-            backgroundImage: reader.result as string
-          }));
-        }
+  const handleUpdateText = (layerId: string, newText: string) => {
+    setLocalConfig(prev => {
+      const updatedLayers = (prev.template.layers || []).map((l: any) =>
+        l.id === layerId ? { ...l, text: newText } : l
+      );
+      return {
+        ...prev,
+        template: {
+          ...prev.template,
+          layers: updatedLayers,
+        },
       };
-      reader.readAsDataURL(file);
-    }
+    });
   };
 
-  const clearBgImage = () => {
-    setLocalConfig(prev => ({
-      ...prev,
-      backgroundImage: undefined
-    }));
+  const handleUpdateProperty = (layerId: string, property: string, value: any) => {
+    setLocalConfig(prev => {
+      const updatedLayers = (prev.template.layers || []).map((l: any) =>
+        l.id === layerId ? { ...l, [property]: value } : l
+      );
+      return {
+        ...prev,
+        template: {
+          ...prev.template,
+          layers: updatedLayers,
+        },
+      };
+    });
   };
 
   return (
     <div className="w-full h-full bg-background flex flex-col sm:flex-row relative overflow-hidden transition-colors duration-550 min-h-0 text-xs font-semibold text-slate-800 dark:text-zinc-100">
       {/* Top Toolbar */}
-      <div className="absolute top-0 left-0 right-0 z-50 p-4 flex items-center justify-between bg-gradient-to-b from-white dark:from-zinc-950 to-transparent pointer-events-none">
+      <div className="absolute top-0 left-0 right-0 z-50 p-4 flex items-center justify-between bg-gradient-to-b from-white/90 dark:from-zinc-950/90 to-transparent pointer-events-none">
         <button
           onClick={onCancel}
           className="h-9 px-4 rounded-full bg-card-bg border border-border-color text-foreground hover:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-all font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 pointer-events-auto cursor-pointer shadow-xs"
@@ -149,294 +121,221 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
             playSound('click');
             onConfirm(localConfig);
           }}
-          className="px-5 py-2 rounded-xl bg-rose-600 dark:bg-rose-500 text-white text-[10px] font-black uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all flex items-center gap-1 shadow-md cursor-pointer pointer-events-auto"
+          className="px-5 py-2 rounded-xl bg-rose-600 dark:bg-rose-500 text-white text-[10px] font-black uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all flex items-center gap-1.5 shadow-md cursor-pointer pointer-events-auto"
         >
           <Icon name="check" size={12} />
-          <span>{trans('Áp dụng khung & chữ')}</span>
+          <span>{trans('Áp dụng nội dung')}</span>
         </button>
       </div>
 
       {/* Live Preview Pane */}
-      <div className="flex-1 min-w-0 overflow-y-auto p-6 pt-24 pb-12 flex flex-col items-center justify-start custom-scrollbar">
+      <div className="flex-1 min-w-0 overflow-y-auto p-6 pt-20 pb-12 flex flex-col items-center justify-start custom-scrollbar">
         {liveUrl ? (
-          <div className="relative flex flex-col items-center justify-start select-none max-w-[92vw] sm:max-w-[340px] w-full bg-slate-100 dark:bg-zinc-900 rounded-xl shadow-2xl p-1.5">
+          <div className="relative flex flex-col items-center justify-start select-none max-w-[92vw] sm:max-w-[340px] w-full bg-slate-100 dark:bg-zinc-900 rounded-xl shadow-2xl p-2 border border-border-color">
             <div 
-              className="relative w-full overflow-hidden"
+              className="relative w-full overflow-hidden rounded-lg"
               style={{ aspectRatio: `${localConfig.template.canvasWidth} / ${localConfig.template.canvasHeight}` }}
             >
               <img
                 src={liveUrl}
                 alt="Live frame designer preview"
-                className="w-full h-auto pointer-events-none select-none rounded-lg"
+                className="w-full h-auto pointer-events-none select-none"
               />
-
-              {/* Real-time CSS Username Signature Overlay */}
-              {localConfig.userName !== '' && (
-                <div
-                  className="absolute pointer-events-none whitespace-nowrap select-none text-center font-bold"
-                  style={{
-                    left: `${localConfig.userNameX !== undefined ? localConfig.userNameX : 50}%`,
-                    top: `${localConfig.userNameY !== undefined ? localConfig.userNameY : ((localConfig.template.canvasHeight - 70) / localConfig.template.canvasHeight) * 100}%`,
-                    transform: 'translate(-50%, -50%)',
-                    fontFamily: resolveFont(localConfig.userNameFont),
-                    fontSize: `${Math.max(6, (localConfig.userNameSize || 36) * (340 / localConfig.template.canvasWidth))}px`,
-                    color: localConfig.userNameColor || '#e11d48',
-                  }}
-                >
-                  {localConfig.userName || 'HANIU STUDIO'}
-                </div>
-              )}
-
-              {/* Real-time CSS Date Overlay */}
-              {localConfig.showDate && (
-                <div
-                  className="absolute pointer-events-none whitespace-nowrap select-none text-center font-bold"
-                  style={{
-                    left: `${localConfig.dateX !== undefined ? localConfig.dateX : 50}%`,
-                    top: `${localConfig.dateY !== undefined ? localConfig.dateY : ((localConfig.template.canvasHeight - 30) / localConfig.template.canvasHeight) * 100}%`,
-                    transform: 'translate(-50%, -50%)',
-                    fontFamily: resolveFont(localConfig.dateFont),
-                    fontSize: `${Math.max(5, (localConfig.dateSize || 18) * (340 / localConfig.template.canvasWidth))}px`,
-                    color: localConfig.dateColor || '#64748b',
-                  }}
-                >
-                  {new Date().toLocaleDateString('vi-VN')}
+              {isGenerating && (
+                <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-[9px] font-bold backdrop-blur-sm animate-pulse">
+                  {trans('Đang cập nhật...')}
                 </div>
               )}
             </div>
-            {/* Khoảng trống để cuộn qua phần chân ảnh */}
-            <div className="h-36 w-full shrink-0" />
+            {/* Scroll clearance */}
+            <div className="h-10 w-full shrink-0" />
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-2">
+          <div className="flex flex-col items-center justify-center gap-2 m-auto">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500" />
-            <span className="text-[10px] text-muted-color uppercase tracking-wider font-bold">{trans('Đang vẽ bản xem trước...')}</span>
+            <span className="text-[10px] text-muted-color uppercase tracking-wider font-bold">{trans('Đang chuẩn bị bản xem trước...')}</span>
           </div>
         )}
       </div>
 
       {/* Right Side Control Sidebar */}
-      <div className="w-full sm:w-80 lg:w-96 shrink-0 bg-card-bg border-t sm:border-t-0 sm:border-l border-border-color flex flex-col h-[45vh] sm:h-full z-40 relative shadow-xl overflow-y-auto custom-scrollbar p-5 space-y-5">
+      <div className="w-full sm:w-80 lg:w-96 shrink-0 bg-card-bg border-t sm:border-t-0 sm:border-l border-border-color flex flex-col h-[50vh] sm:h-full z-40 relative shadow-xl overflow-y-auto custom-scrollbar p-5 space-y-5">
         <div className="border-b border-border-color pb-3">
           <h3 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-1.5 font-sans">
             <Icon name="palette" size={14} className="text-rose-500" />
-            {trans('Chữ ký & Ngày')}
+            {trans('Chỉnh sửa nội dung chữ')}
           </h3>
+          <p className="text-[10px] text-muted-color mt-1 font-normal leading-relaxed">
+            {trans('Bạn có thể tùy ý sửa ngày tháng hoặc các thông điệp văn bản trên khung ảnh này.')}
+          </p>
         </div>
 
-        {/* 4. Custom Branding Text Caption */}
+        {/* Text Layers List */}
         <div className="space-y-4">
-          <div className="border-t border-border-color pt-3">
-            <label className="text-[10px] font-black uppercase text-foreground tracking-wider flex items-center gap-1">
-              <span>{trans('✍️ Thiết Kế Chữ Ký')}</span>
-            </label>
-          </div>
-          
-          <div className="space-y-2.5">
-            <div className="space-y-1">
-              <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">{trans('Nội dung chữ ký')}</label>
-            <input
-                type="text"
-                placeholder={trans('Ví dụ: HANIU STUDIO')}
-                value={localConfig.userName || ''}
-                onChange={(e) => setLocalConfig(prev => ({ ...prev, userName: e.target.value }))}
-                className="w-full bg-background border border-border-color rounded-xl px-3 h-9 text-foreground text-[16px] sm:text-xs focus:outline-none focus:border-rose-500 transition-all font-sans font-bold"
-              />
-            </div>
+          {textLayers.length > 0 ? (
+            textLayers.map((layer: any, idx: number) => {
+              const currentFont = layer.fontFamily || 'Caveat';
+              const currentColor = layer.fontColor || '#2b2b2b';
 
-            {/* Font Family selector for signature */}
-            <div className="space-y-1">
-              <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">{trans('Font Chữ ký')}</label>
-              <select
-                value={localConfig.userNameFont || 'cormorant-garamond'}
-                onChange={(e) => setLocalConfig(prev => ({ ...prev, userNameFont: e.target.value }))}
-                className="w-full bg-background border border-border-color rounded-xl px-2.5 h-9 text-foreground text-[16px] sm:text-xs focus:outline-none focus:border-rose-500 transition-all font-bold"
-              >
-                {AVAILABLE_FONTS.map(f => (
-                  <option key={f.id} value={f.id}>{trans(f.name)}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Font Size slider for signature */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-[9px] font-bold uppercase text-muted-color tracking-wide">
-                <span>{trans('Cỡ chữ ký')}</span>
-                <span className="text-rose-500 font-mono">{localConfig.userNameSize || 36}px</span>
-              </div>
-              <input
-                type="range"
-                min="16"
-                max="80"
-                step="2"
-                value={localConfig.userNameSize || 36}
-                onChange={(e) => setLocalConfig(prev => ({ ...prev, userNameSize: parseInt(e.target.value) }))}
-                className="w-full h-1 bg-background rounded-full appearance-none accent-rose-500 cursor-pointer"
-              />
-            </div>
-
-            {/* Horizontal Position (X) for signature */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-[9px] font-bold uppercase text-muted-color tracking-wide">
-                <span>{trans('Vị trí ngang (Trái - Phải)')}</span>
-                <span className="text-rose-500 font-mono">{localConfig.userNameX !== undefined ? Math.round(localConfig.userNameX) : 50}%</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                value={localConfig.userNameX !== undefined ? localConfig.userNameX : 50}
-                onChange={(e) => setLocalConfig(prev => ({ ...prev, userNameX: parseInt(e.target.value) }))}
-                className="w-full h-1 bg-background rounded-full appearance-none accent-rose-500 cursor-pointer"
-              />
-            </div>
-
-            {/* Vertical Position (Y) for signature */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-[9px] font-bold uppercase text-muted-color tracking-wide">
-                <span>{trans('Vị trí dọc (Trên - Dưới)')}</span>
-                <span className="text-rose-500 font-mono">
-                  {localConfig.userNameY !== undefined 
-                    ? Math.round(localConfig.userNameY) 
-                    : Math.round(((localConfig.template.canvasHeight - 70) / localConfig.template.canvasHeight) * 100)}%
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                value={localConfig.userNameY !== undefined 
-                  ? localConfig.userNameY 
-                  : ((localConfig.template.canvasHeight - 70) / localConfig.template.canvasHeight) * 100}
-                onChange={(e) => setLocalConfig(prev => ({ ...prev, userNameY: parseInt(e.target.value) }))}
-                className="w-full h-1 bg-background rounded-full appearance-none accent-rose-500 cursor-pointer"
-              />
-            </div>
-
-            {/* Color selector for signature */}
-            <div className="space-y-1">
-              <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">{trans('Màu chữ ký')}</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={localConfig.userNameColor || '#e11d48'}
-                  onChange={(e) => setLocalConfig(prev => ({ ...prev, userNameColor: e.target.value }))}
-                  className="w-8 h-8 rounded-lg cursor-pointer border border-border-color bg-transparent p-0.5"
-                />
-                <span className="text-[10px] font-mono text-muted-color">{localConfig.userNameColor || '#e11d48'}</span>
-              </div>
-            </div>
-          </div>
-
-          <hr className="border-border-color" />
-
-          {/* 5. Date Configuration */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-[10px] font-black uppercase text-foreground tracking-wider flex items-center gap-1">
-                <span>{trans('📅 Ngày Chụp')}</span>
-              </label>
-              <button
-                onClick={() => setLocalConfig(prev => ({ ...prev, showDate: !prev.showDate }))}
-                className={`w-9 h-5 rounded-full transition-all relative p-0.5 cursor-pointer ${localConfig.showDate ? 'bg-rose-500' : 'bg-slate-300 dark:bg-zinc-700'}`}
-              >
-                <div className={`w-4 h-4 bg-white rounded-full transition-all shadow-xs ${localConfig.showDate ? 'translate-x-4' : 'translate-x-0'}`} />
-              </button>
-            </div>
-
-            {localConfig.showDate && (
-              <div className="space-y-2.5 bg-slate-50/50 dark:bg-zinc-900/40 p-2.5 rounded-2xl border border-border-color/60">
-                {/* Font Family selector for date */}
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">{trans('Font Ngày')}</label>
-                  <select
-                    value={localConfig.dateFont || 'be-vietnam-pro'}
-                    onChange={(e) => setLocalConfig(prev => ({ ...prev, dateFont: e.target.value }))}
-                    className="w-full bg-background border border-border-color rounded-xl px-2.5 h-8 text-foreground text-[16px] sm:text-xs focus:outline-none focus:border-rose-500 transition-all font-bold"
-                  >
-                    {AVAILABLE_FONTS.map(f => (
-                      <option key={f.id} value={f.id}>{trans(f.name)}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Font Size slider for date */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[9px] font-bold uppercase text-muted-color tracking-wide">
-                    <span>{trans('Cỡ chữ ngày')}</span>
-                    <span className="text-rose-500 font-mono">{localConfig.dateSize || 18}px</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="10"
-                    max="50"
-                    step="1"
-                    value={localConfig.dateSize || 18}
-                    onChange={(e) => setLocalConfig(prev => ({ ...prev, dateSize: parseInt(e.target.value) }))}
-                    className="w-full h-1 bg-background rounded-full appearance-none accent-rose-500 cursor-pointer"
-                  />
-                </div>
-
-                {/* Horizontal Position (X) for Date */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[9px] font-bold uppercase text-muted-color tracking-wide">
-                    <span>{trans('Vị trí ngang')}</span>
-                    <span className="text-rose-500 font-mono">{localConfig.dateX !== undefined ? Math.round(localConfig.dateX) : 50}%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="1"
-                    value={localConfig.dateX !== undefined ? localConfig.dateX : 50}
-                    onChange={(e) => setLocalConfig(prev => ({ ...prev, dateX: parseInt(e.target.value) }))}
-                    className="w-full h-1 bg-background rounded-full appearance-none accent-rose-500 cursor-pointer"
-                  />
-                </div>
-
-                {/* Vertical Position (Y) for Date */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[9px] font-bold uppercase text-muted-color tracking-wide">
-                    <span>{trans('Vị trí dọc')}</span>
-                    <span className="text-rose-500 font-mono">
-                      {localConfig.dateY !== undefined 
-                        ? Math.round(localConfig.dateY) 
-                        : Math.round(((localConfig.template.canvasHeight - 30) / localConfig.template.canvasHeight) * 100)}%
+              return (
+                <div
+                  key={layer.id || idx}
+                  className="p-3.5 bg-slate-50 dark:bg-zinc-900/60 rounded-2xl border border-border-color/80 space-y-3 shadow-xs hover:border-rose-400/50 transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase text-foreground tracking-wider flex items-center gap-1.5">
+                      <span className="w-5 h-5 rounded-full bg-rose-500/15 text-rose-500 flex items-center justify-center text-[10px] font-bold">
+                        {idx + 1}
+                      </span>
+                      {trans('Văn bản')} {idx + 1}
+                    </span>
+                    <span className="text-[10px] font-bold text-rose-500/80 font-mono px-2 py-0.5 rounded-md bg-rose-500/10 truncate max-w-[130px]">
+                      {layer.text || '...'}
                     </span>
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="1"
-                    value={localConfig.dateY !== undefined 
-                      ? localConfig.dateY 
-                      : ((localConfig.template.canvasHeight - 30) / localConfig.template.canvasHeight) * 100}
-                    onChange={(e) => setLocalConfig(prev => ({ ...prev, dateY: parseInt(e.target.value) }))}
-                    className="w-full h-1 bg-background rounded-full appearance-none accent-rose-500 cursor-pointer"
-                  />
-                </div>
 
-                {/* Color selector for date */}
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">{trans('Màu chữ ngày')}</label>
-                  <div className="flex items-center gap-2">
+                  {/* Text Input */}
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase text-muted-color tracking-wide block">
+                      {trans('Nội dung hiển thị')}
+                    </label>
                     <input
-                      type="color"
-                      value={localConfig.dateColor || '#64748b'}
-                      onChange={(e) => setLocalConfig(prev => ({ ...prev, dateColor: e.target.value }))}
-                      className="w-8 h-8 rounded-lg cursor-pointer border border-border-color bg-transparent p-0.5"
+                      type="text"
+                      value={layer.text || ''}
+                      onChange={(e) => handleUpdateText(layer.id, e.target.value)}
+                      placeholder={trans('Ví dụ: 05-10-2024')}
+                      className="w-full bg-background border border-border-color rounded-xl px-3 h-10 text-foreground text-sm font-bold focus:outline-none focus:border-rose-500 transition-all shadow-xs"
                     />
-                    <span className="text-[10px] font-mono text-muted-color">{localConfig.dateColor || '#64748b'}</span>
+                  </div>
+
+                  {/* Font, Size and Color Options */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    {/* Font Chữ */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase text-muted-color tracking-wide block">
+                        {trans('Font chữ')}
+                      </label>
+                      <select
+                        value={currentFont}
+                        onChange={(e) => handleUpdateProperty(layer.id, 'fontFamily', e.target.value)}
+                        className="w-full bg-background border border-border-color rounded-xl px-2 h-9 text-foreground text-xs font-semibold focus:outline-none focus:border-rose-500 transition-all cursor-pointer"
+                        style={{ fontFamily: AVAILABLE_FONTS.find(f => f.id === currentFont)?.font || 'inherit' }}
+                      >
+                        {AVAILABLE_FONTS.map((f) => (
+                          <option key={f.id} value={f.id} style={{ fontFamily: f.font }}>
+                            {f.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Cỡ Chữ (Font Size) */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] font-bold uppercase text-muted-color tracking-wide block">
+                          {trans('Cỡ chữ (Font Size)')}
+                        </label>
+                        <span className="text-xs font-mono font-bold text-rose-500">
+                          {layer.fontSize || 24}px
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 h-9">
+                        <input
+                          type="range"
+                          min="8"
+                          max="64"
+                          step="1"
+                          value={layer.fontSize || 24}
+                          onChange={(e) => handleUpdateProperty(layer.id, 'fontSize', parseInt(e.target.value) || 24)}
+                          className="flex-1 h-1.5 bg-background rounded-full appearance-none accent-rose-500 cursor-pointer"
+                        />
+                        <input
+                          type="number"
+                          min="8"
+                          max="64"
+                          value={layer.fontSize || 24}
+                          onChange={(e) => handleUpdateProperty(layer.id, 'fontSize', parseInt(e.target.value) || 24)}
+                          className="w-12 h-8 rounded-lg bg-background border border-border-color text-center font-mono font-bold text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Màu chữ và định dạng (Bold, Italic, Align) */}
+                  <div className="grid grid-cols-2 gap-2.5 pt-1 border-t border-border-color/50 items-center">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase text-muted-color tracking-wide block">
+                        {trans('Màu chữ')}
+                      </label>
+                      <div className="flex items-center gap-1.5 h-8">
+                        <input
+                          type="color"
+                          value={currentColor}
+                          onChange={(e) => handleUpdateProperty(layer.id, 'fontColor', e.target.value)}
+                          className="w-8 h-8 rounded-lg cursor-pointer border border-border-color bg-transparent p-0.5 shrink-0"
+                        />
+                        <span className="text-xs font-mono text-muted-color truncate">{currentColor}</span>
+                      </div>
+                    </div>
+
+                    {/* Định dạng B / I / Align */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase text-muted-color tracking-wide block">
+                        {trans('Định dạng')}
+                      </label>
+                      <div className="flex gap-1 h-8 items-center">
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateProperty(layer.id, 'fontWeight', layer.fontWeight === 'bold' ? 'normal' : 'bold')}
+                          className={`w-7 h-7 rounded-lg text-xs font-black border transition-all cursor-pointer flex items-center justify-center ${
+                            layer.fontWeight === 'bold'
+                              ? 'bg-rose-500 text-white border-rose-500 shadow-xs'
+                              : 'bg-background text-muted-color border-border-color hover:text-foreground'
+                          }`}
+                          title={trans('In đậm (Bold)')}
+                        >
+                          B
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateProperty(layer.id, 'fontStyle', layer.fontStyle === 'italic' ? 'normal' : 'italic')}
+                          className={`w-7 h-7 rounded-lg text-xs italic font-bold border transition-all cursor-pointer flex items-center justify-center ${
+                            layer.fontStyle === 'italic'
+                              ? 'bg-rose-500 text-white border-rose-500 shadow-xs'
+                              : 'bg-background text-muted-color border-border-color hover:text-foreground'
+                          }`}
+                          title={trans('In nghiêng (Italic)')}
+                        >
+                          I
+                        </button>
+                        {(['left', 'center', 'right'] as const).map((al) => (
+                          <button
+                            key={al}
+                            type="button"
+                            onClick={() => handleUpdateProperty(layer.id, 'align', al)}
+                            className={`flex-1 h-7 rounded-lg text-[9px] font-bold uppercase border transition-all cursor-pointer flex items-center justify-center ${
+                              (layer.align || 'center') === al
+                                ? 'bg-rose-500 text-white border-rose-500 shadow-xs'
+                                : 'bg-background text-muted-color border-border-color hover:text-foreground'
+                            }`}
+                            title={`Căn ${al}`}
+                          >
+                            {al === 'left' ? '⬅' : al === 'right' ? '➡' : '⏺'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              );
+            })
+          ) : (
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-border-color text-center space-y-1 text-muted-color">
+              <p className="text-xs font-bold text-foreground">{trans('Không có dòng chữ nào')}</p>
+              <p className="text-[10px] leading-relaxed">{trans('Khung ảnh này không chứa văn bản nào cần chỉnh sửa.')}</p>
+            </div>
+          )}
         </div>
-
       </div>
     </div>
   );
