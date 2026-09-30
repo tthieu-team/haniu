@@ -446,15 +446,17 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
 
 
 
-            {/* Right Side Vertical Face Filters */}
-            <div className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40">
-              <FaceFilterSelector
-                activeFilter={faceFilter}
-                onSelect={setFaceFilter}
-                isLoading={faceFilterLoading}
-                orientation="vertical"
-              />
-            </div>
+            {/* Right Side Vertical Face Filters — only show after user picks capture mode */}
+            {hasSelectedCaptureMode && cameraReady && (
+              <div className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40">
+                <FaceFilterSelector
+                  activeFilter={faceFilter}
+                  onSelect={setFaceFilter}
+                  isLoading={faceFilterLoading}
+                  orientation="vertical"
+                />
+              </div>
+            )}
           </motion.div>
         )}
 

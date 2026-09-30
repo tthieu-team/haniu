@@ -158,11 +158,11 @@ export const CameraView: React.FC<CameraViewProps> = ({
     }
   }, [stream]);
 
-  // ─── FaceLandmarker Preload (eager) with Warmup ──────────────
-  // Start loading the AI model as soon as camera stream is available,
-  // and run a silent warmup pass so WebGL shaders are compiled in background.
+  // ─── FaceLandmarker Lazy Load (on-demand) with Warmup ──────────────
+  // Only start loading the AI model when the user actually selects a face filter.
+  // This avoids the loading indicator appearing before the user interacts with filters.
   useEffect(() => {
-    if (stream && !faceLandmarkerRef.current) {
+    if (stream && faceFilter !== 'none' && !faceLandmarkerRef.current) {
       onFaceFilterLoading?.(true);
       initFaceLandmarker().then((landmarker) => {
         faceLandmarkerRef.current = landmarker;
@@ -195,7 +195,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
         }
       });
     }
-  }, [stream]);
+  }, [stream, faceFilter]);
 
   // ─── Compute object-cover crop offset ──────────────────────
   // The video element uses object-fit: cover, which means the displayed
