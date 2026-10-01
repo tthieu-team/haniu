@@ -111,7 +111,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                               top: `${layer.y}%`,
                               width: `${layer.width}%`,
                               height: `${layer.height}%`,
-                              borderRadius: layer.type === 'frame' ? `${(layer.cornerRadius || 2) / 3}px` : (isText && (layer.bgRadius ?? 0) >= 40 ? '999px' : '0px'),
+                              borderRadius: layer.type === 'frame' ? `${(layer.cornerRadius || 2) / 3}px` : (isText && (layer.bgRadius ?? 0) >= 999 ? '9999px' : `${(layer.bgRadius ?? 0) * 0.15}px`),
                               backgroundColor: isText && hasBg ? bgCol : (layer.type === 'frame' ? undefined : 'transparent'),
                               transform: layer.rotation ? `rotate(${layer.rotation}deg)` : 'none',
                               zIndex: isText ? 25 : (layer.type === 'overlay' ? 10 : (idx + 1))
@@ -375,7 +375,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                       {isText && (() => {
                         const bgCol = layer.backgroundColor || layer.bg;
                         const hasBg = bgCol && bgCol !== 'transparent';
-                        const radiusVal = (layer.bgRadius ?? 0) >= 40 ? '999px' : `${(layer.bgRadius ?? 0) * 0.15}px`;
+                        const radiusVal = (layer.bgRadius ?? 0) >= 999 ? '9999px' : `${(layer.bgRadius ?? 0) * 0.15}px`;
                         return (
                           <div 
                             className="w-full h-full flex items-center justify-center select-none overflow-hidden"
