@@ -106,30 +106,19 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
 
   return (
     <div className="w-full h-full bg-background flex flex-col sm:flex-row relative overflow-hidden transition-colors duration-550 min-h-0 text-xs font-semibold text-slate-800 dark:text-zinc-100">
-      {/* Top Toolbar */}
-      <div className="absolute top-0 left-0 right-0 z-50 p-4 flex items-center justify-between bg-gradient-to-b from-white/90 dark:from-zinc-950/90 to-transparent pointer-events-none">
+      {/* Top Left Back Button over Preview */}
+      <div className="absolute top-4 left-4 z-50 pointer-events-auto">
         <button
           onClick={onCancel}
-          className="h-9 px-4 rounded-full bg-card-bg border border-border-color text-foreground hover:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-all font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 pointer-events-auto cursor-pointer shadow-xs"
+          className="h-9 px-4 rounded-full bg-card-bg/95 backdrop-blur-md border border-border-color text-foreground hover:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-all font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-xs"
         >
           <Icon name="arrow-left" size={12} className="text-primary-color" />
           <span>{trans('Hủy bỏ')}</span>
         </button>
-
-        <button
-          onClick={() => {
-            playSound('click');
-            onConfirm(localConfig);
-          }}
-          className="px-5 py-2 rounded-xl bg-rose-600 dark:bg-rose-500 text-white text-[10px] font-black uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all flex items-center gap-1.5 shadow-md cursor-pointer pointer-events-auto"
-        >
-          <Icon name="check" size={12} />
-          <span>{trans('Áp dụng nội dung')}</span>
-        </button>
       </div>
 
       {/* Live Preview Pane */}
-      <div className="flex-1 min-w-0 overflow-y-auto p-6 pt-20 pb-12 flex flex-col items-center justify-start custom-scrollbar">
+      <div className="flex-1 min-w-0 overflow-y-auto p-6 pt-16 pb-12 flex flex-col items-center justify-start custom-scrollbar">
         {liveUrl ? (
           <div className="relative flex flex-col items-center justify-start select-none max-w-[92vw] sm:max-w-[340px] w-full bg-slate-100 dark:bg-zinc-900 rounded-xl shadow-2xl p-2 border border-border-color">
             <div 
@@ -147,8 +136,6 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
                 </div>
               )}
             </div>
-            {/* Scroll clearance */}
-            <div className="h-10 w-full shrink-0" />
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 m-auto">
@@ -159,15 +146,27 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
       </div>
 
       {/* Right Side Control Sidebar */}
-      <div className="w-full sm:w-80 lg:w-96 shrink-0 bg-card-bg border-t sm:border-t-0 sm:border-l border-border-color flex flex-col h-[50vh] sm:h-full z-40 relative shadow-xl overflow-y-auto custom-scrollbar p-5 space-y-5">
-        <div className="border-b border-border-color pb-3">
-          <h3 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-1.5 font-sans">
-            <Icon name="palette" size={14} className="text-rose-500" />
-            {trans('Chỉnh sửa nội dung chữ')}
-          </h3>
-          <p className="text-[10px] text-muted-color mt-1 font-normal leading-relaxed">
-            {trans('Bạn có thể tùy ý sửa ngày tháng hoặc các thông điệp văn bản trên khung ảnh này.')}
-          </p>
+      <div className="w-full sm:w-80 lg:w-96 shrink-0 bg-card-bg border-t sm:border-t-0 sm:border-l border-border-color flex flex-col h-[50vh] sm:h-full z-40 relative shadow-xl overflow-y-auto custom-scrollbar p-5 space-y-4">
+        <div className="border-b border-border-color pb-3 flex items-start justify-between gap-2">
+          <div>
+            <h3 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-1.5 font-sans">
+              <Icon name="palette" size={14} className="text-rose-500" />
+              {trans('Chỉnh sửa nội dung chữ')}
+            </h3>
+            <p className="text-[10px] text-muted-color mt-1 font-normal leading-relaxed">
+              {trans('Bạn có thể tùy ý sửa ngày tháng hoặc các thông điệp văn bản trên khung ảnh này.')}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              playSound('click');
+              onConfirm(localConfig);
+            }}
+            className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all flex items-center gap-1.5 shadow-md cursor-pointer shrink-0"
+          >
+            <Icon name="check" size={12} />
+            <span>{trans('Áp dụng')}</span>
+          </button>
         </div>
 
         {/* Text Layers List */}
@@ -233,13 +232,13 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
                     <div className="space-y-1">
                       <div className="flex justify-between items-center">
                         <label className="text-[10px] font-bold uppercase text-muted-color tracking-wide block">
-                          {trans('Cỡ chữ (Font Size)')}
+                          {trans('Cỡ chữ')}
                         </label>
                         <span className="text-xs font-mono font-bold text-rose-500">
                           {layer.fontSize || 24}px
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 h-9">
+                      <div className="flex items-center gap-1.5 h-9 w-full">
                         <input
                           type="range"
                           min="8"
@@ -247,7 +246,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
                           step="1"
                           value={layer.fontSize || 24}
                           onChange={(e) => handleUpdateProperty(layer.id, 'fontSize', parseInt(e.target.value) || 24)}
-                          className="flex-1 h-1.5 bg-background rounded-full appearance-none accent-rose-500 cursor-pointer"
+                          className="flex-1 min-w-0 h-1.5 bg-background rounded-full appearance-none accent-rose-500 cursor-pointer"
                         />
                         <input
                           type="number"
@@ -255,7 +254,7 @@ export const FrameEditor: React.FC<FrameEditorProps> = ({
                           max="64"
                           value={layer.fontSize || 24}
                           onChange={(e) => handleUpdateProperty(layer.id, 'fontSize', parseInt(e.target.value) || 24)}
-                          className="w-12 h-8 rounded-lg bg-background border border-border-color text-center font-mono font-bold text-xs"
+                          className="w-10 h-7 rounded-lg bg-background border border-border-color text-center font-mono font-bold text-[11px] shrink-0"
                         />
                       </div>
                     </div>

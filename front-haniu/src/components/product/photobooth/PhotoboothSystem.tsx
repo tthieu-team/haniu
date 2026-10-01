@@ -446,14 +446,13 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
 
 
 
-            {/* Right Side Vertical Face Filters — only show after user picks capture mode */}
+            {/* Face Filters — Mobile (<640px): Bottom horizontal; Desktop (>=640px): Right vertical */}
             {hasSelectedCaptureMode && cameraReady && (
-              <div className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40">
+              <div className="absolute z-50 pointer-events-auto max-sm:bottom-3 max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:max-w-[92vw] sm:right-4 sm:top-1/2 sm:-translate-y-1/2">
                 <FaceFilterSelector
                   activeFilter={faceFilter}
                   onSelect={setFaceFilter}
                   isLoading={faceFilterLoading}
-                  orientation="vertical"
                 />
               </div>
             )}
@@ -488,9 +487,9 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
             {/* Live Preview Pane */}
             <div className="flex-1 min-w-0 overflow-y-auto p-6 pt-24 pb-12 flex flex-col items-center justify-start custom-scrollbar">
               {resultUrl ? (
-                <div className="relative flex flex-col items-center justify-start select-none max-w-[92vw] sm:max-w-[340px] w-full bg-slate-100 dark:bg-zinc-900 rounded-xl shadow-2xl p-1.5">
+                <div className="relative flex flex-col items-center justify-start select-none max-w-[92vw] sm:max-w-[340px] w-full bg-slate-100 dark:bg-zinc-900 rounded-xl shadow-2xl p-1.5 border border-border-color">
                   <div 
-                    className="relative w-full overflow-hidden"
+                    className="relative w-full overflow-hidden rounded-lg"
                     style={{ aspectRatio: `${config.template.canvasWidth} / ${config.template.canvasHeight}` }}
                   >
                     <img
@@ -499,8 +498,6 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
                       className="w-full h-auto pointer-events-none select-none rounded-lg"
                     />
                   </div>
-                  {/* Khoảng trống để cuộn qua phần chân ảnh */}
-                  <div className="h-36 w-full shrink-0" />
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center gap-2">

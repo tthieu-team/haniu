@@ -7,12 +7,24 @@ interface TemplateBlueprintPreviewProps {
   template: PhotoboothTemplate;
 }
 
+const SAMPLE_PREVIEW_PHOTOS = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&auto=format&fit=crop&q=80',
+];
+
 export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> = ({ template }) => {
   const t = template as any;
   let bgStyle: React.CSSProperties = {};
 
   if (t.backgroundType === 'gradient') {
-    const grad = (t as any).backgroundGradient || { color1: '#fda4af', color2: '#f43f5e', angle: 45 };
+    const grad = t.backgroundGradient || { color1: '#fda4af', color2: '#f43f5e', angle: 45 };
     bgStyle = {
       background: `linear-gradient(${grad.angle || 45}deg, ${grad.color1 || '#fda4af'}, ${grad.color2 || '#f43f5e'})`
     };
@@ -35,29 +47,87 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
 
   const getResolvedFont = (font?: string) => {
     switch (font) {
-      case 'Patrick Hand': return '"Patrick Hand", "Mali", cursive';
-      case 'Caveat': return '"Caveat", cursive';
-      case 'Mali': return '"Mali", cursive';
-      case 'Itim': return '"Itim", cursive';
-      case 'Dancing Script': return '"Dancing Script", cursive';
-      case 'Be Vietnam Pro': return '"Be Vietnam Pro", sans-serif';
-      case 'Cormorant Garamond': return '"Cormorant Garamond", serif';
-      default: return font || '"Patrick Hand", cursive';
+      case 'Patrick Hand':
+      case 'patrick-hand':
+        return '"Patrick Hand", "Mali", cursive';
+      case 'Caveat':
+      case 'caveat':
+        return '"Caveat", cursive';
+      case 'Mali':
+      case 'mali':
+        return '"Mali", cursive';
+      case 'Itim':
+      case 'itim':
+        return '"Itim", cursive';
+      case 'Dancing Script':
+      case 'dancing-script':
+        return '"Dancing Script", cursive';
+      case 'Be Vietnam Pro':
+      case 'be-vietnam-pro':
+        return '"Be Vietnam Pro", sans-serif';
+      case 'Cormorant Garamond':
+      case 'cormorant-garamond':
+        return '"Cormorant Garamond", serif';
+      default:
+        return font || '"Patrick Hand", "Mali", cursive';
     }
   };
 
+  // Safely parse layers and slots whether they come as array or JSON string
+  const rawLayers: any[] = Array.isArray(t.layers)
+    ? t.layers
+    : typeof t.layers === 'string'
+      ? (() => {
+          try {
+            return JSON.parse(t.layers);
+          } catch {
+            return [];
+          }
+        })()
+      : [];
+
+  const rawSlots: any[] = Array.isArray(t.slots)
+    ? t.slots
+    : typeof t.slots === 'string'
+      ? (() => {
+          try {
+            return JSON.parse(t.slots);
+          } catch {
+            return [];
+          }
+        })()
+      : [];
+
+  // Sort layers by z-index layer priority: frame -> shape -> overlay -> sticker/logo -> text
+  const sortedLayers = [...rawLayers].sort((a: any, b: any) => {
+    const order: Record<string, number> = {
+      frame: 1,
+      shape: 2,
+      overlay: 3,
+      sticker: 4,
+      logo: 4,
+      text: 5,
+    };
+    return (order[a.type] || 3) - (order[b.type] || 3);
+  });
+
   return (
-    <div 
+    <div
       className="relative border border-slate-250/80 dark:border-zinc-800 rounded-xl overflow-hidden mb-3 shadow-xs flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shrink-0 w-full"
       style={{
-        aspectRatio: `${t.canvasWidth} / ${t.canvasHeight}`,
-        ...bgStyle
+        aspectRatio: `${t.canvasWidth || 1000} / ${t.canvasHeight || 1500}`,
+        borderWidth: (t.canvasBorderSize ?? 0) > 0 ? `${(t.canvasBorderSize ?? 0) * 0.15}px` : '1px',
+        borderColor: (t.canvasBorderSize ?? 0) > 0 ? t.canvasBorderColor || '#ffffff' : undefined,
+        borderStyle: t.canvasBorderStyle || 'solid',
+        borderRadius: `${(t.canvasBorderRadius ?? 8) * 0.15}px`,
+        containerType: 'inline-size',
+        ...bgStyle,
       }}
     >
-      {t.layers && t.layers.length > 0 ? (
-        t.layers.map((layer: any, idx: number) => {
+      {sortedLayers.length > 0 ? (
+        sortedLayers.map((layer: any, idx: number) => {
           if (layer.visible === false) return null;
-          
+
           const isFrame = layer.type === 'frame';
           const isText = layer.type === 'text';
           const isSticker = layer.type === 'sticker';
@@ -67,22 +137,50 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
 
           const frameShape = layer.frameShape || 'rect';
           const borderRadius = isText
-            ? ((layer.bgRadius ?? 0) >= 40 ? '999px' : `${(layer.bgRadius ?? 0) * 0.15}px`)
-            : (isFrame && frameShape === 'circle') ? '999px' : (isFrame && frameShape !== 'rect' && frameShape !== 'custom' && frameShape !== 'custom-path' ? '0px' : `${layer.cornerRadius ?? 8}px`);
-          const clipPath = isFrame && frameShape === 'custom-path' && (layer.framePath || layer.framePolygon)
-            ? (layer.framePath ? `url(#clip-preview-layer-${layer.id || idx})` : `polygon(${layer.framePolygon})`)
-            : (isFrame && frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom'
-               ? (frameShape === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' 
-                  : frameShape === 'heart' ? 'polygon(50% 24%, 62% 10%, 78% 10%, 90% 20%, 94% 40%, 82% 65%, 50% 95%, 18% 65%, 6% 40%, 10% 20%, 26% 10%, 38% 24%)'
-                  : frameShape === 'star' ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
-                  : 'none')
-               : 'none');
-          
+            ? (layer.bgRadius ?? 0) >= 999
+              ? '9999px'
+              : `${(layer.bgRadius ?? 0) * 0.15}px`
+            : isFrame && frameShape === 'circle'
+              ? '999px'
+              : isFrame && frameShape !== 'rect' && frameShape !== 'custom' && frameShape !== 'custom-path'
+                ? '0px'
+                : `${layer.cornerRadius ?? 8}px`;
+
+          const clipPath =
+            isFrame && frameShape === 'custom-path' && (layer.framePath || layer.framePolygon)
+              ? layer.framePath
+                ? `url(#clip-preview-layer-${layer.id || idx})`
+                : `polygon(${layer.framePolygon})`
+              : isFrame && frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom'
+                ? frameShape === 'triangle'
+                  ? 'polygon(50% 0%, 0% 100%, 100% 100%)'
+                  : frameShape === 'heart'
+                    ? 'polygon(50% 24%, 62% 10%, 78% 10%, 90% 20%, 94% 40%, 82% 65%, 50% 95%, 18% 65%, 6% 40%, 10% 20%, 26% 10%, 38% 24%)'
+                    : frameShape === 'star'
+                      ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
+                      : 'none'
+                : isShape && (layer.shapeType === 'heart' || layer.shapeType === 'star' || layer.shapeType === 'triangle')
+                  ? layer.shapeType === 'triangle'
+                    ? 'polygon(50% 0%, 0% 100%, 100% 100%)'
+                    : layer.shapeType === 'heart'
+                      ? 'polygon(50% 24%, 62% 10%, 78% 10%, 90% 20%, 94% 40%, 82% 65%, 50% 95%, 18% 65%, 6% 40%, 10% 20%, 26% 10%, 38% 24%)'
+                      : 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
+                  : 'none';
+
+          // Flip transforms
+          let transformStr = layer.rotation ? `rotate(${layer.rotation}deg)` : '';
+          if (layer.flipX) transformStr += ' scaleX(-1)';
+          if (layer.flipY) transformStr += ' scaleY(-1)';
+
           return (
             <div
               key={layer.id || idx}
-              className={`absolute flex items-center justify-center overflow-hidden ${
-                isFrame ? (t.showSlotBackground ? 'bg-white/95' : 'bg-slate-300 dark:bg-zinc-700') : 'bg-transparent'
+              className={`absolute flex items-center justify-center ${
+                isText
+                  ? 'overflow-visible bg-transparent'
+                  : isFrame
+                    ? 'overflow-hidden bg-slate-200 dark:bg-zinc-800'
+                    : 'overflow-hidden bg-transparent'
               }`}
               style={{
                 left: `${layer.x}%`,
@@ -91,17 +189,18 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
                 height: `${layer.height}%`,
                 borderRadius,
                 clipPath,
-                backgroundColor: isText && (layer.backgroundColor || layer.bg) && (layer.backgroundColor || layer.bg) !== 'transparent'
-                  ? (layer.backgroundColor || layer.bg)
-                  : undefined,
-                borderWidth: isFrame && (frameShape === 'rect' || frameShape === 'circle') ? `${layer.borderSize ?? 1.5}px` : '0px',
+                borderWidth:
+                  isFrame && (frameShape === 'rect' || frameShape === 'circle')
+                    ? `${layer.borderSize ?? 1.5}px`
+                    : '0px',
                 borderColor: isFrame ? layer.borderColor || '#cbd5e1' : 'transparent',
                 borderStyle: isFrame && (layer.borderSize ?? 1.5) > 0 ? 'solid' : 'none',
-                transform: layer.rotation ? `rotate(${layer.rotation}deg)` : 'none',
+                transform: transformStr || 'none',
                 opacity: (layer.opacity ?? 100) / 100,
-                zIndex: isText ? 25 : (isOverlay ? 10 : (isFrame ? 5 : (idx + 1)))
+                zIndex: isText ? 25 : isSticker || isLogo ? 20 : isOverlay ? 15 : isShape ? 10 : 5,
               }}
             >
+              {/* FRAME WITH REALISTIC DEMO PHOTO */}
               {isFrame && (
                 <>
                   {frameShape === 'custom-path' && layer.framePath && (
@@ -113,10 +212,28 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
                       </defs>
                     </svg>
                   )}
+
+                  {/* Sample Photo for Frame Mockup */}
+                  <img
+                    src={
+                      SAMPLE_PREVIEW_PHOTOS[
+                        ((layer.order ? layer.order - 1 : idx) + (t.name ? t.name.length : 0)) %
+                          SAMPLE_PREVIEW_PHOTOS.length
+                      ]
+                    }
+                    alt="sample photobooth preview"
+                    className="w-full h-full object-cover pointer-events-none select-none"
+                  />
+
+                  {/* Custom Shape Border SVG overlay */}
                   {frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom' && (
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-15" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <svg
+                      className="absolute inset-0 w-full h-full pointer-events-none z-15"
+                      viewBox="0 0 100 100"
+                      preserveAspectRatio="none"
+                    >
                       {frameShape === 'custom-path' && layer.framePath ? (
-                        <path 
+                        <path
                           d={layer.framePath}
                           fill="none"
                           stroke={layer.borderColor || '#cbd5e1'}
@@ -124,12 +241,15 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
                           vectorEffect="non-scaling-stroke"
                         />
                       ) : (
-                        <polygon 
+                        <polygon
                           points={
-                            frameShape === 'triangle' ? '50 0, 0 100, 100 100'
-                            : frameShape === 'heart' ? '50 24, 62 10, 78 10, 90 20, 94 40, 82 65, 50 95, 18 65, 6 40, 10 20, 26 10, 38 24'
-                            : frameShape === 'custom-path' && layer.framePolygon ? layer.framePolygon.replace(/%/g, '')
-                            : '50 0, 61 35, 98 35, 68 57, 79 91, 50 70, 21 91, 32 57, 2 35, 39 35'
+                            frameShape === 'triangle'
+                              ? '50 0, 0 100, 100 100'
+                              : frameShape === 'heart'
+                                ? '50 24, 62 10, 78 10, 90 20, 94 40, 82 65, 50 95, 18 65, 6 40, 10 20, 26 10, 38 24'
+                                : frameShape === 'custom-path' && layer.framePolygon
+                                  ? layer.framePolygon.replace(/%/g, '')
+                                  : '50 0, 61 35, 98 35, 68 57, 79 91, 50 70, 21 91, 32 57, 2 35, 39 35'
                           }
                           fill="none"
                           stroke={layer.borderColor || '#cbd5e1'}
@@ -139,50 +259,99 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
                       )}
                     </svg>
                   )}
-                  <span className="text-[8px] scale-75 text-slate-500 font-black">📸 {layer.order || idx + 1}</span>
+
+                  {/* Custom Mask URL */}
+                  {frameShape === 'custom' && layer.frameMaskUrl && (
+                    <img
+                      src={layer.frameMaskUrl}
+                      alt="mask"
+                      className="absolute inset-0 w-full h-full object-fill pointer-events-none z-10"
+                    />
+                  )}
                 </>
               )}
-              {isText && (() => {
-                const bgCol = layer.backgroundColor || layer.bg;
-                const hasBg = bgCol && bgCol !== 'transparent';
-                const radiusVal = (layer.bgRadius ?? 0) >= 40 ? '999px' : `${(layer.bgRadius ?? 0) * 0.15}px`;
-                return (
-                  <div
-                    className="w-full h-full flex items-center justify-center select-none overflow-hidden"
-                    style={{
-                      backgroundColor: hasBg ? bgCol : 'transparent',
-                      borderRadius: radiusVal,
-                    }}
-                  >
-                    <span 
-                      className="block text-center truncate select-none font-bold px-1"
+
+              {/* TEXT LAYER */}
+              {isText &&
+                (() => {
+                  const bgCol = layer.backgroundColor || layer.bg;
+                  const hasBg = bgCol && bgCol !== 'transparent';
+                  const baseRatio = 300 / (t.canvasWidth || 1000);
+                  const radiusVal =
+                    (layer.bgRadius ?? 0) >= 999
+                      ? '9999px'
+                      : `calc(${(layer.bgRadius ?? 0) * baseRatio}cqw)`;
+                  const strokeWidth = (layer.strokeSize ?? 0) * baseRatio;
+                  const strokeStyle =
+                    (layer.strokeSize ?? 0) > 0
+                      ? `calc(${strokeWidth}cqw) ${layer.strokeColor || '#ffffff'}`
+                      : 'none';
+                  const shadowX = (layer.shadowOffsetX || 0) * baseRatio;
+                  const shadowY = (layer.shadowOffsetY || 1) * baseRatio;
+                  const shadowBlur = (layer.shadowBlur || 2) * baseRatio;
+
+                  return (
+                    <div
+                      className="w-full h-full flex items-center justify-center select-none overflow-visible"
                       style={{
-                        fontSize: `${Math.max(6, (layer.fontSize || 24) * 0.22)}px`,
-                        color: layer.fontColor || '#2b2b2b',
-                        fontFamily: getResolvedFont(layer.fontFamily),
-                        fontWeight: layer.fontWeight || 'bold',
-                        fontStyle: layer.fontStyle || 'normal',
-                        textAlign: (layer.align || 'center') as any
+                        backgroundColor: hasBg ? bgCol : 'transparent',
+                        borderRadius: radiusVal,
+                        borderWidth:
+                          hasBg && (layer.bgBorderSize ?? 0) > 0
+                            ? `calc(${Math.max(0.5, (layer.bgBorderSize ?? 0) * baseRatio)}cqw)`
+                            : '0px',
+                        borderColor: layer.bgBorderColor || '#ffffff',
+                        borderStyle: (layer.bgBorderStyle as any) || 'solid',
+                        boxShadow:
+                          hasBg && layer.shadowColor
+                            ? `calc(${shadowX}cqw) calc(${shadowY}cqw) calc(${shadowBlur}cqw) ${layer.shadowColor}`
+                            : 'none',
                       }}
                     >
-                      {layer.text}
-                    </span>
-                  </div>
-                );
-              })()}
+                      <span
+                        className="w-full h-full flex items-center justify-center select-none whitespace-nowrap leading-none px-0.5"
+                        style={{
+                          fontSize: `calc(${((layer.fontSize || 24) * baseRatio)}cqw)`,
+                          color: layer.fontColor || '#2b2b2b',
+                          fontFamily: getResolvedFont(layer.fontFamily),
+                          fontWeight: layer.fontWeight || 'normal',
+                          fontStyle: layer.fontStyle || 'normal',
+                          textAlign: (layer.align || 'center') as any,
+                          letterSpacing: `${(layer.letterSpacing || 0) * baseRatio}cqw`,
+                          WebkitTextStroke: strokeStyle,
+                          paintOrder: 'stroke fill',
+                        }}
+                      >
+                        {layer.text}
+                      </span>
+                    </div>
+                  );
+                })()}
+
+              {/* STICKER LAYER */}
               {isSticker && layer.url && (
-                <img src={layer.url} alt="sticker" className="w-full h-full object-contain pointer-events-none" />
+                <img
+                  src={layer.url}
+                  alt="sticker"
+                  className="w-full h-full object-contain pointer-events-none"
+                />
               )}
+
+              {/* LOGO LAYER */}
               {isLogo && (
                 <div className="flex items-center justify-center w-full h-full">
                   {layer.url ? (
-                    <img src={layer.url} alt="logo" className="max-h-full object-contain pointer-events-none" />
+                    <img
+                      src={layer.url}
+                      alt="logo"
+                      className="max-h-full object-contain pointer-events-none"
+                    />
                   ) : (
-                    <span 
+                    <span
                       className="font-bold text-center block w-full truncate"
                       style={{
-                        fontSize: `${(layer.size || 20) * 0.08}px`,
-                        color: layer.color || '#475569'
+                        fontSize: `calc(${((layer.size || 20) * (300 / (t.canvasWidth || 1000)))}cqw)`,
+                        color: layer.color || '#475569',
                       }}
                     >
                       {layer.logoText || '🎀'}
@@ -190,57 +359,67 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
                   )}
                 </div>
               )}
+
+              {/* SHAPE LAYER */}
               {isShape && (
-                <div 
+                <div
                   className="w-full h-full"
                   style={{
                     backgroundColor: layer.fillColor || '#fda4af',
                     borderWidth: `${layer.borderSize ?? 0}px`,
                     borderColor: layer.borderColor || '#f43f5e',
                     borderStyle: (layer.borderSize ?? 0) > 0 ? 'solid' : 'none',
-                    borderRadius: layer.shapeType === 'circle' ? '999px' : `${layer.cornerRadius ?? 8}px`,
-                    clipPath: layer.shapeType === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : 'none'
+                    borderRadius:
+                      layer.shapeType === 'circle' ? '999px' : `${layer.cornerRadius ?? 8}px`,
                   }}
-                >
-                  {layer.shapeType === 'heart' && (
-                    <div className="w-full h-full flex items-center justify-center text-red-500 text-[10px] sm:text-xs">❤️</div>
-                  )}
-                  {layer.shapeType === 'star' && (
-                    <div className="w-full h-full flex items-center justify-center text-yellow-500 text-[10px] sm:text-xs">⭐</div>
-                  )}
-                </div>
+                />
               )}
+
+              {/* OVERLAY LAYER */}
               {isOverlay && layer.url && (
-                <img src={layer.url} alt="overlay" className="w-full h-full object-fill pointer-events-none" />
+                <img
+                  src={layer.url}
+                  alt="overlay"
+                  className="w-full h-full object-fill pointer-events-none"
+                />
               )}
             </div>
           );
         })
       ) : (
-        t.slots?.map((slot: any, sIdx: number) => {
-          const leftPct = (slot.x / t.canvasWidth) * 100;
-          const topPct = (slot.y / t.canvasHeight) * 100;
-          const widthPct = (slot.width / t.canvasWidth) * 100;
-          const heightPct = (slot.height / t.canvasHeight) * 100;
+        rawSlots.map((slot: any, sIdx: number) => {
+          const leftPct = (slot.x / (t.canvasWidth || 1000)) * 100;
+          const topPct = (slot.y / (t.canvasHeight || 1500)) * 100;
+          const widthPct = (slot.width / (t.canvasWidth || 1000)) * 100;
+          const heightPct = (slot.height / (t.canvasHeight || 1500)) * 100;
 
           const frameShape = slot.frameShape || 'rect';
-          const borderRadius = frameShape === 'circle' ? '999px' : (frameShape !== 'rect' && frameShape !== 'custom' && frameShape !== 'custom-path' ? '0px' : `${slot.cornerRadius ?? 8}px`);
+          const borderRadius =
+            frameShape === 'circle'
+              ? '999px'
+              : frameShape !== 'rect' && frameShape !== 'custom' && frameShape !== 'custom-path'
+                ? '0px'
+                : `${slot.cornerRadius ?? 8}px`;
 
-          const clipPath = frameShape === 'custom-path' && (slot.framePath || slot.framePolygon)
-            ? (slot.framePath ? `url(#clip-preview-${slot.id || sIdx})` : `polygon(${slot.framePolygon})`)
-            : (frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom'
-               ? (frameShape === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' 
-                  : frameShape === 'heart' ? 'polygon(50% 24%, 62% 10%, 78% 10%, 90% 20%, 94% 40%, 82% 65%, 50% 95%, 18% 65%, 6% 40%, 10% 20%, 26% 10%, 38% 24%)'
-                  : frameShape === 'star' ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
-                  : 'none')
-               : 'none');
+          const clipPath =
+            frameShape === 'custom-path' && (slot.framePath || slot.framePolygon)
+              ? slot.framePath
+                ? `url(#clip-preview-${slot.id || sIdx})`
+                : `polygon(${slot.framePolygon})`
+              : frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom'
+                ? frameShape === 'triangle'
+                  ? 'polygon(50% 0%, 0% 100%, 100% 100%)'
+                  : frameShape === 'heart'
+                    ? 'polygon(50% 24%, 62% 10%, 78% 10%, 90% 20%, 94% 40%, 82% 65%, 50% 95%, 18% 65%, 6% 40%, 10% 20%, 26% 10%, 38% 24%)'
+                    : frameShape === 'star'
+                      ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
+                      : 'none'
+                : 'none';
 
           return (
             <div
               key={sIdx}
-              className={`absolute shadow-2xs ${
-                t.showSlotBackground ? 'bg-white/95' : 'bg-transparent'
-              }`}
+              className="absolute overflow-hidden bg-slate-200 dark:bg-zinc-800 shadow-2xs"
               style={{
                 left: `${leftPct}%`,
                 top: `${topPct}%`,
@@ -248,13 +427,23 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
                 height: `${heightPct}%`,
                 borderRadius,
                 clipPath,
-                borderWidth: (frameShape === 'rect' || frameShape === 'circle') ? `${slot.borderSize ?? 1.5}px` : '0px',
+                borderWidth:
+                  frameShape === 'rect' || frameShape === 'circle'
+                    ? `${slot.borderSize ?? 1.5}px`
+                    : '0px',
                 borderColor: slot.borderColor || '#cbd5e1',
                 borderStyle: (slot.borderSize ?? 1.5) > 0 ? 'solid' : 'none',
                 transform: slot.rotation ? `rotate(${slot.rotation}deg)` : 'none',
-                opacity: (slot.opacity ?? 100) / 100
+                opacity: (slot.opacity ?? 100) / 100,
               }}
             >
+              {/* Sample Photo for legacy slots */}
+              <img
+                src={SAMPLE_PREVIEW_PHOTOS[sIdx % SAMPLE_PREVIEW_PHOTOS.length]}
+                alt="sample photo"
+                className="w-full h-full object-cover pointer-events-none select-none"
+              />
+
               {frameShape === 'custom-path' && slot.framePath && (
                 <svg width="0" height="0" className="absolute">
                   <defs>
@@ -265,9 +454,13 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
                 </svg>
               )}
               {frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom' && (
-                <svg className="absolute inset-0 w-full h-full pointer-events-none z-15" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <svg
+                  className="absolute inset-0 w-full h-full pointer-events-none z-15"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                >
                   {frameShape === 'custom-path' && slot.framePath ? (
-                    <path 
+                    <path
                       d={slot.framePath}
                       fill="none"
                       stroke={slot.borderColor || '#cbd5e1'}
@@ -275,12 +468,15 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
                       vectorEffect="non-scaling-stroke"
                     />
                   ) : (
-                    <polygon 
+                    <polygon
                       points={
-                        frameShape === 'triangle' ? '50 0, 0 100, 100 100'
-                        : frameShape === 'heart' ? '50 24, 62 10, 78 10, 90 20, 94 40, 82 65, 50 95, 18 65, 6 40, 10 20, 26 10, 38 24'
-                        : frameShape === 'custom-path' && slot.framePolygon ? slot.framePolygon.replace(/%/g, '')
-                        : '50 0, 61 35, 98 35, 68 57, 79 91, 50 70, 21 91, 32 57, 2 35, 39 35'
+                        frameShape === 'triangle'
+                          ? '50 0, 0 100, 100 100'
+                          : frameShape === 'heart'
+                            ? '50 24, 62 10, 78 10, 90 20, 94 40, 82 65, 50 95, 18 65, 6 40, 10 20, 26 10, 38 24'
+                            : frameShape === 'custom-path' && slot.framePolygon
+                              ? slot.framePolygon.replace(/%/g, '')
+                              : '50 0, 61 35, 98 35, 68 57, 79 91, 50 70, 21 91, 32 57, 2 35, 39 35'
                       }
                       fill="none"
                       stroke={slot.borderColor || '#cbd5e1'}
@@ -293,6 +489,15 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
             </div>
           );
         })
+      )}
+
+      {/* Template Level Overlay PNG if present */}
+      {t.overlay && (
+        <img
+          src={t.overlay}
+          alt="template overlay"
+          className="absolute inset-0 w-full h-full object-fill pointer-events-none z-20"
+        />
       )}
     </div>
   );

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Icon from '@/components/common/Icons';
+import { TemplateBlueprintPreview } from '@/components/product/photobooth/TemplateBlueprintPreview';
 
 interface TemplatesTabProps {
   templates: any[];
@@ -83,70 +84,8 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                       className="w-full h-full object-contain hover:scale-105 transition-transform duration-200" 
                     />
                   ) : (
-                    <div 
-                      className="shadow-md border border-slate-300 rounded relative"
-                      style={{
-                        width: tpl.canvasWidth > tpl.canvasHeight ? '140px' : '90px',
-                        height: tpl.canvasWidth > tpl.canvasHeight ? '90px' : '140px',
-                        backgroundColor: tpl.background || '#ffffff',
-                        backgroundImage: (tpl.background?.startsWith('http') || tpl.background?.startsWith('data:')) ? `url(${tpl.background})` : 'none',
-                        backgroundSize: 'cover',
-                        padding: '3px'
-                      }}
-                    >
-                      {/* Nested layers visualization inside card */}
-                      {tpl.layers?.map((layer: any, idx: number) => {
-                        if (layer.visible === false) return null;
-                        const isText = layer.type === 'text';
-                        const bgCol = layer.backgroundColor || layer.bg;
-                        const hasBg = bgCol && bgCol !== 'transparent';
-                        return (
-                          <div 
-                            key={layer.id || idx}
-                            className={`absolute flex items-center justify-center overflow-hidden border-[0.5px] ${
-                              layer.type === 'frame' ? 'bg-slate-350 dark:bg-zinc-700 border-white text-[6px]' : 'border-transparent'
-                            }`}
-                            style={{
-                              left: `${layer.x}%`,
-                              top: `${layer.y}%`,
-                              width: `${layer.width}%`,
-                              height: `${layer.height}%`,
-                              borderRadius: layer.type === 'frame' ? `${(layer.cornerRadius || 2) / 3}px` : (isText && (layer.bgRadius ?? 0) >= 999 ? '9999px' : `${(layer.bgRadius ?? 0) * 0.15}px`),
-                              backgroundColor: isText && hasBg ? bgCol : (layer.type === 'frame' ? undefined : 'transparent'),
-                              transform: layer.rotation ? `rotate(${layer.rotation}deg)` : 'none',
-                              zIndex: isText ? 25 : (layer.type === 'overlay' ? 10 : (idx + 1))
-                            }}
-                          >
-                            {layer.type === 'frame' && `📸 ${layer.order || idx + 1}`}
-                            {isText && (
-                              <span 
-                                className="block text-center truncate font-bold text-[5px] px-0.5"
-                                style={{
-                                  color: layer.fontColor || '#2b2b2b',
-                                  fontFamily: layer.fontFamily ? `"${layer.fontFamily}", cursive` : '"Patrick Hand", cursive'
-                                }}
-                              >
-                                {layer.text}
-                              </span>
-                            )}
-                            {layer.type === 'overlay' && layer.url && (
-                              <img 
-                                src={layer.url} 
-                                alt="overlay thumbnail" 
-                                className="w-full h-full object-fill pointer-events-none"
-                              />
-                            )}
-                          </div>
-                        );
-                      })}
-                      {/* Overlay visualization inside thumbnail card */}
-                      {tpl.overlay && (
-                        <img 
-                          src={tpl.overlay} 
-                          alt="card overlay" 
-                          className="absolute inset-0 w-full h-full object-fill pointer-events-none z-20"
-                        />
-                      )}
+                    <div className="w-full h-full max-w-[130px] flex items-center justify-center pointer-events-none select-none">
+                      <TemplateBlueprintPreview template={tpl} />
                     </div>
                   )}
 
@@ -266,7 +205,8 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                   backgroundImage: (previewTemplate.background?.startsWith('http') || previewTemplate.background?.startsWith('data:')) ? `url(${previewTemplate.background})` : 'none',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
-                  position: 'relative'
+                  position: 'relative',
+                  containerType: 'inline-size',
                 }}
               >
                 {previewTemplate.layers?.map((layer: any, idx: number) => {
@@ -375,7 +315,8 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                       {isText && (() => {
                         const bgCol = layer.backgroundColor || layer.bg;
                         const hasBg = bgCol && bgCol !== 'transparent';
-                        const radiusVal = (layer.bgRadius ?? 0) >= 999 ? '9999px' : `${(layer.bgRadius ?? 0) * 0.15}px`;
+                        const baseRatio = 300 / (previewTemplate.canvasWidth || 1000);
+                        const radiusVal = (layer.bgRadius ?? 0) >= 999 ? '9999px' : `calc(${(layer.bgRadius ?? 0) * baseRatio}cqw)`;
                         return (
                           <div 
                             className="w-full h-full flex items-center justify-center select-none overflow-hidden"
@@ -385,12 +326,12 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                             }}
                           >
                             <span 
-                              className="block text-center truncate font-bold px-1"
+                              className="w-full h-full flex items-center justify-center select-none whitespace-nowrap leading-none px-0.5"
                               style={{
-                                fontSize: `${Math.max(6, (layer.fontSize || 24) * 0.22)}px`,
+                                fontSize: `calc(${((layer.fontSize || 24) * baseRatio)}cqw)`,
                                 color: layer.fontColor || '#2b2b2b',
                                 fontFamily: layer.fontFamily ? `"${layer.fontFamily}", cursive` : '"Patrick Hand", cursive',
-                                fontWeight: layer.fontWeight || 'bold',
+                                fontWeight: layer.fontWeight || 'normal',
                                 fontStyle: layer.fontStyle || 'normal',
                                 textAlign: (layer.align || 'center') as any
                               }}
@@ -419,7 +360,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                             <span 
                               className="font-bold text-center block w-full truncate"
                               style={{
-                                fontSize: `${(layer.size || 20) * 0.08}px`,
+                                fontSize: `calc(${((layer.size || 20) * (300 / (previewTemplate.canvasWidth || 1000)))}cqw)`,
                                 color: layer.color || '#475569'
                               }}
                             >

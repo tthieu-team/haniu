@@ -158,44 +158,31 @@ export const CameraView: React.FC<CameraViewProps> = ({
     }
   }, [stream]);
 
-  // ─── FaceLandmarker Lazy Load (on-demand) with Warmup ──────────────
-  // Only start loading the AI model when the user actually selects a face filter.
-  // This avoids the loading indicator appearing before the user interacts with filters.
+  // ─── FaceLandmarker Background Pre-load & Lazy Load ──────────────
+  // Pre-load model in background once camera starts so tapping filters is instant
+  useEffect(() => {
+    if (stream && !faceLandmarkerRef.current) {
+      const timer = setTimeout(() => {
+        initFaceLandmarker().then((landmarker) => {
+          if (landmarker) {
+            faceLandmarkerRef.current = landmarker;
+          }
+        });
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [stream]);
+
+  // If user picks a filter before background preload completes, show loading state
   useEffect(() => {
     if (stream && faceFilter !== 'none' && !faceLandmarkerRef.current) {
       onFaceFilterLoading?.(true);
       initFaceLandmarker().then((landmarker) => {
         faceLandmarkerRef.current = landmarker;
-        if (landmarker) {
-          const video = videoRef.current;
-          const doWarmup = () => {
-            try {
-              if (video && video.videoWidth > 0 && video.readyState >= 2) {
-                const detected = landmarker.detectForVideo(video, performance.now());
-                if (detected?.faceLandmarks?.[0]) {
-                  cachedLandmarksRef.current = detected.faceLandmarks[0];
-                }
-              }
-            } catch {
-              // Ignore warmup error
-            } finally {
-              onFaceFilterLoading?.(false);
-            }
-          };
-
-          if (video && video.readyState >= 2 && video.videoWidth > 0) {
-            setTimeout(doWarmup, 150);
-          } else if (video) {
-            video.addEventListener('loadeddata', () => setTimeout(doWarmup, 150), { once: true });
-          } else {
-            onFaceFilterLoading?.(false);
-          }
-        } else {
-          onFaceFilterLoading?.(false);
-        }
+        onFaceFilterLoading?.(false);
       });
     }
-  }, [stream, faceFilter]);
+  }, [stream, faceFilter, onFaceFilterLoading]);
 
   // ─── Compute object-cover crop offset ──────────────────────
   // The video element uses object-fit: cover, which means the displayed
@@ -241,6 +228,8 @@ export const CameraView: React.FC<CameraViewProps> = ({
     if (!ctx) return;
 
     let running = true;
+    let lastDetectTime = 0;
+    let smoothedLandmarks: any[] | null = null;
 
     const renderLoop = () => {
       if (!running) return;
@@ -263,12 +252,10 @@ export const CameraView: React.FC<CameraViewProps> = ({
 
         ctx.clearRect(0, 0, containerW, containerH);
 
-        // Throttle detection: run every 2nd frame to reduce lag
-        frameCountRef.current++;
-        let landmarks = cachedLandmarksRef.current;
-
-        if (frameCountRef.current % 2 === 0 || !landmarks) {
-          const now = performance.now();
+        // Throttle detection to ~35ms (around 28 FPS detection rate) for phone performance
+        const now = performance.now();
+        if (now - lastDetectTime >= 35 || !cachedLandmarksRef.current) {
+          lastDetectTime = now;
           const timestamp = Math.max(now, lastTimestampRef.current + 1);
           lastTimestampRef.current = timestamp;
 
@@ -278,21 +265,31 @@ export const CameraView: React.FC<CameraViewProps> = ({
             timestamp
           );
           if (detected) {
-            landmarks = detected;
             cachedLandmarksRef.current = detected;
           }
         }
 
-        if (landmarks) {
+        const rawLandmarks = cachedLandmarksRef.current;
+        if (rawLandmarks) {
+          // Linear interpolation (lerp) for silky-smooth 60fps tracking without jitter
+          if (!smoothedLandmarks || smoothedLandmarks.length !== rawLandmarks.length) {
+            smoothedLandmarks = rawLandmarks.map((lm: any) => ({ ...lm }));
+          } else {
+            const alpha = 0.55;
+            for (let i = 0; i < rawLandmarks.length; i++) {
+              smoothedLandmarks[i].x += (rawLandmarks[i].x - smoothedLandmarks[i].x) * alpha;
+              smoothedLandmarks[i].y += (rawLandmarks[i].y - smoothedLandmarks[i].y) * alpha;
+              smoothedLandmarks[i].z += (rawLandmarks[i].z - smoothedLandmarks[i].z) * alpha;
+            }
+          }
+
           // Calculate object-cover transform
           const cover = getVideoCoverRect(video);
 
           ctx.save();
 
-          // The overlay canvas has CSS scale-x-[-1] (same as video) which already
-          // mirrors the display. We do NOT apply ctx.scale(-1,1) here — that would
-          // double-mirror. Instead we just map landmarks through object-cover coords.
-          const mappedLandmarks = landmarks.map((lm: any) => ({
+          // Map landmarks through object-cover coords
+          const mappedLandmarks = smoothedLandmarks.map((lm: any) => ({
             x: (cover.offsetX + lm.x * cover.drawW) / containerW,
             y: (cover.offsetY + lm.y * cover.drawH) / containerH,
             z: lm.z,
@@ -310,6 +307,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
           ctx.restore();
         }
       } else if (currentFilter === 'none') {
+        smoothedLandmarks = null;
         // Clear when filter is off
         if (overlayCanvas.width > 0) {
           ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);

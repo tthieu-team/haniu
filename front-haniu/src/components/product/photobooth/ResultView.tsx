@@ -37,8 +37,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
               className="w-full h-auto object-contain rounded-lg shadow-inner block"
             />
           </div>
-          {/* Khoảng trống để cuộn qua phần chân ảnh */}
-          <div className="h-32 w-full shrink-0" />
         </div>
         <div className="absolute -top-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-md border-2 border-white dark:border-zinc-900 z-10">
           <Icon name="check" size={16} />

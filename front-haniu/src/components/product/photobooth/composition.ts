@@ -48,6 +48,30 @@ export const generateComposition = async (
         return fontKey || '"Patrick Hand", "Mali", cursive';
     }
   };
+ 
+  // Pre-load all photobooth Google Fonts so canvas can render them accurately
+  if (typeof document !== 'undefined' && document.fonts) {
+    try {
+      await document.fonts.ready;
+      await Promise.all([
+        document.fonts.load('24px "Caveat"'),
+        document.fonts.load('bold 24px "Caveat"'),
+        document.fonts.load('24px "Patrick Hand"'),
+        document.fonts.load('bold 24px "Patrick Hand"'),
+        document.fonts.load('24px "Dancing Script"'),
+        document.fonts.load('bold 24px "Dancing Script"'),
+        document.fonts.load('24px "Mali"'),
+        document.fonts.load('bold 24px "Mali"'),
+        document.fonts.load('24px "Itim"'),
+        document.fonts.load('24px "Be Vietnam Pro"'),
+        document.fonts.load('bold 24px "Be Vietnam Pro"'),
+        document.fonts.load('24px "Cormorant Garamond"'),
+        document.fonts.load('bold 24px "Cormorant Garamond"'),
+      ]);
+    } catch (e) {
+      console.warn('Google fonts load warning:', e);
+    }
+  }
 
   // 1. Draw Background
   const isImageUrl = (src?: string) => src && (src.startsWith('http') || src.startsWith('/') || src.startsWith('data:'));
@@ -109,8 +133,22 @@ export const generateComposition = async (
     const frameLayers = template.layers
       .filter((l: any) => l.type === 'frame')
       .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+
+    // Sort layers so frames/shapes are at the bottom, overlays/stickers in the middle, and texts on top
+    const sortedLayers = [...template.layers].sort((a: any, b: any) => {
+      const getLayerPriority = (l: any) => {
+        if (l.type === 'frame') return 1;
+        if (l.type === 'shape') return 2;
+        if (l.type === 'overlay') return 3;
+        if (l.type === 'sticker' || l.type === 'logo') return 4;
+        if (l.type === 'text') return 5;
+        return 1;
+      };
+      return getLayerPriority(a) - getLayerPriority(b);
+    });
+
     // Custom template drawing
-    for (let layer of template.layers) {
+    for (let layer of sortedLayers) {
       if (layer.visible === false) continue;
       
       const posX = (layer.x / 100) * canvas.width;
@@ -338,22 +376,39 @@ export const generateComposition = async (
         }
         ctx.globalAlpha = (layer.opacity ?? 100) / 100;
 
-        // Draw Text Background (Highlight band / badge / box)
+        const canvasScaleFactor = canvas.width / (template.canvasWidth * 0.25 || 256);
+
+        // Draw Text Background (Highlight band / badge / box) strictly bounded by layer.width and layer.height
         const bgCol = layer.backgroundColor || layer.bg;
         if (bgCol && bgCol !== 'transparent') {
           ctx.fillStyle = bgCol;
-          const bgPadding = (layer.bgPadding ?? 0) * (canvas.width / 400);
-          const scaledFontSize = (layer.fontSize || 24) * (canvas.width / 400);
-          const bgW = rectW + bgPadding * 2;
-          const bgH = Math.max(rectH, scaledFontSize * 1.2) + bgPadding * 2;
-          const bgX = posX - bgPadding;
-          const bgY = posY + (rectH - bgH) / 2;
-          const bgRadius = (layer.bgRadius ?? 0) >= 40 ? Math.min(bgW, bgH) / 2 : (layer.bgRadius ?? 0) * (canvas.width / 400);
+          const bgW = rectW;
+          const bgH = rectH;
+          const bgX = posX;
+          const bgY = posY;
+          const bgRadius = (layer.bgRadius ?? 0) >= 999
+            ? Math.min(bgW, bgH) / 2
+            : (layer.bgRadius ?? 0) * canvasScaleFactor * 0.75;
+          const bgBorderSize = (layer.bgBorderSize ?? 0) * canvasScaleFactor * 0.75;
+          const bgBorderColor = layer.bgBorderColor || '#ffffff';
 
           if (bgRadius > 0 && typeof (ctx as any).roundRect === 'function') {
             ctx.beginPath();
             (ctx as any).roundRect(bgX, bgY, bgW, bgH, bgRadius);
             ctx.fill();
+            if (bgBorderSize > 0) {
+              ctx.strokeStyle = bgBorderColor;
+              ctx.lineWidth = bgBorderSize;
+              if (layer.bgBorderStyle === 'dashed') {
+                ctx.setLineDash([8, 6]);
+              } else if (layer.bgBorderStyle === 'dotted') {
+                ctx.setLineDash([3, 4]);
+              } else {
+                ctx.setLineDash([]);
+              }
+              ctx.stroke();
+              ctx.setLineDash([]);
+            }
           } else if (bgRadius > 0) {
             ctx.beginPath();
             ctx.moveTo(bgX + bgRadius, bgY);
@@ -367,33 +422,62 @@ export const generateComposition = async (
             ctx.quadraticCurveTo(bgX, bgY, bgX + bgRadius, bgY);
             ctx.closePath();
             ctx.fill();
+            if (bgBorderSize > 0) {
+              ctx.strokeStyle = bgBorderColor;
+              ctx.lineWidth = bgBorderSize;
+              if (layer.bgBorderStyle === 'dashed') {
+                ctx.setLineDash([8, 6]);
+              } else if (layer.bgBorderStyle === 'dotted') {
+                ctx.setLineDash([3, 4]);
+              } else {
+                ctx.setLineDash([]);
+              }
+              ctx.stroke();
+              ctx.setLineDash([]);
+            }
           } else {
             ctx.fillRect(bgX, bgY, bgW, bgH);
+            if (bgBorderSize > 0) {
+              ctx.strokeStyle = bgBorderColor;
+              ctx.lineWidth = bgBorderSize;
+              if (layer.bgBorderStyle === 'dashed') {
+                ctx.setLineDash([8, 6]);
+              } else if (layer.bgBorderStyle === 'dotted') {
+                ctx.setLineDash([3, 4]);
+              } else {
+                ctx.setLineDash([]);
+              }
+              ctx.strokeRect(bgX, bgY, bgW, bgH);
+              ctx.setLineDash([]);
+            }
           }
         }
 
         const uFont = resolveFont(layer.fontFamily);
         ctx.fillStyle = layer.fontColor || '#2b2b2b';
-        const scaledFontSize = (layer.fontSize || 24) * (canvas.width / 400);
+        const scaledFontSize = (layer.fontSize || 24) * 0.75 * canvasScaleFactor;
         ctx.font = `${layer.fontStyle || 'normal'} ${layer.fontWeight || 'bold'} ${scaledFontSize}px ${uFont}`;
         ctx.textAlign = (layer.align || 'center') as CanvasTextAlign;
         ctx.textBaseline = 'middle';
+        if (layer.letterSpacing && typeof (ctx as any).letterSpacing !== 'undefined') {
+          (ctx as any).letterSpacing = `${(layer.letterSpacing || 0) * canvasScaleFactor * 0.75}px`;
+        }
 
-        if (layer.shadowColor) {
+        if (layer.shadowColor && layer.shadowColor !== 'rgba(0,0,0,0)' && layer.shadowColor !== 'none') {
           ctx.shadowColor = layer.shadowColor;
-          ctx.shadowBlur = layer.shadowBlur || 0;
-          ctx.shadowOffsetX = layer.shadowOffsetX || 0;
-          ctx.shadowOffsetY = layer.shadowOffsetY || 0;
+          ctx.shadowBlur = (layer.shadowBlur || 0) * canvasScaleFactor * 0.75;
+          ctx.shadowOffsetX = (layer.shadowOffsetX || 0) * canvasScaleFactor * 0.75;
+          ctx.shadowOffsetY = (layer.shadowOffsetY || 0) * canvasScaleFactor * 0.75;
         }
 
         const strokeSize = layer.strokeSize || 0;
         const strokeColor = layer.strokeColor || '#ffffff';
-        const textX = layer.align === 'left' ? posX : (layer.align === 'right' ? posX + rectW : posX + rectW / 2);
+        const textX = layer.align === 'left' ? posX + 6 : (layer.align === 'right' ? posX + rectW - 6 : posX + rectW / 2);
         const textY = posY + rectH / 2;
 
         if (strokeSize > 0) {
           ctx.strokeStyle = strokeColor;
-          ctx.lineWidth = strokeSize * (canvas.width / 400);
+          ctx.lineWidth = strokeSize * canvasScaleFactor * 0.75;
           ctx.strokeText(layer.text || '', textX, textY);
         }
         ctx.fillText(layer.text || '', textX, textY);
@@ -978,6 +1062,31 @@ export const generateComposition = async (
       ctx.fillText(tagline, dX, dY);
     }
     
+    ctx.restore();
+  }
+
+  // 5. Draw Canvas Outer Border (if template.canvasBorderSize > 0)
+  if (((template as any).canvasBorderSize ?? 0) > 0) {
+    ctx.save();
+    const borderW = ((template as any).canvasBorderSize ?? 0) * (canvas.width / 400);
+    const borderCol = (template as any).canvasBorderColor || '#ffffff';
+    const borderRad = ((template as any).canvasBorderRadius ?? 8) * (canvas.width / 400);
+    ctx.strokeStyle = borderCol;
+    ctx.lineWidth = borderW;
+    if ((template as any).canvasBorderStyle === 'dashed') {
+      ctx.setLineDash([borderW * 2, borderW * 1.5]);
+    } else if ((template as any).canvasBorderStyle === 'dotted') {
+      ctx.setLineDash([borderW, borderW]);
+    } else {
+      ctx.setLineDash([]);
+    }
+    if (borderRad > 0 && typeof (ctx as any).roundRect === 'function') {
+      ctx.beginPath();
+      (ctx as any).roundRect(borderW / 2, borderW / 2, canvas.width - borderW, canvas.height - borderW, borderRad);
+      ctx.stroke();
+    } else {
+      ctx.strokeRect(borderW / 2, borderW / 2, canvas.width - borderW, canvas.height - borderW);
+    }
     ctx.restore();
   }
 
