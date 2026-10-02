@@ -50,7 +50,9 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
   const [giphyStickers, setGiphyStickers] = useState<any[]>([]);
   const [loadingGiphy, setLoadingGiphy] = useState(false);
   const [localStickers, setLocalStickers] = useState<LocalStickerCategory[]>(LOCAL_STICKERS);
-  const [openCategories, setOpenCategories] = useState<string[]>([]);
+  const [openCategories, setOpenCategories] = useState<string[]>(() => {
+    return LOCAL_STICKERS.length > 0 ? [LOCAL_STICKERS[0].category] : [];
+  });
 
   const uploadedCategory: LocalStickerCategory = {
     category: 'ĐÃ TẢI LÊN',
@@ -108,6 +110,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
             setLocalStickers(data);
+            setOpenCategories(prev => prev.length === 0 ? [data[0].category] : prev);
           }
         }
       } catch (err) {
@@ -116,13 +119,6 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
     };
     loadLocalStickers();
   }, []);
-
-  // Default open first category when categories load
-  useEffect(() => {
-    if (allCategories.length > 0 && openCategories.length === 0) {
-      setOpenCategories([allCategories[0].category]);
-    }
-  }, [allCategories.length]);
 
   const layersCount = builderTemplate.layers?.length || 0;
 

@@ -582,10 +582,16 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
         newY = Math.round(newY * 10) / 10;
       }
       
-      setBuilderTemplate((prev: any) => ({
-        ...prev,
-        layers: prev.layers.map((l: any) => l.id === layerId ? { ...l, x: newX, y: newY } : l)
-      }));
+      setBuilderTemplate((prev: any) => {
+        const cur = prev.layers.find((l: any) => l.id === layerId);
+        if (cur && cur.x === newX && cur.y === newY) {
+          return prev;
+        }
+        return {
+          ...prev,
+          layers: prev.layers.map((l: any) => l.id === layerId ? { ...l, x: newX, y: newY } : l)
+        };
+      });
     };
 
     const handleMouseUp = () => {
@@ -1187,10 +1193,16 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                             h = Math.round(((w * builderTemplate.canvasWidth) / (builderTemplate.canvasHeight * ratioVal)) * 10) / 10;
                           }
 
-                          setBuilderTemplate((prev: any) => ({
-                            ...prev,
-                            layers: prev.layers.map((l: any) => l.id === layer.id ? { ...l, width: w, height: h } : l)
-                          }));
+                          setBuilderTemplate((prev: any) => {
+                            const cur = prev.layers.find((l: any) => l.id === layer.id);
+                            if (cur && cur.width === w && cur.height === h) {
+                              return prev;
+                            }
+                            return {
+                              ...prev,
+                              layers: prev.layers.map((l: any) => l.id === layer.id ? { ...l, width: w, height: h } : l)
+                            };
+                          });
                         };
 
                         const handleResizeUp = () => {

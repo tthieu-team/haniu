@@ -23,12 +23,10 @@ const NumberInput: React.FC<{
   className?: string;
 }> = ({ label, value, onChange, min = 0, max = 100, step = 'any', unit = '', className = '' }) => {
   const [tempVal, setTempVal] = useState(value !== undefined ? String(value) : '');
-
-  useEffect(() => {
-    setTempVal(value !== undefined ? String(value) : '');
-  }, [value]);
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleBlur = () => {
+    setIsFocused(false);
     if (tempVal === '' || isNaN(Number(tempVal))) {
       const fallback = min ?? 0;
       setTempVal(String(fallback));
@@ -44,6 +42,8 @@ const NumberInput: React.FC<{
     }
   };
 
+  const displayValue = isFocused ? tempVal : (value !== undefined ? String(value) : '');
+
   return (
     <div className={className}>
       {label && (
@@ -57,7 +57,11 @@ const NumberInput: React.FC<{
           min={min}
           max={max}
           step={step}
-          value={tempVal}
+          value={displayValue}
+          onFocus={() => {
+            setIsFocused(true);
+            setTempVal(value !== undefined ? String(value) : '');
+          }}
           onChange={e => {
             setTempVal(e.target.value);
             const parsed = parseFloat(e.target.value);
