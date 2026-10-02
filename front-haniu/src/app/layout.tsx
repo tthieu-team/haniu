@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Be_Vietnam_Pro, Geist_Mono, Dancing_Script, Cormorant_Garamond, Patrick_Hand, Mali, Caveat, Itim } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/providers/AuthProvider";
@@ -132,9 +133,9 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100;300;450;500;700;900&family=Caveat:wght@400..700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dancing+Script:wght@400;600;700&family=Itim&family=Mali:wght@400;500;600;700&family=Patrick+Hand&display=swap" rel="stylesheet" />
-        <script
+        <Script
           id="theme-initializer"
-          suppressHydrationWarning
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {

@@ -125,15 +125,15 @@ export default function Footer() {
             </h4>
             <div className="space-y-3 text-xs text-slate-500 dark:text-zinc-400 font-light">
               <p className="flex items-start gap-2">
-                <span className="text-rose-500 mt-0.5"><Icon name="📍" size={14} /></span>
+                <span className="text-rose-500 mt-0.5"><Icon name="map-pin" size={14} /></span>
                 <span>{trans(footer.address)}</span>
               </p>
               <p className="flex items-center gap-2">
-                <span className="text-rose-500"><Icon name="📞" size={14} /></span>
+                <span className="text-rose-500"><Icon name="phone" size={14} /></span>
                 <span>{footer.phone}</span>
               </p>
               <p className="flex items-center gap-2">
-                <span className="text-rose-500"><Icon name="✉️" size={14} /></span>
+                <span className="text-rose-500"><Icon name="mail" size={14} /></span>
                 <span>{footer.email}</span>
               </p>
             </div>
