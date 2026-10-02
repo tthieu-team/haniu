@@ -170,3 +170,33 @@ body {
     top: calc(var(--header-height-sm, 96px) + 12px) !important;
   }
 }
+
+/* Toast Floating Animations */
+@keyframes toastSlideInRight {
+  0% {
+    transform: translateX(110%) scale(0.95);
+    opacity: 0;
+  }
+  70% {
+    transform: translateX(-2%) scale(1.01);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+.animate-toast-slide-in {
+  animation: toastSlideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toastProgress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+

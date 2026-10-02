@@ -9,6 +9,7 @@ import GiftWrapSelector from '@/components/product/GiftWrapSelector';
 import { useTranslate } from '@/lib/translator';
 import { useProductStore } from '@/store/product';
 import { useCartStore } from '@/store/cart';
+import { useToast } from '@/providers/ToastProvider';
 import { cartService } from '@/services/cart.service';
 import Icon from '@/components/common/Icons';
 import { productService } from '@/services/product.service';
@@ -146,7 +147,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
     }
   };
 
-  const [successMsg, setSuccessMsg] = useState('');
+  const { showToast } = useToast();
 
   // Rating and review counters synchronized dynamically with reviews list (default to real values from initialProduct)
   const [avgRating, setAvgRating] = useState(initialProduct?.averageRating ?? 5.0);
@@ -209,12 +210,16 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
 
     try {
       await addToCart(payload);
-      setSuccessMsg("🎉 Đã thêm giỏ hàng thành công! Thông tin quà tặng của bạn đã được ghi nhận.");
-      setTimeout(() => setSuccessMsg(''), 5000);
+      showToast('success', 'Đã thêm giỏ hàng thành công! Thông tin quà tặng của bạn đã được ghi nhận.', {
+        title: 'Giỏ Hàng',
+        duration: 10000
+      });
     } catch (err: any) {
       console.error("Add to cart failed:", err);
-      setSuccessMsg(`❌ Lỗi: ${err.message || 'Không thể thêm vào giỏ hàng. Vui lòng thử lại!'}`);
-      setTimeout(() => setSuccessMsg(''), 6000);
+      showToast('error', `Lỗi: ${err.message || 'Không thể thêm vào giỏ hàng. Vui lòng thử lại!'}`, {
+        title: 'Lỗi Giỏ Hàng',
+        duration: 10000
+      });
     }
   };
 
@@ -403,14 +408,6 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                 onPhotoDeleted={handlePhotoDeleted}
                 maxPhotoboothPhotos={maxPhotoboothPhotos}
               />
-            )}
-
-            {/* Success messages & CTAs */}
-            {successMsg && (
-              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl font-medium animate-fade-in flex items-center gap-2">
-                <Icon name="check" size={14} className="text-emerald-500" />
-                <span>{successMsg}</span>
-              </div>
             )}
 
             {isAccessory ? (

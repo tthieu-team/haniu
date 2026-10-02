@@ -9,6 +9,7 @@ import { getFullImageUrl, fetchApi } from '@/lib/api';
 import Link from 'next/link';
 import Icon from '@/components/common/Icons';
 import { useTranslate } from '@/lib/translator';
+import { useToast } from '@/providers/ToastProvider';
 
 // Import subcomponents
 import CartItemCard from './components/CartItemCard';
@@ -31,6 +32,7 @@ const ALL_PAYMENT_METHODS: PaymentMethodConfig[] = [
 
 export default function CartPage() {
   const trans = useTranslate();
+  const { showToast } = useToast();
   const { cart, loading, fetchCart, updateQuantity, removeItem, addToCart } = useCartStore();
   const {
     appliedCoupon,
@@ -161,7 +163,7 @@ export default function CartPage() {
     try {
       await updateQuantity(itemId, newQty);
     } catch (err: any) {
-      alert(err.message || 'Lỗi cập nhật số lượng');
+      showToast('error', err.message || 'Lỗi cập nhật số lượng', { title: 'Giỏ hàng', duration: 8000 });
     } finally {
       setUpdatingItemId(null);
     }
@@ -171,8 +173,9 @@ export default function CartPage() {
     setUpdatingItemId(itemId);
     try {
       await removeItem(itemId);
+      showToast('info', 'Đã xóa sản phẩm khỏi giỏ hàng.', { title: 'Giỏ hàng', duration: 6000 });
     } catch (err: any) {
-      alert(err.message || 'Lỗi xóa sản phẩm');
+      showToast('error', err.message || 'Lỗi xóa sản phẩm', { title: 'Giỏ hàng', duration: 8000 });
     } finally {
       setUpdatingItemId(null);
     }
@@ -186,7 +189,12 @@ export default function CartPage() {
     const res = await applyCoupon(couponCode, subtotal);
     if (res) {
       const activeDiscount = useCouponStore.getState().discountAmount;
-      setCouponSuccess(`Áp dụng thành công: Giảm ${activeDiscount.toLocaleString()}đ!`);
+      const successMsg = `Áp dụng thành công: Giảm ${activeDiscount.toLocaleString()}đ!`;
+      setCouponSuccess(successMsg);
+      showToast('success', successMsg, { title: 'Mã Giảm Giá', duration: 10000 });
+    } else {
+      const curErr = useCouponStore.getState().error || 'Mã giảm giá không hợp lệ hoặc không đủ điều kiện áp dụng.';
+      showToast('error', curErr, { title: 'Mã Giảm Giá', duration: 10000 });
     }
   };
 
@@ -196,7 +204,12 @@ export default function CartPage() {
     const res = await applyCoupon(code, subtotal);
     if (res) {
       const activeDiscount = useCouponStore.getState().discountAmount;
-      setCouponSuccess(`Áp dụng thành công: Giảm ${activeDiscount.toLocaleString()}đ!`);
+      const successMsg = `Áp dụng thành công: Giảm ${activeDiscount.toLocaleString()}đ!`;
+      setCouponSuccess(successMsg);
+      showToast('success', successMsg, { title: 'Mã Giảm Giá', duration: 10000 });
+    } else {
+      const curErr = useCouponStore.getState().error || 'Mã giảm giá không hợp lệ hoặc không đủ điều kiện áp dụng.';
+      showToast('error', curErr, { title: 'Mã Giảm Giá', duration: 10000 });
     }
   };
 
@@ -204,6 +217,7 @@ export default function CartPage() {
     clearAppliedCoupon();
     setCouponCode('');
     setCouponSuccess('');
+    showToast('info', 'Đã hủy áp dụng mã giảm giá.', { title: 'Mã Giảm Giá', duration: 6000 });
   };
 
   const handleAddRecommended = async (productId: string) => {
@@ -211,8 +225,9 @@ export default function CartPage() {
     try {
       await addToCart({ productId, quantity: 1 });
       await fetchCart(); // Reload cart to reflect new pricing
+      showToast('success', 'Đã thêm sản phẩm chọn thêm vào giỏ hàng!', { title: 'Giỏ hàng', duration: 8000 });
     } catch (err: any) {
-      alert(err.message || 'Lỗi thêm sản phẩm vào giỏ hàng');
+      showToast('error', err.message || 'Lỗi thêm sản phẩm vào giỏ hàng', { title: 'Giỏ hàng', duration: 8000 });
     } finally {
       setUpdatingItemId(null);
     }

@@ -164,7 +164,7 @@ export default function Header() {
 
   const mobileMenuLinks = [
     { name: 'Trang chủ', href: '/' },
-    { name: 'Sản phẩm', href: '/products' },
+    { name: 'Sản phẩm', href: '/products', badge: 'Hot' },
     { name: 'Bộ sưu tập', href: '/collections' },
     { name: 'Câu chuyện', href: '/story' },
     { name: 'Tin tức', href: '/blog' },
@@ -553,84 +553,130 @@ export default function Header() {
 
         {/* Mobile Dropdown Drawer Menu */}
         {mobileOpen && (
-          <div className="relative z-50 md:hidden border-t border-slate-200 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md p-6 space-y-6 shadow-xl animate-fade-in text-slate-800 dark:text-zinc-100">
-            <div className="flex flex-col gap-4">
-              {mobileMenuLinks.map((link, idx) => (
-                <Link
-                  key={idx}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="text-xs font-bold hover:text-rose-500 px-2 py-2 border-b border-slate-100 dark:border-zinc-900/40 transition-all"
-                >
-                  {getTranslatedName(link.name)}
-                </Link>
-              ))}
+          <div className="relative z-50 md:hidden border-t border-slate-200/80 dark:border-zinc-800/80 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-xl shadow-2xl animate-slide-down text-slate-800 dark:text-zinc-100 max-h-[calc(100dvh-70px)] flex flex-col overflow-hidden">
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 scrollbar-thin">
+              {/* Mobile Search Bar inside Drawer */}
+              <form onSubmit={handleSearchSubmit} className="relative flex items-center pt-1">
+                <Icon name="search" size={14} className="absolute left-3.5 text-slate-400 dark:text-zinc-500 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder={trans("Tìm kiếm sản phẩm quà tặng...")}
+                  value={searchVal}
+                  onChange={(e) => setSearchVal(e.target.value)}
+                  className="w-full bg-slate-100/80 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-800 dark:text-zinc-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                />
+              </form>
 
-              {/* Wishlist, Theme Toggle and Account for Mobile Drawer */}
-              <div className="flex items-center justify-between gap-3 pt-2">
-                {/* Theme Toggle Mobile */}
-                <button
-                  onClick={toggleTheme}
-                  className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 text-slate-700 dark:text-zinc-350 border border-slate-200/80 dark:border-zinc-800/80 cursor-pointer"
-                >
-                  <Icon name={mounted && theme === 'dark' ? 'sun' : 'moon'} size={13} />
-                  <span>{mounted && theme === 'dark' ? trans("Sáng") : trans("Tối")}</span>
-                </button>
-
-                {/* Wishlist Link Mobile */}
-                <Link
-                  href="/wishlist"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 text-rose-500 border border-slate-200/80 dark:border-zinc-800/80 cursor-pointer"
-                >
-                  <Icon name="heart" size={13} className="text-rose-500" />
-                  <span>{trans("Yêu thích")} ({wishlistItems.length})</span>
-                </Link>
+              {/* Main Links */}
+              <div className="space-y-1">
+                {mobileMenuLinks.map((link, idx) => {
+                  const isActive = pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href));
+                  return (
+                    <Link
+                      key={idx}
+                      href={link.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                        isActive
+                          ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 shadow-xs'
+                          : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900/60'
+                      }`}
+                    >
+                      <span>{getTranslatedName(link.name)}</span>
+                      <div className="flex items-center gap-1.5">
+                        {link.badge && (
+                          <span className="bg-rose-500 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+                            {link.badge}
+                          </span>
+                        )}
+                        <Icon name="arrow-right" size={12} className={isActive ? 'text-rose-500' : 'text-slate-300 dark:text-zinc-600'} />
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
 
-              {/* Language Selector Mobile */}
-              <div className="flex items-center justify-between gap-2 border border-slate-200/80 dark:border-zinc-800/80 p-2 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50">
-                <span className="text-xs font-bold text-slate-500 dark:text-zinc-450 pl-2">{trans("Ngôn ngữ / Language:")}</span>
-                <LanguageSelector />
-              </div>
+              {/* Quick Actions (Wishlist & Theme) */}
+              <div className="pt-2 border-t border-slate-100 dark:border-zinc-850/80 space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={toggleTheme}
+                    className="flex items-center justify-center gap-1.5 text-xs font-bold py-2 px-3 rounded-xl bg-slate-100/70 dark:bg-zinc-900/70 text-slate-700 dark:text-zinc-300 border border-slate-200/60 dark:border-zinc-800 hover:border-slate-300 transition-all cursor-pointer"
+                  >
+                    <Icon name={mounted && theme === 'dark' ? 'sun' : 'moon'} size={13} className="text-amber-500" />
+                    <span>{mounted && theme === 'dark' ? trans("Giao diện Sáng") : trans("Giao diện Tối")}</span>
+                  </button>
 
-              {/* User Account / Login Mobile */}
-              <div className="pt-1">
-                {isAuthenticated ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 text-slate-700 dark:text-zinc-350">
-                      <Icon name="user" size={13} />
-                      <span>{trans("Chào,")} {(user?.fullName || '').split(' ').slice(-1)[0] || trans('bạn')}</span>
+                  <Link
+                    href="/wishlist"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center gap-1.5 text-xs font-bold py-2 px-3 rounded-xl bg-rose-50/60 dark:bg-zinc-900/70 text-rose-600 dark:text-rose-400 border border-rose-200/50 dark:border-zinc-800 transition-all cursor-pointer"
+                  >
+                    <Icon name="heart" size={13} className="fill-rose-500 text-rose-500" />
+                    <span>{trans("Yêu thích")} ({wishlistItems.length})</span>
+                  </Link>
+                </div>
+
+                {/* Language Selector */}
+                <div className="flex items-center justify-between gap-2 border border-slate-200/60 dark:border-zinc-800 p-1.5 px-2.5 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400">{trans("Ngôn ngữ / Language:")}</span>
+                  <LanguageSelector />
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Account Action Bar */}
+            <div className="p-3 bg-slate-50/90 dark:bg-zinc-900/90 border-t border-slate-200/60 dark:border-zinc-800 pb-[calc(10px+env(safe-area-inset-bottom))]">
+              {isAuthenticated ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between px-1">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-zinc-300">
+                      <div className="w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold">
+                        {(user?.fullName || 'U').charAt(0).toUpperCase()}
+                      </div>
+                      <span className="truncate max-w-[150px]">{user?.fullName || trans('Khách hàng')}</span>
                     </div>
                     {user?.role === 'ADMIN' && (
                       <Link
                         href="/admin/products"
                         onClick={() => setMobileOpen(false)}
-                        className="w-full text-center bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                        className="text-[10px] font-extrabold text-amber-600 bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-500/20 flex items-center gap-1"
                       >
-                        <Icon name="shield" size={13} /> {trans("Quản trị Admin")}
+                        <Icon name="shield" size={11} /> Admin
                       </Link>
                     )}
-                    <button
-                      onClick={() => {
-                        authService.logout();
-                        setMobileOpen(false);
-                      }}
-                      className="w-full text-center bg-rose-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
-                    >
-                      {trans("Đăng xuất")}
-                    </button>
                   </div>
-                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      authService.logout();
+                      setMobileOpen(false);
+                    }}
+                    className="w-full text-center bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-98"
+                  >
+                    {trans("Đăng xuất")}
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
                   <Link
                     href="/auth/login"
                     onClick={() => setMobileOpen(false)}
-                    className="w-full text-center bg-slate-900 text-white dark:bg-zinc-800 font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                    className="w-full text-center bg-slate-900 hover:bg-slate-800 text-white dark:bg-zinc-100 dark:text-zinc-900 font-bold py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-98"
                   >
                     <Icon name="user" size={13} /> {trans("Đăng nhập")}
                   </Link>
-                )}
-              </div>
+                  <Link
+                    href="/auth/register"
+                    onClick={() => setMobileOpen(false)}
+                    className="w-full text-center bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-98"
+                  >
+                    {trans("Đăng ký")}
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         )}

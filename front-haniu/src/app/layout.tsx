@@ -134,6 +134,7 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100;300;450;500;700;900&family=Caveat:wght@400..700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dancing+Script:wght@400;600;700&family=Itim&family=Mali:wght@400;500;600;700&family=Patrick+Hand&display=swap" rel="stylesheet" />
         <script
           id="theme-initializer"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               (function() {

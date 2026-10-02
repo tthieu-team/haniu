@@ -12,6 +12,7 @@ import AddressPicker from '@/components/common/AddressPicker';
 import { cartService } from '@/services/cart.service';
 import { productService } from '@/services/product.service';
 import CustomizationInfo from '@/app/cart/components/CustomizationInfo';
+import { useToast } from '@/providers/ToastProvider';
 
 
 interface PaymentMethodConfig {
@@ -32,6 +33,7 @@ const ALL_PAYMENT_METHODS: PaymentMethodConfig[] = [
 function CheckoutForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { showToast } = useToast();
   const { cart, fetchCart, clearCartState, syncGuestCartToBackend } = useCartStore();
   const { appliedCoupon, discountAmount, applyCoupon } = useCouponStore();
   const { user, isAuthenticated } = useAuthStore();
@@ -179,44 +181,62 @@ function CheckoutForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cartId) {
-      setError('Giỏ hàng trống hoặc không hợp lệ.');
+      const msg = 'Giỏ hàng trống hoặc không hợp lệ.';
+      setError(msg);
+      showToast('error', msg, { title: 'Giỏ hàng', duration: 10000 });
       return;
     }
 
     if (!formData.customerName.trim()) {
-      setError('Vui lòng điền họ tên người nhận.');
+      const msg = 'Vui lòng điền họ tên người nhận.';
+      setError(msg);
+      showToast('error', msg, { title: 'Thiếu thông tin', duration: 10000 });
       return;
     }
     if (!formData.customerPhone.trim()) {
-      setError('Vui lòng điền số điện thoại.');
+      const msg = 'Vui lòng điền số điện thoại liên hệ.';
+      setError(msg);
+      showToast('error', msg, { title: 'Thiếu thông tin', duration: 10000 });
       return;
     }
     const phoneRegex = /^(0|84)(3|5|7|8|9)[0-9]{8}$/;
     if (!phoneRegex.test(formData.customerPhone.trim())) {
-      setError('Số điện thoại không đúng định dạng (VD: 0912345678).');
+      const msg = 'Số điện thoại không đúng định dạng (VD: 0912345678).';
+      setError(msg);
+      showToast('error', msg, { title: 'Sai định dạng', duration: 10000 });
       return;
     }
     if (formData.customerEmail.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.customerEmail.trim())) {
-        setError('Địa chỉ email không đúng định dạng.');
+        const msg = 'Địa chỉ email không đúng định dạng.';
+        setError(msg);
+        showToast('error', msg, { title: 'Sai định dạng', duration: 10000 });
         return;
       }
     }
     if (!formData.shippingProvince.trim()) {
-      setError('Vui lòng chọn Tỉnh/Thành phố.');
+      const msg = 'Vui lòng chọn Tỉnh/Thành phố giao hàng.';
+      setError(msg);
+      showToast('error', msg, { title: 'Thiếu địa chỉ', duration: 10000 });
       return;
     }
     if (!formData.shippingDistrict.trim()) {
-      setError('Vui lòng chọn Quận/Huyện.');
+      const msg = 'Vui lòng chọn Quận/Huyện giao hàng.';
+      setError(msg);
+      showToast('error', msg, { title: 'Thiếu địa chỉ', duration: 10000 });
       return;
     }
     if (!formData.shippingWard.trim()) {
-      setError('Vui lòng chọn Phường/Xã.');
+      const msg = 'Vui lòng chọn Phường/Xã giao hàng.';
+      setError(msg);
+      showToast('error', msg, { title: 'Thiếu địa chỉ', duration: 10000 });
       return;
     }
     if (!formData.shippingAddressLine.trim()) {
-      setError('Vui lòng điền địa chỉ chi tiết (số nhà, tên đường...).');
+      const msg = 'Vui lòng điền địa chỉ chi tiết (số nhà, tên đường...).';
+      setError(msg);
+      showToast('error', msg, { title: 'Thiếu địa chỉ', duration: 10000 });
       return;
     }
 
@@ -335,12 +355,6 @@ function CheckoutForm() {
         <h1 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Thông tin đặt hàng</h1>
         <p className="text-slate-500 dark:text-zinc-400 text-sm mt-1.5">Vui lòng điền địa chỉ giao hàng và thông tin liên hệ để hoàn tất đơn quà tặng</p>
       </div>
-
-      {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-xl text-xs font-semibold">
-          {error}
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Customer Information & Shipping address */}
@@ -699,26 +713,27 @@ function CheckoutForm() {
                 type="button"
                 onClick={() => {
                   if (!tempFormData.customerName.trim()) {
-                    alert('Vui lòng điền họ tên người nhận.');
+                    showToast('error', 'Vui lòng điền họ tên người nhận.', { title: 'Thiếu thông tin', duration: 10000 });
                     return;
                   }
                   if (!tempFormData.customerPhone.trim()) {
-                    alert('Vui lòng điền số điện thoại.');
+                    showToast('error', 'Vui lòng điền số điện thoại liên hệ.', { title: 'Thiếu thông tin', duration: 10000 });
                     return;
                   }
                   const phoneRegex = /^(0|84)(3|5|7|8|9)[0-9]{8}$/;
                   if (!phoneRegex.test(tempFormData.customerPhone.trim())) {
-                    alert('Số điện thoại không đúng định dạng.');
+                    showToast('error', 'Số điện thoại không đúng định dạng (VD: 0912345678).', { title: 'Sai định dạng', duration: 10000 });
                     return;
                   }
                   if (!tempFormData.shippingProvince.trim() || !tempFormData.shippingDistrict.trim() || !tempFormData.shippingWard.trim() || !tempFormData.shippingAddressLine.trim()) {
-                    alert('Vui lòng điền đầy đủ thông tin địa chỉ.');
+                    showToast('error', 'Vui lòng chọn và điền đầy đủ thông tin địa chỉ giao hàng.', { title: 'Thiếu địa chỉ', duration: 10000 });
                     return;
                   }
                   setFormData(prev => ({
                     ...prev,
                     ...tempFormData
                   }));
+                  showToast('success', 'Đã lưu thông tin giao hàng thành công!', { title: 'Lưu địa chỉ', duration: 6000 });
                   setIsAddressModalOpen(false);
                 }}
                 className="flex-1 py-3 bg-rose-500 text-white font-bold text-xs rounded-xl hover:bg-rose-600 transition-all cursor-pointer shadow-md shadow-rose-500/10"

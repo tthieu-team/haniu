@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import { useCouponStore } from '@/store/coupon';
 import Icon from '@/components/common/Icons';
@@ -10,37 +10,63 @@ export default function PromoPopup() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [collectedCodes, setCollectedCodes] = useState<string[]>([]);
   const [usedCodes, setUsedCodes] = useState<string[]>([]);
-  const [initialCollected, setInitialCollected] = useState<string[]>([]);
-  const [initialUsed, setInitialUsed] = useState<string[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [allCollectedCelebration, setAllCollectedCelebration] = useState(false);
+
   const { welcomeScreen } = useHomeLayoutStore();
   const { coupons, fetchCoupons } = useCouponStore();
 
+  // 1. Khởi tạo và đọc danh sách mã đã thu thập & đã sử dụng từ localStorage
   useEffect(() => {
-    // Load collected and used coupons from localStorage on mount
     if (typeof window !== 'undefined') {
       try {
         const storedCollected = localStorage.getItem('haniu_collected_coupons');
         if (storedCollected) {
           const parsed = JSON.parse(storedCollected);
-          setCollectedCodes(parsed);
-          setInitialCollected(parsed);
+          if (Array.isArray(parsed)) {
+            setCollectedCodes(parsed);
+          }
         }
         const storedUsed = localStorage.getItem('haniu_used_coupons');
         if (storedUsed) {
           const parsed = JSON.parse(storedUsed);
-          setUsedCodes(parsed);
-          setInitialUsed(parsed);
+          if (Array.isArray(parsed)) {
+            setUsedCodes(parsed);
+          }
         }
       } catch (e) {
         console.error('Lỗi đọc dữ liệu coupon từ localStorage:', e);
       }
     }
 
+    // Tải danh sách coupon từ máy chủ
+    fetchCoupons().finally(() => {
+      setIsLoaded(true);
+    });
+  }, [fetchCoupons]);
+
+  // 2. Lọc danh sách voucher: Chỉ hiển thị những voucher ĐANG HOẠT ĐỘNG, BẬT BANNER, CHƯA THU THẬP VÀ CHƯA SỬ DỤNG
+  const availableCoupons = useMemo(() => {
+    return (coupons || []).filter(c => {
+      const codeUpper = (c.code || '').trim().toUpperCase();
+      const isCollected = collectedCodes.some(code => code.trim().toUpperCase() === codeUpper);
+      const isUsed = usedCodes.some(code => code.trim().toUpperCase() === codeUpper);
+      return c.active && c.showInBanner && !isCollected && !isUsed;
+    });
+  }, [coupons, collectedCodes, usedCodes]);
+
+  // 3. Tự động hiển thị popup (nếu còn voucher chưa thu thập và chưa hiện trong phiên này)
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    // Nếu người dùng đã thu thập hết tất cả các mã voucher -> Không bao giờ hiển thị popup
+    if (availableCoupons.length === 0) {
+      setIsOpen(false);
+      return;
+    }
+
     const isShown = sessionStorage.getItem('haniu_promo_shown');
     if (!isShown) {
-      // Fetch coupons from backend
-      fetchCoupons();
-
       const isSplashShowing = welcomeScreen.isEnabled && !sessionStorage.getItem('haniu_splash_shown');
       const delay = isSplashShowing ? (welcomeScreen.durationMs + 800) : 1000;
 
@@ -50,44 +76,61 @@ export default function PromoPopup() {
       }, delay);
       return () => clearTimeout(timer);
     }
-  }, [welcomeScreen, fetchCoupons]);
+  }, [isLoaded, availableCoupons.length, welcomeScreen]);
 
+  // 4. Xử lý khi bấm nút "Thu thập"
   const handleCollect = (code: string) => {
-    // Copy code to clipboard
+    // Copy mã vào Clipboard
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
-    setTimeout(() => {
-      setCopiedCode(null);
-    }, 2000);
 
-    // Save to collected list if not already there
-    if (!collectedCodes.includes(code)) {
-      const updated = [...collectedCodes, code];
-      setCollectedCodes(updated);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('haniu_collected_coupons', JSON.stringify(updated));
-      }
+    const codeUpper = code.trim().toUpperCase();
+    const isAlreadyInList = collectedCodes.some(c => c.trim().toUpperCase() === codeUpper);
+
+    const updated = isAlreadyInList ? collectedCodes : [...collectedCodes, code];
+
+    // Lưu ngay lập tức vào localStorage để đồng bộ vĩnh viễn
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('haniu_collected_coupons', JSON.stringify(updated));
+    }
+
+    // Kiểm tra số lượng voucher còn lại
+    const remainingCount = (coupons || []).filter(c => {
+      const cUpper = (c.code || '').trim().toUpperCase();
+      const isColl = updated.some(item => item.trim().toUpperCase() === cUpper);
+      const isUsd = usedCodes.some(item => item.trim().toUpperCase() === cUpper);
+      return c.active && c.showInBanner && !isColl && !isUsd;
+    }).length;
+
+    // Nếu đã thu thập hết voucher cuối cùng
+    if (remainingCount === 0) {
+      setAllCollectedCelebration(true);
+      setTimeout(() => {
+        setCollectedCodes(updated);
+        setTimeout(() => {
+          setIsOpen(false);
+        }, 1200);
+      }, 700);
+    } else {
+      // Ẩn voucher đã thu thập sau hiệu ứng sao chép mượt mà
+      setTimeout(() => {
+        setCollectedCodes(updated);
+        setCopiedCode(null);
+      }, 700);
     }
   };
 
-  // Filter coupons showing in popup banner (only active ones that haven't been collected or used when page loaded)
-  const bannerCoupons = (coupons || []).filter(c => {
-    const isCollected = initialCollected.some(code => code.toUpperCase() === c.code.toUpperCase());
-    const isUsed = initialUsed.some(code => code.toUpperCase() === c.code.toUpperCase());
-    return c.active && c.showInBanner && !isCollected && !isUsed;
-  });
-
-  if (!isOpen || bannerCoupons.length === 0) return null;
+  if (!isOpen || (availableCoupons.length === 0 && !allCollectedCelebration)) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop with premium blur */}
+      {/* Backdrop với blur mượt mà */}
       <div
         className="absolute inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-md transition-opacity duration-300 cursor-pointer"
         onClick={() => setIsOpen(false)}
       />
 
-      {/* Modal Container: Premium Rounded Card with Glow Effects */}
+      {/* Modal Container */}
       <div className="relative w-full max-w-md bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl rounded-[32px] overflow-hidden shadow-[0_32px_64px_-15px_rgba(244,63,94,0.25)] border border-rose-100/50 dark:border-zinc-800/50 animate-scale-up z-10 flex flex-col transition-all duration-300">
 
         {/* Glow Effects inside Modal */}
@@ -115,103 +158,95 @@ export default function PromoPopup() {
             Quà Tặng Độc Quyền Haniu
           </h3>
           <p className="text-xs text-rose-100/90 mt-1.5 font-medium max-w-xs mx-auto">
-            Nhận ngay các mã voucher giảm giá cực hời cho đơn hàng của bạn!
+            {allCollectedCelebration 
+              ? '🎉 Bạn đã thu thập trọn bộ quà tặng ưu đãi!' 
+              : 'Nhận ngay các mã voucher giảm giá cực hời cho đơn hàng của bạn!'}
           </p>
         </div>
 
         {/* Voucher List Content */}
         <div className="p-6 space-y-4 max-h-[50vh] overflow-y-auto scrollbar-thin relative z-10 bg-slate-50/40 dark:bg-zinc-950/20">
-          {bannerCoupons.map((voucher) => {
-            const isCopied = copiedCode === voucher.code;
-            const isCollected = collectedCodes.includes(voucher.code);
-            const isUsed = usedCodes.includes(voucher.code);
+          {allCollectedCelebration && availableCoupons.length === 0 ? (
+            <div className="py-8 text-center space-y-2 animate-fade-in">
+              <div className="text-4xl">🎁✨</div>
+              <h4 className="text-sm font-bold text-slate-800 dark:text-zinc-100">
+                Đã lưu tất cả mã vào kho voucher của bạn!
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
+                Mã sẽ tự động áp dụng tại giỏ hàng khi thanh toán.
+              </p>
+            </div>
+          ) : (
+            availableCoupons.map((voucher) => {
+              const isCopied = copiedCode === voucher.code;
 
-            const discountLabel = voucher.discountType === 'PERCENT'
-              ? `Giảm ${voucher.discountValue}%`
-              : `Giảm ${voucher.discountValue.toLocaleString()}đ`;
-            const minOrderLabel = voucher.minOrderValue
-              ? `Đơn từ ${(voucher.minOrderValue).toLocaleString()}đ`
-              : 'Đơn từ 0đ';
+              const minOrderLabel = voucher.minOrderValue
+                ? `Đơn từ ${(voucher.minOrderValue).toLocaleString()}đ`
+                : 'Đơn từ 0đ';
 
-            return (
-              <div
-                key={voucher.id || voucher.code}
-                className={`bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl flex items-stretch shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group ${isUsed ? 'opacity-60' : ''
-                  }`}
-              >
-                {/* Left side discount tag */}
-                <div className={`w-24 text-white flex flex-col justify-center items-center p-3 text-center relative shrink-0 ${isUsed
-                    ? 'bg-zinc-400 dark:bg-zinc-700'
-                    : 'bg-gradient-to-br from-rose-500 to-rose-600'
-                  }`}>
-                  <span className="text-[10px] font-bold opacity-90 uppercase tracking-widest">GIẢM</span>
-                  <span className="text-xl font-black tracking-tight mt-0.5">
-                    {voucher.discountType === 'PERCENT' ? `${voucher.discountValue}%` : `${(voucher.discountValue / 1000)}k`}
-                  </span>
+              return (
+                <div
+                  key={voucher.id || voucher.code}
+                  className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl flex items-stretch shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group"
+                >
+                  {/* Left side discount tag */}
+                  <div className="w-24 text-white flex flex-col justify-center items-center p-3 text-center relative shrink-0 bg-gradient-to-br from-rose-500 to-rose-600">
+                    <span className="text-[10px] font-bold opacity-90 uppercase tracking-widest">GIẢM</span>
+                    <span className="text-xl font-black tracking-tight mt-0.5">
+                      {voucher.discountType === 'PERCENT' ? `${voucher.discountValue}%` : `${(voucher.discountValue / 1000)}k`}
+                    </span>
 
-                  {/* Elegant dashed line on the right edge */}
-                  <div className="absolute right-0 top-3 bottom-3 w-[1px] border-r border-dashed border-white/40" />
-                </div>
+                    {/* Dashed separator */}
+                    <div className="absolute right-0 top-3 bottom-3 w-[1px] border-r border-dashed border-white/40" />
+                  </div>
 
-                {/* Right side content */}
-                <div className="flex-1 p-4 pl-5 flex flex-col justify-between gap-3 relative">
-                  {/* Top and Bottom Ticket Cutouts */}
-                  <div className="absolute -left-2.5 -top-2.5 w-5 h-5 rounded-full bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800" />
-                  <div className="absolute -left-2.5 -bottom-2.5 w-5 h-5 rounded-full bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800" />
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold text-rose-500 bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 rounded-full border border-rose-100/30 dark:border-rose-900/30">
-                        {minOrderLabel}
-                      </span>
-                      {isUsed && (
-                        <span className="text-[9px] font-bold text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
-                          Đã dùng
+                  {/* Right side content */}
+                  <div className="flex-1 p-4 pl-5 flex flex-col justify-between gap-3 relative">
+                    {/* Top and Bottom Ticket Cutouts */}
+                    <div className="absolute -left-2.5 -top-2.5 w-5 h-5 rounded-full bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800" />
+                    <div className="absolute -left-2.5 -bottom-2.5 w-5 h-5 rounded-full bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800" />
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-rose-500 bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 rounded-full border border-rose-100/30 dark:border-rose-900/30">
+                          {minOrderLabel}
                         </span>
+                      </div>
+
+                      <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-200 mt-2 flex items-center gap-1">
+                        Mã:
+                        <span className="font-mono text-sm text-slate-900 dark:text-white font-bold bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded select-all border border-slate-200/50 dark:border-zinc-700/50">
+                          {voucher.code}
+                        </span>
+                      </h4>
+
+                      {voucher.description && (
+                        <p className="text-[10px] text-slate-500 dark:text-zinc-400 mt-1.5 leading-relaxed">
+                          {voucher.description}
+                        </p>
                       )}
                     </div>
 
-                    <h4 className="text-xs font-bold text-slate-800 dark:text-zinc-200 mt-2 flex items-center gap-1">
-                      Mã:
-                      <span className="font-mono text-sm text-slate-900 dark:text-white font-bold bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded select-all border border-slate-200/50 dark:border-zinc-700/50">
-                        {voucher.code}
-                      </span>
-                    </h4>
-
-                    {voucher.description && (
-                      <p className="text-[10px] text-slate-500 dark:text-zinc-400 mt-1.5 leading-relaxed">
-                        {voucher.description}
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => handleCollect(voucher.code)}
-                    disabled={isUsed}
-                    className={`w-full text-center text-xs font-bold py-2 rounded-xl transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-95 ${isUsed
-                        ? 'bg-zinc-100 dark:bg-zinc-800/80 text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-zinc-750 pointer-events-none'
-                        : isCopied
-                          ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/10'
-                          : isCollected
-                            ? 'bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/50'
-                            : 'bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white shadow-slate-900/5'
+                    <button
+                      onClick={() => handleCollect(voucher.code)}
+                      className={`w-full text-center text-xs font-bold py-2 rounded-xl transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-95 ${
+                        isCopied
+                          ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20'
+                          : 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/20'
                       }`}
-                  >
-                    {isUsed ? (
-                      'Đã sử dụng'
-                    ) : isCopied ? (
-                      <span className="flex items-center justify-center gap-1">
-                        <Icon name="check" size={12} /> Đã sao chép
-                      </span>
-                    ) : isCollected ? (
-                      'Đã thu thập'
-                    ) : (
-                      'Thu thập'
-                    )}
-                  </button>
+                    >
+                      {isCopied ? (
+                        <span className="flex items-center justify-center gap-1">
+                          <Icon name="check" size={13} /> Đã thu thập & Sao chép!
+                        </span>
+                      ) : (
+                        'Thu thập ngay'
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         {/* Footer */}

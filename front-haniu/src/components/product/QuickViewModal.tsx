@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createPortal } from 'react-dom';
 import { useCartStore } from '@/store/cart';
+import { useToast } from '@/providers/ToastProvider';
 import PersonalizationForm from './PersonalizationForm';
 import GiftWrapSelector from './GiftWrapSelector';
 import Icon from '@/components/common/Icons';
@@ -46,11 +47,11 @@ interface QuickViewModalProps {
 
 export default function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps) {
   const { addToCart } = useCartStore();
+  const { showToast } = useToast();
   const [selectedVariant, setSelectedVariant] = useState<any | null>(null);
   const [activeImage, setActiveImage] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
 
   // Customization state
   const [engravingText, setEngravingText] = useState('');
@@ -68,7 +69,6 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
       setEngravingText('');
       setCardMessage('');
       setGiftWrap('Red Ribbon');
-      setSuccessMsg('');
       if (product.variants && product.variants.length > 0) {
         setSelectedVariant(product.variants[0]);
       } else {
@@ -158,18 +158,17 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
 
     try {
       await addToCart(payload);
-      setSuccessMsg("🎉 Đã thêm giỏ hàng thành công! Thông tin quà tặng của bạn đã được ghi nhận.");
-      setTimeout(() => {
-        setSuccessMsg('');
-        onClose();
-      }, 2000);
-    } catch (err) {
+      showToast('success', 'Đã thêm giỏ hàng thành công! Thông tin quà tặng của bạn đã được ghi nhận.', {
+        title: 'Giỏ Hàng',
+        duration: 10000
+      });
+      onClose();
+    } catch (err: any) {
       console.log("Cart Payload created (Fallback):", payload);
-      setSuccessMsg("🎉 Đã thêm giỏ hàng thành công! Thông tin quà tặng của bạn đã được ghi nhận.");
-      setTimeout(() => {
-        setSuccessMsg('');
-        onClose();
-      }, 2000);
+      showToast('error', `Không thể thêm vào giỏ hàng: ${err?.message || 'Vui lòng thử lại!'}`, {
+        title: 'Lỗi Giỏ Hàng',
+        duration: 10000
+      });
     } finally {
       setAdding(false);
     }
@@ -500,31 +499,25 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
               </div>
             </div>
 
-            {/* Success message or adding to cart button */}
-            {successMsg ? (
-              <div className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 p-4 rounded-2xl text-xs font-semibold text-center border border-emerald-100 dark:border-emerald-900/30 animate-fade-in">
-                {successMsg}
-              </div>
-            ) : (
-              <button
-                onClick={handleAddToCart}
-                disabled={adding || product.stock === 0}
-                className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 dark:from-rose-600 dark:to-rose-700 text-white font-bold py-3.5 px-6 rounded-2xl text-xs transition-all shadow-md active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-rose-500/10 hover:shadow-rose-500/20"
-              >
-                {adding ? (
-                  <>
-                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                    Đang thêm...
-                  </>
-                ) : product.stock === 0 ? (
-                  'Hết hàng'
-                ) : (
-                  <span className="flex items-center gap-1.5">
-                    Thêm vào giỏ hàng <Icon name="🛍️" size={16} />
-                  </span>
-                )}
-              </button>
-            )}
+            {/* Add to cart button */}
+            <button
+              onClick={handleAddToCart}
+              disabled={adding || product.stock === 0}
+              className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 dark:from-rose-600 dark:to-rose-700 text-white font-bold py-3.5 px-6 rounded-2xl text-xs transition-all shadow-md active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-rose-500/10 hover:shadow-rose-500/20"
+            >
+              {adding ? (
+                <>
+                  <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                  Đang thêm...
+                </>
+              ) : product.stock === 0 ? (
+                'Hết hàng'
+              ) : (
+                <span className="flex items-center gap-1.5">
+                  Thêm vào giỏ hàng <Icon name="🛍️" size={16} />
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </div>

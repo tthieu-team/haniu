@@ -197,23 +197,69 @@ export default function AddressPicker({ province, district, ward, addressLine, o
   // ── Auto-fill inputs from coordinates ──────────────────────────────────
   const autoFillFromCoords = async (lat: number, lng: number) => {
     try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=vi`,
-        { headers: { 'Accept-Language': 'vi' } }
-      );
-      const data = await res.json();
-      if (!data || !data.address) return;
+      let addr: any = null;
+      let displayName: string = '';
 
-      const addr = data.address;
-      console.log('📍 [Map Geocode] Address returned by Nominatim:', addr);
-      console.log('📍 [Map Geocode] Full display name:', data.display_name);
+      // Strategy 1: OpenStreetMap Nominatim
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=vi`,
+          { headers: { 'Accept-Language': 'vi' } }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.address) {
+            addr = data.address;
+            displayName = data.display_name || '';
+          }
+        }
+      } catch (e) {
+        // Fallback silently if Nominatim fails or blocks
+      }
+
+      // Strategy 2: BigDataCloud Reverse Geocode Client (CORS-friendly, reliable client-side geocoding)
+      if (!addr) {
+        try {
+          const res = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=vi`
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (data) {
+              const adminLevels = data.localityInfo?.administrative || [];
+              const adminProv = adminLevels.find((a: any) => a.adminLevel === 4 || a.name?.includes('Tỉnh') || a.name?.includes('Thành phố'))?.name || data.principalSubdivision;
+              const adminDist = adminLevels.find((a: any) => a.adminLevel === 6 || a.name?.includes('Quận') || a.name?.includes('Huyện') || a.name?.includes('Thị xã'))?.name || data.locality;
+              const adminWard = adminLevels.find((a: any) => a.adminLevel === 8 || a.name?.includes('Phường') || a.name?.includes('Xã') || a.name?.includes('Thị trấn'))?.name;
+
+              addr = {
+                city: adminProv,
+                state: adminProv,
+                province: adminProv,
+                district: adminDist,
+                city_district: adminDist,
+                ward: adminWard || data.locality,
+                road: data.localityInfo?.informative?.[0]?.name || ''
+              };
+              displayName = [data.locality, adminDist, adminProv].filter(Boolean).join(', ');
+            }
+          }
+        } catch (e) {
+          // Fallback failed
+        }
+      }
+
+      if (!addr) return;
 
       // 1. Get provinces list (ensure loaded)
       let activeProvinces = provinces;
       if (activeProvinces.length === 0) {
-        const r = await fetch('https://provinces.open-api.vn/api/?depth=1');
-        activeProvinces = await r.json();
-        setProvinces(activeProvinces);
+        try {
+          const r = await fetch('https://provinces.open-api.vn/api/?depth=1');
+          activeProvinces = await r.json();
+          setProvinces(activeProvinces);
+        } catch (e) {
+          return;
+        }
       }
 
       // Helper to clean and strip accents for highly robust comparison
@@ -229,33 +275,33 @@ export default function AddressPicker({ province, district, ward, addressLine, o
       };
 
       // 2. Match Province
-      const provName = addr.city || addr.state || addr.province || addr.region;
-      console.log('📍 [Map Geocode] Province candidate from map:', provName);
+      const provName = addr.city || addr.state || addr.province || addr.region || '';
       if (!provName) return;
       const cleanProv = clean(provName);
       const matchedProv = activeProvinces.find(
         (p) => clean(p.name).includes(cleanProv) || cleanProv.includes(clean(p.name))
       );
-      console.log('📍 [Map Geocode] Matched Province in Database:', matchedProv);
 
       if (!matchedProv) return;
 
       // 3. Fetch Province Districts and Wards in a single tree request (depth=2)
-      const distRes = await fetch(`https://provinces.open-api.vn/api/p/${matchedProv.code}?depth=2`);
-      const distData = await distRes.json();
-      const fetchedDistricts = distData.districts || [];
-      setDistricts(fetchedDistricts);
-      setProvinceCode(matchedProv.code);
+      let fetchedDistricts: District[] = [];
+      try {
+        const distRes = await fetch(`https://provinces.open-api.vn/api/p/${matchedProv.code}?depth=2`);
+        const distData = await distRes.json();
+        fetchedDistricts = distData.districts || [];
+        setDistricts(fetchedDistricts);
+        setProvinceCode(matchedProv.code);
+      } catch (e) {}
 
       // Extract Ward candidate
-      const wardName = addr.ward || addr.suburb || addr.quarter || addr.neighbourhood || addr.commune || addr.town || addr.village;
-      console.log('📍 [Map Geocode] Ward candidate from map:', wardName);
-      const cleanWard = wardName ? clean(wardName) : '';
+      const wardName = addr.ward || addr.suburb || addr.quarter || addr.neighbourhood || addr.commune || addr.town || addr.village || '';
+      const cleanWard = clean(wardName);
 
       let matchedDist: any = undefined;
       let matchedWard: any = undefined;
 
-      // 4. Match Ward first by searching using open-api.vn search endpoint (handles missing or wrong district fields in map data)
+      // 4. Match Ward first by searching using open-api.vn search endpoint
       if (cleanWard) {
         try {
           const wardSearchRes = await fetch(`https://provinces.open-api.vn/api/w/search/?q=${encodeURIComponent(cleanWard)}`);
@@ -263,7 +309,6 @@ export default function AddressPicker({ province, district, ward, addressLine, o
           
           if (Array.isArray(matchedWardsList) && matchedWardsList.length > 0) {
             const activeDistrictCodes = new Set(fetchedDistricts.map((d: any) => d.code));
-            // Find a ward in the list that belongs to our matched province by fetching details for the candidates
             const candidates = matchedWardsList.slice(0, 10);
             const detailedWards = await Promise.all(
               candidates.map(async (w: any) => {
@@ -279,79 +324,42 @@ export default function AddressPicker({ province, district, ward, addressLine, o
             if (foundWard) {
               matchedWard = foundWard;
               matchedDist = fetchedDistricts.find((d: any) => d.code === foundWard.district_code);
-              console.log('📍 [Map Geocode] Matched via search API:', { ward: matchedWard.name, dist: matchedDist.name });
             }
           }
-        } catch (e) {
-          console.error('📍 [Map Geocode] Fuzzy search ward API failed, trying offline fallback', e);
-        }
+        } catch (e) {}
       }
 
-      // SECONDARY WARD FALLBACK: If ward is still not found directly, scan road, neighbourhood, quarter, and display_name
-      if (!matchedWard) {
-        console.log('📍 [Map Geocode] Ward not matched directly, scanning road/display_name for fuzzy search...');
-        try {
-          const searchWord = clean(addr.road || addr.neighbourhood || addr.quarter || '');
-          if (searchWord) {
-            const wardSearchRes = await fetch(`https://provinces.open-api.vn/api/w/search/?q=${encodeURIComponent(searchWord)}`);
-            const matchedWardsList = await wardSearchRes.json();
-            if (Array.isArray(matchedWardsList) && matchedWardsList.length > 0) {
-              const activeDistrictCodes = new Set(fetchedDistricts.map((d: any) => d.code));
-              const candidates = matchedWardsList.slice(0, 10);
-              const detailedWards = await Promise.all(
-                candidates.map(async (w: any) => {
-                  try {
-                    const res = await fetch(`https://provinces.open-api.vn/api/w/${w.code}`);
-                    return await res.json();
-                  } catch {
-                    return null;
-                  }
-                })
-              );
-              const foundWard = detailedWards.find((w: any) => w && activeDistrictCodes.has(w.district_code));
-              if (foundWard) {
-                matchedWard = foundWard;
-                matchedDist = fetchedDistricts.find((d: any) => d.code === foundWard.district_code);
-              }
-            }
-          }
-        } catch (e) {
-          console.error('📍 [Map Geocode] Secondary fuzzy search failed', e);
-        }
-      }
-
-      // 5. Fallback: If District is still not matched (e.g. no ward matches), match district directly by name
+      // 5. Fallback: If District is not matched, match district directly by name
       if (!matchedDist) {
-        const distName = addr.city_district || addr.district || addr.county || addr.suburb;
-        console.log('📍 [Map Geocode] Fallback: matching district directly by name:', distName);
-        const cleanDist = distName ? clean(distName) : '';
+        const distName = addr.city_district || addr.district || addr.county || addr.suburb || '';
+        const cleanDist = clean(distName);
         matchedDist = cleanDist
           ? fetchedDistricts.find((d: any) => clean(d.name).includes(cleanDist) || cleanDist.includes(clean(d.name)))
-          : undefined;
+          : fetchedDistricts[0]; // fallback to first district if near
       }
 
       // 6. Load Wards options for the UI dropdown based on matched district
       if (matchedDist) {
-        const wardRes = await fetch(`https://provinces.open-api.vn/api/d/${matchedDist.code}?depth=2`);
-        const wardData = await wardRes.json();
-        const fetchedWards = wardData.wards || [];
-        setWards(fetchedWards);
-        setDistrictCode(matchedDist.code);
-        
-        // If we matched the district but matchedWard is still undefined, match within its fetched wards list
-        if (!matchedWard && cleanWard) {
-          matchedWard = fetchedWards.find((w: any) => clean(w.name).includes(cleanWard) || cleanWard.includes(clean(w.name)));
-        }
+        try {
+          const wardRes = await fetch(`https://provinces.open-api.vn/api/d/${matchedDist.code}?depth=2`);
+          const wardData = await wardRes.json();
+          const fetchedWards = wardData.wards || [];
+          setWards(fetchedWards);
+          setDistrictCode(matchedDist.code);
+          
+          if (!matchedWard && cleanWard) {
+            matchedWard = fetchedWards.find((w: any) => clean(w.name).includes(cleanWard) || cleanWard.includes(clean(w.name)));
+          }
+          if (!matchedWard && fetchedWards.length > 0) {
+            matchedWard = fetchedWards[0]; // fallback to nearest ward
+          }
+        } catch (e) {}
       }
 
-      console.log('📍 [Map Geocode] Matched District in Database:', matchedDist);
-      console.log('📍 [Map Geocode] Matched Ward in Database:', matchedWard);
-
-      // 5. Construct highly detailed address line by filtering components of display_name
-      // This preserves specific locations like building name, street name, and local landmarks in correct order
+      // 7. Construct detailed address line
       let cleanDetail = '';
-      if (data.display_name) {
-        const parts = data.display_name.split(',').map((p: string) => p.trim());
+      if (displayName) {
+        const parts = displayName.split(',').map((p: string) => p.trim());
         const matchedWardClean = matchedWard ? clean(matchedWard.name) : '';
         const matchedDistClean = matchedDist ? clean(matchedDist.name) : '';
         const matchedProvClean = clean(matchedProv.name);
@@ -370,7 +378,7 @@ export default function AddressPicker({ province, district, ward, addressLine, o
         cleanDetail = filteredParts.join(', ');
       }
 
-      // Fallback if no specific building or street info is available from display_name
+      // Fallback if no specific street is returned from coordinates
       if (!cleanDetail) {
         const detailParts = [];
         const buildingName = addr.building || addr.amenity || addr.shop || addr.office || addr.apartment;
@@ -382,21 +390,19 @@ export default function AddressPicker({ province, district, ward, addressLine, o
         cleanDetail = detailParts.join(' ');
       }
 
-      console.log('📍 [Map Geocode] Final autofill payload:', {
-        province: matchedProv.name,
-        district: matchedDist ? matchedDist.name : '',
-        ward: matchedWard ? matchedWard.name : '',
-        addressLine: cleanDetail
-      });
+      // Smart nearby fallback if still completely empty
+      if (!cleanDetail && (matchedWard || matchedDist)) {
+        cleanDetail = `Khu vực gần ${matchedWard?.name || ''}${matchedDist ? `, ${matchedDist.name}` : ''}`.trim();
+      }
 
       onChange({
         province: matchedProv.name,
         district: matchedDist ? matchedDist.name : '',
         ward: matchedWard ? matchedWard.name : '',
-        addressLine: cleanDetail
+        addressLine: cleanDetail || addressLine || ''
       });
     } catch (err) {
-      console.error('Failed to reverse geocode and autofill', err);
+      console.warn('Reverse geocode process finished with safe fallback', err);
     }
   };
 
@@ -414,15 +420,15 @@ export default function AddressPicker({ province, district, ward, addressLine, o
       },
       () => { setGettingLocation(false); setShowMap(true); },
       {
-        enableHighAccuracy: true, // Enables GPS / cellular / Wi-Fi triangulation for best accuracy
-        timeout: 8000,            // Time to wait before timing out (8 seconds)
-        maximumAge: 0             // Do not use cached position
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 30000
       }
     );
   };
 
   // ── Map: marker drag/click callback ───────────────────────────────────
-  const handleMapLocationChange = (lat: number, lng: number, addr: string) => {
+  const handleMapLocationChange = (lat: number, lng: number) => {
     setMapLat(lat);
     setMapLng(lng);
     autoFillFromCoords(lat, lng);
