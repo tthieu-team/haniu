@@ -489,8 +489,8 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
 
 
             {/* Face Filters — Mobile (<640px): Bottom horizontal; Desktop (>=640px): Right vertical */}
-            {hasSelectedCaptureMode && cameraReady && settings?.isFilterEnabled !== false && (
-              <div className="absolute z-50 pointer-events-auto max-sm:bottom-3 max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:max-w-[92vw] sm:right-4 sm:top-1/2 sm:-translate-y-1/2">
+            {cameraReady && settings?.isFilterEnabled !== false && (
+              <div className="absolute z-50 pointer-events-auto max-sm:bottom-4 max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:max-w-[95vw] sm:right-4 sm:top-1/2 sm:-translate-y-1/2 animate-in fade-in duration-300">
                 <FaceFilterSelector
                   activeFilter={faceFilter}
                   onSelect={setFaceFilter}
