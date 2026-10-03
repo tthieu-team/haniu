@@ -129,7 +129,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
     >
       
       {/* Top Primary Navigation Tabs (Strictly Equal 33.33% Width for all tabs) */}
-      <div className="grid grid-cols-3 bg-slate-100 dark:bg-zinc-850 p-1 rounded-2xl gap-1 shrink-0 mb-3 border border-slate-200/50 dark:border-zinc-800 w-full">
+      <div className="grid grid-cols-3 bg-slate-100 dark:bg-zinc-800 p-1 rounded-2xl gap-1 shrink-0 mb-3 border border-slate-200/50 dark:border-zinc-800 w-full">
         {[
           { id: 'elements', label: 'Thành phần', icon: 'plus' },
           { id: 'stickers', label: 'Sticker', icon: 'palette' },
@@ -233,7 +233,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
         <div className="flex-1 flex flex-col min-h-0 space-y-3">
           
           {/* Modern Segmented Sub-tab Switcher (Level 2 Hierarchy) */}
-          <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-zinc-850 rounded-2xl gap-1 shrink-0 border border-slate-200/60 dark:border-zinc-800/80">
+          <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-zinc-800 rounded-2xl gap-1 shrink-0 border border-slate-200/60 dark:border-zinc-800/80">
             <button
               onClick={() => setStickerSubTab('local')}
               className={`py-1.5 px-2 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
@@ -287,7 +287,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                       className={`border rounded-2xl overflow-hidden transition-all duration-200 ${
                         isExpanded
                           ? 'border-rose-200 dark:border-rose-900/50 bg-white dark:bg-zinc-900 shadow-sm'
-                          : 'border-slate-200/60 dark:border-zinc-800/80 bg-slate-50/60 dark:bg-zinc-850/40 hover:bg-slate-100/70 dark:hover:bg-zinc-800/60 hover:border-slate-300 dark:hover:border-zinc-700'
+                          : 'border-slate-200/60 dark:border-zinc-800/80 bg-slate-50/60 dark:bg-zinc-800/40 hover:bg-slate-100/70 dark:hover:bg-zinc-800/60 hover:border-slate-300 dark:hover:border-zinc-700'
                       }`}
                     >
                       {/* Accordion Category Header Button */}
@@ -342,7 +342,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                               <div
                                 key={item.url}
                                 onClick={() => handleAddStickerLayer(item.url)}
-                                className="group relative border border-slate-200/60 dark:border-zinc-800/80 hover:border-rose-400 hover:bg-white dark:hover:bg-zinc-800 rounded-xl p-2 flex flex-col items-center justify-center cursor-pointer aspect-square bg-white dark:bg-zinc-850/80 transition-all shadow-2xs hover:shadow-md hover:scale-[1.03]"
+                                className="group relative border border-slate-200/60 dark:border-zinc-800/80 hover:border-rose-400 hover:bg-white dark:hover:bg-zinc-800 rounded-xl p-2 flex flex-col items-center justify-center cursor-pointer aspect-square bg-white dark:bg-zinc-800/80 transition-all shadow-2xs hover:shadow-md hover:scale-[1.03]"
                                 title={`Click để thêm ${item.name}`}
                               >
                                 <img
@@ -405,7 +405,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                   onChange={e => setGiphySearch(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') fetchGiphyStickers(giphySearch); }}
                   placeholder="Tìm kiếm sticker GIPHY..."
-                  className="w-full pl-8 pr-16 py-2 rounded-2xl border border-slate-200 dark:border-zinc-800 text-xs bg-slate-50/80 dark:bg-zinc-850/80 text-slate-800 dark:text-zinc-100 outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-900 transition-colors shadow-2xs"
+                  className="w-full pl-8 pr-16 py-2 rounded-2xl border border-slate-200 dark:border-zinc-800 text-xs bg-slate-50/80 dark:bg-zinc-800/80 text-slate-800 dark:text-zinc-100 outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-900 transition-colors shadow-2xs"
                 />
                 <span className="absolute left-2.5 text-slate-400 pointer-events-none">
                   <Icon name="search" size={13} />
@@ -474,7 +474,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                         <button 
                           key={gif.id}
                           onClick={() => handleAddStickerLayer(url)}
-                          className="group relative p-2 border border-slate-200/60 dark:border-zinc-800/80 hover:border-rose-400 rounded-2xl flex flex-col items-center justify-center cursor-pointer aspect-square bg-slate-50/60 dark:bg-zinc-850/60 hover:bg-white dark:hover:bg-zinc-800 transition-all shadow-2xs hover:shadow-md hover:scale-105"
+                          className="group relative p-2 border border-slate-200/60 dark:border-zinc-800/80 hover:border-rose-400 rounded-2xl flex flex-col items-center justify-center cursor-pointer aspect-square bg-slate-50/60 dark:bg-zinc-800/60 hover:bg-white dark:hover:bg-zinc-800 transition-all shadow-2xs hover:shadow-md hover:scale-105"
                           title={gif.title || 'Click để dán sticker'}
                         >
                           <img src={url} alt={gif.title} className="w-12 h-12 object-contain pointer-events-none group-hover:scale-110 transition-transform duration-200" />
@@ -487,7 +487,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50/60 dark:bg-zinc-850/40 border border-dashed border-slate-200 dark:border-zinc-800 text-center text-slate-400 space-y-2">
+                <div className="flex-1 flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50/60 dark:bg-zinc-800/40 border border-dashed border-slate-200 dark:border-zinc-800 text-center text-slate-400 space-y-2">
                   <Icon name="search" size={28} className="text-slate-400 dark:text-zinc-600" />
                   <span className="text-xs font-bold block">Không tìm thấy sticker nào</span>
                   <span className="text-[9px] block">Thử tìm kiếm với từ khóa khác hoặc bấm gợi ý phía trên</span>
@@ -512,7 +512,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
           </div>
 
           {layersCount === 0 ? (
-            <div className="p-8 text-center border border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl bg-slate-50 dark:bg-zinc-850 text-slate-400 space-y-2">
+            <div className="p-8 text-center border border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl bg-slate-50 dark:bg-zinc-800 text-slate-400 space-y-2">
               <Icon name="layers" size={32} className="mx-auto text-slate-300 dark:text-zinc-600 block" />
               <span className="text-xs font-bold block">Chưa có lớp nào</span>
               <span className="text-[10px] block">Bấm sang tab "Thành phần" hoặc "Sticker" để thêm</span>
@@ -531,7 +531,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                     className={`flex flex-col p-2.5 rounded-xl border text-xs font-semibold cursor-pointer transition-colors ${
                       isSelected
                         ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 shadow-2xs'
-                        : 'bg-slate-50 dark:bg-zinc-850 border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-100'
+                        : 'bg-slate-50 dark:bg-zinc-800 border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-100'
                     }`}
                   >
                     <div className="flex items-center justify-between">

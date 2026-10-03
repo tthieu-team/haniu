@@ -111,7 +111,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
       <div className="w-full max-w-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Wizard Header */}
-        <div className="px-6 py-5 bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-transparent border-b border-slate-100 dark:border-zinc-850 flex items-center justify-between">
+        <div className="px-6 py-5 bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-transparent border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
           <div>
             <h3 className="text-base font-black uppercase text-slate-800 dark:text-zinc-100 tracking-tight">Tạo Template Mới</h3>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Bước {wizardStep} trên 3</p>
@@ -137,7 +137,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
             <div className="space-y-4">
               <div className="p-4 bg-rose-500/5 rounded-2xl border border-rose-500/10 mb-4 flex items-start gap-2.5">
                 <Icon name="sparkles" size={16} className="text-rose-500 shrink-0 mt-0.5" />
-                <p className="text-xs text-rose-600 dark:text-rose-455 font-semibold leading-relaxed font-sans">
+                <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold leading-relaxed font-sans">
                   Nhập các thông tin nhận diện cơ bản của khung ảnh. Tên template và thumbnail sẽ hiển thị trực tiếp cho khách hàng lựa chọn khi chụp.
                 </p>
               </div>
@@ -149,7 +149,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
                   value={basicInfo.name}
                   onChange={e => setBasicInfo(p => ({ ...p, name: e.target.value }))}
                   placeholder="Ví dụ: Korean 4 Cut, Valentine Sweet..."
-                  className="w-full px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-xs font-bold text-slate-700 dark:text-zinc-150 focus:outline-none focus:border-rose-500"
+                  className="w-full px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-xs font-bold text-slate-700 dark:text-zinc-200 focus:outline-none focus:border-rose-500"
                 />
               </div>
 
@@ -160,7 +160,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
                   value={basicInfo.description}
                   onChange={e => setBasicInfo(p => ({ ...p, description: e.target.value }))}
                   placeholder="Mô tả sơ lược về layout..."
-                  className="w-full p-3 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-xs font-bold text-slate-700 dark:text-zinc-150 focus:outline-none focus:border-rose-500"
+                  className="w-full p-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-xs font-bold text-slate-700 dark:text-zinc-200 focus:outline-none focus:border-rose-500"
                 />
               </div>
 
@@ -172,7 +172,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
                     value={basicInfo.thumbnail}
                     onChange={e => setBasicInfo(p => ({ ...p, thumbnail: e.target.value }))}
                     placeholder="Nhập đường dẫn ảnh đại diện hoặc tải lên..."
-                    className="w-full px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-700 dark:text-zinc-150 focus:outline-none"
+                    className="w-full px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-700 dark:text-zinc-200 focus:outline-none"
                   />
                   <label className="px-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center justify-center cursor-pointer transition-colors shrink-0">
                     Tải ảnh
@@ -264,7 +264,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
                       className={`p-3 rounded-2xl border text-xs font-bold text-left transition-all ${
                         selectedRatio === preset.label
                           ? 'border-rose-500 bg-rose-500/5 text-rose-600'
-                          : 'border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-850 hover:bg-slate-100 text-slate-700 dark:text-zinc-350'
+                          : 'border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100 text-slate-700 dark:text-zinc-300'
                       }`}
                     >
                       <div className="flex justify-between items-center">
@@ -279,7 +279,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider block mb-1">Hoặc lấy tỷ lệ từ ảnh tải lên</label>
                 <div className="flex gap-2">
-                  <label className="w-full py-3 bg-rose-500/5 hover:bg-rose-500/10 dark:bg-zinc-850 dark:hover:bg-zinc-800 border border-dashed border-rose-500/20 dark:border-zinc-700 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors text-rose-600 dark:text-rose-455">
+                  <label className="w-full py-3 bg-rose-500/5 hover:bg-rose-500/10 dark:bg-zinc-800 dark:hover:bg-zinc-800 border border-dashed border-rose-500/20 dark:border-zinc-700 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors text-rose-600 dark:text-rose-400">
                     <Icon name="image" size={14} />
                     Chọn ảnh để lấy kích thước tự động
                     <input 
@@ -322,7 +322,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
                       setSelectedRatio('Custom');
                       setBuilderTemplate((p: any) => ({ ...p, canvasWidth: parseInt(e.target.value) || 1000 }));
                     }}
-                    className="w-full px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-xs font-mono font-bold"
+                    className="w-full px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-xs font-mono font-bold"
                   />
                 </div>
                 <div>
@@ -334,7 +334,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
                       setSelectedRatio('Custom');
                       setBuilderTemplate((p: any) => ({ ...p, canvasHeight: parseInt(e.target.value) || 1000 }));
                     }}
-                    className="w-full px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-xs font-mono font-bold"
+                    className="w-full px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-xs font-mono font-bold"
                   />
                 </div>
               </div>
@@ -346,7 +346,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
             <div className="space-y-4">
               <div className="p-4 bg-rose-500/5 rounded-2xl border border-rose-500/10 mb-2 flex items-start gap-2.5">
                 <Icon name="palette" size={16} className="text-rose-500 shrink-0 mt-0.5" />
-                <p className="text-xs text-rose-600 dark:text-rose-455 font-semibold leading-relaxed">
+                <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold leading-relaxed">
                   Lựa chọn màu sắc chủ đạo hoặc tải ảnh nền đặc thù cho template của bạn.
                 </p>
               </div>
@@ -373,7 +373,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
               </div>
 
               {builderTemplate.backgroundType === 'gradient' ? (
-                <div className="space-y-3 p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border">
+                <div className="space-y-3 p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-[9px] font-bold block mb-1">Màu bắt đầu</label>
@@ -416,7 +416,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
               ) : (
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider block mb-1">Màu nền chủ đạo</label>
-                  <div className="flex gap-3 items-center p-2 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800">
+                  <div className="flex gap-3 items-center p-2 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800">
                     <input 
                       type="color" 
                       value={builderTemplate.background?.startsWith('#') ? builderTemplate.background : '#ffffff'}
@@ -441,7 +441,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
                     value={builderTemplate.background?.startsWith('http') || builderTemplate.background?.startsWith('data:') ? builderTemplate.background : ''}
                     onChange={e => setBuilderTemplate((p: any) => ({ ...p, background: e.target.value, backgroundType: 'image' }))}
                     placeholder="Dán link ảnh nền hoặc tải lên file..."
-                    className="w-full px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-xs font-mono"
+                    className="w-full px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-xs font-mono"
                   />
                   <label className="px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center justify-center cursor-pointer transition-colors shrink-0">
                     Tải ảnh
@@ -514,7 +514,7 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
         </div>
 
         {/* Wizard Footer */}
-        <div className="px-6 py-4 bg-slate-50 dark:bg-zinc-900 border-t border-slate-150 dark:border-zinc-850 flex justify-between items-center">
+        <div className="px-6 py-4 bg-slate-50 dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-800 flex justify-between items-center">
           <button 
             onClick={handlePrevStep}
             disabled={wizardStep === 1}

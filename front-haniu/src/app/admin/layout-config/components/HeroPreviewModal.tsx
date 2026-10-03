@@ -177,7 +177,7 @@ export function HeroPreviewModal({ isOpen, onClose }: HeroPreviewModalProps) {
               justifyContent: 'center',
               overflow: 'hidden',
             }}
-            className="transition-all duration-300 relative shadow-2xl rounded-2xl border border-slate-350 dark:border-zinc-800"
+            className="transition-all duration-300 relative shadow-2xl rounded-2xl border border-slate-300 dark:border-zinc-800"
           >
             <div
               style={{

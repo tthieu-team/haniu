@@ -5,6 +5,10 @@ import {
   Search,
   ShoppingCart,
   ShoppingBag,
+  Home,
+  Bell,
+  ChevronLeft,
+  ChevronRight,
   Heart,
   User,
   Star,
@@ -93,16 +97,42 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
 
   // Mapping dict from string keys / emojis to Lucide icons
   switch (normName) {
+    case 'home':
+    case 'Home':
+    case '🏠':
+      return <Home size={size} className={className} {...props} />;
+    case 'bell':
+    case 'Bell':
+    case 'notification':
+    case 'notif':
+    case '🔔':
+      return <Bell size={size} className={className} {...props} />;
+    case 'chevron-left':
+    case 'chevronLeft':
+    case 'ChevronLeft':
+    case '‹':
+      return <ChevronLeft size={size} className={className} {...props} />;
+    case 'chevron-right':
+    case 'chevronRight':
+    case 'ChevronRight':
+    case '›':
+      return <ChevronRight size={size} className={className} {...props} />;
     case 'search':
     case 'Search':
     case '🔍':
       return <Search size={size} className={className} {...props} />;
     case 'cart':
     case 'Cart':
+    case 'shopping-cart':
+    case 'shoppingCart':
+    case 'ShoppingCart':
     case '🛒':
       return <ShoppingCart size={size} className={className} {...props} />;
     case 'bag':
     case 'Bag':
+    case 'shopping-bag':
+    case 'shoppingBag':
+    case 'ShoppingBag':
     case '🛍️':
       return <ShoppingBag size={size} className={className} {...props} />;
     case 'heart':

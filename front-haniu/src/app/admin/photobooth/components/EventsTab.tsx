@@ -167,18 +167,18 @@ export const EventsTab: React.FC<EventsTabProps> = ({
             key={ev.id} 
             className={`p-5 rounded-2xl border transition-all ${
               ev.status === 'ACTIVE' 
-                ? 'bg-gradient-to-tr from-white to-rose-50/10 dark:from-zinc-900 dark:to-rose-950/5 border-rose-200 dark:border-rose-900/30' 
-                : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 opacity-75'
+                ? 'bg-white dark:bg-zinc-800/80 border-rose-200/80 dark:border-rose-900/40 shadow-xs' 
+                : 'bg-slate-50 dark:bg-zinc-800/50 border-slate-200 dark:border-zinc-700 opacity-80'
             }`}
           >
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2">
-                  <h4 className="text-base font-black text-slate-800 dark:text-zinc-200 uppercase tracking-tight">{ev.name}</h4>
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                  <h4 className="text-base font-bold text-slate-800 dark:text-zinc-100">{ev.name}</h4>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
                     ev.status === 'ACTIVE' 
-                      ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' 
-                      : 'bg-slate-400/10 text-slate-500'
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' 
+                      : 'bg-slate-100 dark:bg-zinc-700 text-slate-500 dark:text-zinc-400'
                   }`}>
                     {ev.status === 'ACTIVE' ? 'Hoạt động' : 'Đang ẩn'}
                   </span>
@@ -191,34 +191,34 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                   onClick={() => onToggleStatus(ev.id)}
                   className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
                     ev.status === 'ACTIVE' 
-                      ? 'border-emerald-500/25 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-500' 
-                      : 'border-slate-350 hover:bg-slate-50 text-slate-500'
+                      ? 'border-emerald-500/25 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' 
+                      : 'border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-700 text-slate-500'
                   }`}
                   title={ev.status === 'ACTIVE' ? 'Tạm ẩn sự kiện' : 'Kích hoạt sự kiện'}
                 >
-                  <Icon name="check" size={12} />
+                  <Icon name="check" size={13} />
                 </button>
                 <button 
                   onClick={() => onOpenEdit(ev)}
-                  className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 dark:border-zinc-805 dark:hover:bg-zinc-800 text-slate-500 cursor-pointer"
+                  className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 dark:border-zinc-700 dark:hover:bg-zinc-700 text-slate-600 dark:text-zinc-300 cursor-pointer"
                   title="Chỉnh sửa thông tin"
                 >
-                  <Icon name="edit" size={12} />
+                  <Icon name="edit" size={13} />
                 </button>
                 <button 
                   onClick={() => onDelete(ev.id)}
-                  className="p-1.5 rounded-lg border border-red-250 bg-red-500/5 hover:bg-red-500/10 text-red-500 cursor-pointer"
+                  className="p-1.5 rounded-lg border border-rose-200 dark:border-rose-900/40 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 cursor-pointer"
                   title="Xóa sự kiện"
                 >
-                  <Icon name="trash" size={12} />
+                  <Icon name="trash" size={13} />
                 </button>
               </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-zinc-800 grid grid-cols-2 gap-3 text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
+            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-zinc-700/60 grid grid-cols-2 gap-3 text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
               <div>
-                <p className="text-slate-400 font-medium">Khung ảnh đi kèm ({ev.templateIds?.length || (ev.templateId ? 1 : 0)})</p>
-                <p className="text-slate-700 dark:text-zinc-300 font-black mt-0.5 truncate" title={
+                <p className="text-slate-400 dark:text-zinc-500 font-medium">Khung ảnh đi kèm ({ev.templateIds?.length || (ev.templateId ? 1 : 0)})</p>
+                <p className="text-slate-700 dark:text-zinc-200 font-bold mt-0.5 truncate" title={
                   ev.templateIds && ev.templateIds.length > 0
                     ? ev.templateIds.map((id: string) => templates.find(t => t.id === id)?.name).filter(Boolean).join(', ')
                     : templates.find(t => t.id === ev.templateId)?.name || 'Chưa chọn'
@@ -229,8 +229,8 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                 </p>
               </div>
               <div>
-                <p className="text-slate-400 font-medium">Chữ ký watermark</p>
-                <p className="text-slate-700 dark:text-zinc-300 font-black mt-0.5">
+                <p className="text-slate-400 dark:text-zinc-500 font-medium">Chữ ký watermark</p>
+                <p className="text-slate-700 dark:text-zinc-200 font-bold mt-0.5">
                   {logos?.find((l: any) => l.id === ev.logoId)?.name || 'Haniu Watermark'}
                 </p>
               </div>
@@ -240,33 +240,32 @@ export const EventsTab: React.FC<EventsTabProps> = ({
       </div>
 
       {showEventModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative transition-all duration-300">
-            <h3 className="text-base font-black text-slate-800 dark:text-zinc-150 uppercase tracking-tight mb-4 flex items-center gap-2">
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative transition-all duration-300 animate-in fade-in zoom-in duration-200">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-100 uppercase tracking-tight mb-4 flex items-center gap-2">
               <Icon name="edit" size={16} className="text-rose-500" />
-              {editingEvent ? 'Chỉnh Sửa Sự Kiện' : 'Tạo Sự Kiện Photobooth Mới'}
+              <span>{editingEvent ? 'Chỉnh Sửa Sự Kiện' : 'Tạo Sự Kiện Photobooth Mới'}</span>
             </h3>
 
             {/* AI Smart creation wizard (only for new events) */}
             {!editingEvent && (
-              <div className="mb-4 p-4 rounded-2xl bg-gradient-to-r from-rose-500/10 via-purple-500/10 to-indigo-500/10 border border-rose-500/15 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-xl pointer-events-none" />
+              <div className="mb-4 p-4 rounded-2xl bg-gradient-to-r from-rose-500/10 via-purple-500/10 to-indigo-500/10 border border-rose-500/20 relative overflow-hidden">
                 <div className="flex items-center gap-1.5 mb-2">
                   <span className="animate-pulse">✨</span>
-                  <span className="text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-rose-500 to-indigo-500 bg-clip-text text-transparent">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
                     AI Thiết Kế Nhanh
                   </span>
                 </div>
                 
                 {isAiGenerating ? (
                   <div className="py-3 flex flex-col items-center justify-center gap-2 text-center">
-                    <div className="w-8 h-8 rounded-full border-2 border-rose-500/20 border-t-rose-500 animate-spin" />
-                    <p className="text-[10px] font-bold text-slate-650 dark:text-zinc-350">{aiStatusText}</p>
+                    <div className="w-6 h-6 rounded-full border-2 border-rose-500/20 border-t-rose-500 animate-spin" />
+                    <p className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{aiStatusText}</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">
-                      Nhập ý tưởng của bạn (ví dụ: "Giáng sinh tone đỏ ấm áp") để AI tự động chọn màu, khung và watermark.
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
+                      Nhập ý tưởng của bạn để AI tự động chọn màu nền, template và watermark.
                     </p>
                     <div className="flex gap-2">
                       <input 
@@ -274,7 +273,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                         value={aiPrompt}
                         onChange={e => setAiPrompt(e.target.value)}
                         placeholder="Ví dụ: Giáng sinh tone đỏ, sinh nhật màu hồng..."
-                        className="flex-1 px-3 h-9 rounded-xl bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-850 text-xs font-semibold focus:outline-none focus:border-rose-500"
+                        className="flex-1 px-3 h-9 rounded-xl bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs font-semibold text-slate-800 dark:text-zinc-200 placeholder-slate-400 focus:outline-none focus:border-rose-500"
                         onKeyDown={e => {
                           if (e.key === 'Enter') {
                             e.preventDefault();
@@ -285,7 +284,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                       <button 
                         type="button"
                         onClick={handleGenerateWithAi}
-                        className="px-3 h-9 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center cursor-pointer active:scale-95"
+                        className="px-3 h-9 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center cursor-pointer active:scale-95"
                       >
                         Thiết kế
                       </button>
@@ -297,24 +296,24 @@ export const EventsTab: React.FC<EventsTabProps> = ({
 
             <form onSubmit={onSaveEvent} className="space-y-4">
               <div>
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider block mb-1">Tên Sự Kiện</label>
+                <label className="text-[11px] font-bold uppercase text-slate-500 dark:text-zinc-400 tracking-wider block mb-1">Tên Sự Kiện</label>
                 <input 
                   type="text" 
                   required
                   value={eventForm.name}
                   onChange={e => onChangeEventForm({ name: e.target.value })}
                   placeholder="Ví dụ: Giáng Sinh 2026, Birthday Workshop..."
-                  className="w-full px-4 h-11 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-850 focus:outline-none focus:border-rose-500 text-xs font-semibold text-slate-700 dark:text-zinc-350"
+                  className="w-full px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-rose-500/30 text-xs font-semibold text-slate-800 dark:text-zinc-100"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider block mb-1">Trạng thái</label>
+                  <label className="text-[11px] font-bold uppercase text-slate-500 dark:text-zinc-400 tracking-wider block mb-1">Trạng thái</label>
                   <select 
                     value={eventForm.status}
                     onChange={e => onChangeEventForm({ status: e.target.value })}
-                    className="w-full px-3 h-11 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-850 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="w-full px-3 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs font-bold text-slate-800 dark:text-zinc-100 focus:outline-none cursor-pointer"
                   >
                     <option value="ACTIVE">Hoạt động</option>
                     <option value="INACTIVE">Tạm ẩn</option>
@@ -322,13 +321,13 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider block mb-1">Logo Watermark</label>
+                  <label className="text-[11px] font-bold uppercase text-slate-500 dark:text-zinc-400 tracking-wider block mb-1">Logo Watermark</label>
                   <select 
                     value={eventForm.logoId || ''}
                     onChange={e => onChangeEventForm({ logoId: e.target.value })}
-                    className="w-full px-3 h-11 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-850 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="w-full px-3 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs font-bold text-slate-800 dark:text-zinc-100 focus:outline-none cursor-pointer"
                   >
-                    <option value="">Không sử dụng watermark</option>
+                    <option value="">Không dùng watermark</option>
                     {logos?.map((l: any) => (
                       <option key={l.id} value={l.id}>{l.name}</option>
                     ))}
@@ -337,27 +336,29 @@ export const EventsTab: React.FC<EventsTabProps> = ({
               </div>
 
               <div>
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider block mb-1">Màu nền khung</label>
+                <label className="text-[11px] font-bold uppercase text-slate-500 dark:text-zinc-400 tracking-wider block mb-1">Màu nền khung</label>
                 <div className="flex gap-2 items-center">
                   <input 
                     type="color" 
                     value={eventForm.background}
                     onChange={e => onChangeEventForm({ background: e.target.value })}
-                    className="w-10 h-10 rounded-lg cursor-pointer border border-slate-200 dark:border-zinc-850 bg-transparent p-0.5"
+                    className="w-10 h-10 rounded-xl cursor-pointer border border-slate-200 dark:border-zinc-700 bg-transparent p-0.5"
                   />
-                  <span className="text-[10px] font-mono font-bold text-slate-400">{eventForm.background}</span>
+                  <span className="text-xs font-mono font-bold text-slate-700 dark:text-zinc-300">{eventForm.background}</span>
                 </div>
               </div>
 
               <div>
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider block mb-1">Khung ảnh đi kèm (Chọn nhiều) chưa có phần logo watermark</label>
-                <div className="mt-1 grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-3 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-850 custom-scrollbar">
+                <label className="text-[11px] font-bold uppercase text-slate-500 dark:text-zinc-400 tracking-wider block mb-1">
+                  Khung ảnh đi kèm ({eventForm.templateIds?.length || 0} đã chọn)
+                </label>
+                <div className="mt-1 grid grid-cols-2 gap-2 max-h-36 overflow-y-auto p-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 custom-scrollbar">
                   {templates.map((t) => {
                     const isChecked = eventForm.templateIds?.includes(t.id);
                     return (
                       <label 
                         key={t.id} 
-                        className="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg cursor-pointer transition-colors text-xs font-semibold text-slate-700 dark:text-zinc-350"
+                        className="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-zinc-700/60 rounded-lg cursor-pointer transition-colors text-xs font-semibold text-slate-800 dark:text-zinc-200"
                       >
                         <input 
                           type="checkbox"
@@ -369,7 +370,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                               : [...current, t.id];
                             onChangeEventForm({ templateIds: next });
                           }}
-                          className="rounded text-rose-500 focus:ring-rose-500 border-slate-350 dark:border-zinc-700"
+                          className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-slate-300 dark:border-zinc-600 accent-rose-600 cursor-pointer"
                         />
                         <span className="truncate">{t.name}</span>
                       </label>
@@ -378,17 +379,17 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                 </div>
               </div>
 
-              <div className="pt-4 flex gap-3">
+              <div className="pt-3 flex gap-2.5">
                 <button 
                   type="button" 
                   onClick={onCloseModal}
-                  className="flex-1 h-11 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 font-bold text-xs uppercase tracking-wider cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-wider cursor-pointer transition-colors"
                 >
                   Hủy
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 h-11 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider cursor-pointer shadow-md shadow-rose-600/10"
+                  className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xs hover:shadow-md transition-all"
                 >
                   Lưu Sự Kiện
                 </button>

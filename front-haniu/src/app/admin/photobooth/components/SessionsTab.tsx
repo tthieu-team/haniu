@@ -44,15 +44,15 @@ export const SessionsTab: React.FC<SessionsTabProps> = ({ sessions }) => {
       </div>
 
       {sessions.length === 0 ? (
-        <div className="text-center py-16 bg-slate-50 dark:bg-zinc-850/40 rounded-3xl border border-dashed border-slate-200 dark:border-zinc-800">
+        <div className="text-center py-16 bg-slate-50 dark:bg-zinc-800/40 rounded-3xl border border-dashed border-slate-200 dark:border-zinc-800">
           <p className="text-xs font-bold text-slate-500 dark:text-zinc-400">Chưa có phiên chụp ảnh nào được ghi nhận.</p>
-          <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-1">Khi khách hàng chụp ảnh trên Photobooth, dữ liệu phiên sẽ hiển thị chi tiết tại đây.</p>
+          <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-1">Khi khách hàng chụp ảnh trên Photobooth, dữ liệu phiên sẽ hiển thị chi tiết tại đây.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-zinc-800">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase text-slate-450 tracking-wider">
+              <tr className="bg-slate-50/80 dark:bg-zinc-800/60 border-b border-slate-200/80 dark:border-zinc-800 text-[11px] font-bold uppercase text-slate-500 dark:text-zinc-400 tracking-wider">
                 <th className="py-3 px-4">Ảnh Xem Nhanh</th>
                 <th className="py-3 px-4">Mã Phiên</th>
                 <th className="py-3 px-4">Sự kiện</th>
@@ -62,9 +62,9 @@ export const SessionsTab: React.FC<SessionsTabProps> = ({ sessions }) => {
                 <th className="py-3 px-4">Trạng thái</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-zinc-850">
+            <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/70">
               {sessions.map((sess) => (
-                <tr key={sess.id} className="hover:bg-slate-50 dark:hover:bg-zinc-855/50 transition-colors">
+                <tr key={sess.id} className="hover:bg-slate-50/70 dark:hover:bg-zinc-800/50 transition-colors">
                   <td className="py-2.5 px-4">
                     {sess.imageUrl ? (
                       <div 

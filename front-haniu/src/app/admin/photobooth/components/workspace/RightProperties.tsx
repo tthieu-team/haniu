@@ -70,7 +70,7 @@ const NumberInput: React.FC<{
             }
           }}
           onBlur={handleBlur}
-          className="w-full px-2.5 h-8 rounded-xl bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-xs font-bold font-mono text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-rose-500 transition-colors"
+          className="w-full px-2.5 h-8 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-xs font-bold font-mono text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-rose-500 transition-colors"
         />
         {unit && (
           <span className="absolute right-2.5 text-[10px] font-bold text-slate-400 pointer-events-none">
@@ -110,7 +110,7 @@ const ColorPickerRow: React.FC<{
           value={color || ''}
           onChange={e => onChange(e.target.value)}
           placeholder="#000000"
-          className="flex-1 px-2.5 h-8 rounded-lg bg-slate-50 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 text-xs font-mono font-bold text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-rose-500 min-w-0"
+          className="flex-1 px-2.5 h-8 rounded-lg bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-xs font-mono font-bold text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-rose-500 min-w-0"
         />
         {onPickEyedropper && (
           <button
@@ -255,7 +255,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
         </div>
 
         {/* Top Tab Bar for Template Settings */}
-        <div className="flex bg-slate-100 dark:bg-zinc-850 p-1 rounded-xl gap-1">
+        <div className="flex bg-slate-100 dark:bg-zinc-800 p-1 rounded-xl gap-1">
           {[
             { id: 'general', label: 'Cơ bản', icon: 'file-text' },
             { id: 'background', label: 'Hình nền', icon: 'palette' },
@@ -279,7 +279,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
         {/* TAB 1: GENERAL TEMPLATE INFO */}
         {activeTemplateTab === 'general' && (
           <div className="space-y-4 pt-1">
-            <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
+            <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
               <div>
                 <label className="text-[9px] font-black uppercase text-slate-500 dark:text-zinc-400 block mb-1">
                   Tên Template
@@ -339,7 +339,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
             </div>
 
             {builderTemplate?.backgroundType === 'solid' && (
-              <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
+              <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
                 <ColorPickerRow
                   label="Mã màu nền"
                   color={builderTemplate.background?.startsWith('#') ? builderTemplate.background : '#f6f1ec'}
@@ -359,7 +359,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
             )}
 
             {builderTemplate?.backgroundType === 'gradient' && (
-              <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
+              <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
                 <div className="grid grid-cols-2 gap-2">
                   <ColorPickerRow
                     label="Màu bắt đầu"
@@ -382,7 +382,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
             )}
 
             {builderTemplate?.backgroundType === 'image' && (
-              <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-2.5">
+              <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-2.5">
                 <label className="text-[9px] font-black uppercase text-slate-400 block">Link ảnh hoặc tải file</label>
                 <input
                   type="text"
@@ -419,7 +419,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
             )}
 
             {/* Template Canvas Border Controls */}
-            <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3 shadow-2xs">
+            <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-800 dark:text-zinc-200 tracking-wider block">
@@ -528,7 +528,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
         {/* TAB 3: OVERLAY SETTINGS */}
         {activeTemplateTab === 'overlay' && (
           <div className="space-y-4 pt-1">
-            <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
+            <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
               <label className="text-[9px] font-black uppercase text-slate-500 dark:text-zinc-400 block">
                 Lớp Phủ Thiết Kế (PNG Overlay)
               </label>
@@ -611,7 +611,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
       </div>
 
       {/* Layer Navigation Tabs */}
-      <div className="flex bg-slate-100 dark:bg-zinc-850 p-1 rounded-xl gap-1">
+      <div className="flex bg-slate-100 dark:bg-zinc-800 p-1 rounded-xl gap-1">
         {[
           { id: 'content', label: 'Nội dung', icon: 'palette' },
           { id: 'layout', label: 'Vị trí (%)', icon: 'sliders' },
@@ -642,7 +642,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
           {selectedLayer.type === 'text' && (
             <div className="space-y-3.5">
               {/* Text Content */}
-              <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-2">
+              <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-2">
                 <div className="flex justify-between items-center">
                   <label className="text-[9px] text-slate-500 dark:text-zinc-400 font-bold block uppercase tracking-wider">
                     Nội dung văn bản
@@ -839,7 +839,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
               </div>
 
               {/* Font Color, Family & Typography */}
-              <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
+              <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
                 <ColorPickerRow
                   label="Màu sắc chữ"
                   color={selectedLayer.fontColor || '#2b2b2b'}
@@ -931,7 +931,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
               </div>
 
               {/* Text Stroke / Outline Card with ON/OFF Toggle in Tab 1 */}
-              <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3 shadow-2xs">
+              <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3 shadow-2xs">
                 <div className="flex items-center justify-between">
                   <div>
                     <label className="text-[10px] font-black uppercase text-slate-800 dark:text-zinc-200 tracking-wider block">
@@ -998,7 +998,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
           {/* FRAME LAYER SPECIFIC SETTINGS */}
           {selectedLayer.type === 'frame' && (
             <div className="space-y-3.5">
-              <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
+              <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-[8px] text-slate-500 dark:text-zinc-400 font-bold block mb-1 uppercase tracking-wider">
@@ -1064,7 +1064,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
               </div>
 
               {/* Frame Shape Selector */}
-              <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-2">
+              <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-2">
                 <label className="text-[9px] font-black uppercase text-slate-500 dark:text-zinc-400 block">
                   Kiểu hình khung ảnh (Shape)
                 </label>
@@ -1117,7 +1117,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
 
           {/* STICKER / LOGO / SHAPE / OVERLAY SPECIFIC SETTINGS */}
           {(selectedLayer.type === 'sticker' || selectedLayer.type === 'logo') && (
-            <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
+            <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
               <label className="text-[9px] font-black uppercase text-slate-500 dark:text-zinc-400 block">
                 Lật ảnh (Flip)
               </label>
@@ -1145,7 +1145,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
           )}
 
           {selectedLayer.type === 'shape' && (
-            <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
+            <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
               <div>
                 <label className="text-[8px] text-slate-500 dark:text-zinc-400 font-bold block mb-1 uppercase tracking-wider">
                   Kiểu hình dạng
@@ -1200,7 +1200,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
           )}
 
           {selectedLayer.type === 'overlay' && (
-            <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-2.5">
+            <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-2.5">
               <label className="text-[9px] font-black uppercase text-slate-500 dark:text-zinc-400 block">
                 Link ảnh lớp phủ (.png)
               </label>
@@ -1241,7 +1241,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
       {/* ═══════════════════════════════════════════════════════════════════════ */}
       {activeLayerTab === 'layout' && (
         <div className="space-y-4 pt-1">
-          <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
+          <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
             <h5 className="text-[9px] font-black uppercase text-slate-500 dark:text-zinc-400 tracking-wider">
               Tọa độ & Kích thước (%)
             </h5>
@@ -1282,7 +1282,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
             </div>
           </div>
 
-          <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
+          <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
             <h5 className="text-[9px] font-black uppercase text-slate-500 dark:text-zinc-400 tracking-wider">
               Xoay & Độ Mờ
             </h5>
@@ -1324,7 +1324,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
       {activeLayerTab === 'effects' && (
         <div className="space-y-4 pt-1">
           {/* Shadow Card */}
-          <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
+          <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
             <div className="flex justify-between items-center">
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-800 dark:text-zinc-200 block">
@@ -1390,7 +1390,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
 
           {/* Text Stroke / Outline for Text Layers with ON/OFF Toggle */}
           {selectedLayer.type === 'text' && (
-            <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3 shadow-2xs">
+            <div className="p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-800 dark:text-zinc-200 tracking-wider block">

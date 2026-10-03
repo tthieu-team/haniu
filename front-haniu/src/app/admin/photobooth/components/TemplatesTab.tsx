@@ -104,11 +104,11 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
           const isActive = tpl.status === 'ACTIVE';
 
           return (
-            <div key={tpl.id} className="bg-slate-50 dark:bg-zinc-850/50 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 flex flex-col justify-between group hover:shadow-lg transition-all">
+            <div key={tpl.id} className="bg-white dark:bg-zinc-800/80 border border-slate-200/80 dark:border-zinc-700/80 rounded-3xl p-5 flex flex-col justify-between group hover:shadow-lg transition-all">
               <div>
                 
                 {/* Visual Thumbnail or Mini CSS Canvas */}
-                <div className="w-full h-44 bg-slate-200 dark:bg-zinc-800 rounded-2xl flex items-center justify-center p-3 mb-4 overflow-hidden border border-slate-300 dark:border-zinc-700 relative">
+                <div className="w-full h-44 bg-slate-100 dark:bg-zinc-900 rounded-2xl flex items-center justify-center p-3 mb-4 overflow-hidden border border-slate-200 dark:border-zinc-700 relative">
                   {tpl.thumbnail ? (
                     <img 
                       src={tpl.thumbnail} 
@@ -124,7 +124,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                   {/* Absolute active/inactive badge overlay */}
                   <button 
                     onClick={() => onToggleStatus(tpl.id)}
-                    className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider cursor-pointer shadow-sm transition-all active:scale-95 ${
+                    className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider cursor-pointer shadow-xs transition-all active:scale-95 ${
                       isActive 
                         ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
                         : 'bg-amber-500 text-white hover:bg-amber-600'
@@ -134,73 +134,73 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                   </button>
                 </div>
 
-                <div className="flex justify-between items-start mb-1">
-                  <h4 className="text-sm font-black text-slate-800 dark:text-zinc-200 uppercase tracking-tight truncate max-w-[70%]">
+                <div className="flex justify-between items-start mb-1 gap-2">
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-zinc-100 truncate max-w-[70%]">
                     {tpl.name}
                   </h4>
-                  <span className="px-2 py-0.5 rounded bg-rose-500/10 text-rose-500 dark:text-rose-450 text-[8px] font-black uppercase tracking-wider shrink-0">
+                  <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200/60 dark:border-rose-900/40 text-[9px] font-extrabold uppercase tracking-wider shrink-0">
                     {frameCount} Khung Hình
                   </span>
                 </div>
                 
-                <p className="text-[10px] text-slate-400 dark:text-zinc-500 line-clamp-1 mb-2 font-medium">
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 line-clamp-1 mb-3 font-medium">
                   {tpl.description || 'Chưa có mô tả cho template này.'}
                 </p>
 
                 {/* Event usage section */}
-                <div className="space-y-1 mb-4">
-                  <div className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
+                <div className="space-y-1.5 mb-4">
+                  <div className="text-[10px] font-bold uppercase text-slate-400 dark:text-zinc-500 tracking-wider">
                     Sự kiện đang sử dụng:
                   </div>
                   {usingEvents.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1.5">
                       {usingEvents.map((ev: any) => (
-                        <span key={ev.id} className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-650 dark:text-zinc-350 text-[9px] font-semibold flex items-center gap-1">
-                          <Icon name="party" size={10} className="text-rose-500" />
+                        <span key={ev.id} className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-zinc-700/60 text-slate-700 dark:text-zinc-300 text-[10px] font-semibold flex items-center gap-1 border border-slate-200/60 dark:border-zinc-700">
+                          <Icon name="cake" size={10} className="text-rose-500" />
                           <span>{ev.name}</span>
                         </span>
                       ))}
                     </div>
                   ) : (
-                    <span className="text-[9px] italic text-slate-400">Không có sự kiện nào áp dụng</span>
+                    <span className="text-[10px] italic text-slate-400 dark:text-zinc-500">Chưa gán sự kiện nào</span>
                   )}
                 </div>
 
               </div>
 
               {/* Bottom Actions card bar */}
-              <div className="pt-3 border-t border-slate-200/60 dark:border-zinc-800 flex items-center justify-between">
+              <div className="pt-3 border-t border-slate-100 dark:border-zinc-700/60 flex items-center justify-between">
                 <div className="flex flex-col">
-                  <span className="text-[8px] font-mono text-slate-400">Kích thước: {tpl.canvasWidth}x{tpl.canvasHeight}</span>
-                  <span className="text-[8px] text-slate-400 font-medium">Cập nhật: {formatDate(tpl.updatedAt || tpl.createdAt)}</span>
+                  <span className="text-[9px] font-mono text-slate-400 dark:text-zinc-500">Kích thước: {tpl.canvasWidth}x{tpl.canvasHeight}</span>
+                  <span className="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">Cập nhật: {formatDate(tpl.updatedAt || tpl.createdAt)}</span>
                 </div>
                 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <button 
                     onClick={() => setPreviewTemplate(tpl)}
-                    className="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[9px] font-black uppercase tracking-wider cursor-pointer"
+                    className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-slate-700 dark:text-zinc-200 text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-colors"
                     title="Xem trước kết quả in"
                   >
                     Xem trước
                   </button>
                   <button 
                     onClick={() => onOpenEdit(tpl)}
-                    className="px-2 py-1.5 rounded-lg bg-white dark:bg-zinc-800 hover:bg-rose-500/10 border border-slate-250 dark:border-zinc-750 text-slate-700 hover:text-rose-600 dark:text-zinc-300 text-[9px] font-black uppercase tracking-wider flex items-center gap-1 cursor-pointer transition-colors"
+                    className="px-2 py-1 rounded-lg bg-white dark:bg-zinc-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-zinc-600 text-slate-700 dark:text-zinc-200 hover:text-rose-600 dark:hover:text-rose-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer transition-colors"
                   >
                     Sửa
                   </button>
                   <button 
                     onClick={() => onClone(tpl)}
-                    className="px-2 py-1.5 rounded-lg bg-white dark:bg-zinc-800 hover:bg-amber-500/10 border border-slate-250 dark:border-zinc-750 text-slate-700 hover:text-amber-500 dark:text-zinc-300 text-[9px] font-black uppercase tracking-wider cursor-pointer"
+                    className="px-2 py-1 rounded-lg bg-white dark:bg-zinc-700 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-slate-200 dark:border-zinc-600 text-slate-700 dark:text-zinc-200 hover:text-amber-600 dark:hover:text-amber-400 text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-colors"
                   >
                     Nhân bản
                   </button>
                   <button 
                     onClick={() => onDelete(tpl.id)}
-                    className="p-1.5 rounded-lg border border-red-200 bg-red-500/5 hover:bg-red-500/10 text-red-500 cursor-pointer"
+                    className="p-1.5 rounded-lg border border-rose-200 dark:border-rose-900/50 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 cursor-pointer transition-colors"
                     title="Xóa layout"
                   >
-                    <Icon name="trash" size={11} />
+                    <Icon name="trash" size={12} />
                   </button>
                 </div>
               </div>
@@ -240,14 +240,14 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
         <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md">
           <div className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-zinc-850 flex items-center justify-between">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-black uppercase text-slate-800 dark:text-zinc-100">Xem Trước Thành Phẩm</h3>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{previewTemplate.name}</p>
               </div>
               <button 
                 onClick={() => setPreviewTemplate(null)} 
-                className="p-2 text-slate-400 hover:text-slate-650 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800"
+                className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
               >
                 <Icon name="close" size={16} />
               </button>
@@ -309,7 +309,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                             </svg>
                           )}
                           <div 
-                            className="w-full h-full flex flex-col items-center justify-center text-slate-455 border relative"
+                            className="w-full h-full flex flex-col items-center justify-center text-slate-500 border relative"
                             style={{
                               borderWidth: (layer.frameShape === 'rect' || layer.frameShape === 'circle') ? `${layer.borderSize ?? 4}px` : '0px',
                               borderColor: layer.borderColor || '#ffffff',
@@ -477,7 +477,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-slate-50 dark:bg-zinc-900 border-t border-slate-100 dark:border-zinc-850 flex justify-end">
+            <div className="px-6 py-4 bg-slate-50 dark:bg-zinc-900 border-t border-slate-100 dark:border-zinc-800 flex justify-end">
               <button 
                 onClick={() => setPreviewTemplate(null)}
                 className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md"

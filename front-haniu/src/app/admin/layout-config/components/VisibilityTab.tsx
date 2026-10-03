@@ -4,18 +4,40 @@ import React from 'react';
 import { useHomeLayoutStore } from '@/store/homeLayout';
 import Icon from '@/components/common/Icons';
 
-export function VisibilityTab() {
+interface VisibilityTabProps {
+  onSave?: () => Promise<void>;
+  isSaving?: boolean;
+}
+
+export function VisibilityTab({ onSave, isSaving = false }: VisibilityTabProps) {
   const { visibility, welcomeScreen, trustBadges, toggleVisibility, updateWelcomeScreen, updateTrustBadges } = useHomeLayoutStore();
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">
-          Trạng thái Bật/Tắt các phần chính ở trang chủ
-        </h3>
-        <p className="text-[10px] text-slate-400">
-          Ẩn hoặc hiện các khối giao diện ở trang chủ giúp bạn tối ưu hóa giao diện cho các mùa lễ hội hoặc chiến dịch khuyến mãi.
-        </p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100 dark:border-zinc-800">
+        <div>
+          <h3 className="text-sm font-black text-slate-800 dark:text-zinc-100 uppercase tracking-wider">
+            Trạng thái Bật/Tắt các phần chính ở trang chủ
+          </h3>
+          <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-medium mt-0.5">
+            Ẩn hoặc hiện các khối giao diện ở trang chủ giúp bạn tối ưu hóa giao diện cho các mùa lễ hội hoặc chiến dịch khuyến mãi.
+          </p>
+        </div>
+
+        {onSave && (
+          <button
+            onClick={onSave}
+            disabled={isSaving}
+            className="px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+          >
+            {isSaving ? (
+              <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+            ) : (
+              <Icon name="save" size={13} />
+            )}
+            <span>Lưu trạng thái hiển thị</span>
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -34,7 +56,7 @@ export function VisibilityTab() {
               onChange={(e) => updateWelcomeScreen({ isEnabled: e.target.checked })}
               className="sr-only peer"
             />
-            <div className="w-9 h-5 bg-slate-350 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
+            <div className="w-9 h-5 bg-slate-300 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
           </label>
         </div>
 
@@ -108,7 +130,7 @@ export function VisibilityTab() {
           return (
             <div
               key={section}
-              className="flex items-center justify-between p-4 rounded-2xl border border-slate-150 dark:border-zinc-800 bg-slate-50/40 dark:bg-zinc-850/50 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
+              className="flex items-center justify-between p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/40 dark:bg-zinc-800/50 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
             >
               <div className="space-y-0.5">
                 <span className="text-xs font-bold text-slate-700 dark:text-zinc-200 capitalize">
@@ -123,7 +145,7 @@ export function VisibilityTab() {
                   onChange={() => toggleVisibility(section as any)}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-slate-350 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
+                <div className="w-9 h-5 bg-slate-300 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
               </label>
             </div>
           );

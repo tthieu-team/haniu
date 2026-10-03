@@ -173,7 +173,7 @@ export function PaymentMethodsTab() {
             className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
               method.enabled
                 ? 'border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-900/10'
-                : 'border-slate-200/60 dark:border-zinc-800 bg-slate-50/40 dark:bg-zinc-850/30 opacity-60'
+                : 'border-slate-200/60 dark:border-zinc-800 bg-slate-50/40 dark:bg-zinc-800/30 opacity-60'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -214,7 +214,7 @@ export function PaymentMethodsTab() {
                 disabled={isSaving}
                 className="sr-only peer"
               />
-              <div className="w-9 h-5 bg-slate-350 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 peer-disabled:opacity-50" />
+              <div className="w-9 h-5 bg-slate-300 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 peer-disabled:opacity-50" />
             </label>
           </div>
         ))}

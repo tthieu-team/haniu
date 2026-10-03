@@ -936,7 +936,7 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                         </svg>
                       )}
                       <div 
-                        className={`w-full h-full flex flex-col items-center justify-center text-slate-455 border transition-all ${
+                        className={`w-full h-full flex flex-col items-center justify-center text-slate-500 border transition-all ${
                           builderTemplate.showSlotBackground ? 'bg-slate-50 dark:bg-zinc-900' : 'bg-transparent'
                         }`}
                         style={{
@@ -987,7 +987,7 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                           </svg>
                         )}
                         <Icon name="camera" size={24} className="text-slate-400" />
-                        <span className="text-[9px] font-black uppercase mt-1 text-slate-455">{layer.label}</span>
+                        <span className="text-[9px] font-black uppercase mt-1 text-slate-500">{layer.label}</span>
                         <span className="absolute top-2 left-2 bg-rose-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-black">
                           {layer.order || 1}
                         </span>

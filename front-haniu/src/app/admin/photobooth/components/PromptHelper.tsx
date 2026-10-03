@@ -447,7 +447,7 @@ export const PromptHelper: React.FC = () => {
             placeholder="Tìm kiếm prompt..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 pr-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs bg-white dark:bg-zinc-850 text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-rose-500 w-full md:w-60"
+            className="pl-8 pr-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-rose-500 w-full md:w-60"
           />
           <div className="absolute left-2.5 top-2.5 text-slate-400">
             <Icon name="grid" size={12} />
@@ -465,7 +465,7 @@ export const PromptHelper: React.FC = () => {
               allFilteredItems.map((item, idx) => (
                 <div 
                   key={`${item.colId}-${idx}`} 
-                  className="bg-white dark:bg-zinc-850 border border-slate-150 dark:border-zinc-800 p-3.5 rounded-2xl flex flex-col justify-between hover:shadow-md transition-all duration-200"
+                  className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 p-3.5 rounded-2xl flex flex-col justify-between hover:shadow-md transition-all duration-200"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
@@ -508,7 +508,7 @@ export const PromptHelper: React.FC = () => {
                 className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider cursor-pointer whitespace-nowrap transition-all duration-200 w-full text-left ${
                   activeColId === col.id
                     ? 'bg-rose-600 text-white shadow-md shadow-rose-600/10 scale-[1.02]'
-                    : 'bg-white dark:bg-zinc-850 text-slate-650 dark:text-zinc-400 border border-slate-150 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800'
+                    : 'bg-white dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700/80 hover:bg-slate-100 dark:hover:bg-zinc-700'
                 }`}
               >
                 <Icon name={col.icon} size={12} />
@@ -538,7 +538,7 @@ export const PromptHelper: React.FC = () => {
               {activeCol.items.map((item, idx) => (
                 <div 
                   key={`${activeCol.id}-${idx}`} 
-                  className="bg-white dark:bg-zinc-850 border border-slate-150 dark:border-zinc-800 p-3.5 rounded-2xl flex flex-col justify-between hover:shadow-md transition-all duration-200"
+                  className="bg-white dark:bg-zinc-800/80 border border-slate-200/80 dark:border-zinc-700/80 p-3.5 rounded-2xl flex flex-col justify-between hover:shadow-md transition-all duration-200"
                 >
                   <div className="space-y-1.5">
                     <span className="text-xs font-black text-slate-800 dark:text-zinc-200">{item.name}</span>

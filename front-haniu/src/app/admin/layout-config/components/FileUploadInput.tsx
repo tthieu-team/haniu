@@ -77,7 +77,7 @@ export function FileUploadInput({
   return (
     <div className="space-y-1.5 w-full">
       {label && (
-        <label className="text-[10px] text-slate-500 font-bold uppercase block dark:text-zinc-455">
+        <label className="text-[10px] text-slate-500 font-bold uppercase block dark:text-zinc-400">
           {label}
         </label>
       )}
@@ -91,7 +91,7 @@ export function FileUploadInput({
           className="flex-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-white font-medium"
         />
         
-        <label className="shrink-0 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 border border-slate-200 dark:border-zinc-750 px-3 py-2 rounded-xl cursor-pointer text-xs font-semibold text-slate-700 dark:text-zinc-200 active:scale-95 transition-all">
+        <label className="shrink-0 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700 px-3 py-2 rounded-xl cursor-pointer text-xs font-semibold text-slate-700 dark:text-zinc-200 active:scale-95 transition-all">
           {uploading ? (
             <svg className="animate-spin h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />

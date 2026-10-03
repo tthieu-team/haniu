@@ -83,7 +83,7 @@ export const GalleryTab: React.FC<GalleryTabProps> = ({
       </div>
 
       {/* Filtering header toolbar */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-150 dark:border-zinc-800">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-50 dark:bg-zinc-800/60 p-4 rounded-2xl border border-slate-200 dark:border-zinc-700/80">
         <div className="flex-1 flex gap-2.5 w-full md:max-w-xs">
           <div className="relative flex-1">
             <input 
@@ -91,9 +91,9 @@ export const GalleryTab: React.FC<GalleryTabProps> = ({
               placeholder="Tìm theo Mã đơn hàng hoặc Khách..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:border-rose-500 text-xs font-semibold text-slate-700 dark:text-zinc-300"
+              className="w-full pl-9 pr-4 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:border-rose-500 text-xs font-semibold text-slate-800 dark:text-zinc-100"
             />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500">
               <Icon name="search" size={14} />
             </span>
           </div>
@@ -102,30 +102,30 @@ export const GalleryTab: React.FC<GalleryTabProps> = ({
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
           {/* Event Filter */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Đơn hàng</span>
+            <span className="text-[10px] font-black uppercase text-slate-500 dark:text-zinc-400 tracking-wider">Đơn hàng</span>
             <select 
               value={selectedEvent}
               onChange={e => setSelectedEvent(e.target.value)}
-              className="px-3 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-bold focus:outline-none cursor-pointer"
+              className="px-3 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-800 dark:text-zinc-100 text-xs font-bold focus:outline-none cursor-pointer"
             >
-              <option value="ALL">Tất cả đơn</option>
+              <option value="ALL" className="bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100">Tất cả đơn</option>
               {Array.from(new Set(galleryItems.map(item => item.eventName))).map((evName: any) => (
-                <option key={evName} value={evName}>{evName}</option>
+                <option key={evName} value={evName} className="bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100">{evName}</option>
               ))}
             </select>
           </div>
 
           {/* Template Filter */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Khách hàng</span>
+            <span className="text-[10px] font-black uppercase text-slate-500 dark:text-zinc-400 tracking-wider">Khách hàng</span>
             <select 
               value={selectedTemplate}
               onChange={e => setSelectedTemplate(e.target.value)}
-              className="px-3 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-bold focus:outline-none cursor-pointer"
+              className="px-3 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-800 dark:text-zinc-100 text-xs font-bold focus:outline-none cursor-pointer"
             >
-              <option value="ALL">Tất cả khách hàng</option>
+              <option value="ALL" className="bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100">Tất cả khách hàng</option>
               {Array.from(new Set(galleryItems.map(item => item.templateName))).map((tplName: any) => (
-                <option key={tplName} value={tplName}>{tplName}</option>
+                <option key={tplName} value={tplName} className="bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100">{tplName}</option>
               ))}
             </select>
           </div>
@@ -134,8 +134,8 @@ export const GalleryTab: React.FC<GalleryTabProps> = ({
 
       {/* Gallery Photo Grid */}
       {filteredItems.length === 0 ? (
-        <div className="text-center py-16 text-slate-400 bg-slate-50 dark:bg-zinc-850/30 rounded-3xl border border-dashed border-slate-200">
-          <Icon name="image" size={36} className="mx-auto mb-2 text-slate-300" />
+        <div className="text-center py-16 text-slate-400 dark:text-zinc-500 bg-slate-50 dark:bg-zinc-800/30 rounded-3xl border border-dashed border-slate-200 dark:border-zinc-700/80">
+          <Icon name="image" size={36} className="mx-auto mb-2 text-slate-300 dark:text-zinc-600" />
           <p className="text-xs font-bold text-slate-600 dark:text-zinc-300">Chưa có ảnh photobooth nào từ các đơn đặt hàng.</p>
           <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-1">Khi khách hàng đặt hàng kèm ảnh in kỷ niệm, hình ảnh thành phẩm sẽ tự động hiển thị tại đây để bạn tải về in ấn.</p>
         </div>
@@ -144,7 +144,7 @@ export const GalleryTab: React.FC<GalleryTabProps> = ({
           {filteredItems.map((item) => (
             <div 
               key={item.id}
-              className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all group flex flex-col justify-between"
+              className="bg-white dark:bg-zinc-800/80 border border-slate-200/80 dark:border-zinc-700/80 rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all group flex flex-col justify-between"
             >
               {/* Photo Box container */}
               <div className="relative aspect-[2/3] bg-slate-100 dark:bg-zinc-950 overflow-hidden">
@@ -176,7 +176,7 @@ export const GalleryTab: React.FC<GalleryTabProps> = ({
                         onDeleteSession(item.id);
                       }
                     }}
-                    className="w-9 h-9 rounded-full bg-red-600/80 hover:bg-red-650 text-white flex items-center justify-center cursor-pointer transition-all active:scale-90"
+                    className="w-9 h-9 rounded-full bg-red-600/80 hover:bg-red-600 text-white flex items-center justify-center cursor-pointer transition-all active:scale-90"
                     title="Xóa ảnh"
                   >
                     <Icon name="trash" size={16} />
@@ -185,15 +185,15 @@ export const GalleryTab: React.FC<GalleryTabProps> = ({
               </div>
 
               {/* Specs description */}
-              <div className="p-3.5 space-y-1 bg-slate-50 dark:bg-zinc-850">
+              <div className="p-3.5 space-y-1 bg-slate-50 dark:bg-zinc-800/60 border-t border-slate-100 dark:border-zinc-700/60">
                 <div className="flex justify-between items-center">
                   <span className="font-mono text-[9px] font-black text-rose-500">{item.id?.slice(0, 8)}</span>
-                  <span className="text-[8px] text-slate-400">
+                  <span className="text-[8px] text-slate-400 dark:text-zinc-500">
                     {item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : (item.date?.split(' ')[0] || 'Hôm nay')}
                   </span>
                 </div>
-                <p className="text-[10px] font-black text-slate-800 dark:text-zinc-200 uppercase tracking-tight truncate">{item.eventName}</p>
-                <p className="text-[8.5px] text-slate-455 dark:text-zinc-400 font-medium truncate">{item.templateName}</p>
+                <p className="text-[10px] font-black text-slate-800 dark:text-zinc-100 uppercase tracking-tight truncate">{item.eventName}</p>
+                <p className="text-[8.5px] text-slate-500 dark:text-zinc-400 font-medium truncate">{item.templateName}</p>
               </div>
             </div>
           ))}

@@ -142,7 +142,7 @@ export function ProductDetailsTab() {
   };
 
   return (
-    <div className="space-y-8 divide-y divide-slate-150 dark:divide-zinc-800 text-xs font-semibold">
+    <div className="space-y-8 divide-y divide-slate-200 dark:divide-zinc-800 text-xs font-semibold">
       
       {/* 1. Promotions section */}
       <div className="pb-6 space-y-4">
@@ -151,7 +151,7 @@ export function ProductDetailsTab() {
             <h4 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">
               Khối Ưu Đãi Hôm Nay (Promotions)
             </h4>
-            <p className="text-[10px] text-slate-450 mt-0.5">Quản lý nội dung các dòng ưu đãi hiển thị trong chi tiết sản phẩm.</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">Quản lý nội dung các dòng ưu đãi hiển thị trong chi tiết sản phẩm.</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -160,12 +160,12 @@ export function ProductDetailsTab() {
               onChange={() => handleToggle('showPromotions')}
               className="sr-only peer"
             />
-            <div className="w-9 h-5 bg-slate-350 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
+            <div className="w-9 h-5 bg-slate-300 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
           </label>
         </div>
 
         {config.showPromotions && (
-          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
             <div className="space-y-2">
               {config.promotions.map((promo, idx) => (
                 <div key={idx} className="flex gap-2 items-center">
@@ -213,7 +213,7 @@ export function ProductDetailsTab() {
             <h4 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">
               Khối Lý Do Nên Chọn Haniu (Why Choose Us)
             </h4>
-            <p className="text-[10px] text-slate-450 mt-0.5">Bố cục các cam kết chất lượng kèm icon xinh xắn.</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">Bố cục các cam kết chất lượng kèm icon xinh xắn.</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -222,12 +222,12 @@ export function ProductDetailsTab() {
               onChange={() => handleToggle('showWhyChooseUs')}
               className="sr-only peer"
             />
-            <div className="w-9 h-5 bg-slate-350 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
+            <div className="w-9 h-5 bg-slate-300 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
           </label>
         </div>
 
         {config.showWhyChooseUs && (
-          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
             <div className="space-y-3">
               {config.whyChooseUs.map((item, idx) => (
                 <div key={idx} className="flex gap-2 items-center">
@@ -290,7 +290,7 @@ export function ProductDetailsTab() {
             <h4 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">
               Khối Chính Sách Giao Hàng (Delivery Policy)
             </h4>
-            <p className="text-[10px] text-slate-450 mt-0.5">Quản lý mốc thời gian giao hàng và các lưu ý đồng kiểm.</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">Quản lý mốc thời gian giao hàng và các lưu ý đồng kiểm.</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -299,12 +299,12 @@ export function ProductDetailsTab() {
               onChange={() => handleToggle('showDeliveryPolicy')}
               className="sr-only peer"
             />
-            <div className="w-9 h-5 bg-slate-350 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
+            <div className="w-9 h-5 bg-slate-300 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
           </label>
         </div>
 
         {config.showDeliveryPolicy && (
-          <div className="space-y-4 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+          <div className="space-y-4 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
             {/* Delivery Lines */}
             <div className="space-y-3.5">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block border-b pb-1">Thời gian vận chuyển</span>
@@ -425,7 +425,7 @@ export function ProductDetailsTab() {
             <h4 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">
               Khối Cam Kết Từ Haniu (Brand Commitment)
             </h4>
-            <p className="text-[10px] text-slate-450 mt-0.5">Quản lý nội dung các dòng cam kết chất lượng của thương hiệu.</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">Quản lý nội dung các dòng cam kết chất lượng của thương hiệu.</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -434,12 +434,12 @@ export function ProductDetailsTab() {
               onChange={() => handleToggle('showBrandCommitment')}
               className="sr-only peer"
             />
-            <div className="w-9 h-5 bg-slate-350 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
+            <div className="w-9 h-5 bg-slate-300 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500" />
           </label>
         </div>
 
         {config.showBrandCommitment && (
-          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
             <div className="space-y-2">
               {config.brandCommitment.map((comm, idx) => (
                 <div key={idx} className="flex gap-2 items-center">

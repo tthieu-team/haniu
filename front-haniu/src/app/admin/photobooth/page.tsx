@@ -290,7 +290,7 @@ export default function PhotoboothAdmin() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-1">
+    <div className="space-y-6 pb-12 font-sans w-full">
       {/* Visual Canva Designer Modal Workspace */}
       {isBuilderOpen && builderTemplate && (
         <CanvaWorkspace
@@ -306,33 +306,48 @@ export default function PhotoboothAdmin() {
       )}
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-rose-500/10 via-amber-500/5 to-transparent border border-rose-500/10 p-6 sm:p-8">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full blur-3xl -z-10" />
-        <div className="absolute bottom-0 right-1/4 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl -z-10" />
-        
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/25 text-rose-600 dark:text-rose-450 border border-rose-500/20">
-                PRO MODULE
-              </span>
-              <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold">• Photobooth Haniu v2.5</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-zinc-150 uppercase tracking-tight italic font-sans flex items-center gap-2.5">
-              <Icon name="camera" size={26} className="text-rose-600" />
-              <span>CẤU HÌNH <span className="bg-gradient-to-r from-rose-600 to-amber-500 bg-clip-text text-transparent">PHOTOBOOTH</span></span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">
+              Cấu hình Photobooth Studio
             </h1>
-            <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-xl mt-1">
-              Quản lý các sự kiện chụp hình, định nghĩa layout template kéo thả, tải sticker, theo dõi hoạt động chụp ảnh và xuất báo cáo analytics.
-            </p>
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200/60 dark:border-rose-900/40">
+              Photobooth Studio v2.5
+            </span>
           </div>
+          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
+            Quản trị sự kiện chụp ảnh, thiết kế layout khung hình kéo thả, quản lý sticker và theo dõi lượt in ảnh
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+          <button
+            onClick={() => loadTabData(activeTab)}
+            disabled={loadingTabs[activeTab]}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 active:scale-95 text-xs font-bold transition-all shadow-2xs cursor-pointer"
+            title="Làm mới dữ liệu"
+          >
+            <Icon name="refresh" size={13} className={loadingTabs[activeTab] ? 'animate-spin text-rose-500' : 'text-slate-500'} />
+            <span>Làm mới</span>
+          </button>
+
+          <button
+            onClick={handleOpenAddTemplate}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 dark:bg-rose-600 dark:hover:bg-rose-500 active:scale-95 text-white text-xs font-bold transition-all shadow-xs hover:shadow-md hover:shadow-rose-600/20 border border-rose-500/30 cursor-pointer"
+          >
+            <span className="w-5 h-5 rounded-lg bg-white/20 flex items-center justify-center text-white shrink-0">
+              <Icon name="palette" size={13} />
+            </span>
+            <span>Mở Canva Thiết Kế</span>
+          </button>
         </div>
       </div>
 
       {/* Tabs Menu */}
       <div className="flex border-b border-slate-200 dark:border-zinc-800 overflow-x-auto scrollbar-none gap-2 pb-2">
         {[
-          { id: 'dashboard', label: 'Dashboard', icon: 'grid' },
+          { id: 'dashboard', label: 'Dashboard', icon: 'layout' },
           { id: 'events', label: 'Sự kiện (Events)', icon: 'cake' },
           { id: 'templates', label: 'Khung hình (Templates)', icon: 'palette' },
           { id: 'assets', label: 'Tài nguyên (Assets)', icon: 'image' },
@@ -343,20 +358,20 @@ export default function PhotoboothAdmin() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center gap-2 px-4 py-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer whitespace-nowrap border ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap border ${
               activeTab === tab.id
-                ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/10'
-                : 'bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-850'
+                ? 'bg-rose-600 text-white border-rose-600 shadow-xs shadow-rose-600/20'
+                : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 border-slate-200/80 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800'
             }`}
           >
             <Icon name={tab.icon} size={14} />
-            {tab.label}
+            <span>{tab.label}</span>
           </button>
         ))}
       </div>
 
       {/* TAB CONTENT PANEL */}
-      <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 shadow-sm min-h-[400px]">
+      <div className="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-3xl p-6 shadow-xs min-h-[400px]">
         {activeTab === 'dashboard' && (
           <DashboardTab stats={dashboardStats} loading={loadingTabs.dashboard} />
         )}

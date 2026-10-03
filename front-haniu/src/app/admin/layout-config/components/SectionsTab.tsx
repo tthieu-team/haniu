@@ -5,7 +5,12 @@ import { useHomeLayoutStore } from '@/store/homeLayout';
 import { FileUploadInput } from './FileUploadInput';
 import Icon from '@/components/common/Icons';
 
-export function SectionsTab() {
+interface SectionsTabProps {
+  onSave?: () => Promise<void>;
+  isSaving?: boolean;
+}
+
+export function SectionsTab({ onSave, isSaving = false }: SectionsTabProps) {
   const {
     announcementBar,
     updateAnnouncementBar,
@@ -42,9 +47,35 @@ export function SectionsTab() {
   } = useHomeLayoutStore();
 
   return (
-    <div className="space-y-8 divide-y divide-slate-150 dark:divide-zinc-800">
+    <div className="space-y-8 divide-y divide-slate-200 dark:divide-zinc-800">
+      {/* Tab Actions Header */}
+      {onSave && (
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4">
+          <div>
+            <h3 className="text-sm font-black uppercase text-slate-800 dark:text-zinc-100">
+              Cấu hình chi tiết các khối nội dung
+            </h3>
+            <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-medium">
+              Chỉnh sửa thông tin, tiêu đề, hình ảnh và cài đặt cho từng khối hiển thị ở trang chủ.
+            </p>
+          </div>
+          <button
+            onClick={onSave}
+            disabled={isSaving}
+            className="px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+          >
+            {isSaving ? (
+              <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+            ) : (
+              <Icon name="save" size={13} />
+            )}
+            <span>Lưu cấu hình các khối</span>
+          </button>
+        </div>
+      )}
+
       {/* Announcement & Welcome Splash */}
-      <div className="pb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="pt-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <h4 className="text-xs font-bold text-rose-500 uppercase tracking-widest">
             Thanh thông báo hàng đầu (Announcement Bar)
@@ -56,7 +87,7 @@ export function SectionsTab() {
                 type="checkbox"
                 checked={announcementBar.isEnabled}
                 onChange={(e) => updateAnnouncementBar({ isEnabled: e.target.checked })}
-                className="rounded border-slate-350 bg-slate-50 text-rose-500 focus:ring-rose-500 h-4 w-4 cursor-pointer"
+                className="rounded border-slate-300 bg-slate-50 text-rose-500 focus:ring-rose-500 h-4 w-4 cursor-pointer"
               />
             </div>
             <div className="space-y-1">
@@ -117,7 +148,7 @@ export function SectionsTab() {
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Featured Products */}
-          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
               Khối Sản Phẩm Nổi Bật (Featured Products)
             </span>
@@ -162,7 +193,7 @@ export function SectionsTab() {
           </div>
 
           {/* Categories */}
-          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
               Khối Danh Mục Theo Dịp (Categories)
             </span>
@@ -198,7 +229,7 @@ export function SectionsTab() {
           </div>
 
           {/* Benefits */}
-          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
               Khối Cam Kết Lợi Ích (Benefits)
             </span>
@@ -253,7 +284,7 @@ export function SectionsTab() {
             </div>
           </div>
 
-          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
               Các con số thống kê (Stats)
             </span>
@@ -269,7 +300,7 @@ export function SectionsTab() {
                       newStats[idx].value = e.target.value;
                       updateBrandIntro({ stats: newStats });
                     }}
-                    className="bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-750 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-1.5 text-xs text-center font-bold"
+                    className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-1.5 text-xs text-center font-bold"
                   />
                   <input
                     type="text"
@@ -280,7 +311,7 @@ export function SectionsTab() {
                       newStats[idx].label = e.target.value;
                       updateBrandIntro({ stats: newStats });
                     }}
-                    className="bg-white dark:bg-zinc-850 border border-slate-200 dark:border-zinc-750 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-1.5 text-xs text-center"
+                    className="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:border-rose-500 focus:outline-none rounded-xl px-3 py-1.5 text-xs text-center"
                   />
                 </div>
               ))}
@@ -325,7 +356,7 @@ export function SectionsTab() {
             </div>
           </div>
 
-          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
               Các bước thực hiện (Steps)
             </span>
@@ -642,7 +673,7 @@ export function SectionsTab() {
             {(socialProof.reviews || []).map((rev, idx) => (
               <div
                 key={rev.id || idx}
-                className="p-4 rounded-2xl border border-slate-150 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-850/30 space-y-3 relative group"
+                className="p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-800/30 space-y-3 relative group"
               >
                 <div className="absolute top-4 right-4 flex items-center gap-1">
                   <button
@@ -750,7 +781,7 @@ export function SectionsTab() {
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* UGC Feed */}
-          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
               Khối Instagram Feed (UGC)
             </span>
@@ -786,7 +817,7 @@ export function SectionsTab() {
           </div>
 
           {/* Blog */}
-          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
               Khối Tin Tức & Chia Sẻ (Blog)
             </span>
@@ -831,7 +862,7 @@ export function SectionsTab() {
           </div>
 
           {/* CTA */}
-          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
+          <div className="space-y-3 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block border-b border-slate-200 dark:border-zinc-800 pb-1.5">
               Lời kêu gọi cuối trang (CTA Section)
             </span>
@@ -989,7 +1020,7 @@ export function SectionsTab() {
             {(faq.items || []).map((item, idx) => (
               <div
                 key={idx}
-                className="p-4 rounded-2xl border border-slate-150 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-850/30 space-y-3 relative group"
+                className="p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-800/30 space-y-3 relative group"
               >
                 <div className="absolute top-4 right-4 flex items-center gap-1">
                   <button
@@ -1038,6 +1069,24 @@ export function SectionsTab() {
           </div>
         </div>
       </div>
+
+      {/* Bottom Save Action */}
+      {onSave && (
+        <div className="flex justify-end pt-6">
+          <button
+            onClick={onSave}
+            disabled={isSaving}
+            className="px-5 py-2.5 text-xs font-black uppercase tracking-wider rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+          >
+            {isSaving ? (
+              <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+            ) : (
+              <Icon name="save" size={13} />
+            )}
+            <span>Lưu cấu hình các khối</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

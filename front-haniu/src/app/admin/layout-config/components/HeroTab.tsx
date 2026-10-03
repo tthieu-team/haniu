@@ -6,7 +6,12 @@ import { FileUploadInput } from './FileUploadInput';
 import Icon from '@/components/common/Icons';
 import { HeroPreviewModal } from './HeroPreviewModal';
 
-export function HeroTab() {
+interface HeroTabProps {
+  onSave?: () => Promise<void>;
+  isSaving?: boolean;
+}
+
+export function HeroTab({ onSave, isSaving = false }: HeroTabProps) {
   const {
     hero,
     updateHero,
@@ -60,6 +65,32 @@ export function HeroTab() {
 
   return (
     <div className="space-y-8">
+      {/* Tab Actions Header */}
+      {onSave && (
+        <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-zinc-800">
+          <div>
+            <h3 className="text-sm font-black uppercase text-slate-800 dark:text-zinc-100">
+              Cấu hình Hero Banner & Slideshow
+            </h3>
+            <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-medium">
+              Chỉnh sửa các slide ảnh, câu khẩu hiệu và nút chuyển hướng chính.
+            </p>
+          </div>
+          <button
+            onClick={onSave}
+            disabled={isSaving}
+            className="px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+          >
+            {isSaving ? (
+              <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+            ) : (
+              <Icon name="save" size={13} />
+            )}
+            <span>Lưu cấu hình Hero</span>
+          </button>
+        </div>
+      )}
+
       {/* Configuration Header */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Layout Selection */}
@@ -73,13 +104,13 @@ export function HeroTab() {
             <option value="slider">Slider lớn chạy tự động (Slider Layout)</option>
             <option value="split-grid">Bố cục chia lưới 3 phần (Split-Grid Layout)</option>
           </select>
-          <p className="text-[10px] text-slate-405">
+          <p className="text-[10px] text-slate-400">
             Chọn giữa một slideshow chạy chiếm toàn màn hình chính hoặc một lưới chia làm slide chính bên trái và 2 banner phụ bên phải.
           </p>
         </div>
 
         {/* Autoplay config */}
-        <div className="space-y-4 bg-slate-50/50 dark:bg-zinc-850 p-4 rounded-2xl border border-slate-150 dark:border-zinc-800 flex flex-col justify-between">
+        <div className="space-y-4 bg-slate-50/50 dark:bg-zinc-800 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <div>
               <span className="text-xs font-bold text-slate-700 dark:text-zinc-300 block">Tự động chuyển Slide</span>
@@ -89,11 +120,11 @@ export function HeroTab() {
               type="checkbox"
               checked={hero.autoplay}
               onChange={(e) => updateHero({ autoplay: e.target.checked })}
-              className="rounded border-slate-350 dark:border-zinc-700 bg-slate-50 text-rose-500 focus:ring-rose-500 h-4 w-4 cursor-pointer"
+              className="rounded border-slate-300 dark:border-zinc-700 bg-slate-50 text-rose-500 focus:ring-rose-500 h-4 w-4 cursor-pointer"
             />
           </div>
           {hero.autoplay && (
-            <div className="grid grid-cols-2 items-center gap-4 border-t border-slate-150 dark:border-zinc-800 pt-3">
+            <div className="grid grid-cols-2 items-center gap-4 border-t border-slate-200 dark:border-zinc-800 pt-3">
               <label className="text-xs font-semibold text-slate-500">Tốc độ chuyển (milliseconds):</label>
               <input
                 type="number"
@@ -117,7 +148,7 @@ export function HeroTab() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] text-slate-505 font-bold uppercase">Slide chính bên trái</label>
+              <label className="text-[10px] text-slate-500 font-bold uppercase">Slide chính bên trái</label>
               <select
                 value={hero.gridMainSlideId || ''}
                 onChange={(e) => updateHero({ gridMainSlideId: e.target.value })}
@@ -199,7 +230,7 @@ export function HeroTab() {
                 onDragStart={(e) => handleDragStart(e, index)}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDragEnd={handleDragEnd}
-                className={`bg-slate-50/50 dark:bg-zinc-850 rounded-2xl border transition-all duration-200 overflow-hidden ${
+                className={`bg-slate-50/50 dark:bg-zinc-800 rounded-2xl border transition-all duration-200 overflow-hidden ${
                   draggedIndex === index 
                     ? 'opacity-40 border-dashed border-rose-500 scale-[0.99] shadow-inner' 
                     : 'border-slate-200 dark:border-zinc-800/80'
@@ -409,6 +440,24 @@ export function HeroTab() {
             );
           })}
         </div>
+
+        {/* Bottom Save Action */}
+        {onSave && (
+          <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-zinc-800">
+            <button
+              onClick={onSave}
+              disabled={isSaving}
+              className="px-5 py-2.5 text-xs font-black uppercase tracking-wider rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              {isSaving ? (
+                <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+              ) : (
+                <Icon name="save" size={13} />
+              )}
+              <span>Lưu cấu hình Hero</span>
+            </button>
+          </div>
+        )}
       </div>
       <HeroPreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} />
     </div>

@@ -10,13 +10,13 @@ interface DashboardTabProps {
 
 export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, loading = false }) => {
   const chartData = stats?.chartData || [
-    { day: 'Thứ 2', val: 0 },
-    { day: 'Thứ 3', val: 0 },
-    { day: 'Thứ 4', val: 0 },
-    { day: 'Thứ 5', val: 0 },
-    { day: 'Thứ 6', val: 0 },
-    { day: 'Thứ 7', val: 0 },
-    { day: 'Chủ Nhật', val: 0 }
+    { day: 'T2', val: 0 },
+    { day: 'T3', val: 0 },
+    { day: 'T4', val: 0 },
+    { day: 'T5', val: 0 },
+    { day: 'T6', val: 0 },
+    { day: 'T7', val: 0 },
+    { day: 'CN', val: 0 }
   ];
   const maxChartVal = Math.max(...chartData.map((d: any) => d.val || 0), 5);
   const templateRankings = stats?.templateRankings || [];
@@ -25,100 +25,119 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, loading = fal
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
         <div className="w-8 h-8 rounded-full border-2 border-rose-500 border-t-transparent animate-spin" />
-        <p className="text-xs font-bold text-slate-400 dark:text-zinc-500">Đang tải số liệu thống kê Photobooth...</p>
+        <p className="text-xs font-bold text-slate-500 dark:text-zinc-400">Đang tải số liệu thống kê Photobooth...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-slate-50 dark:bg-zinc-850 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800">
-          <div className="flex justify-between items-start text-rose-500">
-            <Icon name="camera" size={24} />
-            <span className="text-[10px] font-bold text-emerald-500">Thực tế</span>
+      
+      {/* 4 Highlight KPI Metric Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+        
+        {/* Sessions */}
+        <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-xs">
+          <div className="flex justify-between items-center">
+            <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Lượt chụp (Sessions)</span>
+            <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+              <Icon name="camera" size={15} />
+            </div>
           </div>
-          <p className="text-2xl font-black mt-2 text-slate-800 dark:text-zinc-150">{stats?.totalSessions ?? 0} Lượt</p>
-          <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-1">Lượt chụp (Sessions)</p>
+          <div className="mt-2 flex items-baseline gap-1.5">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">{stats?.totalSessions ?? 0}</span>
+            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">hoạt động</span>
+          </div>
         </div>
 
-        <div className="bg-slate-50 dark:bg-zinc-850 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800">
-          <div className="flex justify-between items-start text-amber-500">
-            <Icon name="cake" size={24} />
-            <span className="text-[10px] font-bold text-slate-400">Đang chạy</span>
+        {/* Active Events */}
+        <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-xs">
+          <div className="flex justify-between items-center">
+            <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Sự kiện hoạt động</span>
+            <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <Icon name="cake" size={15} />
+            </div>
           </div>
-          <p className="text-2xl font-black mt-2 text-slate-800 dark:text-zinc-150">
-            {stats?.activeEvents ?? 0} Sự kiện
-          </p>
-          <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-1">Sự kiện hoạt động</p>
+          <div className="mt-2 flex items-baseline gap-1.5">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">{stats?.activeEvents ?? 0}</span>
+            <span className="text-[11px] text-amber-600 dark:text-amber-400 font-bold">sự kiện</span>
+          </div>
         </div>
 
-        <div className="bg-slate-50 dark:bg-zinc-850 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800">
-          <div className="flex justify-between items-start text-blue-500">
-            <Icon name="palette" size={24} />
-            <span className="text-[10px] font-bold text-slate-400">Sẵn có</span>
+        {/* Templates Available */}
+        <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-xs">
+          <div className="flex justify-between items-center">
+            <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Khung hình (Templates)</span>
+            <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <Icon name="palette" size={15} />
+            </div>
           </div>
-          <p className="text-2xl font-black mt-2 text-slate-800 dark:text-zinc-150">{stats?.totalTemplates ?? 0} Khung</p>
-          <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-1">Khung hình (Templates)</p>
+          <div className="mt-2 flex items-baseline gap-1.5">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">{stats?.totalTemplates ?? 0}</span>
+            <span className="text-[11px] text-blue-600 dark:text-blue-400 font-bold">mẫu layout</span>
+          </div>
         </div>
 
-        <div className="bg-slate-50 dark:bg-zinc-850 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800">
-          <div className="flex justify-between items-start text-emerald-500">
-            <Icon name="image" size={24} />
-            <span className="text-[10px] font-bold text-emerald-500">Đã in</span>
+        {/* Printed Photos */}
+        <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-xs">
+          <div className="flex justify-between items-center">
+            <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Ảnh đã xuất / in</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <Icon name="image" size={15} />
+            </div>
           </div>
-          <p className="text-2xl font-black mt-2 text-slate-800 dark:text-zinc-150">
-            {stats?.totalPhotos ?? 0} Ảnh
-          </p>
-          <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-1">Ảnh đặt in</p>
+          <div className="mt-2 flex items-baseline gap-1.5">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">{stats?.totalPhotos ?? 0}</span>
+            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">bản in</span>
+          </div>
         </div>
       </div>
 
       {/* Performance charts and summaries */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-        <div className="md:col-span-2 space-y-4">
-          <h3 className="text-sm font-black uppercase text-slate-800 dark:text-zinc-200 tracking-wide flex items-center gap-1.5">
-            <Icon name="grid" size={14} className="text-rose-500" />
-            Hiệu suất Chụp Theo Ngày (Tuần qua)
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+        <div className="md:col-span-2 space-y-3">
+          <h3 className="text-xs font-bold uppercase text-slate-700 dark:text-zinc-300 tracking-wider flex items-center gap-1.5">
+            <Icon name="layout" size={14} className="text-rose-500" />
+            <span>Hiệu suất Chụp Theo Ngày (Tuần qua)</span>
           </h3>
-          <div className="bg-slate-50 dark:bg-zinc-850/50 border border-slate-100 dark:border-zinc-800 rounded-2xl p-5 h-64 flex items-end justify-between gap-2.5">
+          <div className="bg-slate-50/80 dark:bg-zinc-800/50 border border-slate-200/70 dark:border-zinc-800 rounded-2xl p-5 h-64 flex items-end justify-between gap-3">
             {chartData.map((item: any, idx: number) => (
-              <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
-                <div className="w-full bg-slate-200 dark:bg-zinc-800 rounded-lg h-44 flex items-end overflow-hidden relative">
+              <div key={idx} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
+                <div className="w-full bg-slate-200/70 dark:bg-zinc-700/50 rounded-lg h-44 flex items-end overflow-hidden relative">
                   <div 
-                    style={{ height: `${(item.val / maxChartVal) * 100}%` }}
-                    className="w-full bg-gradient-to-t from-rose-600 to-amber-500 group-hover:from-rose-500 group-hover:to-amber-400 transition-all rounded-t-md relative"
+                    style={{ height: `${Math.max(8, (item.val / maxChartVal) * 100)}%` }}
+                    className="w-full bg-gradient-to-t from-rose-600 to-amber-500 group-hover:from-rose-500 group-hover:to-amber-400 transition-all rounded-t-md relative flex items-start justify-center pt-1"
                   >
-                    <div className="absolute top-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white font-mono text-[9px] px-1 rounded -mt-6 whitespace-nowrap">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold text-white drop-shadow-xs">
                       {item.val}
-                    </div>
+                    </span>
                   </div>
                 </div>
-                <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500">{item.day}</span>
+                <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400">{item.day}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Top active templates */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-black uppercase text-slate-800 dark:text-zinc-200 tracking-wide flex items-center gap-1.5">
+        <div className="space-y-3">
+          <h3 className="text-xs font-bold uppercase text-slate-700 dark:text-zinc-300 tracking-wider flex items-center gap-1.5">
             <Icon name="star" size={14} className="text-amber-500" />
-            Xếp hạng Templates
+            <span>Xếp hạng Templates</span>
           </h3>
           <div className="space-y-2">
             {templateRankings.length === 0 ? (
-              <div className="text-center py-10 bg-slate-50 dark:bg-zinc-850 rounded-2xl border text-slate-400 text-[10px]">
+              <div className="text-center py-12 bg-slate-50/80 dark:bg-zinc-800/50 rounded-2xl border border-slate-200/70 dark:border-zinc-800 text-slate-400 dark:text-zinc-500 text-xs">
                 Chưa có dữ liệu lượt chụp để xếp hạng.
               </div>
             ) : (
               templateRankings.map((tpl: any, i: number) => (
-                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-zinc-850 rounded-xl border border-slate-100 dark:border-zinc-800">
-                  <div>
-                    <p className="text-xs font-bold text-slate-700 dark:text-zinc-300">{tpl.name}</p>
-                    <p className="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">Tỷ lệ sử dụng: {tpl.rate}</p>
+                <div key={i} className="flex items-center justify-between p-3 bg-slate-50/80 dark:bg-zinc-800/50 rounded-xl border border-slate-200/70 dark:border-zinc-800">
+                  <div className="min-w-0 flex-1 pr-2">
+                    <p className="text-xs font-bold text-slate-800 dark:text-zinc-200 truncate">{tpl.name}</p>
+                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">Tỷ lệ sử dụng: {tpl.rate}</p>
                   </div>
-                  <span className="text-xs font-black text-rose-500">{tpl.val}</span>
+                  <span className="text-xs font-black text-rose-600 dark:text-rose-400 font-mono shrink-0">{tpl.val}</span>
                 </div>
               ))
             )}
