@@ -495,12 +495,14 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
   };
 
   const handleDuplicateLayer = (layer: any) => {
+    const currentFrameCount = (builderTemplate.layers || []).filter((l: any) => l.type === 'frame').length;
     const newLayer = {
       ...JSON.parse(JSON.stringify(layer)),
       id: 'l-dup-' + Date.now(),
       x: Math.min(80, layer.x + 5),
       y: Math.min(80, layer.y + 5),
       label: layer.label ? `${layer.label} (Sao chép)` : undefined,
+      order: layer.type === 'frame' ? currentFrameCount + 1 : layer.order,
       text: layer.text ? `${layer.text} Copy` : undefined,
       locked: false
     };

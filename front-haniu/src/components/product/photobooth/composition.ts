@@ -170,17 +170,74 @@ export const generateComposition = async (
           
           ctx.globalAlpha = (layer.opacity ?? 100) / 100;
           
-          // Save the state with rotation/alpha but without clipping
-          ctx.save();
-          
-          ctx.beginPath();
           const scaleFactor = canvas.width / (template.canvasWidth * 0.25 || 300);
           const radius = (layer.cornerRadius ?? 8) * scaleFactor;
           const frameShape = layer.frameShape || 'rect';
 
+          // 1. Draw Frame Drop Shadow if defined
+          if (layer.shadowColor && layer.shadowColor !== 'rgba(0,0,0,0.0)' && layer.shadowColor !== 'none') {
+            ctx.save();
+            ctx.shadowColor = layer.shadowColor;
+            ctx.shadowBlur = (layer.shadowBlur ?? 10) * scaleFactor * 0.75;
+            ctx.shadowOffsetX = (layer.shadowOffsetX ?? 0) * scaleFactor * 0.75;
+            ctx.shadowOffsetY = (layer.shadowOffsetY ?? 4) * scaleFactor * 0.75;
+            ctx.fillStyle = layer.borderColor || '#ffffff';
+            ctx.beginPath();
+            if (frameShape === 'circle') {
+              const r = Math.min(rectW, rectH) / 2;
+              ctx.roundRect(posX, posY, rectW, rectH, r);
+            } else if (frameShape === 'triangle') {
+              ctx.moveTo(posX + rectW / 2, posY);
+              ctx.lineTo(posX, posY + rectH);
+              ctx.lineTo(posX + rectW, posY + rectH);
+              ctx.closePath();
+            } else if (frameShape === 'heart') {
+              const pts = [
+                [50, 24], [62, 10], [78, 10], [90, 20], [94, 40], [82, 65],
+                [50, 95], [18, 65], [6, 40], [10, 20], [26, 10], [38, 24]
+              ];
+              ctx.moveTo(posX + (pts[0][0] / 100) * rectW, posY + (pts[0][1] / 100) * rectH);
+              for (let k = 1; k < pts.length; k++) {
+                ctx.lineTo(posX + (pts[k][0] / 100) * rectW, posY + (pts[k][1] / 100) * rectH);
+              }
+              ctx.closePath();
+            } else if (frameShape === 'star') {
+              const pts = [
+                [50, 0], [61, 35], [98, 35], [68, 57], [79, 91],
+                [50, 70], [21, 91], [32, 57], [2, 35], [39, 35]
+              ];
+              ctx.moveTo(posX + (pts[0][0] / 100) * rectW, posY + (pts[0][1] / 100) * rectH);
+              for (let k = 1; k < pts.length; k++) {
+                ctx.lineTo(posX + (pts[k][0] / 100) * rectW, posY + (pts[k][1] / 100) * rectH);
+              }
+              ctx.closePath();
+            } else if (frameShape === 'custom-path' && (layer.framePath || layer.framePolygon)) {
+              if (layer.framePath) {
+                const currentTransform = ctx.getTransform();
+                ctx.translate(posX, posY);
+                ctx.scale(rectW / 100, rectH / 100);
+                const p2d = new Path2D(layer.framePath);
+                ctx.fill(p2d);
+                ctx.setTransform(currentTransform);
+              }
+            } else {
+              if (radius > 0 && frameShape !== 'custom') {
+                ctx.roundRect(posX, posY, rectW, rectH, radius);
+              } else {
+                ctx.rect(posX, posY, rectW, rectH);
+              }
+            }
+            ctx.fill();
+            ctx.restore();
+          }
+
+          // 2. Save state for clipping photo
+          ctx.save();
+          
+          ctx.beginPath();
           if (frameShape === 'circle') {
-            const radius = Math.min(rectW, rectH) / 2;
-            ctx.roundRect(posX, posY, rectW, rectH, radius);
+            const r = Math.min(rectW, rectH) / 2;
+            ctx.roundRect(posX, posY, rectW, rectH, r);
             ctx.clip();
           } else if (frameShape === 'triangle') {
             ctx.moveTo(posX + rectW / 2, posY);
@@ -248,13 +305,7 @@ export const generateComposition = async (
             ctx.clip();
           }
 
-          // Rotate back to draw the image upright
-          if (layer.rotation) {
-            ctx.translate(posX + rectW / 2, posY + rectH / 2);
-            ctx.rotate(-(layer.rotation * Math.PI) / 180);
-            ctx.translate(-(posX + rectW / 2), -(posY + rectH / 2));
-          }
-
+          // 3. Draw the photo directly inside the rotated, clipped frame
           const scale = Math.max(rectW / img.width, rectH / img.height);
           const x = posX + (rectW - img.width * scale) / 2;
           const y = posY + (rectH - img.height * scale) / 2;
@@ -264,15 +315,9 @@ export const generateComposition = async (
           }
 
           ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+          ctx.filter = 'none';
 
-          // Rotate back to rotated state for borders and custom overlays
-          if (layer.rotation) {
-            ctx.translate(posX + rectW / 2, posY + rectH / 2);
-            ctx.rotate((layer.rotation * Math.PI) / 180);
-            ctx.translate(-(posX + rectW / 2), -(posY + rectH / 2));
-          }
-
-          // Draw Frame border INSIDE the clipped region so exactly half (the inner side) is visible
+          // 4. Draw Frame border INSIDE the clipped region so exactly half (the inner side) is visible
           const borderWidth = (layer.borderSize ?? 4) * scaleFactor;
           if (borderWidth > 0 && frameShape !== 'custom') {
             ctx.save();
@@ -282,8 +327,8 @@ export const generateComposition = async (
             ctx.beginPath();
             
             if (frameShape === 'circle') {
-              const radius = Math.min(rectW, rectH) / 2;
-              ctx.roundRect(posX, posY, rectW, rectH, radius);
+              const r = Math.min(rectW, rectH) / 2;
+              ctx.roundRect(posX, posY, rectW, rectH, r);
             } else if (frameShape === 'triangle') {
               ctx.moveTo(posX + rectW / 2, posY);
               ctx.lineTo(posX, posY + rectH);
@@ -347,7 +392,7 @@ export const generateComposition = async (
             ctx.restore();
           }
 
-          // Restore state to remove clipping but preserve rotation/opacity
+          // Restore state to remove clipping
           ctx.restore();
 
           // If custom shape overlay is selected, render it on top of the clipped photo slot (rotated!)

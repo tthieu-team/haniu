@@ -101,7 +101,15 @@ async function getProduct(slug: string): Promise<Product | null> {
   try {
     const cookieStore = await cookies();
     const lang = cookieStore.get('haniu_lang')?.value || 'vi';
-    const data = await productService.getProductBySlug(slug, lang);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+    
+    let data = null;
+    if (isUuid) {
+      data = await productService.getProductById(slug, lang);
+    } else {
+      data = await productService.getProductBySlug(slug, lang);
+    }
+
     if (data) {
       return {
         ...data,
@@ -116,7 +124,7 @@ async function getProduct(slug: string): Promise<Product | null> {
       } as unknown as Product;
     }
   } catch (error) {
-    console.error(`Error loading product slug "${slug}" on server:`, error);
+    console.error(`Error loading product slug/id "${slug}" on server:`, error);
   }
   return MOCK_PRODUCTS[slug] || null;
 }

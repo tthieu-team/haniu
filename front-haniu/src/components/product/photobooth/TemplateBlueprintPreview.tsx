@@ -134,17 +134,18 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
           const isLogo = layer.type === 'logo';
           const isShape = layer.type === 'shape';
           const isOverlay = layer.type === 'overlay';
+          const baseRatio = 300 / (t.canvasWidth || 1000);
 
           const frameShape = layer.frameShape || 'rect';
           const borderRadius = isText
             ? (layer.bgRadius ?? 0) >= 999
               ? '9999px'
-              : `${(layer.bgRadius ?? 0) * 0.15}px`
+              : `calc(${(layer.bgRadius ?? 0) * baseRatio}cqw)`
             : isFrame && frameShape === 'circle'
-              ? '999px'
+              ? '9999px'
               : isFrame && frameShape !== 'rect' && frameShape !== 'custom' && frameShape !== 'custom-path'
                 ? '0px'
-                : `${layer.cornerRadius ?? 8}px`;
+                : `calc(${((layer.cornerRadius ?? 8) * baseRatio)}cqw)`;
 
           const clipPath =
             isFrame && frameShape === 'custom-path' && (layer.framePath || layer.framePolygon)
@@ -172,6 +173,10 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
           if (layer.flipX) transformStr += ' scaleX(-1)';
           if (layer.flipY) transformStr += ' scaleY(-1)';
 
+          const frameShadow = isFrame && layer.shadowColor && layer.shadowColor !== 'rgba(0,0,0,0.0)' && layer.shadowColor !== 'none'
+            ? `calc(${((layer.shadowOffsetX ?? 0) * baseRatio)}cqw) calc(${((layer.shadowOffsetY ?? 4) * baseRatio)}cqw) calc(${((layer.shadowBlur ?? 10) * baseRatio)}cqw) ${layer.shadowColor}`
+            : 'none';
+
           return (
             <div
               key={layer.id || idx}
@@ -190,11 +195,12 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
                 borderRadius,
                 clipPath,
                 borderWidth:
-                  isFrame && (frameShape === 'rect' || frameShape === 'circle')
-                    ? `${layer.borderSize ?? 1.5}px`
+                  isFrame && (frameShape === 'rect' || frameShape === 'circle') && (layer.borderSize ?? 0) > 0
+                    ? `calc(${((layer.borderSize ?? 4) * baseRatio)}cqw)`
                     : '0px',
-                borderColor: isFrame ? layer.borderColor || '#cbd5e1' : 'transparent',
-                borderStyle: isFrame && (layer.borderSize ?? 1.5) > 0 ? 'solid' : 'none',
+                borderColor: isFrame ? layer.borderColor || '#ffffff' : 'transparent',
+                borderStyle: isFrame && (layer.borderSize ?? 0) > 0 ? 'solid' : 'none',
+                boxShadow: frameShadow,
                 transform: transformStr || 'none',
                 opacity: (layer.opacity ?? 100) / 100,
                 zIndex: isText ? 25 : isSticker || isLogo ? 20 : isOverlay ? 15 : isShape ? 10 : 5,
@@ -214,16 +220,18 @@ export const TemplateBlueprintPreview: React.FC<TemplateBlueprintPreviewProps> =
                   )}
 
                   {/* Sample Photo for Frame Mockup */}
-                  <img
-                    src={
-                      SAMPLE_PREVIEW_PHOTOS[
-                        ((layer.order ? layer.order - 1 : idx) + (t.name ? t.name.length : 0)) %
-                          SAMPLE_PREVIEW_PHOTOS.length
-                      ]
-                    }
-                    alt="sample photobooth preview"
-                    className="w-full h-full object-cover pointer-events-none select-none"
-                  />
+                  {(() => {
+                    const frameLayers = sortedLayers.filter((l: any) => l.type === 'frame');
+                    const frameIdx = frameLayers.indexOf(layer);
+                    const photoIdx = ((frameIdx >= 0 ? frameIdx : idx) + (t.name ? t.name.length : 0)) % SAMPLE_PREVIEW_PHOTOS.length;
+                    return (
+                      <img
+                        src={SAMPLE_PREVIEW_PHOTOS[photoIdx]}
+                        alt="sample photobooth preview"
+                        className="w-full h-full object-cover pointer-events-none select-none"
+                      />
+                    );
+                  })()}
 
                   {/* Custom Shape Border SVG overlay */}
                   {frameShape !== 'rect' && frameShape !== 'circle' && frameShape !== 'custom' && (
