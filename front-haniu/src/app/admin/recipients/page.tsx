@@ -1,34 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Recipient } from '@/services/catalog.service';
-import { productService } from '@/services/product.service';
 import { useRecipientStore } from '@/store/recipient';
-import { getFullImageUrl } from '@/lib/api';
-import Link from 'next/link';
+import { RecipientTable } from './components/RecipientTable';
+import { RecipientFormModal } from './components/RecipientFormModal';
+import {
+  AdminPageHeader,
+  AdminKPICards,
+  AdminFilterTabs,
+  AdminSearchToolbar,
+  KPICardItem,
+  TabItem,
+} from '@/app/admin/components/common';
 import Icon from '@/components/common/Icons';
 
 export default function AdminRecipientsPage() {
   const { recipients, loading, fetchRecipients, saveRecipient, deleteRecipient } = useRecipientStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
-  
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [submitLoading, setSubmitLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [editingItem, setEditingItem] = useState<Recipient | null>(null);
   const [successMsg, setSuccessMsg] = useState('');
-  
-  // Form fields
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [name, setName] = useState('');
-  const [slug, setSlug] = useState('');
-  const [description, setDescription] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [isActive, setIsActive] = useState(true);
-  
-  // Image upload state
-  const [uploading, setUploading] = useState(false);
 
   const loadRecipients = async () => {
     await fetchRecipients();
@@ -38,415 +33,181 @@ export default function AdminRecipientsPage() {
     loadRecipients();
   }, []);
 
-  const toSlug = (str: string) => {
-    str = str.toLowerCase();
-    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
-    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
-    str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
-    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
-    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
-    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
-    str = str.replace(/đ/g, "d");
-    str = str.replace(/[^a-z0-9 -]/g, ""); 
-    str = str.replace(/\s+/g, "-"); 
-    str = str.replace(/-+/g, "-"); 
-    return str.trim();
-  };
-
-  const handleNameChange = (val: string) => {
-    setName(val);
-    if (!editingId) {
-      setSlug(toSlug(val));
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setUploading(true);
-      setErrorMsg('');
-      const res = await productService.uploadImage(file);
-      if (res && res.url) {
-        setImageUrl(res.url);
-      } else {
-        setErrorMsg('Tải ảnh lên thất bại, không tìm thấy URL.');
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Lỗi tải lên hình ảnh.');
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const handleOpenAddModal = () => {
-    setEditingId(null);
-    setName('');
-    setSlug('');
-    setDescription('');
-    setImageUrl('');
-    setIsActive(true);
-    setErrorMsg('');
+    setEditingItem(null);
     setSuccessMsg('');
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (item: Recipient) => {
-    setEditingId(item.id || null);
-    setName(item.name);
-    setSlug(item.slug);
-    setDescription(item.description || '');
-    setImageUrl(item.imageUrl || '');
-    setIsActive(item.isActive ?? true);
-    setErrorMsg('');
+    setEditingItem(item);
     setSuccessMsg('');
     setIsModalOpen(true);
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      setErrorMsg('Tên đối tượng không được để trống.');
-      return;
-    }
-    if (!slug.trim()) {
-      setErrorMsg('Slug không được để trống.');
-      return;
-    }
-
-    const payload: Recipient = {
-      name: name.trim(),
-      slug: slug.trim(),
-      description: description.trim() || undefined,
-      imageUrl: imageUrl.trim() || undefined,
-      isActive,
-    };
-
-    if (editingId) {
-      payload.id = editingId;
-    }
-
-    try {
-      setSubmitLoading(true);
-      setErrorMsg('');
-      await saveRecipient(payload);
-      setSuccessMsg(editingId ? 'Cập nhật đối tượng thành công! 🎉' : 'Thêm đối tượng mới thành công! 🎉');
-      setTimeout(() => {
-        setIsModalOpen(false);
-      }, 1000);
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Lỗi khi lưu đối tượng người nhận.');
-    } finally {
-      setSubmitLoading(false);
-    }
+  const handleSave = async (payload: Recipient) => {
+    await saveRecipient(payload);
+    setSuccessMsg(payload.id ? 'Cập nhật đối tượng thành công! 🎉' : 'Thêm đối tượng mới thành công! 🎉');
+    setTimeout(() => {
+      setIsModalOpen(false);
+    }, 800);
+    setTimeout(() => setSuccessMsg(''), 4000);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa đối tượng người nhận này không?')) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa đối tượng nhận này không?')) return;
     try {
       await deleteRecipient(id);
       setSuccessMsg('Xóa đối tượng thành công! 🎉');
-      setTimeout(() => setSuccessMsg(''), 2000);
+      setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err: any) {
-      alert(err.message || 'Lỗi khi xóa đối tượng người nhận.');
+      alert(err.message || 'Lỗi khi xóa đối tượng.');
     }
   };
 
-  // Filter & Search logic
-  const filteredRecipients = recipients.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesStatus = statusFilter === 'ALL' || 
-                          (statusFilter === 'ACTIVE' && item.isActive) || 
-                          (statusFilter === 'INACTIVE' && !item.isActive);
-    return matchesSearch && matchesStatus;
-  });
+  // Metrics summary
+  const metrics = useMemo(() => {
+    return {
+      total: recipients.length,
+      active: recipients.filter((r) => r.isActive).length,
+      inactive: recipients.filter((r) => !r.isActive).length,
+      withImage: recipients.filter((r) => Boolean(r.imageUrl)).length,
+    };
+  }, [recipients]);
+
+  // Status Tab Counts
+  const statusCounts = useMemo(() => {
+    return {
+      ALL: recipients.length,
+      ACTIVE: recipients.filter((r) => r.isActive).length,
+      INACTIVE: recipients.filter((r) => !r.isActive).length,
+    };
+  }, [recipients]);
+
+  // KPI Items
+  const kpiItems: KPICardItem[] = useMemo(() => [
+    {
+      id: 'total',
+      label: 'Tổng đối tượng',
+      value: metrics.total,
+      subtext: 'nhóm người nhận quà',
+      icon: 'users',
+      variant: 'rose',
+    },
+    {
+      id: 'active',
+      label: 'Đang hiển thị',
+      value: metrics.active,
+      subtext: 'bộ lọc quà tặng',
+      icon: 'check',
+      variant: 'emerald',
+    },
+    {
+      id: 'inactive',
+      label: 'Bản nháp / Đang ẩn',
+      value: metrics.inactive,
+      subtext: 'chưa kích hoạt',
+      icon: 'alert',
+      variant: 'amber',
+    },
+    {
+      id: 'image',
+      label: 'Đã gắn ảnh đại diện',
+      value: metrics.withImage,
+      subtext: 'trực quan sinh động',
+      icon: 'sparkles',
+      variant: 'purple',
+    },
+  ], [metrics]);
+
+  // Status Tab List
+  const statusTabs: TabItem[] = useMemo(() => [
+    { id: 'ALL', label: 'Tất cả đối tượng', count: statusCounts.ALL, activeColor: 'rose' },
+    { id: 'ACTIVE', label: 'Đang hiển thị', count: statusCounts.ACTIVE, activeColor: 'emerald' },
+    { id: 'INACTIVE', label: 'Đang ẩn', count: statusCounts.INACTIVE, activeColor: 'amber' },
+  ], [statusCounts]);
+
+  // Filtered list
+  const filteredRecipients = useMemo(() => {
+    return recipients.filter((item) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        item.name.toLowerCase().includes(q) ||
+        (item.description && item.description.toLowerCase().includes(q)) ||
+        item.slug.toLowerCase().includes(q);
+
+      const matchesStatus =
+        statusFilter === 'ALL' ||
+        (statusFilter === 'ACTIVE' && item.isActive) ||
+        (statusFilter === 'INACTIVE' && !item.isActive);
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [recipients, searchQuery, statusFilter]);
 
   return (
-    <div className="space-y-8">
-      {/* Header section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 dark:border-zinc-800 pb-5">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white">Quản lý Đối Tượng Người Nhận (Recipients)</h1>
-          <p className="text-xs text-slate-400">Tạo, cập nhật thông tin đối tượng nhận quà (ví dụ: Bạn gái, Bạn trai, Đối tác...)</p>
-        </div>
-        <button
-          onClick={handleOpenAddModal}
-          className="px-4 py-2.5 text-xs font-bold rounded-xl bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
-        >
-          <Icon name="plus" size={14} /> Thêm Đối Tượng Mới
-        </button>
+    <div className="flex flex-col h-[calc(100vh-2rem)] sm:h-[calc(100vh-3rem)] max-w-full space-y-3.5 min-h-0">
+      {/* 1. Header Title & KPI Cards */}
+      <div className="shrink-0 space-y-3">
+        <AdminPageHeader
+          title="Quản Lý Đối Tượng Nhận Quà (Recipients)"
+          description="Phân loại quà tặng theo đối tượng nhận (Bạn gái, Người yêu, Bố mẹ, Đồng nghiệp, Thầy cô, Bé yêu)."
+        />
+
+        <AdminKPICards items={kpiItems} columns={4} />
       </div>
 
+      {/* Success Alert */}
       {successMsg && (
-        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl font-medium">
-          {successMsg}
+        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl font-bold flex items-center gap-2 shrink-0 animate-in fade-in duration-150">
+          <Icon name="check" size={15} />
+          <span>{successMsg}</span>
         </div>
       )}
 
-      {/* Filter and search bar */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm w-full">
-        <div className="relative w-full sm:w-80">
-          <input
-            type="text"
-            placeholder="Tìm kiếm đối tượng..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500 font-medium"
-          />
-          <span className="absolute left-3 top-2.5 text-slate-400">
-            <Icon name="search" size={14} />
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 self-end sm:self-auto text-xs font-semibold">
-          <span className="text-slate-400 text-[10px] uppercase tracking-wider">Trạng thái:</span>
-          {(['ALL', 'ACTIVE', 'INACTIVE'] as const).map(f => (
-            <button
-              key={f}
-              onClick={() => setStatusFilter(f)}
-              className={`px-3 py-1.5 rounded-lg border text-[10px] uppercase font-bold transition-all cursor-pointer ${
-                statusFilter === f
-                  ? 'bg-rose-500 text-white border-rose-500'
-                  : 'bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800'
-              }`}
-            >
-              {f === 'ALL' ? 'Tất cả' : f === 'ACTIVE' ? 'Hoạt động' : 'Tạm khóa'}
-            </button>
-          ))}
-        </div>
+      {/* 2. Status Tabs */}
+      <div className="shrink-0">
+        <AdminFilterTabs
+          tabs={statusTabs}
+          activeTab={statusFilter}
+          onSelectTab={(id) => setStatusFilter(id as any)}
+        />
       </div>
 
-      {/* Recipients Table */}
-      <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="p-12 text-center text-slate-400">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500 mx-auto mb-3" />
-            Đang tải dữ liệu đối tượng...
-          </div>
-        ) : filteredRecipients.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 text-xs font-medium">
-            Không tìm thấy đối tượng nào phù hợp.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-zinc-855 border-b border-slate-100 dark:border-zinc-800 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                  <th className="p-4 w-20">Ảnh</th>
-                  <th className="p-4">Tên đối tượng</th>
-                  <th className="p-4">Slug</th>
-                  <th className="p-4">Mô tả</th>
-                  <th className="p-4">Trạng thái</th>
-                  <th className="p-4 text-center w-36">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRecipients.map(item => (
-                  <tr key={item.id} className="border-b border-slate-50 dark:border-zinc-800 hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                    <td className="p-4">
-                      {item.imageUrl ? (
-                        <img
-                          src={getFullImageUrl(item.imageUrl)}
-                          alt={item.name}
-                          className="w-12 h-12 object-cover rounded-xl border border-slate-100 dark:border-zinc-700 bg-slate-100"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center font-bold text-sm">
-                          <Icon name="users" size={20} />
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-4 font-bold text-slate-800 dark:text-white text-sm">{item.name}</td>
-                    <td className="p-4 font-mono font-semibold text-slate-400">{item.slug}</td>
-                    <td className="p-4 text-slate-400 max-w-xs truncate font-medium">{item.description || 'Không có mô tả'}</td>
-                    <td className="p-4">
-                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border ${
-                        item.isActive
-                          ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/10'
-                          : 'bg-slate-500/10 text-slate-500 border-slate-500/10'
-                      }`}>
-                        {item.isActive ? 'Đang chạy' : 'Đang ẩn'}
-                      </span>
-                    </td>
-                    <td className="p-4 text-center space-x-2">
-                      <button
-                        onClick={() => handleOpenEditModal(item)}
-                        className="px-2.5 py-1.5 bg-slate-50 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-700 font-bold border border-slate-200 dark:border-zinc-700 cursor-pointer active:scale-95 transition-all inline-flex items-center gap-1"
-                      >
-                        <Icon name="edit" size={12} /> Sửa
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item.id!)}
-                        className="px-2.5 py-1.5 bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/10 rounded-lg hover:bg-red-500 hover:text-white cursor-pointer active:scale-95 transition-all inline-flex items-center gap-1"
-                      >
-                        <Icon name="trash" size={12} /> Xóa
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      {/* 3. Search & Toolbar */}
+      <div className="shrink-0">
+        <AdminSearchToolbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Tìm theo tên đối tượng, mô tả, slug..."
+          loading={loading}
+          onRefresh={loadRecipients}
+          primaryAction={{
+            label: 'Thêm đối tượng',
+            onClick: handleOpenAddModal,
+            icon: 'plus',
+          }}
+        />
       </div>
 
-      {/* Add / Edit Modal Overlay */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 dark:bg-zinc-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-2xl p-6 relative flex flex-col max-h-[90vh] overflow-y-auto scrollbar-none animate-in fade-in zoom-in-95 duration-200 text-xs font-semibold">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white w-8 h-8 rounded-full bg-slate-50 dark:bg-zinc-850 flex items-center justify-center cursor-pointer"
-            >
-              <Icon name="close" size={14} />
-            </button>
+      {/* 4. Table Container (Scroll-only body) */}
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        <RecipientTable
+          recipients={filteredRecipients}
+          loading={loading}
+          onEdit={handleOpenEditModal}
+          onDelete={handleDelete}
+        />
+      </div>
 
-            <h3 className="text-lg font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-zinc-850 pb-3 mb-5">
-              {editingId ? 'Cập nhật Đối Tượng' : 'Tạo Đối Tượng Mới'}
-            </h3>
-
-            {errorMsg && (
-              <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl font-medium mb-4">
-                {errorMsg}
-              </div>
-            )}
-
-            <form onSubmit={handleSave} className="space-y-4">
-              {/* Name */}
-              <div>
-                <label className="text-[10px] text-slate-400 block mb-1 uppercase tracking-wider">Tên đối tượng *</label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={e => handleNameChange(e.target.value)}
-                  placeholder="Ví dụ: Bạn Gái, Thầy Cô, Bố Mẹ..."
-                  className="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 text-slate-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500"
-                />
-              </div>
-
-              {/* Slug */}
-              <div>
-                <label className="text-[10px] text-slate-400 block mb-1 uppercase tracking-wider">Slug (Đường dẫn tĩnh) *</label>
-                <input
-                  type="text"
-                  required
-                  value={slug}
-                  onChange={e => setSlug(toSlug(e.target.value))}
-                  placeholder="ban-gai"
-                  className="w-full text-xs font-mono bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 text-slate-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500"
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="text-[10px] text-slate-400 block mb-1 uppercase tracking-wider">Mô tả đối tượng</label>
-                <textarea
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                  placeholder="Nhập vài câu mô tả về sở thích hoặc phong cách tặng quà cho đối tượng này..."
-                  className="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-3 text-slate-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500 h-20"
-                />
-              </div>
-
-              {/* Image Upload */}
-              <div>
-                <label className="text-[10px] text-slate-400 block mb-1 uppercase tracking-wider">Hình ảnh đại diện</label>
-                <div className="flex gap-4 items-center">
-                  {imageUrl ? (
-                    <div className="relative shrink-0 border border-slate-200 dark:border-zinc-700 rounded-xl overflow-hidden w-20 h-20 bg-slate-100">
-                      <img src={getFullImageUrl(imageUrl)} alt="Preview" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setImageUrl('')}
-                        className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-red-600 border-none"
-                        title="Xóa ảnh"
-                      >
-                        <Icon name="close" size={10} />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="w-20 h-20 bg-slate-50 dark:bg-zinc-800 border border-dashed border-slate-200 dark:border-zinc-700 rounded-xl flex flex-col items-center justify-center text-slate-400 gap-1 shrink-0">
-                      <Icon name="camera" size={16} />
-                      <span className="text-[8px] font-bold">Chưa có ảnh</span>
-                    </div>
-                  )}
-
-                  <div className="flex-1 space-y-1.5">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      id="upload-recipient-img"
-                      onChange={handleImageUpload}
-                      disabled={uploading}
-                      className="hidden"
-                    />
-                    <label
-                      htmlFor="upload-recipient-img"
-                      className="px-4 py-2 border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 font-bold rounded-lg cursor-pointer transition-all inline-flex items-center gap-1.5 active:scale-95"
-                    >
-                      {uploading ? (
-                        <>
-                          <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-slate-600" />
-                          Đang tải lên...
-                        </>
-                      ) : (
-                        <>
-                          <Icon name="camera" size={12} /> Chọn tập tin ảnh
-                        </>
-                      )}
-                    </label>
-                    <p className="text-[10px] text-slate-400 font-medium">Chấp nhận JPG, PNG, GIF. Kích thước đề xuất 800x800px</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Status active */}
-              <div className="flex items-center gap-2 pt-2">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={!!isActive}
-                  onChange={e => setIsActive(e.target.checked)}
-                  className="rounded border-slate-300 text-rose-500 focus:ring-rose-500 w-4 h-4 cursor-pointer"
-                />
-                <label htmlFor="isActive" className="text-slate-700 dark:text-zinc-300 font-bold cursor-pointer">
-                  Kích hoạt hoạt động (Hiện trên trang chủ)
-                </label>
-              </div>
-
-              {/* Submit buttons */}
-              <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-zinc-850 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-bold cursor-pointer"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitLoading}
-                  className="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-md shadow-rose-500/10 transition-all cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
-                >
-                  {submitLoading ? (
-                    <>
-                      <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
-                      Đang lưu...
-                    </>
-                  ) : (
-                    <>
-                      <Icon name="save" size={12} /> Lưu thay đổi
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Modal */}
+      <RecipientFormModal
+        isOpen={isModalOpen}
+        editingItem={editingItem}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+      />
     </div>
   );
 }

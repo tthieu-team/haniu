@@ -182,12 +182,12 @@ export default function CategoryFormModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-655 dark:hover:text-white w-8 h-8 rounded-full bg-slate-50 dark:bg-zinc-850 flex items-center justify-center cursor-pointer"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white w-8 h-8 rounded-full bg-slate-50 dark:bg-zinc-800 flex items-center justify-center cursor-pointer"
         >
           <Icon name="close" size={14} />
         </button>
 
-        <h3 className="text-lg font-bold text-slate-850 dark:text-white border-b border-slate-100 dark:border-zinc-850 pb-3 mb-5">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-zinc-800 pb-3 mb-5">
           {editingCategory ? 'Cập nhật Danh Mục' : 'Tạo Danh Mục Mới'}
         </h3>
 
@@ -420,7 +420,7 @@ export default function CategoryFormModal({
             <button
               type="button"
               onClick={() => setSeoExpanded(!seoExpanded)}
-              className="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-zinc-850 hover:bg-slate-100/50 dark:hover:bg-zinc-800/40 transition-colors font-bold text-slate-700 dark:text-zinc-200 cursor-pointer border-none"
+              className="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100/50 dark:hover:bg-zinc-700/40 transition-colors font-bold text-slate-700 dark:text-zinc-200 cursor-pointer border-none"
             >
               <span className="flex items-center gap-1.5">
                 <Icon name="sparkles" size={14} className="text-rose-500" />
@@ -467,7 +467,7 @@ export default function CategoryFormModal({
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-zinc-850 mt-6">
+          <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-zinc-800 mt-6">
             <button
               type="button"
               onClick={onClose}

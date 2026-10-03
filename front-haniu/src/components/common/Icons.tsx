@@ -83,7 +83,19 @@ import {
   Leaf,
   Image,
   Share,
-  Video
+  Video,
+  Box,
+  Package,
+  Tag,
+  Tags,
+  Percent,
+  Ticket,
+  Upload,
+  Download,
+  Info,
+  HelpCircle,
+  SlidersHorizontal,
+  Bookmark
 } from 'lucide-react';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -461,6 +473,60 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
     case '📹':
     case '🎥':
       return <Video size={size} className={className} {...props} />;
+    case 'box':
+    case 'Box':
+    case 'package':
+    case 'Package':
+    case 'boxes':
+    case '📦':
+      return <Box size={size} className={className} {...props} />;
+    case 'tag':
+    case 'Tag':
+    case 'label':
+    case 'Label':
+    case '🏷️':
+    case '🏷':
+      return <Tag size={size} className={className} {...props} />;
+    case 'tags':
+    case 'Tags':
+      return <Tags size={size} className={className} {...props} />;
+    case 'percent':
+    case 'Percent':
+    case 'discount':
+    case 'Discount':
+    case 'voucher':
+    case 'Voucher':
+    case 'coupon':
+    case 'Coupon':
+    case '%':
+      return <Percent size={size} className={className} {...props} />;
+    case 'ticket':
+    case 'Ticket':
+    case '🎟️':
+    case '🎫':
+      return <Ticket size={size} className={className} {...props} />;
+    case 'upload':
+    case 'Upload':
+    case '⬆️':
+      return <Upload size={size} className={className} {...props} />;
+    case 'download':
+    case 'Download':
+    case '⬇️':
+      return <Download size={size} className={className} {...props} />;
+    case 'info':
+    case 'Info':
+    case 'ℹ️':
+      return <Info size={size} className={className} {...props} />;
+    case 'help':
+    case 'Help':
+    case 'help-circle':
+    case 'HelpCircle':
+    case '❓':
+      return <HelpCircle size={size} className={className} {...props} />;
+    case 'bookmark':
+    case 'Bookmark':
+    case '🔖':
+      return <Bookmark size={size} className={className} {...props} />;
     default:
       // Fallback if no matching Lucide icon is found
       return <span className={`inline-block font-sans ${className}`}>{name}</span>;

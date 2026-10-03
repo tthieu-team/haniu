@@ -1,17 +1,25 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Category } from '@/services/catalog.service';
 import { useCategoryStore } from '@/store/category';
 import CategoryTable from './CategoryTable';
 import CategoryFormModal from './CategoryFormModal';
+import {
+  AdminPageHeader,
+  AdminKPICards,
+  AdminFilterTabs,
+  AdminSearchToolbar,
+  KPICardItem,
+  TabItem,
+} from '@/app/admin/components/common';
 import Icon from '@/components/common/Icons';
 
 export default function AdminCategoriesPage() {
   const { categories, loading, fetchCategories, createCategory, updateCategory, deleteCategory } = useCategoryStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
-  const [featuredFilter, setFeaturedFilter] = useState<'ALL' | 'FEATURED' | 'NORMAL'>('ALL');
+  const [featuredFilter, setFeaturedFilter] = useState<'ALL' | 'FEATURED' | 'ACCESSORY'>('ALL');
 
   // Modal and editing states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,10 +56,10 @@ export default function AdminCategoriesPage() {
         setSuccessMsg('Thêm danh mục mới thành công! 🎉');
       }
       
-      // Close modal
       setTimeout(() => {
         setIsModalOpen(false);
-      }, 1000);
+      }, 800);
+      setTimeout(() => setSuccessMsg(''), 4000);
     } catch (err: any) {
       throw new Error(err.message || 'Lỗi khi lưu thông tin danh mục.');
     }
@@ -71,115 +79,164 @@ export default function AdminCategoriesPage() {
     }
   };
 
+  // Metrics summary
+  const metrics = useMemo(() => {
+    return {
+      total: categories.length,
+      active: categories.filter(c => c.isActive).length,
+      featured: categories.filter(c => c.isFeatured).length,
+      accessory: categories.filter(c => c.isAccessory).length,
+    };
+  }, [categories]);
+
+  // Status tab counts
+  const statusCounts = useMemo(() => {
+    return {
+      ALL: categories.length,
+      ACTIVE: categories.filter(c => c.isActive).length,
+      INACTIVE: categories.filter(c => !c.isActive).length,
+    };
+  }, [categories]);
+
+  // KPI Items
+  const kpiItems: KPICardItem[] = useMemo(() => [
+    {
+      id: 'total',
+      label: 'Tổng danh mục',
+      value: metrics.total,
+      subtext: 'trong hệ thống',
+      icon: 'tag',
+      variant: 'rose',
+    },
+    {
+      id: 'active',
+      label: 'Đang hoạt động',
+      value: metrics.active,
+      subtext: 'hiển thị trên web',
+      icon: 'check',
+      variant: 'emerald',
+    },
+    {
+      id: 'featured',
+      label: 'Danh mục nổi bật',
+      value: metrics.featured,
+      subtext: 'ưu tiên trang chủ',
+      icon: 'star',
+      variant: 'amber',
+    },
+    {
+      id: 'accessory',
+      label: 'Phụ kiện quà tặng',
+      value: metrics.accessory,
+      subtext: 'mua kèm combo',
+      icon: 'gift',
+      variant: 'purple',
+    },
+  ], [metrics]);
+
+  // Status tabs list
+  const statusTabs: TabItem[] = useMemo(() => [
+    { id: 'ALL', label: 'Tất cả danh mục', count: statusCounts.ALL, activeColor: 'rose' },
+    { id: 'ACTIVE', label: 'Đang hoạt động', count: statusCounts.ACTIVE, activeColor: 'emerald' },
+    { id: 'INACTIVE', label: 'Đang ẩn', count: statusCounts.INACTIVE, activeColor: 'amber' },
+  ], [statusCounts]);
+
   // Search & Filter Logic
-  const filteredCategories = categories.filter((item) => {
-    const matchesSearch =
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      item.slug.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredCategories = useMemo(() => {
+    return categories.filter((item) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        item.name.toLowerCase().includes(q) ||
+        (item.description && item.description.toLowerCase().includes(q)) ||
+        item.slug.toLowerCase().includes(q);
 
-    const matchesStatus =
-      statusFilter === 'ALL' ||
-      (statusFilter === 'ACTIVE' && item.isActive) ||
-      (statusFilter === 'INACTIVE' && !item.isActive);
+      const matchesStatus =
+        statusFilter === 'ALL' ||
+        (statusFilter === 'ACTIVE' && item.isActive) ||
+        (statusFilter === 'INACTIVE' && !item.isActive);
 
-    const matchesFeatured =
-      featuredFilter === 'ALL' ||
-      (featuredFilter === 'FEATURED' && item.isFeatured) ||
-      (featuredFilter === 'NORMAL' && !item.isFeatured);
+      const matchesFeatured =
+        featuredFilter === 'ALL' ||
+        (featuredFilter === 'FEATURED' && item.isFeatured) ||
+        (featuredFilter === 'ACCESSORY' && item.isAccessory);
 
-    return matchesSearch && matchesStatus && matchesFeatured;
-  });
+      return matchesSearch && matchesStatus && matchesFeatured;
+    });
+  }, [categories, searchQuery, statusFilter, featuredFilter]);
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col h-[calc(100vh-2rem)] sm:h-[calc(100vh-3rem)] max-w-full space-y-3.5 min-h-0">
       
-      {/* Header section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 dark:border-zinc-800 pb-5">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white">
-            Quản lý Danh mục (Categories)
-          </h1>
-          <p className="text-xs text-slate-400">
-            Tạo, cập nhật, phân cấp danh mục và tối ưu hóa SEO cho danh mục sản phẩm
-          </p>
-        </div>
-        <button
-          onClick={handleOpenAddModal}
-          className="px-4 py-2.5 text-xs font-bold rounded-xl bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
-        >
-          <Icon name="plus" size={14} /> Thêm Danh Mục Mới
-        </button>
+      {/* 1. Header Title & KPI Cards */}
+      <div className="shrink-0 space-y-3">
+        <AdminPageHeader
+          title="Quản Lý Danh Mục Quà Tặng"
+          description="Tạo mới, phân cấp danh mục, tối ưu SEO và cấu hình phụ kiện quà tặng kèm."
+        />
+
+        <AdminKPICards items={kpiItems} columns={4} />
       </div>
 
-      {/* Success alert message */}
+      {/* Success Alert */}
       {successMsg && (
-        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl font-medium">
-          {successMsg}
+        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl font-bold flex items-center gap-2 shrink-0 animate-in fade-in duration-150">
+          <Icon name="check" size={15} />
+          <span>{successMsg}</span>
         </div>
       )}
 
-      {/* Filter and Search bars */}
-      <div className="flex flex-col xl:flex-row gap-4 justify-between items-stretch xl:items-center bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm w-full">
-        
-        {/* Search input */}
-        <div className="relative w-full xl:w-80">
-          <input
-            type="text"
-            placeholder="Tìm kiếm danh mục theo tên, mô tả..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-rose-500 font-medium"
-          />
-          <span className="absolute left-3 top-2.5 text-slate-400">
-            <Icon name="search" size={14} />
-          </span>
-        </div>
-
-        {/* Filters dropdown & toggle buttons */}
-        <div className="flex flex-wrap items-center gap-4 text-xs font-semibold">
-          
-          {/* Active status filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-slate-400 text-[10px] uppercase tracking-wider">Trạng thái:</span>
-            {(['ALL', 'ACTIVE', 'INACTIVE'] as const).map((f) => (
-              <button
-                key={f}
-                onClick={() => setStatusFilter(f)}
-                className={`px-3 py-1.5 rounded-lg border text-[10px] uppercase font-bold transition-all cursor-pointer ${
-                  statusFilter === f
-                    ? 'bg-rose-500 text-white border-rose-500'
-                    : 'bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800'
-                }`}
-              >
-                {f === 'ALL' ? 'Tất cả' : f === 'ACTIVE' ? 'Hoạt động' : 'Đang ẩn'}
-              </button>
-            ))}
-          </div>
-
-          {/* Featured filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-slate-400 text-[10px] uppercase tracking-wider">Nổi bật:</span>
-            {(['ALL', 'FEATURED', 'NORMAL'] as const).map((f) => (
-              <button
-                key={f}
-                onClick={() => setFeaturedFilter(f)}
-                className={`px-3 py-1.5 rounded-lg border text-[10px] uppercase font-bold transition-all cursor-pointer ${
-                  featuredFilter === f
-                    ? 'bg-amber-500 text-white border-amber-500'
-                    : 'bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800'
-                }`}
-              >
-                {f === 'ALL' ? 'Tất cả' : f === 'FEATURED' ? 'Nổi bật' : 'Thông thường'}
-              </button>
-            ))}
-          </div>
-
-        </div>
+      {/* 2. Status Tabs */}
+      <div className="shrink-0">
+        <AdminFilterTabs
+          tabs={statusTabs}
+          activeTab={statusFilter}
+          onSelectTab={(id) => setStatusFilter(id as any)}
+          rightElement={
+            <div className="flex items-center gap-1.5 text-xs font-semibold">
+              <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500 mr-1 hidden md:inline">
+                Thuộc tính:
+              </span>
+              {[
+                { id: 'ALL', label: 'Tất cả' },
+                { id: 'FEATURED', label: 'Nổi bật ★' },
+                { id: 'ACCESSORY', label: 'Phụ kiện 🎁' },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setFeaturedFilter(f.id as any)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                    featuredFilter === f.id
+                      ? 'bg-slate-800 text-white dark:bg-zinc-700 dark:text-white shadow-xs'
+                      : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          }
+        />
       </div>
 
-      {/* Categories Table View */}
-      <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm overflow-hidden">
+      {/* 3. Search & Filter Toolbar */}
+      <div className="shrink-0">
+        <AdminSearchToolbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Tìm theo tên danh mục, mô tả, slug..."
+          loading={loading}
+          onRefresh={loadCategories}
+          primaryAction={{
+            label: 'Thêm danh mục',
+            onClick: handleOpenAddModal,
+            icon: 'plus',
+          }}
+        />
+      </div>
+
+      {/* 4. Table Container (Scroll-only body) */}
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         <CategoryTable
           categories={filteredCategories}
           loading={loading}
@@ -188,15 +245,16 @@ export default function AdminCategoriesPage() {
         />
       </div>
 
-      {/* Category Creation / Edit Modal Dialog */}
-      <CategoryFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveCategory}
-        editingCategory={editingCategory}
-        allCategories={categories}
-      />
-
+      {/* Category Modal */}
+      {isModalOpen && (
+        <CategoryFormModal
+          isOpen={isModalOpen}
+          editingCategory={editingCategory}
+          allCategories={categories}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveCategory}
+        />
+      )}
     </div>
   );
 }

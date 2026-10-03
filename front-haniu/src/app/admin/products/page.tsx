@@ -3,13 +3,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useProductStore, Product } from '@/store/product';
 import { productService } from '@/services/product.service';
-import { ProductsKPICards } from './components/ProductsKPICards';
-import { ProductsTabsHeader } from './components/ProductsTabsHeader';
-import { ProductsFilterToolbar } from './components/ProductsFilterToolbar';
+import { AdminPageHeader, AdminKPICards, AdminFilterTabs, AdminSearchToolbar, KPICardItem, TabItem } from '@/app/admin/components/common';
 import { ProductsTable } from './components/ProductsTable';
-import { ProductDetailInspector } from './components/ProductDetailInspector';
 import { DeleteProductModal } from './components/DeleteProductModal';
 import { ProductsBottomBar } from './components/ProductsBottomBar';
+import Icon from '@/components/common/Icons';
 
 function formatVND(amount: number | undefined | null) {
   if (typeof amount !== 'number' || isNaN(amount)) return '0 ₫';
@@ -135,9 +133,51 @@ export default function AdminProductsPage() {
       ALL: products.length,
       PUBLISHED: products.filter(p => p.status === 'PUBLISHED').length,
       DRAFT: products.filter(p => p.status === 'DRAFT').length,
-      ARCHIVED: products.filter(p => p.status === 'ARCHIVED').length,
     };
   }, [products]);
+
+  // KPI Items
+  const kpiItems: KPICardItem[] = useMemo(() => [
+    {
+      id: 'total',
+      label: 'Tổng sản phẩm',
+      value: metrics.total,
+      subtext: 'trong hệ thống',
+      icon: 'gift',
+      variant: 'rose',
+    },
+    {
+      id: 'published',
+      label: 'Đang mở bán',
+      value: metrics.published,
+      subtext: 'hiển thị khách',
+      icon: 'check',
+      variant: 'emerald',
+    },
+    {
+      id: 'lowStock',
+      label: 'Cảnh báo tồn kho',
+      value: metrics.lowStock,
+      subtext: 'sắp hết hàng',
+      icon: 'alert',
+      variant: 'amber',
+    },
+    {
+      id: 'combo',
+      label: 'Combo & Khắc chữ',
+      value: metrics.customizableOrCombo,
+      subtext: 'quà cá nhân hóa',
+      icon: 'sparkles',
+      variant: 'purple',
+    },
+  ], [metrics]);
+
+  // Status Tab List
+  const statusTabs: TabItem[] = useMemo(() => [
+    { id: 'ALL', label: 'Tất cả sản phẩm', count: statusCounts.ALL, activeColor: 'rose' },
+    { id: 'PUBLISHED', label: 'Đang mở bán', count: statusCounts.PUBLISHED, activeColor: 'emerald' },
+    { id: 'DRAFT', label: 'Bản nháp / Tạm ẩn', count: statusCounts.DRAFT, activeColor: 'amber' },
+  ], [statusCounts]);
 
   // Filtered & Sorted list
   const filteredProducts = useMemo(() => {
@@ -167,54 +207,89 @@ export default function AdminProductsPage() {
   }, [products, filterStatus, filterFeature, searchQuery, sortBy]);
 
   return (
-    <div className="space-y-6 max-w-full pb-10">
+    <div className="flex flex-col h-[calc(100vh-2rem)] sm:h-[calc(100vh-3rem)] max-w-full space-y-3.5 min-h-0">
+      
       {/* 1. Header Title & KPI Cards */}
-      <div className="space-y-4">
-        <div>
-          <h1 className="text-xl font-black text-slate-900 dark:text-zinc-100 uppercase tracking-tight">
-            Quản Lý Sản Phẩm & Kho Quà Tặng
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium mt-0.5">
-            Kiểm soát danh mục quà tặng, thiết lập giá bán, số lượng tồn kho và cấu hình combo khắc laser.
-          </p>
-        </div>
+      <div className="shrink-0 space-y-3">
+        <AdminPageHeader
+          title="Quản Lý Sản Phẩm & Kho Quà Tặng"
+          description="Kiểm soát danh mục quà tặng, thiết lập giá bán, số lượng tồn kho và cấu hình combo khắc laser."
+        />
 
-        <ProductsKPICards metrics={metrics} />
+        <AdminKPICards items={kpiItems} columns={4} />
       </div>
 
       {/* 2. Status & Feature Tabs */}
-      <ProductsTabsHeader
-        filterStatus={filterStatus}
-        onSelectStatus={setFilterStatus}
-        filterFeature={filterFeature}
-        onSelectFeature={setFilterFeature}
-        statusCounts={statusCounts}
-      />
+      <div className="shrink-0">
+        <AdminFilterTabs
+          tabs={statusTabs}
+          activeTab={filterStatus}
+          onSelectTab={setFilterStatus}
+          rightElement={
+            <div className="flex items-center gap-1.5 text-xs font-semibold">
+              <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500 mr-1 hidden md:inline">
+                Phân loại:
+              </span>
+              {[
+                { id: 'ALL', label: 'Tất cả' },
+                { id: 'FEATURED', label: 'Nổi bật', icon: 'star' },
+                { id: 'CUSTOMIZABLE', label: 'Khắc chữ', icon: 'edit' },
+                { id: 'COMBO', label: 'Set Combo', icon: 'box' },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setFilterFeature(f.id)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    filterFeature === f.id
+                      ? 'bg-slate-800 text-white dark:bg-zinc-700 dark:text-white shadow-xs'
+                      : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700'
+                  }`}
+                >
+                  {f.icon && <Icon name={f.icon} size={11} />}
+                  <span>{f.label}</span>
+                </button>
+              ))}
+            </div>
+          }
+        />
+      </div>
 
       {/* 3. Search & Sorter Toolbar */}
-      <ProductsFilterToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        loading={loading}
-        onRefresh={() => loadProducts(cursorHistory[currentPageIndex] || '')}
-      />
+      <div className="shrink-0">
+        <AdminSearchToolbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Tìm theo tên sản phẩm, mã SKU, danh mục..."
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          sortOptions={[
+            { value: 'NEWEST', label: 'Mới tạo gần đây' },
+            { value: 'PRICE_ASC', label: 'Giá: Thấp đến Cao' },
+            { value: 'PRICE_DESC', label: 'Giá: Cao đến Thấp' },
+            { value: 'STOCK_ASC', label: 'Tồn kho: Ít đến Nhiều' },
+          ]}
+          loading={loading}
+          onRefresh={() => loadProducts(cursorHistory[currentPageIndex] || '')}
+          primaryAction={{
+            label: 'Thêm mới',
+            href: '/admin/products/new',
+            icon: 'plus',
+          }}
+        />
+      </div>
 
-      {/* 4. Main 2-Column Split: Table + Right Inspector */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
-        {/* Left: Products Table */}
-        <div className="lg:col-span-7 space-y-4">
-          <ProductsTable
-            products={filteredProducts}
-            selectedProduct={selectedProduct}
-            onSelectProduct={setSelectedProduct}
-            onRequestDelete={setProductToDelete}
-            formatVND={formatVND}
-            loading={loading}
-          />
+      {/* 4. Main Content: Products Table & Pagination (Only Table body scrolls!) */}
+      <div className="flex-1 min-h-0 flex flex-col space-y-2.5 overflow-hidden">
+        <ProductsTable
+          products={filteredProducts}
+          selectedProduct={selectedProduct}
+          onSelectProduct={setSelectedProduct}
+          onRequestDelete={setProductToDelete}
+          formatVND={formatVND}
+          loading={loading}
+        />
 
+        <div className="shrink-0">
           <ProductsBottomBar
             totalCount={products.length}
             filteredCount={filteredProducts.length}
@@ -225,17 +300,6 @@ export default function AdminProductsPage() {
             loading={loading}
           />
         </div>
-
-        {/* Right: Product Inspector */}
-        <div className="lg:col-span-5 sticky top-4">
-          <ProductDetailInspector
-            product={selectedProduct}
-            onClose={() => setSelectedProduct(null)}
-            onRequestDelete={setProductToDelete}
-            formatVND={formatVND}
-          />
-        </div>
-
       </div>
 
       {/* Delete Confirmation Modal */}
