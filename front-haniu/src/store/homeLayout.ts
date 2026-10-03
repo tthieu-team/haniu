@@ -267,8 +267,43 @@ export interface ProductDetailsSectionConfig {
   brandCommitment: string[];
 }
 
+export type HomeSectionKey =
+  | 'hero'
+  | 'trustBar'
+  | 'brandIntro'
+  | 'categories'
+  | 'featuredProducts'
+  | 'collections'
+  | 'benefits'
+  | 'howItWorks'
+  | 'videoBanner'
+  | 'story'
+  | 'socialProof'
+  | 'ugcFeed'
+  | 'blog'
+  | 'cta'
+  | 'faq';
+
+export const DEFAULT_SECTION_ORDER: HomeSectionKey[] = [
+  'hero',
+  'trustBar',
+  'brandIntro',
+  'categories',
+  'featuredProducts',
+  'collections',
+  'benefits',
+  'howItWorks',
+  'videoBanner',
+  'story',
+  'socialProof',
+  'ugcFeed',
+  'blog',
+  'cta',
+  'faq',
+];
+
 export interface HomeLayoutState {
-  // Visibility toggles for the 10 main page body blocks
+  // Visibility toggles for the 15 main page body blocks
   visibility: {
     hero: boolean;
     trustBar: boolean;
@@ -286,6 +321,9 @@ export interface HomeLayoutState {
     cta: boolean;
     faq: boolean;
   };
+
+  // Drag and drop section display order on Homepage
+  sectionOrder: HomeSectionKey[];
 
   // Section configs
   header: HeaderConfig;
@@ -312,6 +350,9 @@ export interface HomeLayoutState {
 
   // Actions
   toggleVisibility: (section: keyof HomeLayoutState['visibility']) => void;
+  updateSectionOrder: (newOrder: HomeSectionKey[]) => void;
+  moveSection: (index: number, direction: 'up' | 'down') => void;
+  resetSectionOrder: () => void;
   updateHeader: (config: Partial<HeaderConfig>) => void;
   updateAnnouncementBar: (config: Partial<AnnouncementBarConfig>) => void;
   updateHero: (config: Partial<HeroConfig>) => void;
@@ -351,6 +392,7 @@ export interface HomeLayoutState {
 }
 
 export const DEFAULT_STATE = {
+  sectionOrder: DEFAULT_SECTION_ORDER,
   visibility: {
     hero: true,
     trustBar: true,
@@ -748,6 +790,31 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
             },
           })),
 
+        updateSectionOrder: (newOrder) =>
+          set(() => ({
+            sectionOrder: newOrder,
+          })),
+
+        moveSection: (index, direction) =>
+          set((state) => {
+            const currentOrder = state.sectionOrder && state.sectionOrder.length > 0 
+              ? [...state.sectionOrder] 
+              : [...DEFAULT_SECTION_ORDER];
+            const targetIndex = direction === 'up' ? index - 1 : index + 1;
+            if (targetIndex < 0 || targetIndex >= currentOrder.length) return {};
+            const temp = currentOrder[index];
+            currentOrder[index] = currentOrder[targetIndex];
+            currentOrder[targetIndex] = temp;
+            return {
+              sectionOrder: currentOrder,
+            };
+          }),
+
+        resetSectionOrder: () =>
+          set(() => ({
+            sectionOrder: DEFAULT_SECTION_ORDER,
+          })),
+
         updateHeader: (config) =>
           set((state) => ({
             header: { ...state.header, ...config },
@@ -942,6 +1009,7 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
 
         resetVisibility: () => set((state) => ({
           visibility: DEFAULT_STATE.visibility,
+          sectionOrder: DEFAULT_SECTION_ORDER,
           isDirty: true,
         })),
 
@@ -962,6 +1030,16 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
                   deepMerged[key] = parsedVal;
                 }
               }
+
+              // Ensure sectionOrder is complete and contains all valid keys
+              if (parsed.sectionOrder && Array.isArray(parsed.sectionOrder) && parsed.sectionOrder.length > 0) {
+                const validSaved = parsed.sectionOrder.filter((k: any) => DEFAULT_SECTION_ORDER.includes(k));
+                const missing = DEFAULT_SECTION_ORDER.filter((k) => !validSaved.includes(k));
+                deepMerged.sectionOrder = [...validSaved, ...missing];
+              } else if (!deepMerged.sectionOrder) {
+                deepMerged.sectionOrder = DEFAULT_SECTION_ORDER;
+              }
+
               set((state) => ({
                 ...state,
                 ...deepMerged,
@@ -983,6 +1061,7 @@ export const useHomeLayoutStore = create<HomeLayoutState>()(
             const state = get();
             const dataToSave = {
               visibility: state.visibility,
+              sectionOrder: state.sectionOrder || DEFAULT_SECTION_ORDER,
               header: state.header,
               announcementBar: state.announcementBar,
               hero: state.hero,

@@ -154,7 +154,16 @@ export async function fetchApi(path: string, options: RequestInit = {}): Promise
     return null;
   }
 
-  return response.json();
+  const text = await response.text();
+  if (!text || !text.trim()) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text as any;
+  }
 }
 
 export function getFullImageUrl(url: string | null | undefined): string | undefined {

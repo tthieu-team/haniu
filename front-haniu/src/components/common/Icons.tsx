@@ -95,7 +95,10 @@ import {
   Info,
   HelpCircle,
   SlidersHorizontal,
-  Bookmark
+  Bookmark,
+  GripVertical,
+  ArrowUpDown,
+  Move
 } from 'lucide-react';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -109,6 +112,20 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
 
   // Mapping dict from string keys / emojis to Lucide icons
   switch (normName) {
+    case 'grip-vertical':
+    case 'gripVertical':
+    case 'GripVertical':
+    case 'drag':
+    case 'grip':
+      return <GripVertical size={size} className={className} {...props} />;
+    case 'arrow-up-down':
+    case 'ArrowUpDown':
+    case 'sort':
+    case 'order':
+      return <ArrowUpDown size={size} className={className} {...props} />;
+    case 'move':
+    case 'Move':
+      return <Move size={size} className={className} {...props} />;
     case 'home':
     case 'Home':
     case '🏠':
@@ -189,8 +206,15 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
     case '📋':
       return <Copy size={size} className={className} {...props} />;
     case 'file-text':
+    case 'fileText':
     case 'FileText':
+    case 'file':
+    case 'File':
+    case 'document':
+    case 'doc':
+    case 'blog':
     case 'profile':
+    case '📄':
       return <FileText size={size} className={className} {...props} />;
     case 'user-check':
     case 'UserCheck':
@@ -371,6 +395,13 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
       return <List size={size} className={className} {...props} />;
     case 'book':
     case 'Book':
+    case 'book-open':
+    case 'bookOpen':
+    case 'BookOpen':
+    case 'story':
+    case 'Story':
+    case '📖':
+    case '📚':
       return <BookOpen size={size} className={className} {...props} />;
     case 'lock':
     case 'Lock':
@@ -520,8 +551,13 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
     case 'help':
     case 'Help':
     case 'help-circle':
+    case 'helpCircle':
     case 'HelpCircle':
+    case 'faq':
+    case 'FAQ':
+    case 'question':
     case '❓':
+    case '❔':
       return <HelpCircle size={size} className={className} {...props} />;
     case 'bookmark':
     case 'Bookmark':

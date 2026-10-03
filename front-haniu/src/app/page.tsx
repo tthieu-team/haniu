@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { productService } from '@/services/product.service';
 import { catalogService } from '@/services/catalog.service';
+import { useHomeLayoutStore, HomeSectionKey, DEFAULT_SECTION_ORDER } from '@/store/homeLayout';
 import {
   HeroSection,
   BrandIntroSection,
@@ -319,116 +320,153 @@ function HomeContent() {
     }
   };
 
+  // Section ordering & visibility from store
+  const sectionOrder = useHomeLayoutStore((state) => state.sectionOrder);
+  const visibility = useHomeLayoutStore((state) => state.visibility);
+
+  const activeOrder: HomeSectionKey[] = useMemo(() => {
+    if (sectionOrder && Array.isArray(sectionOrder) && sectionOrder.length > 0) {
+      const valid = sectionOrder.filter((k) => DEFAULT_SECTION_ORDER.includes(k));
+      const missing = DEFAULT_SECTION_ORDER.filter((k) => !valid.includes(k));
+      return [...valid, ...missing];
+    }
+    return DEFAULT_SECTION_ORDER;
+  }, [sectionOrder]);
+
+  const renderSection = (key: HomeSectionKey) => {
+    // If section visibility is explicitly false in store, don't render
+    if (visibility && visibility[key] === false) return null;
+
+    switch (key) {
+      case 'hero':
+        return <HeroSection key="hero" onOccasionSelect={handleOccasionClick} />;
+      case 'trustBar':
+        return <TrustBar key="trustBar" />;
+      case 'brandIntro':
+        return (
+          <ScrollReveal key="brandIntro">
+            <BrandIntroSection />
+          </ScrollReveal>
+        );
+      case 'categories':
+        return (
+          <ScrollReveal key="categories">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <CategoriesSection
+                onOccasionSelect={handleOccasionClick}
+                selectedOccasion={selectedOccasion}
+                occasions={dbOccasions.filter((o) => o.slug !== '')}
+              />
+            </div>
+          </ScrollReveal>
+        );
+      case 'featuredProducts':
+        return (
+          <ScrollReveal key="featuredProducts">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <FeaturedProductsSection
+                products={products}
+                loading={loading}
+                loadingMore={loadingMore}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                selectedOccasion={selectedOccasion}
+                setSelectedOccasion={setSelectedOccasion}
+                selectedRecipient={selectedRecipient}
+                setSelectedRecipient={setSelectedRecipient}
+                occasions={occasionsList}
+                recipients={recipients}
+                hasNextPage={hasNextPage}
+                handleLoadMore={handleLoadMore}
+              />
+            </div>
+          </ScrollReveal>
+        );
+      case 'collections':
+        return (
+          <ScrollReveal key="collections">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <CollectionsSection />
+            </div>
+          </ScrollReveal>
+        );
+      case 'benefits':
+        return (
+          <ScrollReveal key="benefits">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <BenefitsSection />
+            </div>
+          </ScrollReveal>
+        );
+      case 'howItWorks':
+        return (
+          <ScrollReveal key="howItWorks">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <HowItWorksSection />
+            </div>
+          </ScrollReveal>
+        );
+      case 'videoBanner':
+        return (
+          <ScrollReveal key="videoBanner">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <VideoBanner />
+            </div>
+          </ScrollReveal>
+        );
+      case 'story':
+        return (
+          <ScrollReveal key="story">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <StorySection />
+            </div>
+          </ScrollReveal>
+        );
+      case 'socialProof':
+        return (
+          <ScrollReveal key="socialProof">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <SocialProofSection />
+            </div>
+          </ScrollReveal>
+        );
+      case 'ugcFeed':
+        return (
+          <ScrollReveal key="ugcFeed">
+            <UgcFeedSection />
+          </ScrollReveal>
+        );
+      case 'blog':
+        return (
+          <ScrollReveal key="blog">
+            <BlogSection />
+          </ScrollReveal>
+        );
+      case 'cta':
+        return (
+          <ScrollReveal key="cta">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <CTASection />
+            </div>
+          </ScrollReveal>
+        );
+      case 'faq':
+        return (
+          <ScrollReveal key="faq">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <FAQSection />
+            </div>
+          </ScrollReveal>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-8 sm:space-y-12 md:space-y-16 lg:space-y-20 pb-12 sm:pb-16 md:pb-24 font-sans">
-      {/* 3. HERO BANNER */}
-      <HeroSection onOccasionSelect={handleOccasionClick} />
-
-      {/* 4. TRUST BAR */}
-      <TrustBar />
-
-      {/* BRAND INTRO / ABOUT */}
-      <ScrollReveal>
-        <BrandIntroSection />
-      </ScrollReveal>
-
-      {/* 5. CATEGORIES SECTION */}
-      <ScrollReveal>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <CategoriesSection
-            onOccasionSelect={handleOccasionClick}
-            selectedOccasion={selectedOccasion}
-            occasions={dbOccasions.filter(o => o.slug !== "")}
-          />
-        </div>
-      </ScrollReveal>
-
-      {/* 6. FEATURED PRODUCTS (with search filtering) */}
-      <ScrollReveal>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FeaturedProductsSection
-            products={products}
-            loading={loading}
-            loadingMore={loadingMore}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            selectedOccasion={selectedOccasion}
-            setSelectedOccasion={setSelectedOccasion}
-            selectedRecipient={selectedRecipient}
-            setSelectedRecipient={setSelectedRecipient}
-            occasions={occasionsList}
-            recipients={recipients}
-            hasNextPage={hasNextPage}
-            handleLoadMore={handleLoadMore}
-          />
-        </div>
-      </ScrollReveal>
-
-      {/* 9. COLLECTIONS SECTION */}
-      <ScrollReveal>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <CollectionsSection />
-        </div>
-      </ScrollReveal>
-
-      {/* 7. BENEFITS SECTION */}
-      <ScrollReveal>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <BenefitsSection />
-        </div>
-      </ScrollReveal>
-
-      {/* HOW IT WORKS */}
-      <ScrollReveal>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <HowItWorksSection />
-        </div>
-      </ScrollReveal>
-
-      {/* 8. VIDEO BANNER */}
-      <ScrollReveal>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <VideoBanner />
-        </div>
-      </ScrollReveal>
-
-      {/* STORY / CONTENT */}
-      <ScrollReveal>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <StorySection />
-        </div>
-      </ScrollReveal>
-
-      {/* 10. REVIEWS SECTION */}
-      <ScrollReveal>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SocialProofSection />
-        </div>
-      </ScrollReveal>
-
-      {/* 11. UGC / INSTAGRAM / TIKTOK FEED */}
-      <ScrollReveal>
-        <UgcFeedSection />
-      </ScrollReveal>
-
-      {/* 12. BLOG SECTION */}
-      <ScrollReveal>
-        <BlogSection />
-      </ScrollReveal>
-
-      {/* 13. CTA BANNER */}
-      <ScrollReveal>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <CTASection />
-        </div>
-      </ScrollReveal>
-
-      {/* FAQ Accordions */}
-      <ScrollReveal>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FAQSection />
-        </div>
-      </ScrollReveal>
+      {/* Dynamically sorted homepage sections */}
+      {activeOrder.map((sectionKey) => renderSection(sectionKey))}
 
       {/* Live Configuration Panel */}
       <LiveConfigPanel />

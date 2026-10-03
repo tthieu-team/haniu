@@ -311,9 +311,11 @@ export default function Header() {
             <form
               ref={searchRef}
               onSubmit={handleSearchSubmit}
-              className="hidden min-[991px]:flex relative items-center"
+              className="hidden min-[991px]:flex relative items-center group"
             >
-              <Icon name="search" size={13} className="absolute left-3 text-slate-400 dark:text-zinc-500 pointer-events-none" />
+              <span className="absolute left-3 z-10 flex items-center justify-center pointer-events-none text-slate-500 dark:text-zinc-400 group-focus-within:text-rose-500 dark:group-focus-within:text-rose-400 transition-colors">
+                <Icon name="search" size={13} />
+              </span>
               <input
                 type="text"
                 placeholder={trans("Tìm quà tặng")}
@@ -323,7 +325,7 @@ export default function Header() {
                   setShowDropdown(true);
                 }}
                 onFocus={() => setShowDropdown(true)}
-                className={`text-xs pl-8 pr-8 py-1.5 rounded-full border bg-slate-100/70 dark:bg-zinc-900/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-950 transition-all duration-300 w-36 lg:w-44 xl:w-52 text-slate-700 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 border-slate-200/80 dark:border-zinc-800/80`}
+                className="text-xs pl-8 pr-8 py-1.5 rounded-full border bg-slate-100/80 dark:bg-zinc-900/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-950 transition-all duration-300 w-36 lg:w-44 xl:w-52 text-slate-800 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 border-slate-200/80 dark:border-zinc-800"
               />
               {searchVal && (
                 <button
@@ -332,7 +334,7 @@ export default function Header() {
                     setSearchVal('');
                     setSuggestions([]);
                   }}
-                  className="absolute right-3 text-slate-500 dark:text-zinc-500 hover:text-rose-500 text-[10px] cursor-pointer"
+                  className="absolute right-3 z-10 text-slate-400 dark:text-zinc-500 hover:text-rose-500 dark:hover:text-rose-400 text-[10px] cursor-pointer"
                 >
                   ✕
                 </button>
@@ -553,14 +555,16 @@ export default function Header() {
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 scrollbar-thin">
               {/* Mobile Search Bar inside Drawer */}
-              <form onSubmit={handleSearchSubmit} className="relative flex items-center pt-1">
-                <Icon name="search" size={14} className="absolute left-3.5 text-slate-400 dark:text-zinc-500 pointer-events-none" />
+              <form onSubmit={handleSearchSubmit} className="relative flex items-center pt-1 group">
+                <span className="absolute left-3.5 z-10 flex items-center justify-center pointer-events-none text-slate-500 dark:text-zinc-400 group-focus-within:text-rose-500 dark:group-focus-within:text-rose-400 transition-colors">
+                  <Icon name="search" size={14} />
+                </span>
                 <input
                   type="text"
                   placeholder={trans("Tìm kiếm sản phẩm quà tặng...")}
                   value={searchVal}
                   onChange={(e) => setSearchVal(e.target.value)}
-                  className="w-full bg-slate-100/80 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-800 dark:text-zinc-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                  className="w-full bg-slate-100/80 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-800 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
                 />
               </form>
 
