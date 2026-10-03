@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Icon from '@/components/common/Icons';
 
 interface SessionsTabProps {
   sessions: any[];
@@ -30,11 +31,15 @@ export const SessionsTab: React.FC<SessionsTabProps> = ({ sessions }) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-sm font-black uppercase text-slate-800 dark:text-zinc-200">Nhật Ký Chụp Ảnh (Sessions)</h3>
+          <h3 className="text-sm font-black uppercase text-slate-800 dark:text-zinc-200 flex items-center gap-1.5">
+            <Icon name="list" size={15} className="text-rose-500" />
+            <span>Nhật Ký Chụp Ảnh (Sessions)</span>
+          </h3>
           <p className="text-[11px] text-slate-400 dark:text-zinc-500">Theo dõi số lượng ảnh được in ra và lịch sử hoạt động camera photobooth.</p>
         </div>
-        <div className="px-3 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-full text-[10px] font-black uppercase tracking-wider">
-          Tổng cộng: {sessions.length} phiên
+        <div className="px-3 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+          <Icon name="camera" size={11} />
+          <span>Tổng cộng: {sessions.length} phiên</span>
         </div>
       </div>
 

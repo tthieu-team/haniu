@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Icon from '@/components/common/Icons';
 
 interface SettingsTabProps {
   settings: any;
@@ -11,7 +12,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ settings, onUpdateSett
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h3 className="text-sm font-black uppercase text-slate-800 dark:text-zinc-200">Cấu hình Hệ Thống</h3>
+        <h3 className="text-sm font-black uppercase text-slate-800 dark:text-zinc-200 flex items-center gap-2">
+          <Icon name="settings" size={16} className="text-rose-500" />
+          <span>Cấu hình Hệ Thống</span>
+        </h3>
         <p className="text-[11px] text-slate-400 dark:text-zinc-500">Các tùy chỉnh toàn cục áp dụng cho giao diện chụp ảnh photobooth.</p>
       </div>
 
@@ -20,7 +24,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ settings, onUpdateSett
           {/* Thời gian đếm ngược */}
           <div className="flex items-center justify-between">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-tight block">Thời gian đếm ngược (Countdown)</label>
+              <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-tight flex items-center gap-1.5">
+                <Icon name="hourglass" size={13} className="text-amber-500" />
+                <span>Thời gian đếm ngược (Countdown)</span>
+              </label>
               <span className="text-[10px] text-slate-400 dark:text-zinc-500 block">Số giây chuẩn bị đếm ngược cho mỗi kiểu ảnh.</span>
             </div>
             <select 
@@ -38,36 +45,44 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ settings, onUpdateSett
           {/* Hiệu ứng âm thanh */}
           <div className="flex items-center justify-between border-t border-slate-100 dark:border-zinc-800 pt-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-tight block">Hiệu ứng âm thanh (Audio Effects)</label>
+              <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-tight flex items-center gap-1.5">
+                <Icon name="play" size={13} className="text-blue-500" />
+                <span>Hiệu ứng âm thanh (Audio Effects)</span>
+              </label>
               <span className="text-[10px] text-slate-400 dark:text-zinc-500 block">Bật/tắt âm thanh chụp shutter, tiếng bíp đếm ngược.</span>
             </div>
             <button 
               onClick={() => onUpdateSettings('isSoundEnabled', settings.isSoundEnabled === false ? true : false)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase transition-colors cursor-pointer flex items-center gap-1 ${
                 settings.isSoundEnabled !== false
                   ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20' 
                   : 'bg-rose-500/10 text-rose-600 hover:bg-rose-500/20'
               }`}
             >
-              {settings.isSoundEnabled !== false ? 'Đang bật' : 'Đang tắt'}
+              <Icon name={settings.isSoundEnabled !== false ? 'check' : 'close'} size={12} />
+              <span>{settings.isSoundEnabled !== false ? 'Đang bật' : 'Đang tắt'}</span>
             </button>
           </div>
 
           {/* Bật tắt bộ lọc làm đẹp */}
           <div className="flex items-center justify-between border-t border-slate-100 dark:border-zinc-800 pt-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-tight block">Bộ lọc màu & Làm đẹp (Filters)</label>
+              <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-tight flex items-center gap-1.5">
+                <Icon name="sparkles" size={13} className="text-pink-500" />
+                <span>Bộ lọc màu & Làm đẹp (Filters)</span>
+              </label>
               <span className="text-[10px] text-slate-400 dark:text-zinc-500 block">Cho phép khách hàng chọn hiệu ứng bộ lọc màu và filter khuôn mặt khi chụp.</span>
             </div>
             <button 
               onClick={() => onUpdateSettings('isFilterEnabled', settings.isFilterEnabled === false ? true : false)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase transition-colors cursor-pointer flex items-center gap-1 ${
                 settings.isFilterEnabled !== false
                   ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20' 
                   : 'bg-rose-500/10 text-rose-600 hover:bg-rose-500/20'
               }`}
             >
-              {settings.isFilterEnabled !== false ? 'Đang bật' : 'Đang tắt'}
+              <Icon name={settings.isFilterEnabled !== false ? 'check' : 'close'} size={12} />
+              <span>{settings.isFilterEnabled !== false ? 'Đang bật' : 'Đang tắt'}</span>
             </button>
           </div>
         </div>

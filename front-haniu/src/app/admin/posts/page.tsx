@@ -151,7 +151,8 @@ export default function AdminPostsPage() {
                 onClick={() => setShowAiHelper(!showAiHelper)}
                 className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-sm hover:opacity-90 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
               >
-                <span>✨ Viết bài bằng AI</span>
+                <Icon name="sparkles" size={13} />
+                <span>Viết bài bằng AI</span>
               </button>
             )}
           </div>
@@ -159,7 +160,8 @@ export default function AdminPostsPage() {
           {showAiHelper && (
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800 space-y-3 animate-fade-in">
               <div className="text-xs font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-                <span>🤖 Trợ lý nội dung AI</span>
+                <Icon name="bot" size={14} className="text-rose-500" />
+                <span>Trợ lý nội dung AI</span>
                 <span className="text-[10px] text-slate-400 font-normal">(Sử dụng AI để tự động tạo một bài viết chất lượng ~1000 từ)</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -211,9 +213,10 @@ export default function AdminPostsPage() {
                   type="button"
                   disabled={isAiWriting}
                   onClick={handleAiWrite}
-                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-rose-500 hover:bg-rose-600 text-white shadow-sm active:scale-95 transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-rose-500 hover:bg-rose-600 text-white shadow-sm active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
-                  <span>Chấp bút viết bài 🚀</span>
+                  <span>Chấp bút viết bài</span>
+                  <Icon name="zap" size={13} />
                 </button>
               </div>
             </div>

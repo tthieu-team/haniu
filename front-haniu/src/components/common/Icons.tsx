@@ -10,6 +10,7 @@ import {
   Star,
   Truck,
   RotateCcw,
+  RefreshCw,
   ShieldCheck,
   Sparkles,
   Palette,
@@ -17,6 +18,7 @@ import {
   Gem,
   Settings,
   Eye,
+  EyeOff,
   X,
   Check,
   Menu,
@@ -47,8 +49,29 @@ import {
   Filter,
   LayoutGrid,
   List,
+  Layers,
+  Type,
+  Square,
+  Circle,
+  Triangle,
+  Cloud,
+  Bot,
+  Sliders,
+  Folder,
+  FolderOpen,
+  Maximize2,
+  Volume2,
+  Music,
+  Clock,
+  Unlock,
   BookOpen,
   Lock,
+  Key,
+  Crown,
+  Copy,
+  FileText,
+  UserCheck,
+  UserX,
   CreditCard,
   Wallet,
   Calendar,
@@ -102,8 +125,37 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
       return <Truck size={size} className={className} {...props} />;
     case 'refresh':
     case 'Refresh':
+    case 'rotate':
+    case 'Rotate':
+    case 'rotate-ccw':
+    case 'RotateCcw':
     case '🔄':
       return <RotateCcw size={size} className={className} {...props} />;
+    case 'refresh-cw':
+    case 'RefreshCw':
+      return <RefreshCw size={size} className={className} {...props} />;
+    case 'key':
+    case 'Key':
+    case '🔑':
+      return <Key size={size} className={className} {...props} />;
+    case 'crown':
+    case 'Crown':
+    case '👑':
+      return <Crown size={size} className={className} {...props} />;
+    case 'copy':
+    case 'Copy':
+    case '📋':
+      return <Copy size={size} className={className} {...props} />;
+    case 'file-text':
+    case 'FileText':
+    case 'profile':
+      return <FileText size={size} className={className} {...props} />;
+    case 'user-check':
+    case 'UserCheck':
+      return <UserCheck size={size} className={className} {...props} />;
+    case 'user-x':
+    case 'UserX':
+      return <UserX size={size} className={className} {...props} />;
     case 'shield':
     case 'Shield':
     case '🛡️':
@@ -302,6 +354,78 @@ export default function Icon({ name, size = 16, className = '', ...props }: Icon
     case 'AlertTriangle':
     case '⚠️':
       return <AlertTriangle size={size} className={className} {...props} />;
+    case 'layers':
+    case 'Layers':
+    case '📑':
+      return <Layers size={size} className={className} {...props} />;
+    case 'type':
+    case 'Type':
+    case 'text':
+    case 'Text':
+    case '🖋️':
+    case '📝':
+      return <Type size={size} className={className} {...props} />;
+    case 'square':
+    case 'Square':
+    case 'rect':
+    case '■':
+      return <Square size={size} className={className} {...props} />;
+    case 'circle':
+    case 'Circle':
+    case '●':
+      return <Circle size={size} className={className} {...props} />;
+    case 'triangle':
+    case 'Triangle':
+      return <Triangle size={size} className={className} {...props} />;
+    case 'cloud':
+    case 'Cloud':
+    case '☁️':
+      return <Cloud size={size} className={className} {...props} />;
+    case 'bot':
+    case 'Bot':
+    case 'ai':
+    case 'AI':
+    case '🤖':
+      return <Bot size={size} className={className} {...props} />;
+    case 'sliders':
+    case 'Sliders':
+    case 'layout':
+    case '📐':
+      return <Sliders size={size} className={className} {...props} />;
+    case 'folder':
+    case 'Folder':
+    case '📁':
+      return <Folder size={size} className={className} {...props} />;
+    case 'folder-open':
+    case 'FolderOpen':
+    case '📂':
+      return <FolderOpen size={size} className={className} {...props} />;
+    case 'maximize':
+    case 'Maximize':
+    case 'fit':
+      return <Maximize2 size={size} className={className} {...props} />;
+    case 'volume':
+    case 'Volume':
+    case 'Volume2':
+    case '🔊':
+      return <Volume2 size={size} className={className} {...props} />;
+    case 'music':
+    case 'Music':
+    case '🎵':
+      return <Music size={size} className={className} {...props} />;
+    case 'clock':
+    case 'Clock':
+    case 'time':
+    case '⏱️':
+      return <Clock size={size} className={className} {...props} />;
+    case 'unlock':
+    case 'Unlock':
+    case '🔓':
+      return <Unlock size={size} className={className} {...props} />;
+    case 'eye-off':
+    case 'EyeOff':
+    case '👁️‍🗨️':
+      return <EyeOff size={size} className={className} {...props} />;
     case 'video':
     case 'Video':
     case '📹':

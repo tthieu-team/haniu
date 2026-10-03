@@ -111,6 +111,61 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Async
+    public void sendAdminPasswordReset(String to, String fullName, String newPassword) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+
+            String name = (fullName != null && !fullName.isBlank()) ? fullName : "Quý khách";
+
+            String htmlMsg = "<div style=\"font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #f8fafc;\">" +
+                    "  <div style=\"background-color: #ffffff; padding: 40px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;\">" +
+                    "    <div style=\"text-align: center; margin-bottom: 30px;\">" +
+                    "      <h2 style=\"color: #f43f5e; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -0.5px;\">HANIU Gifting</h2>" +
+                    "      <p style=\"color: #64748b; font-size: 14px; margin-top: 5px;\">Trải nghiệm mua sắm quà tặng đặc quyền</p>" +
+                    "    </div>" +
+                    "    <h3 style=\"color: #0f172a; font-size: 20px; font-weight: 700; margin-bottom: 20px;\">Mật khẩu mới cho tài khoản Haniu</h3>" +
+                    "    <p style=\"color: #475569; font-size: 15px; line-height: 1.6; margin-bottom: 15px;\">" +
+                    "      Xin chào <strong>" + name + "</strong>," +
+                    "    </p>" +
+                    "    <p style=\"color: #475569; font-size: 15px; line-height: 1.6; margin-bottom: 25px;\">" +
+                    "      Mật khẩu tài khoản của bạn tại <strong>Haniu</strong> vừa được quản trị viên cấp lại. Dưới đây là mật khẩu đăng nhập mới của bạn:" +
+                    "    </p>" +
+                    "    <div style=\"text-align: center; margin: 30px 0;\">" +
+                    "      <div style=\"display: inline-block; background: #f1f5f9; border: 2px dashed #cbd5e1; padding: 18px 36px; border-radius: 16px;\">" +
+                    "        <span style=\"font-size: 26px; font-weight: 900; color: #0f172a; letter-spacing: 2px; font-family: monospace;\">" + newPassword + "</span>" +
+                    "      </div>" +
+                    "    </div>" +
+                    "    <div style=\"text-align: center; margin: 30px 0;\">" +
+                    "      <a href=\"" + frontendUrl + "/auth/login\" style=\"display: inline-block; background: linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 800; font-size: 15px; box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);\">Đăng nhập ngay</a>" +
+                    "    </div>" +
+                    "    <div style=\"background-color: #fff1f2; border-left: 4px solid #f43f5e; padding: 12px 16px; border-radius: 8px; margin-top: 20px;\">" +
+                    "      <p style=\"color: #9f1239; font-size: 13px; margin: 0; line-height: 1.5;\">" +
+                    "        <strong>Lưu ý bảo mật:</strong> Để đảm bảo an toàn tuyệt đối, vui lòng đổi lại mật khẩu cá nhân ngay sau khi đăng nhập thành công." +
+                    "      </p>" +
+                    "    </div>" +
+                    "    <p style=\"color: #94a3b8; font-size: 12px; line-height: 1.5; text-align: center; margin-top: 35px; border-top: 1px solid #f1f5f9; padding-top: 20px;\">" +
+                    "      Nếu bạn không yêu cầu hành động này, vui lòng liên hệ ngay với bộ phận hỗ trợ khách hàng của Haniu.<br/>" +
+                    "      &copy; 2026 Haniu. All rights reserved." +
+                    "    </p>" +
+                    "  </div>" +
+                    "</div>";
+
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject("[Haniu] Cấp lại mật khẩu tài khoản thành công");
+            helper.setText(htmlMsg, true);
+
+            mailSender.send(mimeMessage);
+            log.info("Admin password reset email sent to: {}", to);
+        } catch (Exception e) {
+            log.error("Failed to send admin password reset email to: " + to, e);
+            throw new RuntimeException("Không thể gửi email thông báo mật khẩu mới. Vui lòng kiểm tra lại cấu hình email.");
+        }
+    }
+
+    @Override
+    @Async
     public void sendOrderConfirmation(String to, com.haniu.tthieu.haniu.dto.OrderResponseDto order) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();

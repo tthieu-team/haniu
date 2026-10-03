@@ -131,9 +131,9 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
       {/* Top Primary Navigation Tabs (Strictly Equal 33.33% Width for all tabs) */}
       <div className="grid grid-cols-3 bg-slate-100 dark:bg-zinc-850 p-1 rounded-2xl gap-1 shrink-0 mb-3 border border-slate-200/50 dark:border-zinc-800 w-full">
         {[
-          { id: 'elements', label: 'Thành phần', icon: '➕' },
-          { id: 'stickers', label: 'Sticker', icon: '🎨' },
-          { id: 'layers', label: `Lớp (${layersCount})`, icon: '📑' },
+          { id: 'elements', label: 'Thành phần', icon: 'plus' },
+          { id: 'stickers', label: 'Sticker', icon: 'palette' },
+          { id: 'layers', label: `Lớp (${layersCount})`, icon: 'layers' },
         ].map(t => {
           const isActive = activeTab === t.id;
           return (
@@ -141,13 +141,13 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
               key={t.id}
               type="button"
               onClick={() => setActiveTab(t.id as any)}
-              className={`w-full min-w-0 py-2 px-1 rounded-xl text-[11px] font-bold uppercase flex items-center justify-center gap-1 transition-all cursor-pointer ${
+              className={`w-full min-w-0 py-2 px-1 rounded-xl text-[11px] font-bold uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                 isActive
                   ? 'bg-white dark:bg-zinc-900 text-rose-600 dark:text-rose-400 shadow-sm border border-slate-200/80 dark:border-zinc-700'
                   : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
               }`}
             >
-              <span className="text-xs shrink-0">{t.icon}</span>
+              <Icon name={t.icon} size={13} className="shrink-0" />
               <span className="truncate">{t.label}</span>
             </button>
           );
@@ -168,30 +168,30 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
               <button 
                 type="button"
                 onClick={handleAddFrameLayer}
-                className="w-full min-w-0 h-20 border border-dashed border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center gap-1 text-slate-600 dark:text-zinc-300 hover:text-rose-600 cursor-pointer transition-all group shadow-2xs hover:shadow-sm p-1"
+                className="w-full min-w-0 h-20 border border-dashed border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-slate-600 dark:text-zinc-300 hover:text-rose-600 cursor-pointer transition-all group shadow-2xs hover:shadow-sm p-1"
                 title="Thêm khung chứa ảnh photobooth"
               >
-                <span className="text-2xl group-hover:scale-110 transition-transform">📸</span>
+                <Icon name="camera" size={24} className="group-hover:scale-110 transition-transform text-rose-500" />
                 <span className="text-[11px] font-bold uppercase tracking-tight font-sans truncate w-full text-center">Khung Ảnh</span>
               </button>
               
               <button 
                 type="button"
                 onClick={() => handleAddTextLayer(true)}
-                className="w-full min-w-0 h-20 border border-dashed border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center gap-1 text-slate-600 dark:text-zinc-300 hover:text-rose-600 cursor-pointer transition-all group shadow-2xs hover:shadow-sm p-1"
+                className="w-full min-w-0 h-20 border border-dashed border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-slate-600 dark:text-zinc-300 hover:text-rose-600 cursor-pointer transition-all group shadow-2xs hover:shadow-sm p-1"
                 title="Thêm văn bản chữ nghệ thuật photobooth"
               >
-                <span className="text-2xl group-hover:scale-110 transition-transform">🖋️</span>
+                <Icon name="type" size={24} className="group-hover:scale-110 transition-transform text-rose-500" />
                 <span className="text-[11px] font-bold uppercase tracking-tight font-sans truncate w-full text-center">Văn Bản</span>
               </button>
 
               <button 
                 type="button"
                 onClick={handleAddOverlayLayer}
-                className="w-full min-w-0 h-20 border border-dashed border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center gap-1 text-slate-600 dark:text-zinc-300 hover:text-rose-600 cursor-pointer transition-all group shadow-2xs hover:shadow-sm p-1"
+                className="w-full min-w-0 h-20 border border-dashed border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-slate-600 dark:text-zinc-300 hover:text-rose-600 cursor-pointer transition-all group shadow-2xs hover:shadow-sm p-1"
                 title="Thêm lớp phủ ảnh trong suốt overlay"
               >
-                <span className="text-2xl group-hover:scale-110 transition-transform">🖼️</span>
+                <Icon name="image" size={24} className="group-hover:scale-110 transition-transform text-rose-500" />
                 <span className="text-[11px] font-bold uppercase tracking-tight font-sans truncate w-full text-center">Lớp Phủ</span>
               </button>
             </div>
@@ -204,11 +204,11 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
             </h4>
             <div className="grid grid-cols-5 gap-1 w-full">
               {[
-                { shape: 'rect', icon: '■', label: 'Chữ Nhật' },
-                { shape: 'circle', icon: '●', label: 'Tròn' },
-                { shape: 'triangle', icon: '▲', label: 'Tam Giác' },
-                { shape: 'heart', icon: '♥', label: 'Trái Tim' },
-                { shape: 'star', icon: '★', label: 'Ngôi Sao' }
+                { shape: 'rect', icon: 'square', label: 'Chữ Nhật' },
+                { shape: 'circle', icon: 'circle', label: 'Tròn' },
+                { shape: 'triangle', icon: 'triangle', label: 'Tam Giác' },
+                { shape: 'heart', icon: 'heart', label: 'Trái Tim' },
+                { shape: 'star', icon: 'star', label: 'Ngôi Sao' }
               ].map((item) => (
                 <button
                   key={item.shape}
@@ -217,8 +217,8 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                   className="w-full min-w-0 py-2 border border-slate-200 dark:border-zinc-800 hover:border-rose-500 hover:bg-rose-500/5 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors text-slate-600 dark:text-zinc-300 hover:text-rose-600 px-0.5"
                   title={item.label}
                 >
-                  <span className="text-sm font-bold">{item.icon}</span>
-                  <span className="text-[8px] font-semibold uppercase mt-0.5 truncate w-full text-center">{item.label}</span>
+                  <Icon name={item.icon} size={15} className="shrink-0" />
+                  <span className="text-[8px] font-semibold uppercase mt-1 truncate w-full text-center">{item.label}</span>
                 </button>
               ))}
             </div>
@@ -242,7 +242,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                   : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
               }`}
             >
-              <span className="text-xs">🌸</span>
+              <Icon name="sparkles" size={13} className="shrink-0" />
               <span className="truncate">Thư viện Haniu</span>
             </button>
             <button
@@ -253,7 +253,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                   : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
               }`}
             >
-              <span className="text-xs">✨</span>
+              <Icon name="zap" size={13} className="shrink-0" />
               <span className="truncate">GIPHY Online</span>
             </button>
           </div>
@@ -306,7 +306,10 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                               ? 'bg-rose-500 text-white shadow-xs'
                               : 'bg-white dark:bg-zinc-800 border border-slate-200/70 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 group-hover:border-rose-300'
                           }`}>
-                            {cat.category === 'ĐÃ TẢI LÊN' ? '☁️' : isExpanded ? '📂' : '📁'}
+                            <Icon 
+                              name={cat.category === 'ĐÃ TẢI LÊN' ? 'cloud' : isExpanded ? 'folder-open' : 'folder'} 
+                              size={14} 
+                            />
                           </div>
                           <div className="truncate">
                             <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200 block truncate">
@@ -322,12 +325,12 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                           </span>
                         </div>
                         
-                        <div className={`w-5 h-5 rounded-lg flex items-center justify-center text-[8px] shrink-0 transition-transform duration-200 ${
+                        <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 ${
                           isExpanded 
                             ? 'rotate-180 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300' 
                             : 'bg-slate-100 dark:bg-zinc-800 text-slate-400 group-hover:text-slate-600'
                         }`}>
-                          ▼
+                          <Icon name="chevron-down" size={11} />
                         </div>
                       </button>
 
@@ -404,8 +407,8 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                   placeholder="Tìm kiếm sticker GIPHY..."
                   className="w-full pl-8 pr-16 py-2 rounded-2xl border border-slate-200 dark:border-zinc-800 text-xs bg-slate-50/80 dark:bg-zinc-850/80 text-slate-800 dark:text-zinc-100 outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-900 transition-colors shadow-2xs"
                 />
-                <span className="absolute left-2.5 text-slate-400 text-xs pointer-events-none">
-                  🔍
+                <span className="absolute left-2.5 text-slate-400 pointer-events-none">
+                  <Icon name="search" size={13} />
                 </span>
                 {giphySearch && (
                   <button
@@ -413,7 +416,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                     onClick={() => { setGiphySearch(''); fetchGiphyStickers(''); }}
                     className="absolute right-12 text-slate-400 hover:text-slate-600 text-xs cursor-pointer p-0.5"
                   >
-                    ✕
+                    <Icon name="close" size={12} />
                   </button>
                 )}
                 <button
@@ -427,24 +430,30 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
 
               {/* Quick Trending Keyword Pills */}
               <div className="flex gap-1 overflow-x-auto pb-1 shrink-0 scrollbar-none">
-                {['🌸 Cute', '💖 Heart', '🎂 Birthday', '✨ Sparkle', '🐱 Cat', '🎉 Party', '⭐ Star'].map(tag => {
-                  const query = tag.replace(/^[^\s]+\s/, '');
-                  const isActive = giphySearch.toLowerCase() === query.toLowerCase();
+                {[
+                  { tag: 'Cute', icon: 'sparkles' },
+                  { tag: 'Heart', icon: 'heart' },
+                  { tag: 'Birthday', icon: 'cake' },
+                  { tag: 'Party', icon: 'party' },
+                  { tag: 'Star', icon: 'star' }
+                ].map(({ tag, icon }) => {
+                  const isActive = giphySearch.toLowerCase() === tag.toLowerCase();
                   return (
                     <button
                       key={tag}
                       type="button"
                       onClick={() => {
-                        setGiphySearch(query);
-                        fetchGiphyStickers(query);
+                        setGiphySearch(tag);
+                        fetchGiphyStickers(tag);
                       }}
-                      className={`px-2.5 py-1 rounded-xl text-[10px] font-semibold whitespace-nowrap cursor-pointer transition-all shrink-0 ${
+                      className={`px-2.5 py-1 rounded-xl text-[10px] font-semibold whitespace-nowrap cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
                         isActive
                           ? 'bg-rose-600 text-white shadow-2xs'
                           : 'bg-slate-100/80 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-rose-50 dark:hover:bg-zinc-750 hover:text-rose-600 border border-slate-200/50 dark:border-zinc-750'
                       }`}
                     >
-                      {tag}
+                      <Icon name={icon} size={11} className="shrink-0" />
+                      <span>{tag}</span>
                     </button>
                   );
                 })}
@@ -478,10 +487,10 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50/60 dark:bg-zinc-850/40 border border-dashed border-slate-200 dark:border-zinc-800 text-center text-slate-400 space-y-1">
-                  <span className="text-2xl">🔍</span>
-                  <span className="text-xs font-bold">Không tìm thấy sticker nào</span>
-                  <span className="text-[9px]">Thử tìm kiếm với từ khóa khác hoặc bấm gợi ý phía trên</span>
+                <div className="flex-1 flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50/60 dark:bg-zinc-850/40 border border-dashed border-slate-200 dark:border-zinc-800 text-center text-slate-400 space-y-2">
+                  <Icon name="search" size={28} className="text-slate-400 dark:text-zinc-600" />
+                  <span className="text-xs font-bold block">Không tìm thấy sticker nào</span>
+                  <span className="text-[9px] block">Thử tìm kiếm với từ khóa khác hoặc bấm gợi ý phía trên</span>
                 </div>
               )}
             </div>
@@ -503,8 +512,8 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
           </div>
 
           {layersCount === 0 ? (
-            <div className="p-8 text-center border border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl bg-slate-50 dark:bg-zinc-850 text-slate-400 space-y-1">
-              <span className="text-3xl block">📂</span>
+            <div className="p-8 text-center border border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl bg-slate-50 dark:bg-zinc-850 text-slate-400 space-y-2">
+              <Icon name="layers" size={32} className="mx-auto text-slate-300 dark:text-zinc-600 block" />
               <span className="text-xs font-bold block">Chưa có lớp nào</span>
               <span className="text-[10px] block">Bấm sang tab "Thành phần" hoặc "Sticker" để thêm</span>
             </div>
@@ -527,8 +536,8 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 truncate max-w-[60%]">
-                        <span className="text-slate-400 text-xs">
-                          {layer.type === 'frame' ? '📸' : layer.type === 'text' ? '🖋️' : layer.type === 'sticker' ? '🎨' : layer.type === 'overlay' ? '🖼️' : '■'}
+                        <span className="text-slate-400 shrink-0">
+                          {layer.type === 'frame' ? <Icon name="camera" size={13} /> : layer.type === 'text' ? <Icon name="type" size={13} /> : layer.type === 'sticker' ? <Icon name="palette" size={13} /> : layer.type === 'overlay' ? <Icon name="image" size={13} /> : <Icon name="square" size={13} />}
                         </span>
                         <input
                           type="text"
@@ -553,10 +562,10 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                       <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                         <button
                           onClick={() => handleDuplicateLayer(layer)}
-                          className="p-1 rounded hover:bg-slate-200 dark:hover:bg-zinc-750 text-[10px] text-slate-500 cursor-pointer"
+                          className="p-1 rounded hover:bg-slate-200 dark:hover:bg-zinc-750 text-slate-500 cursor-pointer"
                           title="Nhân bản lớp"
                         >
-                          👯
+                          <Icon name="copy" size={12} />
                         </button>
                         <button 
                           onClick={() => {
@@ -569,7 +578,7 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                           className={`p-1 rounded hover:bg-slate-200 dark:hover:bg-zinc-750 cursor-pointer ${layer.locked ? 'text-rose-500' : 'text-slate-400'}`}
                           title={layer.locked ? 'Mở khóa layer' : 'Khóa layer'}
                         >
-                          {layer.locked ? '🔒' : '🔓'}
+                          <Icon name={layer.locked ? 'lock' : 'unlock'} size={12} />
                         </button>
                         <button 
                           onClick={() => {
@@ -582,23 +591,23 @@ export const LeftToolbox: React.FC<LeftToolboxProps> = ({
                           className={`p-1 rounded hover:bg-slate-200 dark:hover:bg-zinc-750 cursor-pointer ${layer.visible === false ? 'text-slate-300' : 'text-slate-600 dark:text-zinc-300'}`}
                           title={layer.visible === false ? 'Hiện layer' : 'Ẩn layer'}
                         >
-                          {layer.visible === false ? '👁️‍🗨️' : '👁️'}
+                          <Icon name={layer.visible === false ? 'eye-off' : 'eye'} size={12} />
                         </button>
                         <button 
                           onClick={() => handleMoveLayerUp(idx)}
                           disabled={idx === builderTemplate.layers.length - 1}
-                          className="p-1 rounded hover:bg-slate-200 dark:hover:bg-zinc-750 disabled:opacity-25 text-slate-500 cursor-pointer text-xs"
+                          className="p-1 rounded hover:bg-slate-200 dark:hover:bg-zinc-750 disabled:opacity-25 text-slate-500 cursor-pointer"
                           title="Đưa lên trên"
                         >
-                          ▲
+                          <Icon name="chevron-up" size={12} />
                         </button>
                         <button 
                           onClick={() => handleMoveLayerDown(idx)}
                           disabled={idx === 0}
-                          className="p-1 rounded hover:bg-slate-200 dark:hover:bg-zinc-750 disabled:opacity-25 text-slate-500 cursor-pointer text-xs"
+                          className="p-1 rounded hover:bg-slate-200 dark:hover:bg-zinc-750 disabled:opacity-25 text-slate-500 cursor-pointer"
                           title="Đưa xuống dưới"
                         >
-                          ▼
+                          <Icon name="chevron-down" size={12} />
                         </button>
                       </div>
                     </div>

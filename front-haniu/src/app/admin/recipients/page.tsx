@@ -254,7 +254,7 @@ export default function AdminRecipientsPage() {
                         />
                       ) : (
                         <div className="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center font-bold text-sm">
-                          👥
+                          <Icon name="users" size={20} />
                         </div>
                       )}
                     </td>
@@ -361,10 +361,10 @@ export default function AdminRecipientsPage() {
                       <button
                         type="button"
                         onClick={() => setImageUrl('')}
-                        className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-red-600 border-none text-[8px]"
+                        className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-red-600 border-none"
                         title="Xóa ảnh"
                       >
-                        ✕
+                        <Icon name="close" size={10} />
                       </button>
                     </div>
                   ) : (

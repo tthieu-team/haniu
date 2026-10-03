@@ -319,7 +319,8 @@ export default function PhotoboothAdmin() {
               <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold">• Photobooth Haniu v2.5</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-zinc-150 uppercase tracking-tight italic font-sans flex items-center gap-2.5">
-              📷 CẤU HÌNH <span className="bg-gradient-to-r from-rose-600 to-amber-500 bg-clip-text text-transparent">PHOTOBOOTH</span>
+              <Icon name="camera" size={26} className="text-rose-600" />
+              <span>CẤU HÌNH <span className="bg-gradient-to-r from-rose-600 to-amber-500 bg-clip-text text-transparent">PHOTOBOOTH</span></span>
             </h1>
             <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-xl mt-1">
               Quản lý các sự kiện chụp hình, định nghĩa layout template kéo thả, tải sticker, theo dõi hoạt động chụp ảnh và xuất báo cáo analytics.
@@ -336,7 +337,7 @@ export default function PhotoboothAdmin() {
           { id: 'templates', label: 'Khung hình (Templates)', icon: 'palette' },
           { id: 'assets', label: 'Tài nguyên (Assets)', icon: 'image' },
           { id: 'sessions', label: 'Lượt chụp (Sessions)', icon: 'list' },
-          { id: 'gallery', label: 'Thư viện ảnh', icon: 'image' },
+          { id: 'gallery', label: 'Thư viện ảnh', icon: 'camera' },
           { id: 'settings', label: 'Cấu hình chung', icon: 'settings' }
         ].map((tab) => (
           <button

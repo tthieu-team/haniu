@@ -97,8 +97,9 @@ export const AssetLibraryTab: React.FC<AssetLibraryTabProps> = ({
 
       {/* Backgrounds */}
       <div className="space-y-4 pb-4 border-b border-slate-100 dark:border-zinc-800">
-        <h4 className="text-xs font-black uppercase text-slate-700 dark:text-zinc-350 border-b border-slate-100 dark:border-zinc-800 pb-1">
-          🖼️ Thư Viện Hình Nền (Backgrounds)
+        <h4 className="text-xs font-black uppercase text-slate-700 dark:text-zinc-350 border-b border-slate-100 dark:border-zinc-800 pb-1 flex items-center gap-1.5">
+          <Icon name="image" size={13} className="text-blue-500" />
+          <span>Thư Viện Hình Nền (Backgrounds)</span>
         </h4>
 
         <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 gap-4">
@@ -166,8 +167,9 @@ export const AssetLibraryTab: React.FC<AssetLibraryTabProps> = ({
 
       {/* Stickers */}
       <div className="space-y-4 pt-2">
-        <h4 className="text-xs font-black uppercase text-slate-700 dark:text-zinc-350 border-b border-slate-100 dark:border-zinc-800 pb-1">
-          🎨 Thư Viện Stickers Hỗ Trợ Dán
+        <h4 className="text-xs font-black uppercase text-slate-700 dark:text-zinc-350 border-b border-slate-100 dark:border-zinc-800 pb-1 flex items-center gap-1.5">
+          <Icon name="sparkles" size={13} className="text-amber-500" />
+          <span>Thư Viện Stickers Hỗ Trợ Dán</span>
         </h4>
 
         <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 gap-4">
@@ -235,8 +237,9 @@ export const AssetLibraryTab: React.FC<AssetLibraryTabProps> = ({
 
       {/* Logos */}
       <div className="space-y-4 pt-4">
-        <h4 className="text-xs font-black uppercase text-slate-700 dark:text-zinc-350 border-b border-slate-100 dark:border-zinc-800 pb-1">
-          🖋️ Chữ Ký Thương Hiệu / Logos Watermarks
+        <h4 className="text-xs font-black uppercase text-slate-700 dark:text-zinc-350 border-b border-slate-100 dark:border-zinc-800 pb-1 flex items-center gap-1.5">
+          <Icon name="edit" size={13} className="text-rose-500" />
+          <span>Chữ Ký Thương Hiệu / Logos Watermarks</span>
         </h4>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

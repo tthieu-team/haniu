@@ -5,5 +5,6 @@ public interface EmailService {
     void sendPasswordResetCode(String to, String code);
     void sendOrderConfirmation(String to, com.haniu.tthieu.haniu.dto.OrderResponseDto order);
     void sendOrderStatusUpdate(String to, com.haniu.tthieu.haniu.dto.OrderResponseDto order, String status);
+    void sendAdminPasswordReset(String to, String fullName, String newPassword);
 }
 

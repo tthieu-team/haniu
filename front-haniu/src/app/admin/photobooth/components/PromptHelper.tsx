@@ -433,7 +433,8 @@ export const PromptHelper: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-zinc-800 pb-4">
         <div>
           <h4 className="text-sm font-black uppercase text-slate-800 dark:text-zinc-200 flex items-center gap-2">
-            ✨ Trợ Lý Tạo Asset AI (Midjourney & DALL-E)
+            <Icon name="sparkles" size={15} className="text-rose-500" />
+            <span>Trợ Lý Tạo Asset AI (Midjourney & DALL-E)</span>
           </h4>
           <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-1">
             Tra cứu và sao chép nhanh Prompt chuẩn hóa cho 210 loại sticker, khung ảnh và hình nền photobooth Hàn Quốc.
@@ -518,8 +519,9 @@ export const PromptHelper: React.FC = () => {
 
           <div className="lg:col-span-3 space-y-4">
             <div className="bg-rose-500/5 border border-rose-500/10 p-3.5 rounded-2xl">
-              <p className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-1">
-                💡 Lưu ý kỹ thuật cho bộ sưu tập này
+              <p className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                <Icon name="sparkles" size={12} className="shrink-0" />
+                <span>Lưu ý kỹ thuật cho bộ sưu tập này</span>
               </p>
               <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-relaxed">
                 {activeColId === 'background'

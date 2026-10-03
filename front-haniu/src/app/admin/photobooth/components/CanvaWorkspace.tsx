@@ -986,7 +986,7 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                             )}
                           </svg>
                         )}
-                        <span className="text-xl">📸</span>
+                        <Icon name="camera" size={24} className="text-slate-400" />
                         <span className="text-[9px] font-black uppercase mt-1 text-slate-455">{layer.label}</span>
                         <span className="absolute top-2 left-2 bg-rose-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-black">
                           {layer.order || 1}
@@ -1109,7 +1109,8 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                       />
                     ) : (
                       <div className="w-full h-full bg-slate-200/50 dark:bg-zinc-800/50 border border-dashed border-slate-400 dark:border-zinc-700 flex flex-col items-center justify-center text-slate-400 dark:text-zinc-500 text-[10px] p-2 text-center leading-normal">
-                        <span>🖼️ LỚP PHỦ TRỐNG</span>
+                        <Icon name="image" size={22} className="mb-1 text-slate-400" />
+                        <span>LỚP PHỦ TRỐNG</span>
                         <span className="text-[8px] mt-1">Click chọn để tải ảnh lớp phủ (.png)</span>
                       </div>
                     )
@@ -1137,7 +1138,7 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                   {/* SHAPE LAYER RENDERING */}
                   {layer.type === 'shape' && (
                     <div 
-                      className="w-full h-full transition-all"
+                      className="w-full h-full transition-all flex items-center justify-center"
                       style={{
                         backgroundColor: layer.fillColor || '#fda4af',
                         borderWidth: `${layer.borderSize ?? 0}px`,
@@ -1148,13 +1149,13 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                       }}
                     >
                       {layer.shapeType === 'heart' && (
-                        <div className="w-full h-full flex items-center justify-center text-red-500 text-3xl" style={{ backgroundColor: 'transparent' }}>
-                          ❤️
+                        <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'transparent' }}>
+                          <Icon name="heart" size={Math.min(48, Math.max(16, 28 * canvasZoom))} className="text-red-500 fill-red-500" />
                         </div>
                       )}
                       {layer.shapeType === 'star' && (
-                        <div className="w-full h-full flex items-center justify-center text-yellow-500 text-3xl" style={{ backgroundColor: 'transparent' }}>
-                          ⭐
+                        <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'transparent' }}>
+                          <Icon name="star" size={Math.min(48, Math.max(16, 28 * canvasZoom))} className="text-yellow-500 fill-yellow-500" />
                         </div>
                       )}
                     </div>
@@ -1266,21 +1267,21 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
             <button 
               onClick={handleZoomOut}
               disabled={canvasZoom <= MIN_ZOOM}
-              className="w-8 h-8 flex items-center justify-center rounded-xl text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:hover:bg-transparent cursor-pointer font-bold text-base transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-xl text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:hover:bg-transparent cursor-pointer font-bold transition-colors"
               title="Thu nhỏ (Ctrl + -)"
             >
-              −
+              <Icon name="minus" size={14} />
             </button>
 
             {/* Percentage selector popover trigger */}
             <div className="relative">
               <button 
                 onClick={() => setShowZoomMenu(p => !p)}
-                className="px-2.5 h-8 flex items-center gap-1 rounded-xl text-xs font-black font-mono text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
+                className="px-2.5 h-8 flex items-center gap-1.5 rounded-xl text-xs font-black font-mono text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
                 title="Chọn mức zoom"
               >
                 <span>{Math.round(canvasZoom * 100)}%</span>
-                <span className="text-[9px] text-slate-400">▾</span>
+                <Icon name="chevron-down" size={10} className="text-slate-400" />
               </button>
 
               {/* Zoom Presets Popover Menu */}
@@ -1316,7 +1317,7 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                       >
                         <span>{preset.label}</span>
                         {Math.round(canvasZoom * 100) === Math.round(preset.value * 100) && (
-                          <span className="text-[10px]">✓</span>
+                          <Icon name="check" size={12} className="text-rose-600" />
                         )}
                       </button>
                     ))}
@@ -1326,9 +1327,10 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
                         handleFitToScreen();
                         setShowZoomMenu(false);
                       }}
-                      className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                      className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer flex items-center gap-1.5"
                     >
-                      📐 Vừa màn hình
+                      <Icon name="maximize" size={13} className="shrink-0" />
+                      <span>Vừa màn hình</span>
                     </button>
                   </div>
                 </>
@@ -1339,10 +1341,10 @@ export const CanvaWorkspace: React.FC<CanvaWorkspaceProps> = ({
             <button 
               onClick={handleZoomIn}
               disabled={canvasZoom >= MAX_ZOOM}
-              className="w-8 h-8 flex items-center justify-center rounded-xl text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:hover:bg-transparent cursor-pointer font-bold text-base transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-xl text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:hover:bg-transparent cursor-pointer font-bold transition-colors"
               title="Phóng to (Ctrl + +)"
             >
-              +
+              <Icon name="plus" size={14} />
             </button>
 
             <div className="w-px h-5 bg-slate-200 dark:bg-zinc-800 mx-0.5" />

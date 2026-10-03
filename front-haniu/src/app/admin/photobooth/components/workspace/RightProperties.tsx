@@ -140,7 +140,9 @@ const ColorPickerRow: React.FC<{
               title={p.name}
             >
               {p.color === 'transparent' && (
-                <span className="absolute inset-0 flex items-center justify-center text-[10px] text-red-500 font-black leading-none">✕</span>
+                <span className="absolute inset-0 flex items-center justify-center text-red-500 font-black">
+                  <Icon name="close" size={10} />
+                </span>
               )}
             </button>
           ))}
@@ -247,28 +249,28 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
       >
         <div className="flex justify-between items-center border-b border-slate-100 dark:border-zinc-800 pb-2.5">
           <span className="text-xs font-black uppercase text-rose-500 tracking-wider flex items-center gap-1.5">
-            <span>⚙️</span>
+            <Icon name="settings" size={14} className="shrink-0" />
             <span>Cấu hình Template</span>
           </span>
         </div>
 
         {/* Top Tab Bar for Template Settings */}
-        <div className="flex bg-slate-100 dark:bg-zinc-800 p-1 rounded-xl gap-1">
+        <div className="flex bg-slate-100 dark:bg-zinc-850 p-1 rounded-xl gap-1">
           {[
-            { id: 'general', label: 'Cơ bản', icon: '📝' },
-            { id: 'background', label: 'Hình nền', icon: '🎨' },
-            { id: 'overlay', label: 'Lớp phủ', icon: '🖼️' },
+            { id: 'general', label: 'Cơ bản', icon: 'file-text' },
+            { id: 'background', label: 'Hình nền', icon: 'palette' },
+            { id: 'overlay', label: 'Lớp phủ', icon: 'image' },
           ].map(t => (
             <button
               key={t.id}
               onClick={() => setActiveTemplateTab(t.id as any)}
-              className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-black uppercase flex items-center justify-center gap-1 transition-all cursor-pointer ${
+              className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-black uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                 activeTemplateTab === t.id
                   ? 'bg-white dark:bg-zinc-900 text-rose-600 dark:text-rose-400 shadow-xs'
                   : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
               }`}
             >
-              <span>{t.icon}</span>
+              <Icon name={t.icon} size={12} className="shrink-0" />
               <span>{t.label}</span>
             </button>
           ))}
@@ -591,9 +593,9 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
       
       {/* Top Header with Delete button */}
       <div className="flex justify-between items-center border-b border-slate-100 dark:border-zinc-800 pb-2.5">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-base">
-            {selectedLayer.type === 'text' ? '🖋️' : selectedLayer.type === 'frame' ? '📸' : selectedLayer.type === 'sticker' ? '🎨' : selectedLayer.type === 'logo' ? '🎀' : selectedLayer.type === 'shape' ? '🔷' : '🖼️'}
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-rose-500 shrink-0">
+            {selectedLayer.type === 'text' ? <Icon name="type" size={15} /> : selectedLayer.type === 'frame' ? <Icon name="camera" size={15} /> : selectedLayer.type === 'sticker' ? <Icon name="palette" size={15} /> : selectedLayer.type === 'logo' ? <Icon name="gem" size={15} /> : selectedLayer.type === 'shape' ? <Icon name="square" size={15} /> : <Icon name="image" size={15} />}
           </span>
           <span className="text-xs font-black uppercase text-slate-800 dark:text-zinc-200 tracking-wider truncate">
             {selectedLayer.label || (selectedLayer.type === 'text' ? 'Văn Bản' : selectedLayer.type === 'frame' ? `Khung #${selectedLayer.order || 1}` : 'Thành Phần')}
@@ -609,22 +611,22 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
       </div>
 
       {/* Layer Navigation Tabs */}
-      <div className="flex bg-slate-100 dark:bg-zinc-800 p-1 rounded-xl gap-1">
+      <div className="flex bg-slate-100 dark:bg-zinc-850 p-1 rounded-xl gap-1">
         {[
-          { id: 'content', label: 'Nội dung', icon: '🎨' },
-          { id: 'layout', label: 'Vị trí (%)', icon: '📐' },
-          { id: 'effects', label: 'Hiệu ứng', icon: '✨' },
+          { id: 'content', label: 'Nội dung', icon: 'palette' },
+          { id: 'layout', label: 'Vị trí (%)', icon: 'sliders' },
+          { id: 'effects', label: 'Hiệu ứng', icon: 'sparkles' },
         ].map(t => (
           <button
             key={t.id}
             onClick={() => setActiveLayerTab(t.id as any)}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-black uppercase flex items-center justify-center gap-1 transition-all cursor-pointer ${
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-black uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeLayerTab === t.id
                 ? 'bg-white dark:bg-zinc-900 text-rose-600 dark:text-rose-400 shadow-xs'
                 : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
             }`}
           >
-            <span>{t.icon}</span>
+            <Icon name={t.icon} size={12} className="shrink-0" />
             <span>{t.label}</span>
           </button>
         ))}
@@ -862,14 +864,14 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
                       onChange={e => updateSelectedLayer({ fontFamily: e.target.value })}
                       className="w-full px-2 h-8 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-bold text-slate-800 dark:text-zinc-100"
                     >
-                      <optgroup label="✍️ Chữ Vẽ Tay Cute">
-                        <option value="Patrick Hand">✍️ Patrick Hand</option>
-                        <option value="Caveat">✒️ Caveat</option>
-                        <option value="Mali">🌸 Mali</option>
-                        <option value="Itim">✏️ Itim</option>
-                        <option value="Dancing Script">💖 Dancing Script</option>
+                      <optgroup label="Chữ Vẽ Tay">
+                        <option value="Patrick Hand">Patrick Hand</option>
+                        <option value="Caveat">Caveat</option>
+                        <option value="Mali">Mali</option>
+                        <option value="Itim">Itim</option>
+                        <option value="Dancing Script">Dancing Script</option>
                       </optgroup>
-                      <optgroup label="✨ Font Hiện Đại">
+                      <optgroup label="Font Hiện Đại">
                         <option value="Be Vietnam Pro">Be Vietnam Pro</option>
                         <option value="Cormorant Garamond">Cormorant Garamond</option>
                         <option value="sans-serif">Sans Serif</option>
@@ -1068,16 +1070,16 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
                 </label>
                 <div className="grid grid-cols-5 gap-1.5">
                   {[
-                    { shape: 'rect', icon: '■', label: 'Chữ Nhật' },
-                    { shape: 'circle', icon: '●', label: 'Hình Tròn' },
-                    { shape: 'triangle', icon: '▲', label: 'Tam Giác' },
-                    { shape: 'heart-custom', icon: '❤️', label: 'Trái Tim', isPreset: true, path: "M 50 90 C 20 70, 5 45, 15 25 C 25 5, 45 10, 50 25 C 55 10, 75 5, 85 25 C 95 45, 80 70, 50 90 Z", polygon: "50% 90%, 20% 70%, 5% 45%, 15% 25%, 25% 5%, 50% 25%, 75% 5%, 85% 25%, 95% 45%, 80% 70%" },
-                    { shape: 'cloud-custom', icon: '☁️', label: 'Đám Mây', isPreset: true, path: "M 20 65 C 5 65, 5 40, 20 40 C 20 20, 45 15, 55 30 C 65 15, 90 20, 90 45 C 100 45, 100 70, 80 70 L 20 70 Z", polygon: "20% 70%, 5% 60%, 10% 40%, 25% 30%, 45% 15%, 65% 20%, 85% 30%, 95% 50%, 85% 70%, 20% 70%" },
-                    { shape: 'star-custom', icon: '⭐', label: 'Ngôi Sao', isPreset: true, path: "M 50 8 C 55 18, 65 22, 78 25 C 70 35, 68 45, 72 58 C 60 55, 50 60, 40 55 C 28 58, 30 35, 22 25 C 35 22, 45 18, 50 8 Z", polygon: "50% 8%, 65% 22%, 78% 25%, 68% 45%, 72% 58%, 50% 60%, 28% 58%, 30% 35%, 22% 25%, 35% 22%" },
-                    { shape: 'flower-sakura-custom', icon: '🌸', label: 'Hoa Đào', isPreset: true, path: "M 50 15 C 65 5, 80 20, 70 40 C 90 35, 95 55, 75 60 C 85 80, 65 95, 50 80 C 35 95, 15 80, 25 60 C 5 55, 10 35, 30 40 C 20 20, 35 5, 50 15 Z", polygon: "50% 15%, 70% 40%, 90% 35%, 75% 60%, 85% 80%, 50% 80%, 15% 80%, 25% 60%, 10% 35%, 30% 40%" },
-                    { shape: 'teddy-custom', icon: '🧸', label: 'Gấu Bông', isPreset: true, path: "M 25 25 C 15 10, 35 0, 45 15 C 55 5, 75 10, 75 25 C 90 35, 90 70, 50 90 C 10 70, 10 35, 25 25 Z", polygon: "25% 25%, 20% 10%, 40% 15%, 60% 15%, 80% 10%, 75% 25%, 90% 40%, 80% 75%, 50% 90%, 20% 75%, 10% 40%" },
-                    { shape: 'custom', icon: '🖼️', label: 'Khung Đè' },
-                    { shape: 'custom-path', icon: '🤖', label: 'AI Shape' }
+                    { shape: 'rect', icon: 'square', label: 'Chữ Nhật' },
+                    { shape: 'circle', icon: 'circle', label: 'Hình Tròn' },
+                    { shape: 'triangle', icon: 'triangle', label: 'Tam Giác' },
+                    { shape: 'heart-custom', icon: 'heart', label: 'Trái Tim', isPreset: true, path: "M 50 90 C 20 70, 5 45, 15 25 C 25 5, 45 10, 50 25 C 55 10, 75 5, 85 25 C 95 45, 80 70, 50 90 Z", polygon: "50% 90%, 20% 70%, 5% 45%, 15% 25%, 25% 5%, 50% 25%, 75% 5%, 85% 25%, 95% 45%, 80% 70%" },
+                    { shape: 'cloud-custom', icon: 'cloud', label: 'Đám Mây', isPreset: true, path: "M 20 65 C 5 65, 5 40, 20 40 C 20 20, 45 15, 55 30 C 65 15, 90 20, 90 45 C 100 45, 100 70, 80 70 L 20 70 Z", polygon: "20% 70%, 5% 60%, 10% 40%, 25% 30%, 45% 15%, 65% 20%, 85% 30%, 95% 50%, 85% 70%, 20% 70%" },
+                    { shape: 'star-custom', icon: 'star', label: 'Ngôi Sao', isPreset: true, path: "M 50 8 C 55 18, 65 22, 78 25 C 70 35, 68 45, 72 58 C 60 55, 50 60, 40 55 C 28 58, 30 35, 22 25 C 35 22, 45 18, 50 8 Z", polygon: "50% 8%, 65% 22%, 78% 25%, 68% 45%, 72% 58%, 50% 60%, 28% 58%, 30% 35%, 22% 25%, 35% 22%" },
+                    { shape: 'flower-sakura-custom', icon: 'sparkles', label: 'Hoa Đào', isPreset: true, path: "M 50 15 C 65 5, 80 20, 70 40 C 90 35, 95 55, 75 60 C 85 80, 65 95, 50 80 C 35 95, 15 80, 25 60 C 5 55, 10 35, 30 40 C 20 20, 35 5, 50 15 Z", polygon: "50% 15%, 70% 40%, 90% 35%, 75% 60%, 85% 80%, 50% 80%, 15% 80%, 25% 60%, 10% 35%, 30% 40%" },
+                    { shape: 'teddy-custom', icon: 'gem', label: 'Gấu Bông', isPreset: true, path: "M 25 25 C 15 10, 35 0, 45 15 C 55 5, 75 10, 75 25 C 90 35, 90 70, 50 90 C 10 70, 10 35, 25 25 Z", polygon: "25% 25%, 20% 10%, 40% 15%, 60% 15%, 80% 10%, 75% 25%, 90% 40%, 80% 75%, 50% 90%, 20% 75%, 10% 40%" },
+                    { shape: 'custom', icon: 'image', label: 'Khung Đè' },
+                    { shape: 'custom-path', icon: 'bot', label: 'AI Shape' }
                   ].map((item) => {
                     const isActive = item.isPreset 
                       ? selectedLayer.frameShape === 'custom-path' && selectedLayer.framePath === item.path
@@ -1099,13 +1101,12 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({
                         }}
                         className={`py-2 border rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors text-xs font-bold ${
                           isActive 
-                            ? 'bg-rose-500 border-rose-600 text-white shadow-2xs' 
-                            : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-300 hover:text-rose-600'
+                            ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-500 text-rose-600 dark:text-rose-400 shadow-2xs' 
+                            : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-100'
                         }`}
                         title={item.label}
                       >
-                        <span className="text-sm">{item.icon}</span>
-                        <span className="text-[7px] mt-0.5 font-bold uppercase truncate max-w-full px-0.5">{item.label}</span>
+                        <Icon name={item.icon} size={15} className="shrink-0" />
                       </button>
                     );
                   })}

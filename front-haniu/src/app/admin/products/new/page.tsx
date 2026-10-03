@@ -367,7 +367,7 @@ export default function NewProductPage() {
           onClick={() => setIsAiModalOpen(true)}
           className="px-4 py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-purple-600 to-rose-600 hover:from-purple-700 hover:to-rose-700 text-white active:scale-95 transition-all flex items-center gap-2 cursor-pointer shadow-md shadow-purple-500/15"
         >
-          <Icon name="sparkles" size={13} /> Viết thông tin bằng AI ✨
+          <Icon name="sparkles" size={13} /> Viết thông tin bằng AI
         </button>
       </div>
 
@@ -575,7 +575,7 @@ export default function NewProductPage() {
                   </>
                 ) : (
                   <>
-                    <Icon name="💾" size={14} /> Lưu sản phẩm quà tặng
+                    <Icon name="save" size={14} /> Lưu sản phẩm quà tặng
                   </>
                 )}
               </button>
@@ -613,7 +613,7 @@ export default function NewProductPage() {
 
             {aiSuccessMsg ? (
               <div className="py-8 text-center space-y-3">
-                <span className="text-4xl">✨</span>
+                <Icon name="sparkles" size={36} className="text-purple-600 dark:text-purple-400 mx-auto" />
                 <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                   {aiSuccessMsg}
                 </p>
@@ -623,7 +623,9 @@ export default function NewProductPage() {
               <div className="py-12 flex flex-col items-center justify-center space-y-4">
                 <div className="relative">
                   <div className="w-16 h-16 border-4 border-purple-500/20 border-t-purple-600 rounded-full animate-spin"></div>
-                  <div className="absolute inset-0 flex items-center justify-center text-lg">🔮</div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Icon name="sparkles" size={20} className="text-purple-600 dark:text-purple-400" />
+                  </div>
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-bold text-purple-600 dark:text-purple-400 animate-pulse">
@@ -680,7 +682,7 @@ export default function NewProductPage() {
                     onClick={handleGenerateAiContent}
                     className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-650 to-rose-600 hover:from-purple-700 hover:to-rose-700 text-white font-bold disabled:opacity-50 active:scale-95 transition-all flex items-center gap-1.5 shadow-md shadow-purple-500/10 cursor-pointer"
                   >
-                    <Icon name="sparkles" size={13} /> Bắt đầu viết bằng AI ✨
+                    <Icon name="sparkles" size={13} /> Bắt đầu viết bằng AI
                   </button>
                 </div>
               </div>

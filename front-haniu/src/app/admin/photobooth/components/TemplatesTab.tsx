@@ -155,8 +155,9 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                   {usingEvents.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {usingEvents.map((ev: any) => (
-                        <span key={ev.id} className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-650 dark:text-zinc-350 text-[9px] font-semibold">
-                          🎉 {ev.name}
+                        <span key={ev.id} className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-650 dark:text-zinc-350 text-[9px] font-semibold flex items-center gap-1">
+                          <Icon name="party" size={10} className="text-rose-500" />
+                          <span>{ev.name}</span>
                         </span>
                       ))}
                     </div>
@@ -227,8 +228,9 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
       {/* End of list badge */}
       {!hasMore && templates.length > 0 && (
         <div className="flex justify-center items-center py-4">
-          <span className="text-[10px] font-bold tracking-wider text-slate-400 dark:text-zinc-500 uppercase bg-slate-100 dark:bg-zinc-800/60 px-3 py-1.5 rounded-full border border-slate-200 dark:border-zinc-700">
-            ✓ Đã hiển thị tất cả ({templates.length}) mẫu layout
+          <span className="text-[10px] font-bold tracking-wider text-slate-400 dark:text-zinc-500 uppercase bg-slate-100 dark:bg-zinc-800/60 px-3 py-1.5 rounded-full border border-slate-200 dark:border-zinc-700 flex items-center gap-1.5">
+            <Icon name="check" size={12} className="text-emerald-500" />
+            <span>Đã hiển thị tất cả ({templates.length}) mẫu layout</span>
           </span>
         </div>
       )}
@@ -441,10 +443,14 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
                           }}
                         >
                           {layer.shapeType === 'heart' && (
-                            <div className="w-full h-full flex items-center justify-center text-red-500 text-xs">❤️</div>
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Icon name="heart" size={12} className="text-red-500 fill-red-500" />
+                            </div>
                           )}
                           {layer.shapeType === 'star' && (
-                            <div className="w-full h-full flex items-center justify-center text-yellow-500 text-xs">⭐</div>
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Icon name="star" size={12} className="text-amber-400 fill-amber-400" />
+                            </div>
                           )}
                         </div>
                       )}

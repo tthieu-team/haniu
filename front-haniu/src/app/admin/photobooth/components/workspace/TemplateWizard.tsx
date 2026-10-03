@@ -135,9 +135,10 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
           {/* STEP 1: BASIC INFORMATION */}
           {wizardStep === 1 && (
             <div className="space-y-4">
-              <div className="p-4 bg-rose-500/5 rounded-2xl border border-rose-500/10 mb-4">
+              <div className="p-4 bg-rose-500/5 rounded-2xl border border-rose-500/10 mb-4 flex items-start gap-2.5">
+                <Icon name="sparkles" size={16} className="text-rose-500 shrink-0 mt-0.5" />
                 <p className="text-xs text-rose-600 dark:text-rose-455 font-semibold leading-relaxed font-sans">
-                  💡 Nhập các thông tin nhận diện cơ bản của khung ảnh. Tên template và thumbnail sẽ hiển thị trực tiếp cho khách hàng lựa chọn khi chụp.
+                  Nhập các thông tin nhận diện cơ bản của khung ảnh. Tên template và thumbnail sẽ hiển thị trực tiếp cho khách hàng lựa chọn khi chụp.
                 </p>
               </div>
 
@@ -238,9 +239,10 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
           {/* STEP 2: CANVAS RATIOS */}
           {wizardStep === 2 && (
             <div className="space-y-4">
-              <div className="p-4 bg-amber-500/5 rounded-2xl border border-amber-500/10 mb-2">
+              <div className="p-4 bg-amber-500/5 rounded-2xl border border-amber-500/10 mb-2 flex items-start gap-2.5">
+                <Icon name="sliders" size={16} className="text-amber-500 shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold leading-relaxed">
-                  📐 Chọn tỷ lệ khung hình chuẩn cho ảnh in. Tỷ lệ in phổ biến nhất của các quầy Photobooth là 3:4 hoặc 9:16.
+                  Chọn tỷ lệ khung hình chuẩn cho ảnh in. Tỷ lệ in phổ biến nhất của các quầy Photobooth là 3:4 hoặc 9:16.
                 </p>
               </div>
 
@@ -342,9 +344,10 @@ export const TemplateWizard: React.FC<TemplateWizardProps> = ({
           {/* STEP 3: BACKGROUND SELECTION */}
           {wizardStep === 3 && (
             <div className="space-y-4">
-              <div className="p-4 bg-rose-500/5 rounded-2xl border border-rose-500/10 mb-2">
+              <div className="p-4 bg-rose-500/5 rounded-2xl border border-rose-500/10 mb-2 flex items-start gap-2.5">
+                <Icon name="palette" size={16} className="text-rose-500 shrink-0 mt-0.5" />
                 <p className="text-xs text-rose-600 dark:text-rose-455 font-semibold leading-relaxed">
-                  🎨 Lựa chọn màu sắc chủ đạo hoặc tải ảnh nền đặc thù cho template của bạn.
+                  Lựa chọn màu sắc chủ đạo hoặc tải ảnh nền đặc thù cho template của bạn.
                 </p>
               </div>
 
