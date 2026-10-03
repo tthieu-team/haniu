@@ -178,8 +178,8 @@ export default function Header() {
   const showAnnouncementBar = announcementBar.isEnabled && !isCheckoutOrOrderPage;
 
   return (
-    <div className={`w-full z-50 transition-all duration-300 mobile-landscape-hide-sticky ${header.isSticky ? 'fixed top-0 left-0 right-0' : 'relative'
-      } ${isScrolled ? 'is-scrolled' : ''}`}>
+    <div className={`w-full z-50 transition-all duration-300 mobile-landscape-hide-sticky ${header.isSticky ? 'sticky top-0' : 'relative'
+      } ${isScrolled ? 'is-scrolled shadow-sm' : ''}`}>
       {/* Mobile Search Backdrop (Click to close mobile search) */}
       {showMobileSearch && (
         <div
@@ -213,11 +213,7 @@ export default function Header() {
       )}
 
       <header
-        className={`w-full transition-all duration-300 relative z-50 ${isScrolled
-          ? 'bg-white/90 dark:bg-zinc-950/90 shadow-md backdrop-blur-md border-b border-slate-200/60 dark:border-zinc-900/80 py-2.5 text-slate-800 dark:text-zinc-100'
-          : `bg-transparent py-3.5 text-slate-800 dark:text-zinc-100 border-b ${isHome ? 'border-transparent' : 'border-slate-200/50 dark:border-zinc-900/40'
-          }`
-          }`}
+        className="w-full transition-all duration-200 relative z-50 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-b border-slate-200/80 dark:border-zinc-800/80 py-2.5 sm:py-3 text-slate-800 dark:text-zinc-100 shadow-xs"
       >
         {/* Mobile Search Overlay (Beautiful animation and search suggestions) */}
         {showMobileSearch && (
@@ -241,7 +237,7 @@ export default function Header() {
                     setSearchVal('');
                     setSuggestions([]);
                   }}
-                  className="text-slate-400 hover:text-slate-650 p-1 cursor-pointer"
+                  className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
                 >
                   ✕
                 </button>
@@ -327,7 +323,7 @@ export default function Header() {
                   setShowDropdown(true);
                 }}
                 onFocus={() => setShowDropdown(true)}
-                className={`text-xs pl-8 pr-8 py-1.5 rounded-full border bg-slate-50/50 dark:bg-zinc-900/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-950 transition-all duration-300 w-36 lg:w-44 xl:w-52 text-slate-750 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-550 border-slate-200/80 dark:border-zinc-800/80`}
+                className={`text-xs pl-8 pr-8 py-1.5 rounded-full border bg-slate-100/70 dark:bg-zinc-900/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 focus:bg-white dark:focus:bg-zinc-950 transition-all duration-300 w-36 lg:w-44 xl:w-52 text-slate-700 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 border-slate-200/80 dark:border-zinc-800/80`}
               />
               {searchVal && (
                 <button
@@ -336,7 +332,7 @@ export default function Header() {
                     setSearchVal('');
                     setSuggestions([]);
                   }}
-                  className="absolute right-3 text-slate-455 dark:text-zinc-500 hover:text-rose-500 text-[10px] cursor-pointer"
+                  className="absolute right-3 text-slate-500 dark:text-zinc-500 hover:text-rose-500 text-[10px] cursor-pointer"
                 >
                   ✕
                 </button>
@@ -394,7 +390,7 @@ export default function Header() {
                                 </div>
 
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-[9px] text-slate-400 dark:text-zinc-550 font-bold bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 rounded-sm">
+                                  <span className="text-[9px] text-slate-400 dark:text-zinc-500 font-bold bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 rounded-sm">
                                     {product.sku}
                                   </span>
                                   {product.isCustomizable && (
@@ -598,7 +594,7 @@ export default function Header() {
               </div>
 
               {/* Quick Actions (Wishlist & Theme) */}
-              <div className="pt-2 border-t border-slate-100 dark:border-zinc-850/80 space-y-2">
+              <div className="pt-2 border-t border-slate-100 dark:border-zinc-800/80 space-y-2">
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"

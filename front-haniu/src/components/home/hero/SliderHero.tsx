@@ -111,9 +111,11 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar, onOccasi
 
   return (
     <section
-      className="relative overflow-hidden w-full group flex flex-col"
+      className="relative overflow-hidden w-full group min-h-[480px] sm:min-h-[540px] md:min-h-[600px] lg:min-h-[660px] xl:min-h-[720px] 2xl:min-h-[780px]"
       style={{
-        height: '100vh',
+        height: 'calc(100vh - 80px)',
+        minHeight: '480px',
+        maxHeight: '840px',
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -122,7 +124,7 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar, onOccasi
       onTouchEnd={handleTouchEnd}
     >
       {/* Slides Container */}
-      <div className="relative w-full flex-1">
+      <div className="relative w-full h-full min-h-[480px] sm:min-h-[540px] md:min-h-[600px] lg:min-h-[660px] xl:min-h-[720px] 2xl:min-h-[780px]">
         {slides.map((slide, idx) => {
           const isActive = idx === currentIndex;
 
@@ -160,13 +162,10 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar, onOccasi
               </div>
 
               {/* Foreground content grid */}
-              <div className={`relative z-10 h-full max-w-screen-2xl mx-auto px-4 sm:px-20 lg:px-28 xl:px-36 2xl:px-44 w-full flex items-center ${isSticky
-                ? (isAnnouncementBar ? 'pt-16 sm:pt-28' : 'pt-14 sm:pt-22')
-                : ''
-                }`}>
+              <div className="relative z-10 h-full max-w-screen-2xl mx-auto px-4 sm:px-12 md:px-20 lg:px-28 xl:px-36 2xl:px-44 w-full flex items-center justify-center py-8 sm:py-12">
                 {/* Floating stamp in the corner of the slide to prevent overlap */}
                 {slide.circleBadgeText && (
-                  <div className={`absolute z-20 pointer-events-none hidden sm:block top-20 sm:top-28 lg:top-32 xl:top-36 ${slide.textLayout === 'left'
+                  <div className={`absolute z-20 pointer-events-none hidden sm:block top-4 sm:top-8 lg:top-10 ${slide.textLayout === 'left'
                       ? 'right-4 sm:right-20 lg:right-28 xl:right-36 2xl:right-44'
                       : 'left-4 sm:left-20 lg:left-28 xl:left-36 2xl:left-44'
                     }`}>
@@ -268,7 +267,7 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar, onOccasi
 
               {/* Floating organic card tag in the bottom corner */}
               {slide.cardTitle && (
-                <div className={`absolute bottom-6 sm:bottom-8 z-20 hidden md:flex flex-col items-center justify-center bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xs p-4 sm:p-5 rounded-[22px] border border-dashed border-rose-250 dark:border-zinc-800/80 shadow-md max-w-[190px] transition-all duration-500 hover:rotate-0 hover:scale-105 ${slide.textLayout === 'right'
+                <div className={`absolute bottom-6 sm:bottom-8 z-20 hidden md:flex flex-col items-center justify-center bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xs p-4 sm:p-5 rounded-[22px] border border-dashed border-rose-300 dark:border-zinc-800/80 shadow-md max-w-[190px] transition-all duration-500 hover:rotate-0 hover:scale-105 ${slide.textLayout === 'right'
                   ? 'left-8 sm:left-12 -rotate-3'
                   : 'right-8 sm:right-12 rotate-3'
                   }`}>
@@ -295,14 +294,14 @@ export default function SliderHero({ hero, isSticky, isAnnouncementBar, onOccasi
         <>
           <button
             onClick={handlePrev}
-            className="absolute left-2 sm:left-4 lg:left-8 top-1/2 -translate-y-1/2 z-30 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white/40 dark:bg-zinc-900/40 hover:bg-white/80 dark:hover:bg-zinc-800/80 border border-white/40 dark:border-zinc-700/40 text-rose-500 dark:text-rose-350 hover:text-rose-600 dark:hover:text-rose-200 hover:border-rose-450 dark:hover:border-rose-600 backdrop-blur-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 shadow-md cursor-pointer hover:scale-105 active:scale-95"
+            className="absolute left-2 sm:left-4 lg:left-8 top-1/2 -translate-y-1/2 z-30 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white/40 dark:bg-zinc-900/40 hover:bg-white/80 dark:hover:bg-zinc-800/80 border border-white/40 dark:border-zinc-700/40 text-rose-500 dark:text-rose-300 hover:text-rose-600 dark:hover:text-rose-200 hover:border-rose-400 dark:hover:border-rose-600 backdrop-blur-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 shadow-md cursor-pointer hover:scale-105 active:scale-95"
             aria-label="Previous slide"
           >
             <Icon name="arrow-left" size={14} />
           </button>
           <button
             onClick={handleNext}
-            className="absolute right-2 sm:right-4 lg:right-8 top-1/2 -translate-y-1/2 z-30 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white/40 dark:bg-zinc-900/40 hover:bg-white/80 dark:hover:bg-zinc-800/80 border border-white/40 dark:border-zinc-700/40 text-rose-500 dark:text-rose-350 hover:text-rose-600 dark:hover:text-rose-200 hover:border-rose-450 dark:hover:border-rose-600 backdrop-blur-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 shadow-md cursor-pointer hover:scale-105 active:scale-95"
+            className="absolute right-2 sm:right-4 lg:right-8 top-1/2 -translate-y-1/2 z-30 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white/40 dark:bg-zinc-900/40 hover:bg-white/80 dark:hover:bg-zinc-800/80 border border-white/40 dark:border-zinc-700/40 text-rose-500 dark:text-rose-300 hover:text-rose-600 dark:hover:text-rose-200 hover:border-rose-400 dark:hover:border-rose-600 backdrop-blur-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 shadow-md cursor-pointer hover:scale-105 active:scale-95"
             aria-label="Next slide"
           >
             <Icon name="arrow-right" size={14} />

@@ -54,9 +54,7 @@ export default function SiteLayout({
   const isAuth = pathname?.startsWith('/auth');
   const isAdmin = pathname?.startsWith('/admin');
 
-  const ptClass = isSticky && (!isFullWidth || !isHome)
-    ? (isAnnouncementBar ? 'pt-28 sm:pt-32' : 'pt-20 sm:pt-24')
-    : (isFullWidth ? 'pt-0' : 'pt-8');
+  const ptClass = isFullWidth ? 'pt-0' : 'pt-4 sm:pt-6';
 
   if (isAuth || isAdmin) {
     return (

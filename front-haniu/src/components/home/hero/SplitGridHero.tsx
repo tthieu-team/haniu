@@ -19,11 +19,7 @@ export default function SplitGridHero({ hero, isSticky, isAnnouncementBar, onOcc
 
   return (
     <section
-      className={`w-full bg-[#FAF5F2] dark:bg-zinc-950 py-6 sm:py-10 ${
-        isSticky
-          ? (isAnnouncementBar ? 'pt-24 sm:pt-28 md:pt-32' : 'pt-20 sm:pt-22 md:pt-24')
-          : 'pt-6'
-      }`}
+      className="w-full bg-[#FAF5F2] dark:bg-zinc-950 py-6 sm:py-8 lg:py-10"
     >
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 2xl:px-24 w-full">
         <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:h-[600px] xl:h-[700px] 2xl:h-[780px]">
