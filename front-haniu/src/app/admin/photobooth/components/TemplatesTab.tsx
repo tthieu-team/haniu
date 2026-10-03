@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Icon from '@/components/common/Icons';
 import { TemplateBlueprintPreview } from '@/components/product/photobooth/TemplateBlueprintPreview';
 
 interface TemplatesTabProps {
   templates: any[];
   events: any[];
+  hasMore?: boolean;
+  loadingMore?: boolean;
+  onLoadMore?: () => void;
   onToggleStatus: (id: string) => void;
   onOpenAdd: () => void;
   onOpenEdit: (tpl: any) => void;
@@ -17,6 +20,9 @@ interface TemplatesTabProps {
 export const TemplatesTab: React.FC<TemplatesTabProps> = ({
   templates,
   events,
+  hasMore = false,
+  loadingMore = false,
+  onLoadMore,
   onToggleStatus,
   onOpenAdd,
   onOpenEdit,
@@ -24,6 +30,32 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
   onDelete
 }) => {
   const [previewTemplate, setPreviewTemplate] = useState<any | null>(null);
+  const observerRef = useRef<HTMLDivElement | null>(null);
+
+  // Intersection observer for smooth infinite scrolling
+  useEffect(() => {
+    if (!hasMore || loadingMore || !onLoadMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onLoadMore();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    const currentEl = observerRef.current;
+    if (currentEl) {
+      observer.observe(currentEl);
+    }
+
+    return () => {
+      if (currentEl) {
+        observer.unobserve(currentEl);
+      }
+    };
+  }, [hasMore, loadingMore, onLoadMore]);
 
   // Helper to format date
   const formatDate = (dateStr: string) => {
@@ -175,6 +207,31 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({
           );
         })}
       </div>
+
+      {/* Infinite Scroll Loader & Sentinel */}
+      {loadingMore && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="bg-slate-100 dark:bg-zinc-800/40 rounded-3xl p-5 border border-slate-200/50 dark:border-zinc-800 flex flex-col justify-between h-[300px]">
+              <div className="w-full h-44 bg-slate-200 dark:bg-zinc-700/50 rounded-2xl mb-4" />
+              <div className="h-4 bg-slate-200 dark:bg-zinc-700/50 rounded w-3/4 mb-2" />
+              <div className="h-3 bg-slate-200 dark:bg-zinc-700/50 rounded w-1/2" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Sentinel for triggering loadMore */}
+      <div ref={observerRef} className="h-4 w-full" />
+
+      {/* End of list badge */}
+      {!hasMore && templates.length > 0 && (
+        <div className="flex justify-center items-center py-4">
+          <span className="text-[10px] font-bold tracking-wider text-slate-400 dark:text-zinc-500 uppercase bg-slate-100 dark:bg-zinc-800/60 px-3 py-1.5 rounded-full border border-slate-200 dark:border-zinc-700">
+            ✓ Đã hiển thị tất cả ({templates.length}) mẫu layout
+          </span>
+        </div>
+      )}
 
       {/* VISUAL RENDER PREVIEW MODAL */}
       {previewTemplate && (

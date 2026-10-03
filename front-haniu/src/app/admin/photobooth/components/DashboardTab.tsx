@@ -4,62 +4,31 @@ import React from 'react';
 import Icon from '@/components/common/Icons';
 
 interface DashboardTabProps {
-  events: any[];
-  templates: any[];
-  assets: any;
-  sessions: any[];
+  stats: any;
+  loading?: boolean;
 }
 
-export const DashboardTab: React.FC<DashboardTabProps> = ({ events, templates, assets, sessions }) => {
-  const completedSessions = sessions.filter(s => s.status === 'Completed');
+export const DashboardTab: React.FC<DashboardTabProps> = ({ stats, loading = false }) => {
+  const chartData = stats?.chartData || [
+    { day: 'Thứ 2', val: 0 },
+    { day: 'Thứ 3', val: 0 },
+    { day: 'Thứ 4', val: 0 },
+    { day: 'Thứ 5', val: 0 },
+    { day: 'Thứ 6', val: 0 },
+    { day: 'Thứ 7', val: 0 },
+    { day: 'Chủ Nhật', val: 0 }
+  ];
+  const maxChartVal = Math.max(...chartData.map((d: any) => d.val || 0), 5);
+  const templateRankings = stats?.templateRankings || [];
 
-  // Compute sessions count by weekday (Monday to Sunday)
-  const getSessionsByWeekday = () => {
-    const counts = [0, 0, 0, 0, 0, 0, 0]; // 0: Mon, 1: Tue, ..., 6: Sun
-    sessions.forEach(sess => {
-      if (!sess.date) return;
-      try {
-        const date = new Date(sess.date);
-        let day = date.getDay(); // 0: Sunday, 1: Monday, etc.
-        let index = day === 0 ? 6 : day - 1;
-        counts[index]++;
-      } catch (e) {
-        // Ignore date parsing errors
-      }
-    });
-    return [
-      { day: 'Thứ 2', val: counts[0] },
-      { day: 'Thứ 3', val: counts[1] },
-      { day: 'Thứ 4', val: counts[2] },
-      { day: 'Thứ 5', val: counts[3] },
-      { day: 'Thứ 6', val: counts[4] },
-      { day: 'Thứ 7', val: counts[5] },
-      { day: 'Chủ Nhật', val: counts[6] }
-    ];
-  };
-
-  const chartData = getSessionsByWeekday();
-  const maxChartVal = Math.max(...chartData.map(d => d.val), 5); // At least scale of 5 to look good
-
-  // Group and rank templates by usage frequency
-  const getTemplateRanking = () => {
-    const counts: { [key: string]: number } = {};
-    sessions.forEach(sess => {
-      const tName = sess.templateName || 'Bố cục Classic';
-      counts[tName] = (counts[tName] || 0) + 1;
-    });
-    const total = sessions.length || 1;
-    return Object.entries(counts)
-      .map(([name, count]) => ({
-        name,
-        val: `${count} lượt`,
-        rate: `${((count / total) * 100).toFixed(1)}%`,
-        count
-      }))
-      .sort((a, b) => b.count - a.count);
-  };
-
-  const templateRankings = getTemplateRanking();
+  if (loading && !stats) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <div className="w-8 h-8 rounded-full border-2 border-rose-500 border-t-transparent animate-spin" />
+        <p className="text-xs font-bold text-slate-400 dark:text-zinc-500">Đang tải số liệu thống kê Photobooth...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -69,7 +38,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ events, templates, a
             <Icon name="camera" size={24} />
             <span className="text-[10px] font-bold text-emerald-500">Thực tế</span>
           </div>
-          <p className="text-2xl font-black mt-2 text-slate-800 dark:text-zinc-150">{sessions.length} Lượt</p>
+          <p className="text-2xl font-black mt-2 text-slate-800 dark:text-zinc-150">{stats?.totalSessions ?? 0} Lượt</p>
           <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-1">Lượt chụp (Sessions)</p>
         </div>
 
@@ -79,7 +48,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ events, templates, a
             <span className="text-[10px] font-bold text-slate-400">Đang chạy</span>
           </div>
           <p className="text-2xl font-black mt-2 text-slate-800 dark:text-zinc-150">
-            {events.filter(e => e.status === 'ACTIVE').length} Sự kiện
+            {stats?.activeEvents ?? 0} Sự kiện
           </p>
           <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-1">Sự kiện hoạt động</p>
         </div>
@@ -89,19 +58,19 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ events, templates, a
             <Icon name="palette" size={24} />
             <span className="text-[10px] font-bold text-slate-400">Sẵn có</span>
           </div>
-          <p className="text-2xl font-black mt-2 text-slate-800 dark:text-zinc-150">{templates.length} Khung</p>
+          <p className="text-2xl font-black mt-2 text-slate-800 dark:text-zinc-150">{stats?.totalTemplates ?? 0} Khung</p>
           <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-1">Khung hình (Templates)</p>
         </div>
 
         <div className="bg-slate-50 dark:bg-zinc-850 p-5 rounded-2xl border border-slate-100 dark:border-zinc-800">
           <div className="flex justify-between items-start text-emerald-500">
             <Icon name="image" size={24} />
-            <span className="text-[10px] font-bold text-emerald-500">Hoàn tất</span>
+            <span className="text-[10px] font-bold text-emerald-500">Đã in</span>
           </div>
           <p className="text-2xl font-black mt-2 text-slate-800 dark:text-zinc-150">
-            {completedSessions.length} Ảnh
+            {stats?.totalPhotos ?? 0} Ảnh
           </p>
-          <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-1">Thư viện ảnh</p>
+          <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-1">Ảnh đặt in</p>
         </div>
       </div>
 
@@ -113,7 +82,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ events, templates, a
             Hiệu suất Chụp Theo Ngày (Tuần qua)
           </h3>
           <div className="bg-slate-50 dark:bg-zinc-850/50 border border-slate-100 dark:border-zinc-800 rounded-2xl p-5 h-64 flex items-end justify-between gap-2.5">
-            {chartData.map((item, idx) => (
+            {chartData.map((item: any, idx: number) => (
               <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
                 <div className="w-full bg-slate-200 dark:bg-zinc-800 rounded-lg h-44 flex items-end overflow-hidden relative">
                   <div 
@@ -143,7 +112,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ events, templates, a
                 Chưa có dữ liệu lượt chụp để xếp hạng.
               </div>
             ) : (
-              templateRankings.map((tpl, i) => (
+              templateRankings.map((tpl: any, i: number) => (
                 <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-zinc-850 rounded-xl border border-slate-100 dark:border-zinc-800">
                   <div>
                     <p className="text-xs font-bold text-slate-700 dark:text-zinc-300">{tpl.name}</p>

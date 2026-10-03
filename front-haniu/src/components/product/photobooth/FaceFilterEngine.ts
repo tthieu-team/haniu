@@ -935,9 +935,9 @@ export function detectFaceLandmarks(
   try {
     if (!video || video.videoWidth === 0 || video.videoHeight === 0) return null;
 
-    // Downscale high-resolution mobile camera (e.g. 1080p, 4K) to max 360px for inference
-    // This provides 5x-10x speedup on mobile devices without any loss in landmark precision
-    const MAX_DIM = 360;
+    // Downscale mobile camera to max 256px for inference
+    // MediaPipe FaceLandmarker uses 256x256 internally. Downscaling to 256px gives 10x speedup on mobile devices
+    const MAX_DIM = 256;
     const vw = video.videoWidth;
     const vh = video.videoHeight;
 
@@ -955,7 +955,7 @@ export function detectFaceLandmarks(
 
     if (!inferenceCanvas && typeof document !== 'undefined') {
       inferenceCanvas = document.createElement('canvas');
-      inferenceCtx = inferenceCanvas.getContext('2d', { willReadFrequently: false });
+      inferenceCtx = inferenceCanvas.getContext('2d', { willReadFrequently: true });
     }
 
     if (inferenceCanvas && inferenceCtx) {

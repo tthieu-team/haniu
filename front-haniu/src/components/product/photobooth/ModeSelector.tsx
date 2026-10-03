@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@/components/common/Icons';
 import { PhotoboothMode } from './types';
@@ -9,97 +9,45 @@ import { useAuthStore } from '@/store/auth';
 interface ModeSelectorProps {
   onSelect: (mode: string, userName: string) => void;
   customTemplates?: any[];
+  hasMore?: boolean;
+  loadingMore?: boolean;
+  onLoadMore?: () => void;
 }
 
-const MODES = [
-  {
-    id: 'single',
-    label: 'Chụp 1 ảnh',
-    iconName: 'image',
-    description: 'Chụp một tấm duy nhất sắc nét',
-    color: 'from-blue-500 to-cyan-500'
-  },
-  {
-    id: 'grid-2-v',
-    label: '2 Ảnh Dọc',
-    iconName: 'list',
-    description: 'Bố cục 2 ảnh đứng song song',
-    color: 'from-emerald-500 to-teal-500'
-  },
-  {
-    id: 'grid-2-h',
-    label: '2 Ảnh Ngang',
-    iconName: 'list',
-    description: 'Bố cục 2 ảnh nằm ngang cổ điển',
-    color: 'from-rose-500 to-pink-500'
-  },
-  {
-    id: 'grid-3-v',
-    label: '3 Ảnh Dọc',
-    iconName: 'grid',
-    description: '3 tấm đứng phong cách nghệ thuật',
-    color: 'from-indigo-500 to-purple-500'
-  },
-  {
-    id: 'grid-4',
-    label: '4 Ảnh Grid',
-    iconName: 'grid',
-    description: 'Bố cục 2x2 hiện đại, cân đối',
-    color: 'from-purple-500 to-pink-500'
-  },
-  {
-    id: 'grid-6',
-    label: '6 Ảnh Grid',
-    iconName: 'grid',
-    description: 'Bố cục 2x3 cho nhiều khoảnh khắc',
-    color: 'from-orange-500 to-red-500'
-  },
-  {
-    id: 'grid-9',
-    label: '9 Ảnh Grid',
-    iconName: 'grid',
-    description: '9 ô vuông nhỏ cho bộ sưu tập cảm xúc',
-    color: 'from-cyan-500 to-blue-500'
-  },
-  {
-    id: 'strip-3',
-    label: '3 Ảnh Strip',
-    iconName: 'list',
-    description: 'Dải ảnh 3 tấm phong cách Retro',
-    color: 'from-yellow-500 to-amber-500'
-  },
-  {
-    id: 'strip-4',
-    label: '4 Ảnh Strip',
-    iconName: 'list',
-    description: 'Dải ảnh 4 tấm chuẩn Hàn Quốc',
-    color: 'from-amber-500 to-orange-500'
-  },
-  {
-    id: 'wide-1',
-    label: 'Cinema Wide',
-    iconName: 'image',
-    description: 'Góc rộng điện ảnh siêu chất',
-    color: 'from-slate-700 to-slate-900'
-  },
-  {
-    id: 'mixed-3',
-    label: 'Poster Mixed',
-    iconName: 'grid',
-    description: '1 chính lớn và 2 phụ nhỏ tinh tế',
-    color: 'from-fuchsia-500 to-purple-600'
-  },
-  {
-    id: 'mixed-4',
-    label: 'Magazine Style',
-    iconName: 'grid',
-    description: 'Phong cách tạp chí thời thượng',
-    color: 'from-sky-500 to-indigo-600'
-  }
-];
-
-export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect, customTemplates = [] }) => {
+export const ModeSelector: React.FC<ModeSelectorProps> = ({
+  onSelect,
+  customTemplates = [],
+  hasMore = false,
+  loadingMore = false,
+  onLoadMore
+}) => {
   const trans = useTranslate();
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!hasMore || loadingMore || !onLoadMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onLoadMore();
+        }
+      },
+      { rootMargin: '150px' }
+    );
+
+    const currentEl = sentinelRef.current;
+    if (currentEl) {
+      observer.observe(currentEl);
+    }
+
+    return () => {
+      if (currentEl) {
+        observer.unobserve(currentEl);
+      }
+    };
+  }, [hasMore, loadingMore, onLoadMore]);
 
   const displayModes = customTemplates.map((t: any) => {
     const frameCount = t.slots ? t.slots.length : (
@@ -120,7 +68,6 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect, customTemp
       template: t
     };
   });
-
 
   return (
     <div className="w-full h-full bg-background flex flex-col items-center justify-start p-4 sm:p-6 overflow-y-auto relative custom-scrollbar transition-colors duration-500">
@@ -143,24 +90,41 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ onSelect, customTemp
 
       {/* Grid List with auto-rows-fr */}
       {displayModes.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl w-full z-10 pb-8 auto-rows-fr">
-          {displayModes.map((mode, index) => (
-            <motion.button
-              key={mode.id}
-              initial={{ y: 15, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: index * 0.03 }}
-              whileHover={{ y: -4 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => onSelect(mode.id, '')}
-              className="relative group bg-card-bg/45 border border-border-color rounded-2xl p-4 flex flex-col items-center justify-between text-center hover:border-primary-color/50 hover:bg-accent-color/10 transition-all duration-300 shadow-xs hover:shadow-md cursor-pointer h-full min-h-[155px]"
-            >
-              <div className="flex flex-col items-center w-full">
-                <TemplateBlueprintPreview template={mode.template} />
-                <h3 className="text-[11px] sm:text-xs font-black text-foreground mb-1 uppercase tracking-tight">{trans(mode.label)}</h3>
-              </div>
-            </motion.button>
-          ))}
+        <div className="flex flex-col items-center max-w-5xl w-full z-10 pb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 w-full auto-rows-fr">
+            {displayModes.map((mode, index) => (
+              <motion.button
+                key={mode.id}
+                initial={{ y: 15, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: Math.min(index * 0.02, 0.3) }}
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onSelect(mode.id, '')}
+                className="relative group bg-card-bg/45 border border-border-color rounded-2xl p-4 flex flex-col items-center justify-between text-center hover:border-primary-color/50 hover:bg-accent-color/10 transition-all duration-300 shadow-xs hover:shadow-md cursor-pointer h-full min-h-[155px]"
+              >
+                <div className="flex flex-col items-center w-full">
+                  <TemplateBlueprintPreview template={mode.template} />
+                  <h3 className="text-[11px] sm:text-xs font-black text-foreground mb-1 uppercase tracking-tight line-clamp-1">{trans(mode.label)}</h3>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Loading More Indicator */}
+          {loadingMore && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 w-full mt-3 animate-pulse">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-card-bg/30 border border-border-color/40 rounded-2xl p-4 flex flex-col items-center justify-center min-h-[155px]">
+                  <div className="w-20 h-24 bg-card-bg/60 rounded-lg mb-2" />
+                  <div className="h-3 w-16 bg-card-bg/60 rounded" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Sentinel element for infinite scroll */}
+          <div ref={sentinelRef} className="h-4 w-full" />
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center p-12 text-center bg-card-bg/30 border border-dashed border-border-color rounded-3xl max-w-md w-full mx-auto my-8 z-10">

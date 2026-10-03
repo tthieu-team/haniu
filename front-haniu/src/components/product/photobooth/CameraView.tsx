@@ -386,16 +386,18 @@ export const CameraView: React.FC<CameraViewProps> = ({
         context.setTransform(1, 0, 0, 1, 0, 0);
 
         // Render face filter onto capture canvas
-        if (faceFilter !== 'none' && faceLandmarkerRef.current && video.readyState >= 2) {
+        if (faceFilter !== 'none' && video.readyState >= 2) {
           const timestamp = performance.now();
           const safeTs = Math.max(timestamp, lastTimestampRef.current + 1);
           lastTimestampRef.current = safeTs;
 
-          const landmarks = detectFaceLandmarks(
-            faceLandmarkerRef.current,
-            video,
-            safeTs
-          );
+          let landmarks: any = null;
+          if (faceLandmarkerRef.current) {
+            landmarks = detectFaceLandmarks(faceLandmarkerRef.current, video, safeTs);
+          }
+          if (!landmarks && cachedLandmarksRef.current) {
+            landmarks = cachedLandmarksRef.current;
+          }
 
           if (landmarks) {
             context.save();

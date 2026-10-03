@@ -32,18 +32,20 @@ export default function PhotoboothAdmin() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'events' | 'templates' | 'sessions' | 'settings' | 'gallery' | 'assets'>('dashboard');
 
   // Unified application state
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
+  const [templateCursor, setTemplateCursor] = useState<string | null>(null);
+  const [hasMoreTemplates, setHasMoreTemplates] = useState<boolean>(false);
+  const [loadingMoreTemplates, setLoadingMoreTemplates] = useState<boolean>(false);
   const [assets, setAssets] = useState<any>({ backgrounds: [], stickers: [], logos: [] });
   const [sessions, setSessions] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>({
-    countdown: 5,
-    quality: 'high',
-    defaultFrameColor: '#ffffff',
-    watermarkText: '🎀 Haniu Photobooth',
+    countdown: 3,
     isSoundEnabled: true,
-    showDate: true
+    isFilterEnabled: true
   });
+  const [loadingTabs, setLoadingTabs] = useState<{ [key: string]: boolean }>({});
 
   // Modal Control for Events
   const [showEventModal, setShowEventModal] = useState(false);
@@ -55,28 +57,105 @@ export default function PhotoboothAdmin() {
   const [builderTemplate, setBuilderTemplate] = useState<any>(null);
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
 
-  // Fetch Data from Service Layer
-  const loadData = async () => {
+  // Load specific tab data on demand
+  const loadTabData = async (tab: string) => {
+    setLoadingTabs(prev => ({ ...prev, [tab]: true }));
     try {
-      const fetchedEvents = await photoboothService.getEvents();
-      const fetchedTemplates = await photoboothService.getTemplates();
-      const fetchedAssets = await photoboothService.getAssets();
-      const fetchedSessions = await photoboothService.getSessions();
-      const fetchedSettings = await photoboothService.getSettings();
-
-      setEvents(fetchedEvents);
-      setTemplates(fetchedTemplates);
-      setAssets(fetchedAssets);
-      setSessions(fetchedSessions);
-      setSettings(fetchedSettings);
+      if (tab === 'dashboard') {
+        const stats = await photoboothService.getDashboardStats();
+        setDashboardStats(stats);
+      } else if (tab === 'events') {
+        const [fetchedEvents, templateRes, fetchedAssets] = await Promise.all([
+          photoboothService.getEvents(),
+          templates.length === 0 ? photoboothService.getTemplates({ limit: 12 }) : Promise.resolve(null),
+          !assets.logos || assets.logos.length === 0 ? photoboothService.getAssets() : Promise.resolve(assets),
+        ]);
+        setEvents(fetchedEvents);
+        if (templateRes) {
+          if (Array.isArray(templateRes)) {
+            setTemplates(templateRes);
+            setTemplateCursor(null);
+            setHasMoreTemplates(false);
+          } else if (templateRes && Array.isArray(templateRes.items)) {
+            setTemplates(templateRes.items);
+            setTemplateCursor(templateRes.nextCursor || null);
+            setHasMoreTemplates(Boolean(templateRes.hasMore));
+          }
+        }
+        if (!assets.logos || assets.logos.length === 0) setAssets(fetchedAssets);
+      } else if (tab === 'templates') {
+        const templateRes = await photoboothService.getTemplates({ limit: 12 });
+        if (Array.isArray(templateRes)) {
+          setTemplates(templateRes);
+          setTemplateCursor(null);
+          setHasMoreTemplates(false);
+        } else if (templateRes && Array.isArray(templateRes.items)) {
+          setTemplates(templateRes.items);
+          setTemplateCursor(templateRes.nextCursor || null);
+          setHasMoreTemplates(Boolean(templateRes.hasMore));
+        }
+        if (events.length === 0) {
+          photoboothService.getEvents().then(setEvents).catch(() => {});
+        }
+      } else if (tab === 'assets') {
+        const fetchedAssets = await photoboothService.getAssets();
+        setAssets(fetchedAssets);
+      } else if (tab === 'sessions') {
+        const fetchedSessions = await photoboothService.getSessions();
+        setSessions(fetchedSessions);
+      } else if (tab === 'gallery') {
+        const [fetchedSessions, fetchedEvents] = await Promise.all([
+          photoboothService.getSessions(),
+          events.length === 0 ? photoboothService.getEvents() : Promise.resolve(events),
+        ]);
+        setSessions(fetchedSessions);
+        if (events.length === 0) setEvents(fetchedEvents);
+      } else if (tab === 'settings') {
+        const fetchedSettings = await photoboothService.getSettings();
+        let cleanSettings = fetchedSettings;
+        if (typeof fetchedSettings === 'string') {
+          try {
+            cleanSettings = JSON.parse(fetchedSettings);
+          } catch {
+            cleanSettings = {};
+          }
+        }
+        setSettings({
+          countdown: cleanSettings?.countdown || 3,
+          isSoundEnabled: cleanSettings?.isSoundEnabled !== false,
+          isFilterEnabled: cleanSettings?.isFilterEnabled !== false,
+        });
+      }
     } catch (error) {
-      console.error('Lỗi khi tải cấu hình Photobooth từ backend:', error);
+      console.error(`Lỗi khi tải dữ liệu tab ${tab}:`, error);
+    } finally {
+      setLoadingTabs(prev => ({ ...prev, [tab]: false }));
+    }
+  };
+
+  const handleLoadMoreTemplates = async () => {
+    if (!hasMoreTemplates || !templateCursor || loadingMoreTemplates) return;
+    setLoadingMoreTemplates(true);
+    try {
+      const res = await photoboothService.getTemplates({
+        cursor: templateCursor,
+        limit: 12
+      });
+      if (res && Array.isArray(res.items)) {
+        setTemplates(prev => [...prev, ...res.items]);
+        setTemplateCursor(res.nextCursor || null);
+        setHasMoreTemplates(Boolean(res.hasMore));
+      }
+    } catch (err) {
+      console.error('Lỗi khi tải thêm templates:', err);
+    } finally {
+      setLoadingMoreTemplates(false);
     }
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadTabData(activeTab);
+  }, [activeTab]);
 
   // Event Action Handlers
   const handleToggleEventStatus = async (id: string) => {
@@ -84,7 +163,7 @@ export default function PhotoboothAdmin() {
     if (!target) return;
     const updatedEvent = { ...target, status: target.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' };
     await photoboothService.saveEvent(updatedEvent);
-    loadData();
+    loadTabData('events');
   };
 
   const handleOpenAddEvent = () => {
@@ -106,7 +185,7 @@ export default function PhotoboothAdmin() {
   const handleDeleteEvent = async (id: string) => {
     if (confirm('Bạn có chắc muốn xóa sự kiện này không?')) {
       await photoboothService.deleteEvent(id);
-      loadData();
+      loadTabData('events');
     }
   };
 
@@ -123,12 +202,16 @@ export default function PhotoboothAdmin() {
 
     await photoboothService.saveEvent(payload);
     setShowEventModal(false);
-    loadData();
+    loadTabData('events');
   };
 
   // Settings Save Handler
   const handleUpdateSettings = async (key: string, value: any) => {
-    const updated = { ...settings, [key]: value };
+    const updated = {
+      countdown: key === 'countdown' ? value : (settings.countdown || 3),
+      isSoundEnabled: key === 'isSoundEnabled' ? value : (settings.isSoundEnabled !== false),
+      isFilterEnabled: key === 'isFilterEnabled' ? value : (settings.isFilterEnabled !== false),
+    };
     await photoboothService.saveSettings(updated);
     setSettings(updated);
   };
@@ -136,12 +219,12 @@ export default function PhotoboothAdmin() {
   // Asset Actions
   const handleAddAsset = async (type: 'backgrounds' | 'stickers' | 'logos', item: any) => {
     await photoboothService.saveAsset(type, item);
-    loadData();
+    loadTabData('assets');
   };
 
   const handleDeleteAsset = async (type: 'backgrounds' | 'stickers' | 'logos', id: string) => {
     await photoboothService.deleteAsset(type, id);
-    loadData();
+    loadTabData('assets');
   };
 
   // Template Actions
@@ -173,7 +256,7 @@ export default function PhotoboothAdmin() {
     if (!target) return;
     const updated = { ...target, status: target.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' };
     await photoboothService.saveTemplate(updated);
-    loadData();
+    loadTabData('templates');
   };
 
   const handleCloneTemplate = async (tpl: any) => {
@@ -184,7 +267,7 @@ export default function PhotoboothAdmin() {
     };
     delete clone.id;
     await photoboothService.saveTemplate(clone);
-    loadData();
+    loadTabData('templates');
   };
 
   const handleDeleteTemplate = async (id: string) => {
@@ -196,14 +279,14 @@ export default function PhotoboothAdmin() {
 
     if (confirm('Bạn có chắc muốn xóa Template này?')) {
       await photoboothService.deleteTemplate(id);
-      loadData();
+      loadTabData('templates');
     }
   };
 
   const handleSaveBuilderTemplate = async () => {
     await photoboothService.saveTemplate(builderTemplate);
     setIsBuilderOpen(false);
-    loadData();
+    loadTabData('templates');
   };
 
   return (
@@ -273,7 +356,9 @@ export default function PhotoboothAdmin() {
 
       {/* TAB CONTENT PANEL */}
       <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 shadow-sm min-h-[400px]">
-        {activeTab === 'dashboard' && <DashboardTab events={events} templates={templates} assets={assets} sessions={sessions} />}
+        {activeTab === 'dashboard' && (
+          <DashboardTab stats={dashboardStats} loading={loadingTabs.dashboard} />
+        )}
         
         {activeTab === 'events' && (
           <EventsTab
@@ -297,6 +382,9 @@ export default function PhotoboothAdmin() {
           <TemplatesTab
             templates={templates}
             events={events}
+            hasMore={hasMoreTemplates}
+            loadingMore={loadingMoreTemplates}
+            onLoadMore={handleLoadMoreTemplates}
             onToggleStatus={handleToggleTemplateStatus}
             onOpenAdd={handleOpenAddTemplate}
             onOpenEdit={handleOpenEditTemplate}
@@ -322,7 +410,7 @@ export default function PhotoboothAdmin() {
             templates={templates}
             onDeleteSession={async (id) => {
               await photoboothService.deleteSession(id);
-              loadData();
+              loadTabData('gallery');
             }}
           />
         )}

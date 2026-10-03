@@ -28,7 +28,7 @@ public class PhotoboothSession {
     @Column(name = "photos_count")
     private Integer photosCount;
 
-    @Column(name = "image_url", length = 1024)
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
     private String status; // Completed, Interrupted

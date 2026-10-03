@@ -11,6 +11,7 @@ import { fetchApi } from '@/lib/api';
 import AddressPicker from '@/components/common/AddressPicker';
 import { cartService } from '@/services/cart.service';
 import { productService } from '@/services/product.service';
+import { photoboothService } from '@/services/photobooth.service';
 import CustomizationInfo from '@/app/cart/components/CustomizationInfo';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -309,6 +310,36 @@ function CheckoutForm() {
         ...formData
       });
 
+      // Save ordered photobooth photos into Photobooth Gallery for order printing
+      try {
+        const allOrderedPbUrls: string[] = [];
+        (activeCart?.items || []).forEach(item => {
+          if (item.customizationInfo) {
+            try {
+              const parsed = JSON.parse(item.customizationInfo);
+              if (parsed.photoboothPhotoUrls && Array.isArray(parsed.photoboothPhotoUrls)) {
+                allOrderedPbUrls.push(...parsed.photoboothPhotoUrls);
+              } else if (parsed.photoboothPhotoUrl) {
+                allOrderedPbUrls.push(parsed.photoboothPhotoUrl);
+              }
+            } catch {}
+          }
+        });
+
+        for (const pUrl of allOrderedPbUrls) {
+          if (pUrl && !pUrl.startsWith('local_pb_')) {
+            await photoboothService.saveSession({
+              eventName: `Đơn hàng #${order.orderCode || order.id || 'Haniu'}`,
+              templateName: `Khách hàng: ${formData.customerName || 'Khách đặt in'}`,
+              photosCount: 1,
+              imageUrl: pUrl,
+              status: 'ORDERED'
+            });
+          }
+        }
+      } catch (pbSaveErr) {
+        console.warn('Lỗi ghi nhận ảnh đặt hàng vào photobooth gallery:', pbSaveErr);
+      }
 
       if (formData.couponCode && typeof window !== 'undefined') {
         try {

@@ -57,7 +57,14 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
 
 
 
-  const { activeTemplates, settings, fetchPhotoboothData } = usePhotoboothStore();
+  const { 
+    activeTemplates, 
+    hasMoreTemplates, 
+    loadingMore, 
+    loadMoreTemplates, 
+    settings, 
+    fetchPhotoboothData 
+  } = usePhotoboothStore();
 
   const [config, setConfig] = useState<PhotoboothConfig>({
     mode: 'grid-4',
@@ -84,8 +91,7 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
     if (settings) {
       setConfig(prev => ({
         ...prev,
-        countdown: settings.countdown,
-        frameColor: settings.defaultFrameColor,
+        countdown: settings.countdown || 3,
         userName: '',
         showDate: false
       }));
@@ -165,8 +171,31 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
   };
 
 
+  const saveSessionToBackend = useCallback(async (composedBlob: Blob, composedUrl: string) => {
+    try {
+      const templateName = config.template?.name || config.mode || 'Bố cục chuẩn';
+      const eventName = activeTemplates.find(t => t.id === config.mode)?.name || templateName;
+
+      const reader = new FileReader();
+      reader.readAsDataURL(composedBlob);
+      reader.onloadend = async () => {
+        const base64data = reader.result as string;
+        await photoboothService.saveSession({
+          eventName,
+          templateName,
+          photosCount: photos.length || config.template.slots.length,
+          imageUrl: base64data || composedUrl,
+          status: 'Completed'
+        });
+      };
+    } catch (err) {
+      console.warn('Lỗi khi lưu thông tin session:', err);
+    }
+  }, [config.template?.name, config.mode, activeTemplates, photos.length, config.template.slots.length]);
+
   const handleCapture = useCallback(async (blob: Blob, url: string) => {
-    if (photos.length >= config.template.slots.length && retakeIndex === null) return;
+    const totalSlots = config.template.slots.length;
+    if (photos.length >= totalSlots && retakeIndex === null) return;
 
     // Apply Instagram-style beauty filter (skin smoothing, sharpening, color grading)
     let finalBlob = blob;
@@ -188,31 +217,32 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
         return next;
       });
       setRetakeIndex(null);
+      setIsCapturing(false);
       setStep('review');
     } else {
-      setPhotos(prev => [...prev, newPhoto]);
-      setIsCapturing(false);
-      if (captureMode === 'manual' && photos.length + 1 < config.template.slots.length) {
-        setWaitingForNextCapture(true);
-      }
+      setPhotos(prev => {
+        const next = [...prev, newPhoto];
+        if (next.length >= totalSlots) {
+          setTimeout(() => {
+            setIsCapturing(false);
+            setStep('review');
+            playSound('success');
+          }, 350);
+        } else {
+          setIsCapturing(false);
+          if (captureMode === 'auto') {
+            setTimeout(() => {
+              setStep('countdown');
+            }, 1200);
+          } else {
+            setWaitingForNextCapture(true);
+            setStep('countdown');
+          }
+        }
+        return next;
+      });
     }
   }, [retakeIndex, photos.length, config.template.slots.length, captureMode]);
-
-  useEffect(() => {
-    if ((step === 'countdown' || step === 'capturing') && retakeIndex === null) {
-      if (photos.length >= config.template.slots.length) {
-        setStep('review');
-        playSound('success');
-      } else if (step === 'capturing') {
-        if (captureMode === 'auto') {
-          const timer = setTimeout(() => {
-            setStep('countdown');
-          }, 1500);
-          return () => clearTimeout(timer);
-        }
-      }
-    }
-  }, [photos.length, config.template.slots.length, step, retakeIndex, captureMode]);
 
   const handleFinishCountdown = () => {
     setIsCapturing(true);
@@ -237,6 +267,8 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
       setResultBlob(blob);
       setResultUrl(url);
       setStep('design-menu');
+      // Record completed session in database for statistics & gallery
+      saveSessionToBackend(blob, url);
     } catch (err) {
       console.error(err);
       setErrorMessage('Không thể ghép bản phối ảnh. Vui lòng chụp lại.');
@@ -341,14 +373,22 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
 
         {step === 'select-mode' && (
           <motion.div key="mode" className="w-full h-full relative z-10" initial={{ x: 300, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -300, opacity: 0 }}>
-            <ModeSelector onSelect={handleModeSelect} customTemplates={activeTemplates} />
+            <ModeSelector 
+              onSelect={handleModeSelect} 
+              customTemplates={activeTemplates}
+              hasMore={hasMoreTemplates}
+              loadingMore={loadingMore}
+              onLoadMore={loadMoreTemplates}
+            />
           </motion.div>
         )}
 
         {(step === 'countdown' || step === 'capturing') && (
           <motion.div key="camera" className="w-full h-full relative z-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             {(() => {
-              const currentSlotIndex = retakeIndex !== null ? retakeIndex : photos.length;
+              const currentSlotIndex = retakeIndex !== null 
+                ? retakeIndex 
+                : Math.min(photos.length, Math.max(0, config.template.slots.length - 1));
               const currentSlot = config.template.slots[currentSlotIndex] || config.template.slots[0];
               const slotRatio = currentSlot ? `${currentSlot.width}:${currentSlot.height}` : 'free';
               const resolvedAspectRatio = aspectRatio === 'template' ? slotRatio : aspectRatio;
@@ -425,29 +465,31 @@ export const PhotoboothSystem: React.FC<PhotoboothSystemProps> = ({ onCapture, o
             )}
 
             {/* Photo capture process counter indicators */}
-            <div className="absolute top-6 left-6 flex flex-col gap-2">
+            <div className="absolute top-6 left-6 flex flex-col gap-2 z-40">
               <div className="flex gap-1.5">
                 {config.template.slots.map((_, i) => (
                   <motion.div
                     key={i}
                     animate={{
-                      scale: i === photos.length ? [1, 1.2, 1] : 1,
+                      scale: i === (retakeIndex !== null ? retakeIndex : Math.min(photos.length, config.template.slots.length - 1)) ? [1, 1.25, 1] : 1,
                       backgroundColor: i < photos.length ? "var(--primary)" : "rgba(255,255,255,0.2)"
                     }}
-                    transition={{ repeat: i === photos.length ? Infinity : 0, duration: 1.5 }}
+                    transition={{ repeat: i === (retakeIndex !== null ? retakeIndex : Math.min(photos.length, config.template.slots.length - 1)) ? Infinity : 0, duration: 1.5 }}
                     className="w-2.5 h-2.5 rounded-full border border-white/20 shadow-xs"
                   />
                 ))}
               </div>
-              <p className="text-[9px] font-black uppercase tracking-wider text-white/50">
-                {retakeIndex !== null ? `${trans("CHỤP LẠI ẢNH")} ${retakeIndex + 1}` : `${trans("ẢNH")} ${photos.length + 1} / ${config.template.slots.length}`}
+              <p className="text-[9px] font-black uppercase tracking-wider text-white/80 bg-black/50 px-2.5 py-1 rounded-full backdrop-blur-md w-fit border border-white/10 shadow-sm">
+                {retakeIndex !== null 
+                  ? `${trans("CHỤP LẠI ẢNH")} ${retakeIndex + 1}` 
+                  : `${trans("ẢNH")} ${Math.min(photos.length + 1, config.template.slots.length)} / ${config.template.slots.length}`}
               </p>
             </div>
 
 
 
             {/* Face Filters — Mobile (<640px): Bottom horizontal; Desktop (>=640px): Right vertical */}
-            {hasSelectedCaptureMode && cameraReady && (
+            {hasSelectedCaptureMode && cameraReady && settings?.isFilterEnabled !== false && (
               <div className="absolute z-50 pointer-events-auto max-sm:bottom-3 max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:max-w-[92vw] sm:right-4 sm:top-1/2 sm:-translate-y-1/2">
                 <FaceFilterSelector
                   activeFilter={faceFilter}

@@ -1,6 +1,11 @@
 import { fetchApi } from '@/lib/api';
 
 export const photoboothService = {
+  // Stats / Dashboard
+  getDashboardStats: async (): Promise<any> => {
+    return await fetchApi('/api/v1/photobooth/stats');
+  },
+
   // Events
   getEvents: async (): Promise<any[]> => {
     return await fetchApi('/api/v1/photobooth/events');
@@ -18,8 +23,17 @@ export const photoboothService = {
   },
 
   // Templates
-  getTemplates: async (): Promise<any[]> => {
-    return await fetchApi('/api/v1/photobooth/templates');
+  getTemplates: async (params?: { cursor?: string; limit?: number; status?: string }): Promise<any> => {
+    let url = '/api/v1/photobooth/templates';
+    if (params) {
+      const searchParams = new URLSearchParams();
+      if (params.cursor) searchParams.append('cursor', params.cursor);
+      if (params.limit) searchParams.append('limit', String(params.limit));
+      if (params.status) searchParams.append('status', params.status);
+      const queryString = searchParams.toString();
+      if (queryString) url += `?${queryString}`;
+    }
+    return await fetchApi(url);
   },
 
   saveTemplate: async (template: any): Promise<any> => {
